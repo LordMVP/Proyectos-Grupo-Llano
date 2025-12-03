@@ -1,0 +1,36 @@
+@charset "utf-8";
+body {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	margin: 0px;
+	font-size: 11px;
+	color: #666666;
+}
+a:link {
+	color: #0052A8;
+}
+
+a:visited {
+	color: #0052A8;
+}
+
+a:hover {
+	color: #DFA641;
+}
+h1 {
+	font-size:16px;
+	color: #000000;
+	background-image: url(../image/icons/bullets/pre_titulo3.gif);
+	background-position: left;
+	padding-left: 25px;
+	background-repeat: no-repeat;
+}
+h2 {
+	font-size:14px;
+	margin-bottom: 2px;
+	margin-top: 2px;
+}
+
+h3 {
+	font-size:12px;
+}
+

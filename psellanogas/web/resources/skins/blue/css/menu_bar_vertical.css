@@ -1,0 +1,83 @@
+/* REGLAS DEL MENU VERTICAL */
+ul.MenuBarVertical {
+	margin: 20px;
+	padding: 0;
+	padding-top: 30px;
+	list-style-type: none;
+	font-size: 12px;
+	width: 200px;
+	color: #0052A8;
+}
+
+ul.MenuBarVertical li {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	position: relative;
+	text-align: left;
+	width: auto;
+	white-space:nowrap;
+}
+
+/* Submenus should appear slightly overlapping to the right (95%) and up (-5%) with a higher z-index, but they are initially off the left side of the screen (-1000em) */
+ul.MenuBarVertical ul
+{
+	margin-left: 0px;
+	list-style-type: none;
+	font-size: 100%;
+	font-weight: normal;
+	cursor: default;
+}
+
+/* Menu item containers are same fixed width as parent */
+ul.MenuBarVertical ul li
+{
+	width: 150px;
+	background: #FFF;
+}
+
+/* Menu items are a light gray block with padding and no text decoration */
+ul.MenuBarVertical a, ul.MenuBarVertical a:visited
+{
+	display: block;
+	cursor: pointer;
+	padding: 0.5em 0.75em;
+	color: #0052A8;
+	text-decoration: none;
+	border-bottom: 1px solid #CCC;
+	width: 150px;
+}
+
+/* Menu items that have mouse over or focus have a blue background and white text */
+ul.MenuBarVertical a:hover, ul.MenuBarVertical a:focus
+{
+	background-color: #F6F8FB;
+	color: #0052A8;
+}
+
+ul.MenuBarVertical li.active_parent  a {
+	background-color:#F6F8FB;
+}
+
+ul.MenuBarVertical li.active_parent  li a {
+	background-color:#FFF;
+	color:#0052A8;
+}
+
+ul.MenuBarVertical li.active a, 
+ul.MenuBarVertical li.active_parent  li.active a {
+	background-color: #F6F8FB;
+	color:#DFA641;
+}
+
+ul.MenuBarVertical li.active li a {
+	color:#0052A8;
+	text-decoration: underline;
+}
+
+ul.MenuBarVertical li ul li {
+	list-style:url(../image/icons/bullets/arrow1.gif) none inside;
+	margin-left: 0;
+	text-align: left;
+}
+/* FIN DE LAS REGLAS DEL MENÚ VERTICAL */

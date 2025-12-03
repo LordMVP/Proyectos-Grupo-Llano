@@ -1,0 +1,2 @@
+[14-May-2014 15:27:51] PHP Warning:  PHP Startup: Unable to load dynamic library '/opt/alt/php52/usr/lib64/php/modules/mongo.so' - /opt/alt/php52/usr/lib64/php/modules/mongo.so: undefined symbol: php_json_encode in Unknown on line 0
+[09-Jun-2014 17:34:56] PHP Warning:  PHP Startup: Unable to load dynamic library '/opt/alt/php52/usr/lib64/php/modules/mongo.so' - /opt/alt/php52/usr/lib64/php/modules/mongo.so: undefined symbol: php_json_encode in Unknown on line 0

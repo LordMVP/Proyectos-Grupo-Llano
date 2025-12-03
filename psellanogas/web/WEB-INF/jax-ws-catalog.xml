@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="https://200.1.124.65/PSEHostingWebServices/PSEHostingWS.asmx?wsdl" uri="PSEHostingWS.wsdl"/>
+</catalog>

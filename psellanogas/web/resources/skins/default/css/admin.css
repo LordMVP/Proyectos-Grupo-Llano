@@ -1,0 +1,304 @@
+/* GENERAL RULES */
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0px;
+	font-size: 10px;
+	color: #333333;
+	background-image: url(../image/body_bg.jpg);
+	background-repeat: repeat-x;
+}
+
+a:link {
+	color: #2E5C96;
+}
+
+a:visited {
+	color: #2E5C96;
+}
+
+a:hover {
+	color: #996600;
+}
+
+/* PAGE STRUCTURE RULES */
+#header {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	padding:0px;
+	margin-top:0px;
+	border-bottom:none;
+	background-color: #FFFFFF;
+}
+
+#body {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	border-top:none;
+	background-color: #FFFFFF;
+	height: 410px;
+}
+
+#footer {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+	padding: 0px;
+	background-color: #FFFFFF;
+}
+
+/* HEADER ELEMENTS RULES */
+#header #logo {
+	width: 100%;
+	height: 49px;
+	background-image: url(../image/logo.jpg);
+	background-repeat: no-repeat;
+	background-position: left center;
+	margin-left: 10px;
+}
+
+/* Título del área de administración */
+#header h1 {
+	padding-top:10px;
+	font-size:16px;
+	text-align:center;
+	height:20px;
+}
+
+/* Authenticated user data and options */
+#header #session_data {
+	text-align: right;
+	position: relative;
+	float: right;
+	right:20px;
+	top: 15px;
+	width: 300px;
+}
+
+/* Language selector */
+#header #language {
+	text-align:right;
+	padding-right:10px;
+}
+
+#header #language a{
+	color: #CC0000;
+	text-decoration:none;
+}
+
+#header #language a:link{
+	text-decoration:none;
+}
+
+#header #language a:hover{
+	text-decoration:underline;
+}
+
+/* Top navigation area */
+#header #top_navigation {
+	clear:both;
+}
+
+/* Top first level navigation */
+#header #top_navigation #nav1 {
+	text-align:left;
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-top-color: #999999;
+	padding-top: 8px;
+}
+
+#header #top_navigation #nav1 ul {
+	margin:0px;
+	padding:0px;
+	height: 20px;
+}
+
+#header #top_navigation #nav1 li {
+	padding: 0px 10px 8px 10px;
+	display:inline;
+}
+
+#header #top_navigation #nav1 li a {
+	vertical-align:middle;
+}
+
+#header #top_navigation #nav1 li.active {
+	background-color:#97AACA;
+}
+
+#header #top_navigation #nav1 li.active a {
+	color:#FFFFFF;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+/* Top second level navigation */
+#header #top_navigation #nav2 {
+	background-color:#97AACA;
+	padding:0px;
+	vertical-align:bottom;
+	height:20px;
+}
+
+#header #top_navigation #nav2 ul {
+	margin:0px;
+}
+
+#header #top_navigation #nav2 li {
+	padding: 0px 10px 10px 10px;
+	display:inline;
+}
+
+#header #top_navigation #nav2 li a {
+	
+}
+
+#header #top_navigation #nav2 li.active {
+	background-color:#9999CC;
+}
+
+#header #top_navigation #nav2 li.active a {
+	color:#FF0000;
+}
+#header #username {
+	color:#CC0000;
+	text-align: right;
+	position: relative;
+	float: right;
+	width: 300px;
+	right: -280px;
+	top: 35px;
+
+}
+.qilca_from {
+	background-image:url(../image/qilca_from.gif);
+	background-repeat: no-repeat;
+	background-position: left top;
+	width: 234px;
+}
+.header {
+	height: 23px;
+	width: 228px;
+	background-repeat: no-repeat;
+	text-align:center;
+	color: #3878A6;
+}
+.center_bg {
+	font-size:8px;	
+	background-image: url(../image/qilca_center.gif);
+	background-repeat: no-repeat;
+	background-position:top;
+	width: 995px;
+	height: 217px;
+	vertical-align:top;
+}
+.left_bg {
+	background-image: url(../image/qilca_left.gif);
+	background-repeat: repeat-x;
+	background-position:top;
+	height: 217px;
+}
+.right_bg {
+	background-image: url(../image/qilca_right.gif);
+	background-repeat: repeat-x;
+	background-position:top;
+	height: 217px;
+}
+/* BODY ELEMENTS RULES */
+#breadcrumbs {
+	padding:5px;
+	color: #E24F05;
+}
+
+#breadcrumbs a {
+	color: #E24F05;
+	font-weight: bold;
+}
+
+#body #left_navigation {
+	vertical-align:top;
+	padding:5px;
+	width:25%;
+	border-right-width: 1px;
+	border-right-style: dotted;
+	border-right-color: #CCCCCC;
+}
+
+#body #left_navigation ul {
+	padding-left:15px;
+}
+
+#body #left_navigation li {
+	margin-top:5px;
+}
+
+#body #left_navigation li a {
+}
+
+#body #left_navigation li a.active {
+	background-color:#999999;
+	color:#FF0000;
+}
+
+#body #left_navigation li.active {
+	margin-top:5px;
+}
+
+#body #content {
+	width:auto;
+	padding: 10px;
+}
+
+#body #content h1 {
+	font-size:16px;
+}
+
+#body #content dl {
+	margin-left: 10px;
+}
+
+#body #content dt a {
+	font-weight:bold;
+}
+
+#body #content dd {
+}
+
+/* FOOTER ELEMENTS RULES */
+#footer #company_name {
+	font-weight:bold;
+}
+
+#footer #contents{
+	background-image: url(../image/footer-background.gif);
+	background-repeat: repeat-x;
+}
+
+#overDiv table * {
+	padding: 1px;
+	font-weight:normal;
+	border-style:none;
+}
+
+#overDiv strong {
+	font-weight:bold;
+}
+
+.image_link {
+	cursor: url(../../resources/js/thumbnailviewer/zoomin.cur), pointer;
+}
+a.external_link {
+	background: url(../../resources/image/icon_external.gif) no-repeat 100% 0;
+	padding: 0 20px 0 0;
+}
+#img_link_target {
+	border: none;
+}
+a.overlibNoLink {
+	text-decoration:none;
+}
+a img {
+   border:none;
+}

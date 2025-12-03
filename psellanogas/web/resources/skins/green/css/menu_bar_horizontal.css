@@ -1,0 +1,92 @@
+/*  REGLAS DEL MENU HORIZONTAL NO JAVASCRIPT */
+
+
+/** 
+	REGLAS RELACIONADAS CON LA ESTRUCTURA DEL MENÚ
+*/
+
+/* Lista que contiene primer nivel del menú */
+ul.MenuBarHorizontal {
+	padding: 0;
+	list-style-type: none;
+	font-size: 100%;
+	width: auto;
+	margin:0;
+}
+
+/* Lista que contiene el segundo nivel del menú */
+ul.MenuBarSubmenu {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	font-size: 100%;
+	z-index: 1000;
+	left: auto;
+}
+
+/* Opción de menú de primer nivel */
+ul.MenuBarHorizontal li {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	font-size: 100%;
+	position: relative;
+	text-align: left;
+	width: auto;
+	float: left;
+	white-space:nowrap;
+}
+
+/** 
+	REGLAS QUE DESCRIBEN LA PRESENTACIÓN DEL MENÚ
+*/
+ul.MenuBarSubmenu li {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	font-size: 100%;
+	position: relative;
+	text-align: left;
+	width: auto;
+	float: left;
+	white-space:nowrap;
+}
+
+
+ul.MenuBarHorizontal a, ul.MenuBarSubmenu a {
+	display: block;
+	background-color: #FFF;
+	padding: 0.5em 25px;
+	color: #0052A8;
+	text-decoration: none;
+	border-left: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+}
+
+ul.MenuBarHorizontal a:hover, ul.MenuBarSubmenu a:hover {
+	background-color: #F6F8FB; 
+	border-left: 1px solid #EAEAEA;
+	border-right: 1px solid #EAEAEA;
+}
+
+
+/** 
+	REGLAS DE LAS OPCIONES ELEMENTOS DE MENÚ DE PRIMER NIVEL
+*/
+
+/* Opción de primer nivel que tiene un hijo activo en el menú de segundo nivel */
+ul.MenuBarHorizontal li.active_parent a, ul.MenuBarSubmenu li.active_parent a {
+	background-color: #F6F8FB; 
+	border-left: 1px solid #EAEAEA;
+	border-right: 1px solid #EAEAEA;
+}
+
+/* Opción activa de primer nivel */
+ul.MenuBarHorizontal li.active a, ul.MenuBarSubmenu li.active a {
+	background-color: #F6F8FB; 
+	color:#FF8200;
+	border-left: 1px solid #EAEAEA;
+	border-right: 1px solid #EAEAEA;
+}
+
+/* FIN DE LAS REGLAS DE MENU HORIZONTAL */

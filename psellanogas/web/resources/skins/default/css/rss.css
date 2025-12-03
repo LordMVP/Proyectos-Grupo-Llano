@@ -1,0 +1,59 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	background: #CCCCCC;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size:12px;
+	margin:0px;
+	text-align:center;
+}
+
+/** 
+	REGLAS DEL CANAL
+*/
+#channel {
+	background-color:#666666;
+	margin: 0 auto;
+	width: 500px;
+	padding: 10px;
+	text-align:left;
+}
+#channel div.header {
+	background-color:#FFFFFF;
+	width: 100%;
+	padding: 10px;
+	text-align:left;
+}
+#channel h1 {
+	color:#FF0000;
+}
+#channel p.description {
+	color: #999999;
+}
+#channel p.copyright {
+	color: #FF0000;
+}
+
+/**  
+	REGLAS DE CADA UNO DE LOS ELEMENTOS (ITEMS) DEL FEED 
+*/
+#channel li h2 a {
+	color:#00FF00;
+}
+#channel li p.category {
+	color:#00FF00;
+}
+#channel li p.date {
+	color:#00FF00;
+}
+#channel li p.author {
+	color:#00FF00;
+}
+#channel li p.description {
+	color:#00FF00;
+}
+#channel li p.link a {
+	color:#00FF00;
+	display:none;
+}

