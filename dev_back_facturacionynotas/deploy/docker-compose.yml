@@ -1,0 +1,11 @@
+version: "3.2"
+services:
+  facturacionnotas-back:
+    container_name: facturacionnotas-back
+    build: .
+    ports:
+      - "5011:8080"
+networks:
+  default:
+    external:
+      name: docker_default

@@ -1,0 +1,21 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+*.class
+**/target/
+
+bioagricola-back/apiestandardgell
+bioagricola-back/target/
+bioagricola-back/bin/
+
+bioagricola-servicios/target/
+bioagricola-servicios/bin/
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+target/
+.idea/
+example.log
+example.log.1

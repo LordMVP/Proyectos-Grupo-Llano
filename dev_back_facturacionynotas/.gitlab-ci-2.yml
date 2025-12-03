@@ -1,0 +1,10 @@
+deploy:
+  tags:
+    - prg-llano-notas-back
+  script:
+    #- mvn clean install -DskipTests -Pdev
+    - mv bioagricola-servicios/pom-docker.xml bioagricola-servicios/pom.xml
+    - echo $CI_COMMIT_SHORT_SHA
+    - docker-compose down
+    - docker-compose build
+    - docker-compose up -d

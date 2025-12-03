@@ -1,0 +1,10 @@
+version: "3.2"
+services:
+  facturacion-notas-back:
+    build: .
+    ports:
+      - "5010:8080"
+networks:
+  default:
+    external:
+      name: docker_default

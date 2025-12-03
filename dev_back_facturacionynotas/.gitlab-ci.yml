@@ -1,0 +1,39 @@
+stages:
+  - build-sta
+  - deploy
+cache:
+  paths:
+    - .m2/repository
+build:
+  tags:
+    - prg-notas-srv1
+  image: maven:3.8.4-amazoncorretto-8
+  stage: build-sta
+  artifacts:
+    paths:
+      - bioagricola-servicios/target/bioagricola-servicios.war
+  script:
+    - mv bioagricola-servicios/pom-docker.xml bioagricola-servicios/pom.xml
+    - mvn install:install-file -Dfile=bioagricola-servicios/EstandarGell-1.0-SNAPSHOT.jar
+    - mvn clean install
+deploy:
+  tags:
+    - prg-notas-srv1
+  image: docker/compose:alpine-1.29.2
+  stage: deploy
+  environment:
+    name: staging
+    url: http://docker.bocetos.co:5011
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - cp -r $ARTIFACT_URL ./deploy/
+    - ssh $SSH_USER@$VM_IPADDRESS "mkdir -p $VM_DIRECTORY"
+    - scp -r deploy $SSH_USER@$VM_IPADDRESS:$VM_DIRECTORY
+    - ssh $SSH_USER@$VM_IPADDRESS "cd $VM_DIRECTORY/deploy && chmod +x $VM_DIRECTORY/deploy/deploy.sh && sh $VM_DIRECTORY/deploy/deploy.sh"

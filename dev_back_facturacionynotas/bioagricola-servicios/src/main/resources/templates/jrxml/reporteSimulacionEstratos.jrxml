@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteSimulacionEstratos" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="960" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e52e2af8-2a2f-4655-a3c7-6e9f792bba01">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bio"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="EMPRESAID" class="java.lang.Integer"/>
+	<parameter name="IDSUSCRIPTION" class="java.util.List"/>
+	<parameter name="IDUSUARIO" class="java.lang.Integer"/>
+	<parameter name="TIPONOTA" class="java.lang.Integer"/>
+	<parameter name="CONCEPTOESTRATO" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT DISTINCT fn.dsus_ideregistr AS ID_SUSCRIPCION,
+	fn.fac_ideregistro AS NUMERO_FACTURA,
+	uu.uni_nombre1 AS TIPO_USO,
+	CONCAT ( tt.ter_nombre,' ',tt.ter_apellido) AS NOMBRE,
+	tt.ter_documento AS DOCUMENTO,
+	pp2.pro_direccion AS DIRECCION,
+	b2.barrio_nom AS BARRIO,
+	CONCAT( pp.per_nombre,' - ',fn.cic_ano) AS PERIODO,
+	dd.pro_catestrato AS ESTRATO,
+	dd2.dfac_vlrtotal AS ESTRATO_ANTERIOR,
+	dd.dsus_pcodigo AS CODIGO_ANTERIOR,
+	CONCAT( pp.per_nombre,' - ',fn.cic_ano) AS PERIODO,
+	cc.cic_nombre AS CICLO,
+	e2.empresa_nom AS EMPRESA_ALTERNA,
+	ff.fac_vlrreal AS TOTAL_FINAL_ESTRATO
+FROM fac_novedad fn
+	inner join fac_factura ff ON 
+	 ff.fac_ideregistro = fn.fac_idepadre 	 
+	inner join dfac_detfactura dd2 ON 
+	 dd2.fac_ideregistro = ff.fac_ideregistro 
+	inner join dsus_detsuscrip dd ON 
+	 dd.dsus_ideregistr = fn.dsus_ideregistr 
+	inner join ter_tercero tt ON 
+	 tt.ter_ideregistro = dd.ter_ideregistro 
+	inner join pro_propiedad pp2 ON 
+	 pp2.pro_ideregistro = dd.pro_ideregistro 
+	inner join per_periodo pp ON 
+	 pp.per_ideregistro = fn.per_ideregistro 
+	inner join cic_ciclo cc ON 
+	 cc.cic_ideregistro = dd.cic_ideregistro 
+	inner join uni_unidad uu ON 
+	 uu.uni_ideregistro = dd.uni_tipusosuscr 
+	inner join sus_suscripcion suscriptor_convenio_homologacion ON 
+	 suscriptor_convenio_homologacion.sus_ideregistro = dd.sus_ideregistro 
+	inner join dicn_disconven detalle_convenio_homologacion ON 
+	 detalle_convenio_homologacion.cnre_ideregistr = suscriptor_convenio_homologacion.cnre_ideregistr 
+	inner join empresas e2 ON 
+	 e2.empresa_sevemp = detalle_convenio_homologacion.emp_ideregistro 
+	inner join barrios b2 ON 
+	 b2.barrio_ideregistro = dd.uni_barrio 
+WHERE 
+	 detalle_convenio_homologacion.dicn_empfactura = 'S' 
+	 AND fn.fac_idepadre IS NOT NULL  
+	 AND fn.emp_ideregistro = $P{EMPRESAID} 
+	 AND $X{IN,fn.dsus_ideregistr,IDSUSCRIPTION}
+	 AND fn.usu_ideregistro =  $P{IDUSUARIO} 
+	 AND dd2.uni_concepto =  $P{CONCEPTOESTRATO}]]>
+	</queryString>
+	<field name="id_suscripcion" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_suscripcion"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_suscripcion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="fac_novedad"/>
+	</field>
+	<field name="numero_factura" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="numero_factura"/>
+		<property name="com.jaspersoft.studio.field.label" value="numero_factura"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="fac_novedad"/>
+	</field>
+	<field name="tipo_uso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo_uso"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipo_uso"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="uni_unidad"/>
+	</field>
+	<field name="nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nombre"/>
+		<property name="com.jaspersoft.studio.field.label" value="nombre"/>
+	</field>
+	<field name="documento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="documento"/>
+		<property name="com.jaspersoft.studio.field.label" value="documento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="ter_tercero"/>
+	</field>
+	<field name="direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pro_propiedad"/>
+	</field>
+	<field name="barrio" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="barrio"/>
+		<property name="com.jaspersoft.studio.field.label" value="barrio"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="barrios"/>
+	</field>
+	<field name="periodo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="periodo"/>
+		<property name="com.jaspersoft.studio.field.label" value="periodo"/>
+	</field>
+	<field name="estrato" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="estrato"/>
+		<property name="com.jaspersoft.studio.field.label" value="estrato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="dsus_detsuscrip"/>
+	</field>
+	<field name="estrato_anterior" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="estrato_anterior"/>
+		<property name="com.jaspersoft.studio.field.label" value="estrato_anterior"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="dfac_detfactura"/>
+	</field>
+	<field name="codigo_anterior" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="codigo_anterior"/>
+		<property name="com.jaspersoft.studio.field.label" value="codigo_anterior"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="dsus_detsuscrip"/>
+	</field>
+	<field name="COLUMN_12" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="periodo"/>
+		<property name="com.jaspersoft.studio.field.label" value="periodo"/>
+	</field>
+	<field name="ciclo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ciclo"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciclo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="cic_ciclo"/>
+	</field>
+	<field name="empresa_alterna" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="empresa_alterna"/>
+		<property name="com.jaspersoft.studio.field.label" value="empresa_alterna"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="empresas"/>
+	</field>
+	<field name="total_final_estrato" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_final_estrato"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_final_estrato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="fac_factura"/>
+	</field>
+	<background>
+		<band height="35" splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="51" splitType="Stretch">
+			<staticText>
+				<reportElement key="" mode="Transparent" x="245" y="5" width="470" height="40" uuid="07c17bd5-dd40-4c39-82be-7fd1377522bc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[Tabla de suscripciones reliquidadas cambio de estrato]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="53" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="2" width="70" height="40" uuid="3104bf27-c375-46f9-968f-b5381dda2422">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de8f01eb-6671-4473-9965-67e4dea09f85"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[ID de suscripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="1" width="70" height="41" uuid="32f0fca4-1529-4b2d-b24f-5456a7ed8010">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6ad03bdd-102a-4e2c-b7c5-14e80428b74d"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Número de factura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="140" y="2" width="60" height="40" uuid="c5fb9c94-f5ee-408d-9811-fee4a676338e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="32540328-33a8-49aa-a0a0-ab777ad9370f"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Código anterior]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="2" width="40" height="40" uuid="c0ec8022-aaef-4520-8995-f9e0201419b4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b152c5-e42a-4955-9da1-f053783f9415"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Estrato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="240" y="0" width="40" height="40" uuid="5b643a24-79f0-430a-9d5a-6eb5fc802816">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b152c5-e42a-4955-9da1-f053783f9415"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Estrato Anterior]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="0" width="59" height="41" uuid="f1da9cd9-9c11-4ac9-8f32-14f922501434">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="52f6109e-f1c9-4b47-a8ef-b970e277af49"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Tipo de uso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="1" width="90" height="40" uuid="1053ff4e-6164-453a-8d10-6eba03c27575">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="834e1fa1-f857-431f-9e07-6d2ab9ce19d3"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Nombre suscriptor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="2" width="80" height="40" uuid="256fdebd-811f-4e98-89d9-926a4b81a50f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c21fa05-a107-4705-8f50-47330c6b6745"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Documento del suscriptor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="0" width="80" height="41" uuid="c8da64b7-06f2-4504-adb7-8ea313c01240">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="52f6109e-f1c9-4b47-a8ef-b970e277af49"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Dirección]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="590" y="2" width="80" height="40" uuid="f45ccca2-49b5-4e47-9f1c-a614f288eb9b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ffcbaed8-ed05-42e1-b1d6-99dcd64d351d"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Barrio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="670" y="2" width="70" height="40" uuid="83ebfb72-e1bc-4a2b-9ab7-78a7999a6990">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1f0c1737-1c64-4dd0-be3c-be19acd5d94c"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Periodo de facturación cambio estrato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="740" y="2" width="70" height="40" uuid="830a64b0-6941-4b16-af63-a216e8390463">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="739645b2-de51-4c37-9c9a-9deb4d9c2be3"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Ciclo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="810" y="1" width="80" height="41" uuid="6858a67a-2076-4f55-b325-625d81e64dce">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9610141c-f7c5-4610-9f23-487125eff51f"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Empresa alterna]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="890" y="0" width="70" height="41" uuid="b96d9530-33e9-4ff5-8009-2e1114309d75">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="53270dcd-c9d5-45bb-a27f-6066e883124e"/>
+				</reportElement>
+				<box>
+					<pen lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Total descuento ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<textField>
+				<reportElement x="70" y="0" width="70" height="40" uuid="a8edaefc-84af-44b0-be5c-6de52dcf6856">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8a7cdfcc-ac42-4621-a0c0-25422aeb376a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{numero_factura}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="140" y="0" width="60" height="40" uuid="b2192af2-7350-4e21-8c86-ba250bfee04f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b5b91e4e-765c-418d-8bf1-6e5291e727c6"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{codigo_anterior}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="40" height="40" uuid="a973473f-c1df-4fe5-b518-a1cec62f25a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="298987b1-3917-4961-a9eb-3add80b4d749"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{estrato}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="240" y="0" width="40" height="40" uuid="c6df27d7-e631-422a-bcab-fa6691602869">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7eff5001-6519-4bdf-beca-b848c1048f8b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{estrato_anterior}.intValue()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="80" height="40" uuid="c9450c45-b46c-4a2a-a4c0-52e936cbb88b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b5528cf-5d6c-47dd-993e-2ec0b0b77ec8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="590" y="0" width="80" height="40" uuid="3e7041e0-f6e1-4ed0-a796-cb879f94ce65">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2994d116-9a32-4f8e-8a57-9231ffb60588"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{barrio}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="670" y="0" width="70" height="40" uuid="707bc972-8e80-49c0-9832-e50b16fac5fd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="adecd5d8-4318-418c-9719-00052ab672cd"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{periodo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="740" y="0" width="70" height="40" uuid="39458742-f2c2-433a-ab7e-ee57ae009b26">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eddf2952-6b03-499a-a129-50ee5362670b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ciclo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="810" y="0" width="80" height="40" uuid="bed1d954-6ea4-4ad8-a61c-562375e2528f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d9815ac9-a231-4ab8-9962-44ebd7501f83"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{empresa_alterna}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="70" height="40" uuid="c0a33767-6d3d-425f-ac53-132c55a6a1c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cce4ef6a-ca95-4dbe-9e18-4ef430cd7042"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{id_suscripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="890" y="0" width="70" height="40" uuid="866e1394-5f32-49da-a83c-4332706b71c0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5b48e319-76ad-4810-807b-80452741707f"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[String.format("%.2f", (double)$F{total_final_estrato}.doubleValue())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="80" height="40" uuid="34b374a6-30cd-46f5-893f-46076be836cd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="03241550-6ae5-485e-8502-ffe5c73fe396"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{documento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="0" width="60" height="40" uuid="37c4606b-b779-4102-a359-7ee3aaee14c2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c1055708-dd64-4b31-9541-805598734edb"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{tipo_uso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="0" width="90" height="40" uuid="6115b0c0-b764-4154-a0a3-02ca9a90141f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e1b12285-4b32-4cb8-ae83-9c1df2b797ad"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

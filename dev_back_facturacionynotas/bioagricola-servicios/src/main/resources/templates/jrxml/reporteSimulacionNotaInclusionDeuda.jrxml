@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteSimulacionNotaInclusiónoEliminacionDeuda" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="941440ce-013c-4f8a-9e14-74506f7f0699">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BioagricolaDataAdapter.xml"/>
+	<parameter name="IDEMPRESA" class="java.lang.Integer"/>
+	<parameter name="TIPONOTA" class="java.lang.Integer"/>
+	<parameter name="IDSUSCRIPCIONES" class="java.util.List"/>
+	<parameter name="IDUSUARIO" class="java.lang.Integer"/>
+	<queryString language="SQL">
+		<![CDATA[select distinct fn.dsus_ideregistr as ID_SUSCRIPCION,
+dd.dsus_Pcodigo as CODIGO_ANTERIOR,
+fn.fac_ideregistro as NUMERO_FACTURA,
+CONCAT(pp.per_nombre, ' - ', fn.cic_ano ) as PERIODO,
+CONCAT (tt.ter_nombre, ' ', tt.ter_apellido ) as NOMBRE, 
+tt.ter_documento as DOCUMENTO,
+pp2.pro_direccion as DIRECCION,
+b2.barrio_nom as BARRIO,
+pp2.pro_numcatastral as CATASTRAL,
+ff.fac_vlrreal as VALOR_EMITIDO,
+fn.fac_vlrreal as VALOR_AJUSTAR,
+(ff.fac_vlrreal +fn.fac_vlrreal) as NUEVO_SALDO
+from fac_novedad fn
+inner join fac_factura ff on ff.fac_ideregistro = fn.fac_idepadre
+inner join dsus_detsuscrip dd on dd.dsus_ideregistr = fn.dsus_ideregistr
+inner join pro_propiedad pp2 on pp2.pro_ideregistro = dd.pro_ideregistro
+inner join per_periodo pp on pp.per_ideregistro = fn.per_ideregistro
+inner join ter_tercero tt on tt.ter_ideregistro = dd.ter_ideregistro
+inner join barrios b2 on b2.barrio_ideregistro = dd.uni_barrio
+inner join Sus_Suscripcion suscriptor_convenio_homologacion on suscriptor_convenio_homologacion.sus_Ideregistro  = dd.sus_Ideregistro
+inner join Dicn_Disconven  detalle_convenio_homologacion on detalle_convenio_homologacion.cnre_Ideregistr = suscriptor_convenio_homologacion.cnre_Ideregistr
+inner join Empresas e2 on e2.empresa_Sevemp =  detalle_convenio_homologacion.emp_Ideregistro
+where detalle_convenio_homologacion.dicn_Empfactura = 'S'
+and fn.emp_ideregistro =  $P{IDEMPRESA}
+and fn.fac_Idepadre is not null 
+and  $X{IN,fn.dsus_ideregistr,IDSUSCRIPCIONES}
+and fn.usu_Ideregistro = $P{IDUSUARIO}  and fn.tipo_Nota =  $P{TIPONOTA}]]>
+	</queryString>
+	<field name="ID_SUSCRIPCION" class="java.lang.Long"/>
+	<field name="NUMERO_FACTURA" class="java.lang.Long"/>
+	<field name="CODIGO_ANTERIOR" class="java.lang.String"/>
+	<field name="PERIODO" class="java.lang.String"/>
+	<field name="NOMBRE" class="java.lang.String"/>
+	<field name="DOCUMENTO" class="java.lang.String"/>
+	<field name="DIRECCION" class="java.lang.String"/>
+	<field name="BARRIO" class="java.lang.String"/>
+	<field name="CATASTRAL" class="java.lang.String"/>
+	<field name="VALOR_EMITIDO" class="java.lang.Long"/>
+	<field name="VALOR_AJUSTAR" class="java.lang.Long"/>
+	<field name="NUEVO_SALDO" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="63" splitType="Stretch">
+			<staticText>
+				<reportElement x="173" y="24" width="456" height="30" uuid="0e06456d-cc85-48bc-9a36-018d07d19bf0"/>
+				<textElement textAlignment="Center">
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[Reporte de resultados de inclusión de deuda]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="32" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="55" height="30" uuid="57959555-bfd3-45e4-91e9-f623e1b25b35">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7b70eb9-2882-4761-a4f5-72177e2ffc79"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Id suscripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="120" y="0" width="53" height="30" uuid="c6df3445-b1fc-4fb1-8089-68e63ab490a2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6a12ba03-e192-47b1-be7d-529354443d0d"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Número de factura	]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="0" width="60" height="30" uuid="9e1cd212-45e3-4b74-a3fc-2158da8ce47f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de0c6f80-7521-40ee-aa44-0a686008965f"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Código anterior]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="173" y="0" width="90" height="30" uuid="bb30eda4-847a-42e5-aeda-ac229bd11cad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bb02b84d-9beb-450d-8119-49cf52bbaa6b"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Periodo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="263" y="0" width="90" height="30" uuid="72e20372-112e-45fa-b7c2-40297747e351">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee68a08b-3b28-4408-abc1-abe1cfff1c49"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Nombre]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="353" y="0" width="60" height="30" uuid="bddc794b-5835-4b3c-908d-571d67aefc1b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b78a028-8af9-441d-b8ad-949e3a735410"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="413" y="0" width="70" height="30" uuid="d7aa9b56-508f-4258-aa6a-a781959f0c51">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e2ae7d87-652b-462d-a23e-8cc3c732a1f5"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Dirección]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="483" y="0" width="80" height="30" uuid="afbd16f2-9ac8-4b82-bbc6-131376719c0e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5b170e2c-e9ff-4b7c-9ffe-d576509ce546"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Barrio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="563" y="0" width="90" height="30" uuid="7916717f-6112-411e-a494-1344a3c4bbfb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d894b83-b1f4-410f-b191-e9f2b4ae79a9"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Catastral]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="653" y="0" width="57" height="30" uuid="70d4773b-d730-4918-a1a4-c37363f0518a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3b21cf3a-8b93-416b-ad0b-63c9bfa5c24b"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Valor emitido]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="710" y="0" width="40" height="30" uuid="e1abb220-0ce0-41f0-a08f-22a4d93c8710">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d61b5853-7d4f-4064-8b76-3079424d088f"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Valor ajustar]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="750" y="0" width="50" height="30" uuid="ab75a4f3-99d0-4bc0-9793-00dfb412e194">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6d1f6c31-280a-471f-b1ef-b04f27053afd"/>
+				</reportElement>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Nuevo saldo]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="50" height="30" uuid="a26ec6c0-ffc0-4adb-9744-6f7048f9934d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7b70eb9-2882-4761-a4f5-72177e2ffc79"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ID_SUSCRIPCION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="120" y="0" width="53" height="30" uuid="82f2591b-ad1a-4b88-aef9-b0a4bdf23024">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6a12ba03-e192-47b1-be7d-529354443d0d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{NUMERO_FACTURA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="0" width="70" height="30" uuid="a7b05278-7641-46e1-95e9-2c2db6142fb8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de0c6f80-7521-40ee-aa44-0a686008965f"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{CODIGO_ANTERIOR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="173" y="0" width="90" height="30" uuid="c4c25b64-70a5-4b7d-b7c8-b5260619ad94">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bb02b84d-9beb-450d-8119-49cf52bbaa6b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{PERIODO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="263" y="0" width="90" height="30" uuid="8ae26c3b-6d56-4e11-acd0-92eec2d27e6b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee68a08b-3b28-4408-abc1-abe1cfff1c49"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{NOMBRE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="353" y="0" width="60" height="30" uuid="62c09292-4dd9-4c8a-9c14-f63dd693ffb7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b78a028-8af9-441d-b8ad-949e3a735410"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{DOCUMENTO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="413" y="0" width="70" height="30" uuid="80cf54d9-66ce-47c5-bb29-e7e8f7b25103">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e2ae7d87-652b-462d-a23e-8cc3c732a1f5"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{DIRECCION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="483" y="0" width="80" height="30" uuid="54ab180f-232a-46c4-ad04-95a8e53940c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5b170e2c-e9ff-4b7c-9ffe-d576509ce546"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{BARRIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="563" y="0" width="90" height="30" uuid="eefbe743-c672-4605-9a7a-49d8b90ada57">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d894b83-b1f4-410f-b191-e9f2b4ae79a9"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{CATASTRAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="653" y="0" width="57" height="30" uuid="44449528-1ffd-4cdf-ad5f-7e786b44a3c2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3b21cf3a-8b93-416b-ad0b-63c9bfa5c24b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[String.format("%.2f", (double)$F{VALOR_EMITIDO}.doubleValue())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="710" y="0" width="40" height="30" uuid="e6dc08e7-c705-4866-b72b-97a6d54dc54b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d61b5853-7d4f-4064-8b76-3079424d088f"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[String.format("%.2f", (double)$F{VALOR_AJUSTAR}.doubleValue())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="750" y="0" width="50" height="30" uuid="8b1a3efb-61b1-46ea-a31d-db6f1d046f2f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6d1f6c31-280a-471f-b1ef-b04f27053afd"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[String.format("%.2f", (double)$F{NUEVO_SALDO}.doubleValue())]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
