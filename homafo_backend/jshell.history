@@ -1,0 +1,4 @@
+EXPRESSION#>mvn -N io.takari:maven:wrapper
+EXPRESSION#>mvn -N io.takari:maven:wrapper;
+VAR#>mvn clean install
+VAR#>mvn clean install;

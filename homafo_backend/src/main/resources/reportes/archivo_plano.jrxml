@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="archivo_plano" pageWidth="2000" pageHeight="842" columnWidth="1960" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="09b16569-0669-4be4-8786-f6f48b1f5d04">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bioagricola"/>
+	<property name="net.sf.jasperreports.export.text.character.width" value="8"/>
+	<property name="net.sf.jasperreports.export.text.character.height" value="20"/>
+	<parameter name="PR_STR_FECHA1" class="java.lang.String"/>
+	<parameter name="PR_STR_FECHA2" class="java.lang.String"/>
+	<parameter name="PR_INT_EMPRESA" class="java.lang.Integer"/>
+	<parameter name="PR_STR_CONDICIONES" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+ghom.ghom_ideregistr,
+MAX(ter.ter_nomcompleto) AS ter_nomcompleto,
+MAX(dsus.dsus_pcodigo) AS dsus_pcodigo,
+MAX(pro.pro_direccion) AS pro_direccion,
+MAX(ba.barrio_nom) AS barrio_nom,
+MAX(proy.proyecto_nom) AS proyecto_nom,
+MAX(per.per_nombre) AS per_nombre,
+MAX(ghom.emp_ideregistro) as empresaHomologaIde,
+MAX(emp.empresa_nom) as empresaHomologaNom,
+(
+SELECT
+empTmp.empresa_nom
+FROM aseo.dgho_detallegestionhomologa detalle
+INNER JOIN empresas empTmp ON empTmp.empresa_sevemp=detalle.emp_ideregistro
+WHERE detalle.emp_ideregistro!= $P{PR_INT_EMPRESA} 
+AND detalle.ghom_ideregistr=ghom.ghom_ideregistr
+ORDER BY detalle.emp_ideregistro DESC
+limit 1
+) as empresaDetalle,
+MAX(usu.usu_login) as usuario,
+dgho.usu_ideregistro AS usuario,
+(
+SELECT
+pfi.pfi_nombre
+FROM opc_opcion opc inner join oppf_opcperfil oppf on opc.opc_ideregistro=oppf.opc_ideregistro
+INNER JOIN  pfi_perfil pfi on pfi.pfi_ideregistro=oppf.pfi_ideregistro
+INNER JOIN usem_usuempresa usem on usem.pfi_ideregistro=pfi.pfi_ideregistro
+INNER JOIN prg_programa prg on opc.prg_ideregistro=prg.prg_ideregistro
+WHERE  usem.usu_ideregistro=dgho.usu_ideregistro AND  usem.emp_ideregistro= $P{PR_INT_EMPRESA} 
+LIMIT 1
+) as perfil,
+ghom.ghom_fecharegistro,
+CASE EXTRACT (MONTH FROM ghom_fecharegistro)
+WHEN 1 THEN 'ENERO'  WHEN 2 THEN 'FEBRERO' WHEN 3 THEN 'MARZO' WHEN 4 THEN 'ABRIL' WHEN 5 THEN 'MAYO'
+WHEN 6 THEN 'JUNIO' WHEN 7 THEN 'JULIO' WHEN 8 THEN 'AGOSTO' WHEN 9 THEN 'SEPTIEMBRE' WHEN 10 THEN 'OCTUBRE'
+WHEN 11 THEN 'NOVIEMBRE' WHEN 12 THEN 'DICIEMBRE'
+END AS mes
+FROM aseo.ghom_gestionhomologa ghom
+INNER JOIN aseo.dgho_detallegestionhomologa dgho ON dgho.ghom_ideregistr=ghom.ghom_ideregistr
+INNER JOIN dsus_detsuscrip dsus ON dsus.dsus_ideregistr=dgho.dsus_ideregistr
+INNER JOIN ter_tercero ter ON ter.ter_ideregistro=dsus.ter_ideregistro
+INNER JOIN pro_propiedad pro ON pro.pro_ideregistro=dsus.pro_ideregistro
+INNER JOIN barrios ba ON ba.barrio_ideregistro=dsus.uni_barrio
+INNER JOIN proyectos proy ON proy.proyecto_ideregistro=dsus.uni_municipio
+INNER JOIN per_periodo per ON per.per_ideregistro=ghom.per_ideregistro
+INNER JOIN empresas emp ON emp.empresa_sevemp=ghom.emp_ideregistro
+INNER JOIN cic_ciclo cic ON cic.cic_ideregistro=dsus.cic_ideregistro
+INNER JOIN usuarios usu ON usu.usu_ideregistro=dgho.usu_ideregistro
+WHERE ghom.ghom_fecharegistro BETWEEN   $P{PR_STR_FECHA1}::DATE AND  $P{PR_STR_FECHA2}::DATE
+ $P!{PR_STR_CONDICIONES} 
+GROUP BY ghom.ghom_ideregistr,dgho.usu_ideregistro]]>
+	</queryString>
+	<field name="ghom_ideregistr" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="ghom_ideregistr"/>
+	</field>
+	<field name="ter_nomcompleto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ter_nomcompleto"/>
+	</field>
+	<field name="dsus_pcodigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dsus_pcodigo"/>
+	</field>
+	<field name="pro_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="pro_direccion"/>
+	</field>
+	<field name="barrio_nom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="barrio_nom"/>
+	</field>
+	<field name="proyecto_nom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proyecto_nom"/>
+	</field>
+	<field name="per_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="per_nombre"/>
+	</field>
+	<field name="empresahomologaide" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="empresahomologaide"/>
+	</field>
+	<field name="empresahomologanom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="empresahomologanom"/>
+	</field>
+	<field name="empresadetalle" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="empresadetalle"/>
+	</field>
+	<field name="usuario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="usuario"/>
+	</field>
+	<field name="COLUMN_12" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usuario"/>
+	</field>
+	<field name="perfil" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="perfil"/>
+	</field>
+	<field name="ghom_fecharegistro" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="ghom_fecharegistro"/>
+	</field>
+	<field name="mes" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="mes"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="110" height="20" uuid="03108585-92f2-4f09-95ef-4e2a5f0b2a73"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[CodAse]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="0" width="100" height="20" uuid="5d11986b-0d35-422a-9dd6-989c0c458fec"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[data-entry CPTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="200" height="20" uuid="e878dceb-64aa-456f-9b53-c08b437c52ce"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[any MUA_Cod_NTGA MUA_Nom]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="410" y="0" width="190" height="20" uuid="600676e2-624e-4fc8-87da-9a3082925ed5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[any MUA_Cod_NTGA MUA_DirEnt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="600" y="0" width="160" height="20" uuid="fd030b4e-ac62-4591-9c94-ef0b0a1941e9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ACHA_Nom]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="760" y="0" width="170" height="20" uuid="0075655a-6d2c-4d2d-b95e-3fbea00602cb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ACHA_Nom002]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="930" y="0" width="120" height="20" uuid="8584a513-9bfd-44d8-a046-40492e83dedf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[current date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1050" y="0" width="120" height="20" uuid="b09c07bd-eb4c-4901-bd23-e95e97c97a08"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[current time]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1170" y="0" width="80" height="20" uuid="ee0abf25-5cd5-4b0e-88fb-1c7236a1dd95"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[current page number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1250" y="0" width="140" height="20" uuid="b96255d1-2f15-4abf-8858-52fe8bd6bd99"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[current user name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1390" y="0" width="150" height="20" uuid="1b58db56-0c88-46e1-b906-95baee26147c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[current computername]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1540" y="0" width="120" height="20" uuid="1bc142bf-7159-4c6b-ae65-b72e208039c4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[upper (spellmonth ( month ( current extended date ) ) )]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1660" y="0" width="120" height="20" uuid="bcdb676a-e155-498a-a4b0-b883848041fa"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[year (current extended date )]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1780" y="0" width="180" height="20" uuid="5e2f736e-1954-4cc0-8ce8-9614e094bce0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[any MUA_Cod_NTGA ADB_Nom]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="110" height="20" uuid="889fed4f-cc5c-4739-90c5-68c9f92907f4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dsus_pcodigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="0" width="100" height="20" uuid="88b1f8c7-0392-4eaa-b2b5-e22f1b317d25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["NOVED"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="0" width="200" height="20" uuid="bbc82776-5c01-4c8c-bdf9-cddcc8f84b44"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ter_nomcompleto}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="410" y="0" width="190" height="20" uuid="84a85454-89a9-48de-922f-1acd0321899f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pro_direccion}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="600" y="0" width="160" height="20" uuid="42035598-3b8d-483b-a823-9af54fe11fa0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empresahomologanom}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="760" y="0" width="170" height="20" uuid="949bd29e-3abc-4484-a399-b9c89e24cc05"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empresadetalle}==null ? "BIOAGRICOLA DEL LLANO S.A. E.S.P" : $F{empresadetalle}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yy">
+				<reportElement x="930" y="0" width="120" height="20" uuid="d4a71936-2998-465b-b77b-9e7fec185d04"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ghom_fecharegistro}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm a">
+				<reportElement x="1050" y="0" width="120" height="20" uuid="b9c7880b-dd16-48a4-9638-8ce1772db17d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ghom_fecharegistro}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1170" y="0" width="80" height="20" uuid="add52130-51d9-46ac-951a-9412c51c96e9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1250" y="0" width="140" height="20" uuid="5473b1ca-1d6c-410c-9451-a485718c9245"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usuario}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1390" y="0" width="150" height="20" uuid="853e2f29-4bd1-4df5-a11a-24b00150c5c4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{perfil}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1540" y="0" width="120" height="20" uuid="40a52ddd-9c0d-40a3-9df8-8672d8e77ace"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{mes}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy">
+				<reportElement x="1660" y="0" width="120" height="20" uuid="8c1af410-9211-4c7c-a1b2-2c5079226e07"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ghom_fecharegistro}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1780" y="0" width="180" height="20" uuid="cb4c3cf7-5779-486c-9edc-78975ff025e0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{barrio_nom}.toUpperCase()]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

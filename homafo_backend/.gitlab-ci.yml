@@ -1,0 +1,38 @@
+stages:
+  - build-sta
+  - deploy
+cache:
+  paths:
+    - .m2/repository
+build:
+  tags:
+    - prg-homafoback-svr1
+  image: maven:3.8.4-amazoncorretto-8
+  stage: build-sta
+  artifacts:
+    paths:
+      - target/bioagricola-0.0.1-SNAPSHOT.war
+  script:
+    - mvn install:install-file -Dfile=src/main/resources/gell-estandar-1.jar
+    - mvn clean install
+deploy:
+  tags:
+    - prg-homafoback-svr1
+  image: docker/compose:alpine-1.29.2
+  stage: deploy
+  environment:
+    name: staging
+    url: http://docker.bocetos.co:5004
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - cp -r $ARTIFACT_URL ./deploy/
+    - ssh $SSH_USER@$VM_IPADDRESS "mkdir -p $VM_DIRECTORY"
+    - scp -r deploy $SSH_USER@$VM_IPADDRESS:$VM_DIRECTORY
+    - ssh $SSH_USER@$VM_IPADDRESS "cd $VM_DIRECTORY/deploy && chmod +x $VM_DIRECTORY/deploy/deploy.sh && sh $VM_DIRECTORY/deploy/deploy.sh"

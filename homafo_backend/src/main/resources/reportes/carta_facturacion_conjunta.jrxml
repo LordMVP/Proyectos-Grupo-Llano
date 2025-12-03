@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="carta_facturacion_conjunta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1f4f6cdb-747a-4df0-aa29-945c22a60554">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bioagricola"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="246"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="748"/>
+	<parameter name="PR_STR_FECHA1" class="java.lang.String"/>
+	<parameter name="PR_STR_FECHA2" class="java.lang.String"/>
+	<parameter name="PR_INT_EMPRESA" class="java.lang.Integer"/>
+	<parameter name="PR_STR_CONDICIONES" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+ghom.ghom_ideregistr,
+MAX(ter.ter_nomcompleto) AS ter_nomcompleto,
+MAX(dsus.dsus_pcodigo) AS dsus_pcodigo,
+MAX(pro.pro_direccion) AS pro_direccion,
+MAX(ba.barrio_nom) AS barrio_nom,
+MAX(proy.proyecto_nom) AS proyecto_nom,
+MAX(per.per_nombre) AS per_nombre,
+MAX(ghom.emp_ideregistro) as empresaHomologaIde,
+MAX(emp.empresa_nom) as empresaHomologaNom
+FROM aseo.ghom_gestionhomologa ghom
+INNER JOIN aseo.dgho_detallegestionhomologa dgho ON dgho.ghom_ideregistr=ghom.ghom_ideregistr
+INNER JOIN dsus_detsuscrip dsus ON dsus.dsus_ideregistr=dgho.dsus_ideregistr
+INNER JOIN ter_tercero ter ON ter.ter_ideregistro=dsus.ter_ideregistro
+INNER JOIN pro_propiedad pro ON pro.pro_ideregistro=dsus.pro_ideregistro
+INNER JOIN barrios ba ON ba.barrio_ideregistro=dsus.uni_barrio
+INNER JOIN proyectos proy ON proy.proyecto_ideregistro=dsus.uni_municipio
+INNER JOIN per_periodo per ON per.per_ideregistro=ghom.per_ideregistro
+INNER JOIN empresas emp ON emp.empresa_sevemp=ghom.emp_ideregistro
+INNER JOIN cic_ciclo cic ON cic.cic_ideregistro=dsus.cic_ideregistro
+WHERE ghom.ghom_fecharegistro BETWEEN   $P{PR_STR_FECHA1}::DATE AND  $P{PR_STR_FECHA2}::DATE
+AND ghom.emp_ideregistro!= $P{PR_INT_EMPRESA}  $P!{PR_STR_CONDICIONES} 
+GROUP BY ghom.ghom_ideregistr
+HAVING(
+SELECT
+COUNT(dg2.dgho_ideregistr)
+FROM aseo.dgho_detallegestionhomologa dg2
+WHERE dg2.ghom_ideregistr=ghom.ghom_ideregistr
+AND dg2.emp_ideregistro=$P{PR_INT_EMPRESA} 
+)>=1]]>
+	</queryString>
+	<field name="ghom_ideregistr" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="ghom_ideregistr"/>
+	</field>
+	<field name="ter_nomcompleto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ter_nomcompleto"/>
+	</field>
+	<field name="dsus_pcodigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dsus_pcodigo"/>
+	</field>
+	<field name="pro_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="pro_direccion"/>
+	</field>
+	<field name="barrio_nom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="barrio_nom"/>
+	</field>
+	<field name="proyecto_nom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proyecto_nom"/>
+	</field>
+	<field name="per_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="per_nombre"/>
+	</field>
+	<field name="empresahomologaide" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="empresahomologaide"/>
+	</field>
+	<field name="empresahomologanom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="empresahomologanom"/>
+	</field>
+	<variable name="conjunta" class="java.lang.String"/>
+	<variable name="solo_aseo" class="java.lang.String"/>
+	<variable name="emsa_gas" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="762" splitType="Stretch">
+			<image scaleImage="FillFrame">
+				<reportElement x="440" y="0" width="110" height="100" uuid="d11b3850-54de-4d8e-8a7c-d1dc0f6be687"/>
+				<imageExpression><![CDATA["./logo-bio.png"]]></imageExpression>
+			</image>
+			<textField pattern="MMMM d, yyyy">
+				<reportElement x="50" y="30" width="180" height="20" uuid="17479fdf-d4f1-45f8-a10d-d97c63da089b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9" isBold="true"/>
+					<paragraph lineSpacing="Double"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame" hAlign="Center" vAlign="Middle">
+				<reportElement x="0" y="690" width="575" height="70" uuid="3318fefd-dbfb-4bf8-8bbe-f1779faf010a"/>
+				<imageExpression><![CDATA["./pie.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="50" y="640" width="180" height="50" uuid="a013c301-6f18-41fc-bf94-485f69cb3ef2"/>
+				<textElement markup="styled">
+					<font fontName="DejaVu Sans" size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<style isBold='true'>"+"Marbel Astrid Torres Pardo"+"</style>"+"\n"+
+"Gerente General"]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame">
+				<reportElement x="50" y="560" width="110" height="80" uuid="fb47a844-d131-4bab-a1e5-4374a77988d7"/>
+				<imageExpression><![CDATA["./firma.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="150" y="70" width="200" height="30" uuid="ca103014-1c78-4f92-8bc7-3e00d1bfd601"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["RADICADO "+$F{ghom_ideregistr}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="120" width="100" height="15" uuid="71362624-7ead-4e5e-a217-2dde5a22f820"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<text><![CDATA[Señor(a):]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="135" width="300" height="15" uuid="79d047b0-1503-443f-b434-899d1160a165"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ter_nomcompleto}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="150" width="100" height="15" uuid="18c7253c-214e-4a33-b05b-199ea1a621bb"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<text><![CDATA[Código de Usuario N°]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="150" y="150" width="200" height="15" uuid="acfed593-f10b-4373-a205-5d4d72a0221e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dsus_pcodigo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="165" width="100" height="15" uuid="bfc03325-6d8e-49cb-ab16-26b20e7b1dfc"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<text><![CDATA[Dirección: ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="150" y="165" width="200" height="15" uuid="27371c65-a992-43dd-b4c4-31f77a23349d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pro_direccion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="180" width="100" height="15" uuid="9c0378d7-8b98-4c8a-8793-a57ac467362b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<text><![CDATA[Barrio:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="150" y="180" width="200" height="15" uuid="e18a6314-92bf-41c8-9ca9-e27ca83222e9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{barrio_nom}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="195" width="300" height="15" uuid="78ee5249-8e3a-4e7c-a435-3ab3d51e8087"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{proyecto_nom}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="240" width="450" height="20" uuid="cd2daeab-44e2-45e5-af6e-17fa9df60c92"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<style isBold='true' Align='Center'>"+"Asunto:	"+"</style>"+"Factura Conjunta - Servicio Público de Aseo."]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="50" y="290" width="450" height="250" uuid="c8c2e9b3-cad8-4088-9951-2d2212989cd7"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top" markup="styled">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Respetado señor (a):"+"\n"+"\n"+"<style isBold='true'>"+"BIOAGRICOLA DEL LLANO S.A. E.S.P."+"</style>"+", se permite informar que a partir de la"+"<style isBold='true' isUnderline='true'>"+" PRÓXIMA FACTURACIÓN"+"</style>"+" (periodo de facturación "+"<style isBold='true'>"+$F{per_nombre}.toUpperCase()+"</style>"+" ) del Servicio Público de Aseo para el inmueble cuya dirección arriba se señala, se hará de forma conjunta con "+"<style isBold='true'>"+$F{empresahomologanom}.toUpperCase()+"</style>"+" ) y"+"<style isBold='true' isUnderline='true'>"+" NO "+"</style>"+"<style isBold='true'>"+" de forma individual con BIOAGRICOLA,"+"</style>"+" como se venía realizando hasta la fecha."+"\n"+"\n"+" Cualquier inquietud será atendida en nuestra sede comercial ubicada en la carrera 38 No. 26C-95 Maizaro Sur; en nuestra línea de atención "+"<style isBold='true'>"+"110;"+"</style>"+" en el call center "+"<style isBold='true'>"+"6819081,"+"</style>"+" o en nuestra página web "+"<style isBold='true' forecolor='blue' isUnderline='true'>"+"www.bioagricoladelllano.com.co."+"</style>"+"\n"+"\n"+" Contamos con más de dos décadas de experiencia y diversos reconocimientos a nivel nacional e internacional, como el Premio Portafolio en la categoría Protección Ambiental y las certificaciones de ICONTEC en ISO 9001:2015 e ISO 45001:2018, lo que nos permite brindarle el mejor servicio."]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="540" width="100" height="20" uuid="6a8ca53d-53bf-4a99-85e3-8b5e734b3910"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<text><![CDATA[Cordialmente, ]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

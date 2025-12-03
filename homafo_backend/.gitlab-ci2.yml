@@ -1,0 +1,9 @@
+deploy:
+  tags:
+    - upcl-prg-hya-llano
+  script:
+    #- mvn clean install -DskipTests -Pdev
+    - echo $CI_COMMIT_SHORT_SHA
+    - docker-compose down
+    - docker-compose build
+    - docker-compose up -d

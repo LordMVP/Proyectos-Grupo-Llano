@@ -1,0 +1,11 @@
+version: "3.2"
+services:
+  homafo-back:
+    container_name: homafo-back
+    build: .
+    ports:
+      - "5005:8080"
+networks:
+  default:
+    external:
+      name: docker_default
