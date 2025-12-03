@@ -1,0 +1,347 @@
+/****** ESTILOS PARA EL LAYOUT DE LAS PAGINAS ******/
+/****** distribución del contenido y divisiones ******/
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video{ margin:0; padding:0; border:0; outline:0; font-size:100%; 
+    /*vertical-align: top; */
+    background:transparent;}
+
+body{
+    background-color: #FFF;
+    background-image: url('img/bg.png');
+    font-size: 11px;
+    color:#666;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0px 10px 20px 10px;
+}
+
+h1{
+    font-size: 1.7em;
+    color:#408BC4;
+    font-weight: bold;
+}
+
+h2{
+    font-size: 1.8em;
+    color:#408BC4;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+h4{
+    margin: 5px 0px 6px 0px;
+    font-weight: bold;
+}
+
+div#contenedorLogin{
+    width: 100%;
+}
+div#divlogin{
+    width: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+    margin-top: 100px;
+    margin-bottom: 200px;
+}
+div#divlogin > table {
+    width: 100%;
+    border-spacing: 15px;
+    border-collapse: separate;
+}
+
+div#divlogin > table > tr {
+    width: 100%;
+}
+
+div#divlogin > table > tr > td{
+    width: 100%;
+    padding: 1%;
+}
+
+#nit_txt{
+    width: 98%;
+}
+
+#contrasena_txt{
+    width: 98%;
+    padding-left: 5px;
+    height: 24px;
+}
+
+#empresa_txt{
+    width: 100%;
+    /*padding-left: 5px;
+    height: 24px;*/
+    display: block;
+    margin:auto;
+}
+
+#login_btn{
+    display: block;
+    margin:auto;
+}
+
+
+
+div#divTitulo{
+    border-bottom: solid 1px #408BC4;
+    background-image: url('img/LogoAchagua.png');
+    background-size: 180px auto;
+    background-repeat: no-repeat;
+    background-position: 5px 10px;
+    height: 50px;
+    padding-bottom: 5px;
+}   
+
+    
+    div#divTitulo h1{
+        padding-top: 15px;
+        text-align: center;
+        font-size: 2em;
+        font-weight: bold;        
+        vertical-align :middle;
+    }
+    
+
+div#contenedor{
+    margin: 0 auto;
+    background-color: #FFF;
+    border-radius: 15px;
+    padding: 15px 10px 20px 10px;
+    box-shadow: 0px 0px 10px #999;
+    margin-top: 10px;
+    width: 95%;
+}
+
+div#menu{
+    width:15%;
+    min-height: 400px;
+    float:left;
+    margin-right: 10px;
+}
+
+div#divGeneral{
+    width: 80%;
+    float:right;
+    border-left: solid 1px #DEDEDE;
+    min-height: 400px;
+    padding: 15px 15px 20px 15px;
+}
+
+
+div#divCabecera{
+    
+}
+
+div#divDetalles{
+    margin-top: 15px;
+}
+
+
+div#botonesCrud, div#botonesNavegacion{
+    display: inline-block;
+}
+
+
+div#divCargador{
+    display:none;
+    position: fixed;
+    top:-1px;
+    background-color: #FFF;
+    min-width: 200px;
+    height: 40px;
+    padding: 7px 5px 5px 5px;
+    text-align: center;
+    right: 42%;
+    border:solid 1px #AAA;
+    border-top:none;
+    border-radius: 0px 0px 10px 10px;
+    background-image: url('img/bgCargador.jpg');
+    background-repeat: repeat-x;
+    background-size: 100% 100%;
+    color:#FFF;
+    z-index: 99999;
+    box-shadow: 0px 0px 20px 3px #FFF;
+}
+
+    div#divCargador span{
+        position: relative;
+        /* top:-10px; */
+        font-weight: bold;
+        margin-left: 15px;
+    }
+    
+div.divCortina{
+    background-color:rgba(200, 200, 200, 0.6);
+    position: fixed;
+    top:0px;
+    left: 0px;
+    bottom:0px;
+    right: 0px;
+    width:100%;
+    height: 100%;
+}
+
+
+div.listaSeleccion{
+    display: block;
+    margin:10px;
+}
+
+    div.listaSeleccion div{
+        display:block;
+        height: 30px;
+    }
+    
+        div.listaSeleccion div label{ display:inline; }
+    
+        div.listaSeleccion div:nth-child(2n){
+            background-color: #c5dbec;
+        }
+        
+div#divDialogo{
+    font-size: 0.9em;
+}
+
+fieldset{
+    margin-top: 10px;
+    margin-bottom: 7px;
+    padding: 10px 0px 15px 20px;
+    border:solid 1px #408BC4;
+}
+
+fieldset legend{
+    font-weight: bold;
+    font-size: 1.4em;
+    color:#408BC4;
+    padding:0px 7px 0px 7px;
+}
+
+div#piePagina{
+    text-align: center;
+    color:#666;
+    font-size: 0.9em;
+    margin: 0 auto;
+    border-top: solid 1px #AAA;
+    width: 90%;
+    padding-top: 15px;
+    display:block;
+    clear:both;
+}
+
+fieldset.grupoControles{
+    margin-top: 7px;
+    margin-bottom: 5px;
+    padding: 0px 0px 5px 15px;
+    border:solid 1px #408BC4;
+}
+
+    fieldset.grupoControles legend{
+        font-weight: bold;
+        font-size: 1.1em;
+        color:#408BC4;
+        padding:0px 7px 0px 7px;
+    }
+
+
+div#divBarraOcultarMenu {
+    position: absolute;
+    right: 0px;
+    height: 100vh;
+    width: 9px;
+    background-color: rgba(247, 245, 245, 0.5);
+}
+
+button#btnOcultarMenu:hover {
+    background-color: rgba(230, 225, 225, 0.7);
+}
+button#btnOcultarMenu {
+    height: 100vh;
+    background-color: inherit;
+    border: none;
+    width: inherit;
+    padding: 0px 0px 25px 3px;
+    vertical-align: middle;
+}
+button:hover {
+    outline: none;
+}
+
+@media (max-width: 767px) {
+    div#menu{
+        width: 20%;
+    }
+
+    div#divGeneral{
+        width: 70%;
+    }
+
+    div#divTitulo{
+        height: 40px;
+    }
+
+    div#divTitulo h1 {
+        text-align: right;
+        padding: 7px 15px 0px 0px;
+        font-size: 1.7em;
+    }
+
+    .dataTables_wrapper{
+        overflow-x: scroll;
+    }
+}
+
+/* Dispositivos pequeños (tablets, anchura mayor o igual a 768px) */
+@media (min-width: 768px) and (max-width:991px) {
+    div#menu{
+        width: 20%;
+    }
+
+    div#divGeneral{
+        width: 70%;
+    }
+
+    div#divTitulo{
+        background-size: 130px auto;
+        background-position: 0px 6px;
+        height: 40px;
+    }
+
+    div#divTitulo h1{
+        text-align: right;
+        padding: 7px 15px 0px 0px;
+        font-size: 1.7em;
+    }
+    
+    .dataTables_wrapper{
+        overflow-x: scroll;
+    }
+
+}
+
+/* Dispositivos medianos (ordenadores, anchura mayor o igual a 992px) */
+@media (min-width: 992px) and (max-width:1199px) {
+    .dataTables_wrapper{
+        overflow-x: scroll;
+    }
+}
+
+/* Dispositivos grandes (ordenadores, anchura mayor o igual a 1200px) */
+@media (min-width: 1200px) {
+    .dataTables_wrapper{
+        overflow-x: inherit;
+    }
+}
+

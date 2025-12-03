@@ -1,0 +1,103 @@
+
+.appload-input{
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 1em;
+	background-color: #F90;
+	border-radius: 5px;
+	padding: 5px 5px;
+	margin: 4px;
+	color:#FFF;
+	margin-left: 0px;
+	display: inline-block;
+	
+}
+
+.appload-container{
+	margin: 10px 0px;
+}
+
+	.appload-buttons{
+		
+	}
+
+	.files-notifications{
+		margin: 5px;
+		border-radius: 7px;
+		border:solid 1px #F90;
+		color:#A60;
+		padding: 5px 10px;
+	    background-color: #FFEED5;
+	    position: relative;
+	}
+
+		.link-close-notifications{
+			position: absolute;
+			top:5px;
+			right: 10px;
+			font-size: 14px;
+			color:#A60;
+		}
+
+.file-item:nth-child(2n+1){
+	background-color: #DEDEDE;
+}
+
+.file-item{
+    height: 25px;
+    margin: 3px 5px 3px 0px;
+    padding-top: 5px;
+}
+
+.file-item-btns, .file-item-desc{
+	display: inline-block;
+	margin: 0px;	
+}
+
+.file-item-desc{
+	width: 70%;
+	padding-left: 5px;
+}
+
+	.file-item-desc .fa-warning{
+		margin-right: 11px;
+	    font-size: 18px;
+	    color: #F90;	
+	}
+
+.file-item-btns{
+	width: 28%;
+	padding-right: 5px;
+	text-align: right;
+}
+
+
+.uploaded-item{
+	background-color: #F90 !important;
+	color:#FFF;
+}
+
+.span-uploading{
+	font-weight: bold;
+	margin-left: 30px;
+
+}
+
+.uploaded-item .fa-check-circle-o {
+    margin-right: 11px;
+    font-size: 18px;
+    color: #FFF;
+}
+
+
+.files-notifications ul{
+	margin-left: 17px;
+}
+
+.btn-remove-all-files{
+
+}
+
+.btn-upload-all-files{
+	
+}

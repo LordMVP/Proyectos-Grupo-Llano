@@ -1,0 +1,31 @@
+#divCabecera{
+    width: 100%;
+    display: block;
+}
+
+div#divDetalles,
+div#divConceptos,
+div#divConfirmCancelar{
+    display: none;
+}
+
+div.divIzquierda,
+div.divDerecha{
+    display: table-cell;
+    border:solid 5px #FFF;
+}
+
+div.divIzquierda{
+    width: 77%;
+    margin-right: 5px;
+}
+
+div.divDerecha{
+    width: 23%;
+}
+
+div.divDerecha .campo,
+div.divDerecha .campoBusqueda{
+    width: 95% !important;
+}
+

@@ -1,0 +1,17 @@
+2020-03-05 18:06:05 :: Inicio Proceso Actualización 
+ **** SINCRONIZANDO TERCERO/FACTURACION  **** 
+Updating 7245220..4414260
+Fast-forward
+ .../c.administracion_registr_tercero_propied.php   |  3 ++
+ app/modelo/m.administracion_registr_tercero.php    |  2 +-
+ .../m.administracion_registr_tercero_propied.php   | 11 ++++
+ app/vista/default/js/funciones_generales.js        |  2 +-
+ .../js/vista/administracion_registr_tercero.js     |  2 +
+ .../administracion_registr_tercero_propied.js      | 60 +++++++++++++++++++++-
+ .../modulo/v.administracion_registr_tercero.php    |  6 ++-
+ .../v.administracion_registr_tercero_propied.php   |  3 ++
+ 8 files changed, 85 insertions(+), 4 deletions(-)
+ Elminando DIrectorio de Cache de Symfony
+2020-03-05 18:06:09 :: Fin  Proceso Actualizacin
+2020-03-05 18:06:51 :: Fin  Proceso Actualizacin
+2020-03-09 16:13:48 :: Fin  Proceso Actualizacin

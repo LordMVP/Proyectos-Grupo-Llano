@@ -1,0 +1,135 @@
+.at-tr-selected,
+.at-tr:hover{
+    background-color: #DEDEDE !important;
+    background-color:rgba(117,161,232,0.6) !important;
+    border-bottom: solid 1px #001687;
+    border-top: solid 1px #001687;
+}
+
+
+.at-header-panel{
+    width: 33.33%;
+    display: inline-block;
+    border:none;
+    margin-bottom: 10px;
+}
+
+.at-header-title-panel{
+    text-align: center;
+    font-size: 1.6em;
+    color: #408BC4;
+}
+
+.at-footer-page-navigator button:first-child{
+    border-radius: 5px 0px 0px 5px;
+}
+
+.at-footer-page-navigator button:last-child{
+    border-radius: 0px 5px 5px 0px;	
+}
+
+.at-footer-page-navigator button{
+    color:#FFF;
+    font-weight: bold;
+    background-image: url('img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width: 25px;
+    height: 20px;
+    border: solid 1px #408BC4;
+    margin: 0px;
+    margin-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.at-search-wrapper .no-filtered-data-span{
+    display: block;
+    color:#F90;
+    font-weight: bold;
+}
+.at-wrap-table{
+    overflow: hidden;
+    position: relative;
+}
+
+.at-data-table{
+    overflow: auto;
+    width: 100%;
+}
+
+
+.at-wrap-fixed-tables{
+    max-width: 600px;
+    min-width: 600px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    display: block;
+    max-height: 130px;
+}
+
+
+
+.at-data-table tbody tr td:focus,
+.at-wrap-fixed-tables td:focus,
+.at-wrap-fixed-tables tr:focus,
+.at-td-selected{
+    outline: 0;
+    background-color: #E0DDFF;
+}
+
+.at-tbl-fixed{
+    display: inline-block;
+    border-spacing: 0px;
+    float: left;
+}
+
+.at-tbl-fixed tr td, 
+.at-tbl-fixed tr th{
+    border:solid 1px #DEDEDE;
+    min-width: 130px;
+    height: 23px;
+}
+
+.at-tbl-fixed thead tr{
+    position: relative;
+    display: block;
+    max-width: 300px;
+    overflow: hidden;
+}
+
+.at-tbl-fixed tbody{
+    display: block;		
+    max-height: 130px;
+}
+
+
+.at-tbl-primary tbody{
+    overflow-y: hidden;
+}
+
+.at-tbl-secondary{
+    max-width: 300px;
+}
+
+.at-tbl-secondary thead{
+    overflow: hidden;
+}
+
+.at-tbl-secondary tbody{
+    overflow: auto;
+}
+
+
+.at-clear{
+    opacity: 0;
+    clear: both;
+}
+
+.at-preloader{
+    z-index:999999;
+    background-color:rgba(117,161,232,0.6) !important;
+    position:absolute;
+    width:100%;
+    left:0px; 
+    top:0px;
+}

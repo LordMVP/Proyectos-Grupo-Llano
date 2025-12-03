@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Achagua</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">        
+        <link rel="stylesheet" type="text/css" href="css/estilo.layout.css"/>
+        <link rel="stylesheet" type="text/css" href="css/estilo.ui.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link rel="stylesheet" type="text/css" href="css/theme/jquery.ui.all.css" />
+        <link rel="stylesheet" type="text/css" href="css/theme/jquery.datetimepicker.css" />
+
+        <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+        <script type="text/javascript" src="js/app.funciones.js"></script>
+        <script type="text/javascript" src="js/app.ui.js"></script>
+        <script type="text/javascript" src="js/app.global.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.ui.core.js"></script>
+        <script type="text/javascript" src="js/jquery.crypt.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.ui.widget.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.ui.tabs.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.ui.datepicker.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.datetimepicker.js"></script>
+        <script type="text/javascript" src="js/ui/jquery.ui.autocomplete.js"></script>
+        <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+
+
+    </head>
+    <body>
+        <div id="contenedor">
+            <div id="divTitulo">
+                <h1 id="titulo">Sistema de información Achagua</h1>
+            </div>
+
+            <div id="contenedorLogin">
+                <div id="divlogin">
+                    <table>
+                        <tr><td>
+                                <label for="nit_txt">Documento:</label>
+                                <input type="text" id="nit_txt" placeholder="NIT Documento"/>
+                            </td></tr>
+                        <tr><td>
+                                <label for="contrasena_txt">Contraseña:</label>
+                                <input type="password" id="contrasena_txt" placeholder="contraseña"/>
+                            </td></tr>
+                        <tr><td>
+                                <label for="empresa_txt">Empresa:</label>
+                                <select id="empresa_txt">
+                                    <option value="0">Seleccione una Empresa</option>
+                                </select></td></tr>
+                        <tr><td><input type="button" id="login_btn" value="Iniciar Sesión" class="btnSimple"/></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <hr class="limpiar" />
+            <div id="piePagina">
+                <p></p>
+            </div>
+        </div>
+        <script type="text/javascript" src="js/crypto/configuracion.js"></script>
+        <script type="text/javascript" src="js/crypto/AES.js"></script>
+        <script type="text/javascript" src="js/login/login.model.js"></script>
+        <script type="text/javascript" src="js/login/login.control.js"></script>
+        <script type="text/javascript" src="js/login/login.vista.js"></script>
+        <script type="text/javascript">
+            (function ($) {
+                loginVista.init();
+            })(jQuery);
+        </script>
+    </body>
+</html>
+
+

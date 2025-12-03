@@ -1,0 +1,3 @@
+var CONFIGURACION = {
+    CLAVE_ENCRIPTACION: '$Gell$239.'
+};

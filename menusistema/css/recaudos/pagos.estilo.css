@@ -1,0 +1,93 @@
+
+/*****Estilos depreciados****/
+/****candidato a eliminar****/
+h3 {
+    color:#408BC4;
+    font-size: 1.4em;
+    margin-top:5px;
+}
+
+
+div.panelContenedor{
+    display: table;
+    margin: 0 auto;
+    width: 90%;
+}
+
+div.divIzquierda,
+div.divDerecha{
+    display: table-cell;
+    border:solid 5px #FFF;
+}
+
+div.divIzquierda{
+    width: 80%;
+    margin-right: 5px;
+}
+
+div.divDerecha{
+    width: 30%;
+}
+
+div#divRecaudosMenu{
+    height: 30px;
+
+}
+
+    div#divRecaudosMenu ul{
+        display: inline;
+    }
+
+        div#divRecaudosMenu ul li{
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+div.divDerecha .campo, 
+div.divDerecha .campoBusqueda{
+    display: block;
+    width: 90%;
+}
+
+.campoBusqueda label{
+    display: block;
+}
+
+
+
+#divCabecera{
+    width: 100%;
+    display: block;
+}
+
+div#divDetalles,
+div#divFacturas,
+div#divDetallesFactura,
+div#divConfirmCancelar{
+    display: none;
+}
+
+div#divFacturas{
+    margin-top: 15px;
+}
+
+div.divIzquierda,
+div.divDerecha{
+    display: table-cell;
+    border:solid 5px #FFF;
+}
+
+div.divIzquierda{
+    width: 77%;
+    margin-right: 5px;
+}
+
+div.divDerecha{
+    width: 23%;
+}
+
+div.divDerecha .campo,
+div.divDerecha .campoBusqueda{
+    width: 95% !important;
+}
+

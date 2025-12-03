@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Llanogas SA E.S.P</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">        
+        <link rel="stylesheet" type="text/css" href="css/estilo.layout.css"/>
+        <link rel="stylesheet" type="text/css" href="css/estilo.ui.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+
+        <script type="text/javascript" src="js/app.prototypes.js"></script>
+        <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="js/jquery.plugins.js"></script>
+        <script type="text/javascript" src="js/app.funciones.js"></script>
+        <script type="text/javascript" src="js/app.ui.js"></script>
+        <script type="text/javascript" src="js/app.global.js"></script>
+        <!--<script type="text/javascript" src="js/jquery.tree.js"></script>-->
+        <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    </head>
+    <body>
+        <div id="contenedor">
+            <div id="divTitulo">
+                <h1 id="titulo">Sistema de información de llanogas</h1>
+            </div>
+            <div id="menu">
+                <div id="userData">
+                    <p>Bienvenido: </p>
+                    <p id="nomUsuarioTxt"></p>
+                    <p>Fecha Sistema:</p>
+                    <p id="fechaSistemaTxt"></p>
+                    <a href="index.html">Cerrar Sesión</a>
+                </div>
+                <!-- para crear el menu -->
+                <div class="filtroBusqueda">
+                    <input type="text"
+                           id="txtFiltroMenu" 
+                           placeholder="Buscar..." autofocus="autofocus">
+                </div>
+                <div class="tree contentMenu" id="contenedorOpcionesMenu">
+                    <ul id='menuItems'>
+
+                    </ul>
+                </div>
+            </div>
+            <div id="divContenedorPrincipal">                
+            </div>
+            <hr class="limpiar" />
+            <div id="piePagina">
+                <p></p>
+            </div>
+        </div>
+        <a href="js/crypto/configuracion.js"></a>
+        <script type="text/javascript" src="js/crypto/AES.js"></script>
+        <script type="text/javascript" src="js/menu/menu.model.js"></script>
+        <script type="text/javascript" src="js/menu/menu.control.js"></script>
+        <script type="text/javascript" src="js/menu/menu.vista.js"></script>
+        <script type="text/javascript">
+            (function($) {
+                $('#titulo').text('Sistema de Información de '+sessionStorage.getItem('empresa'));
+                menuVista.init();
+            })(jQuery);
+        </script>
+    </body>
+</html>

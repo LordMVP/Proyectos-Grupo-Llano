@@ -1,0 +1,275 @@
+
+input[type="text"]{
+    padding-left: 5px;
+    height: 24px;
+}
+
+div.campoCorto{
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.campoCorto input{
+    width: 104px;
+    padding-left: 3px !important;
+
+}
+
+textarea{
+    max-width: 98%;
+    max-height: 100px;
+    min-width: 95%;
+    min-height: 50px;
+    padding: 3px 5px 5px 4px;
+    font-family: inherit;
+    font-size: 1.2em;
+}
+
+.limpiar{
+    clear:both;
+    opacity: 0;
+}
+
+label{
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 7px;
+    font-size: 1.1em;
+
+}
+
+div.campo{
+    display: inline-block;
+    width: 30%;
+    margin-right: 10px;
+}
+
+
+div.campo input[type="text"],
+div.campo select,
+div.campoCorto select{
+    width: 96%;
+}
+
+div.campo .campoCorto{
+    width:45% !important;
+}
+
+div.campoBusqueda{
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+div.campoBusqueda label{
+    margin-bottom: 0px;
+    position: relative;
+    bottom: -3px;
+}
+
+div.campoBusqueda input[type="text"]{
+    width:75%;
+    margin-top: 0px;
+    display: table-cell;
+}
+
+div.campoBusqueda button{
+	display: table-cell;
+    width:30%;
+    height: 30px;
+    background-size: 100% 100%;
+    border: none;
+    background-image: url('img/buscar_filtroBtn.fw.png');
+    background-repeat: no-repeat;
+    border-radius: 0px 10px 10px 0px;
+    /*position: relative;
+    bottom: -9px;
+    left: -4px;*/
+}
+
+    div.campoBusqueda button:hover{
+        cursor: pointer;
+    }
+
+div#divComandos{
+    padding:0px;
+    text-align: center;
+}
+
+div.divBotones{
+    margin-right: 20px;
+    display: inline-block;
+}
+
+div.divBotones .btn{
+    background-image: url('img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    color:#FFF;
+    float:left;
+}
+
+
+.btnSimple{
+    background-image: url('img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    margin-top:5px;
+    color:#FFF;
+    border-radius: 10px;
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div.divBotones .btn:hover,
+.btnSimple:hover{
+    cursor:pointer;
+    background-image: url('img/bgBotonesHover.jpg');
+}
+
+div.divBotones .btn:first-child{
+    border-radius: 10px 0px 0px 10px;
+}
+
+div.divBotones .btn:last-of-type{
+    border-radius: 0px 10px 10px 0px;
+}
+
+.pMensaje{
+    font-weight: bold;
+    margin-bottom: 15px;
+    color:#F90;
+    display: block;
+    margin-top: 10px;
+}
+
+select{
+    height: 30px;
+    width: 100%;
+}
+
+/**********Estilo para la tabla****************/
+.tabla{
+    width: 100%;
+    border:solid 1px #408BC4;
+    border-collapse: collapse;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+}
+
+    .tabla tr.selected{
+        font-weight: bold;
+        background-color:rgba(117,161,232,0.6) !important;
+        border-bottom: solid 1px #001687;
+        color:#FFF;
+    }
+
+    .tabla thead tr{
+        background-color:#408BC4;
+        background-image: url('img/bgBotones.jpg');
+        background-repeat: repeat-x;
+
+        color:#FFF;
+        height: 30px;
+    }
+
+    .tabla caption{
+            color:#408BC4;
+            font-size: 1.6em;
+            margin-bottom: 5px;
+            margin-top: 10px;
+    }
+
+    .tabla tbody tr:nth-child(2n){
+        background-color: #D9F3FF;
+    }
+
+    .tabla td{
+        padding:5px;
+        border-right: solid 1px #408BC4;
+    }
+
+    .tabla td label{
+        display: inline;
+    }
+
+    .tabla thead tr th{
+        vertical-align: middle;
+    }
+
+    .tabla thead tr th[data-sort="asc"],
+    .tabla thead tr th[data-sort="desc"]{
+            text-decoration: underline;
+    }
+
+    .tabla thead tr th[data-sort="asc"]:hover,
+    .tabla thead tr th[data-sort="desc"]:hover{
+            cursor: pointer;
+    }
+
+    .tabla td label{
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+
+/***********************/
+.campoValido{
+    box-shadow: 0px 0px 3px #46c82e;
+    border: solid 1px #999;
+}
+
+.campoInvalido{
+    box-shadow: 0px 0px 5px #F90;
+    border:solid 1px #7A0000;
+}
+
+
+div.toast{
+    position:fixed;
+    top:10px;
+    right:20px;
+    padding:7px 6px 4px 6px;
+    border:solid 1px #ec4f12;
+    background-color:#fa3838;
+    color:#FFF;
+    border-radius:5px;
+    display:none;
+    min-height:50px;
+    min-width:100px;
+    text-align:left;
+    z-index:9999999;
+}
+
+
+.campoRadio fieldset label{
+    display: inline !important;
+}
+
+
+
+ul.ui-autocomplete{
+    max-height: 200px;
+    overflow: auto;
+    box-shadow: #72aad3 0px 3px 10px 1px;
+    width: 248px;
+    background-color: rgb(255, 255, 255);
+}
+
+.no-scroll{
+    overflow: hidden;
+}

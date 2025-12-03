@@ -1,0 +1,33 @@
+{
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "source": {
+
+        "include": ["js/login", "js/menu", "sistema/web/bundles/Llanogas/js", "js"],
+        "exclude": ["js/ui", "js/ui"],
+        "includePattern": ".+\\.js?$",
+        "excludePattern": "\\jquery+\\.js?$"
+    },
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "opts": {
+        "template": "/usr/local/lib/node_modules/docdash/",
+        "encoding": "utf8",
+        "destination": "docs/",
+        "recurse": true,
+        "verbose": false
+    },
+    "template": {
+        "default": {
+            "includeDate": false
+        }
+    },
+    "docdash": {
+        "static": false, 
+        "sort": false,   
+        "title": "Documentación Acuagua"
+    }
+}
