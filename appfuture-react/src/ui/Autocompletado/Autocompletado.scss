@@ -1,0 +1,30 @@
+.autocompletado {
+    position: relative; 
+
+    ul { margin: 0 !important; }
+
+    & > .form-control.activo {
+        border-radius: .25rem .25rem 0 0;
+    }
+
+    &__contenedor.activo {
+        width: 100%;
+        max-height: 12.5em;
+        border: solid 1px #CCC;
+        border-top: none;
+        background: #FFF;
+        border-radius: 0 0 .25rem .25rem;
+        position: absolute;
+        top: 100%;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    &__sugerencia {
+        height: 2.5em;
+        padding: .6em .8em;
+        cursor: pointer;
+
+        &:hover, &.activo { background: #FBFBFB; }
+    }
+}

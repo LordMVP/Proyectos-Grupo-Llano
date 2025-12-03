@@ -1,0 +1,31 @@
+.boton {
+  font: inherit;
+  background-color: #75a7dc;
+  border-color: #5d95d0;
+  color: #FFF;
+  cursor: pointer;
+
+  &.opcion { margin: 0 }
+
+  &:disabled {
+      $gris: fade-out(#CCC, .6);
+      background: $gris;
+      border-color: $gris;
+      color: black;
+      cursor: default;
+  }
+}
+
+.primary {
+  background-color: #75a7dc;
+  border-color: #5d95d0;
+  color: #FFF;
+}
+
+.primary:hover {
+  background-color: #5d8cbd;
+}
+
+.primary:focus {
+  outline: unset;
+}

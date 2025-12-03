@@ -1,0 +1,47 @@
+.interruptor {
+    display: flex;
+    align-items: center;
+
+    label {
+        margin: 0;
+        margin-right: 1em;
+    }
+
+    & > [type="checkbox"] {
+        $medida: 2.2em;
+
+        width: $medida * 2;
+        height: $medida;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        display: inline-block;
+        border: solid 1px #CCC;
+        border-radius: 0.8em;
+        background: #EEE;
+        position: relative;
+        cursor: pointer;
+
+        &::before {
+            content: '';
+            font: inherit;
+            width: $medida;
+            height: $medida;
+            display: inline-block;
+            border: solid 1px #CCC;
+            border-radius: 0.8em;
+            position: absolute;
+            top: -1px;
+            left: -2px;
+            background: #FFF;
+        }
+
+        &:checked {
+            background: #71A7D3;
+
+            &::before {
+                box-shadow: -0.2em 0 0.6em rgba(0,0,0,.1);
+                left: $medida;
+            }
+        }
+    }
+}

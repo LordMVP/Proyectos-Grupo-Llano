@@ -1,0 +1,27 @@
+.dialogo {
+    display: block;
+    visibility: hidden;
+    background: rgba(0,0,0,0.5);
+
+    &.activo {
+        visibility: visible;
+    }
+
+    &__titulo {
+        background: #fafafa;
+        
+        & > h6 {
+            width: 100%;
+            text-align: center;
+            margin: 0 !important;
+        }
+    }
+
+    &__texto {
+        min-height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+}

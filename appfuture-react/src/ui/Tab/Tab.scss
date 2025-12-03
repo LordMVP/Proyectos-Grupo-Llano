@@ -1,0 +1,49 @@
+.tab {
+    $color: #CCC;
+
+    border: solid 1px $color;
+    border-radius: .4em;
+
+    &__cabecera {
+        display: flex;
+    }
+
+    &__titulo, &__seleccionado {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1em 1.5em;
+        border-bottom: solid 1px $color;
+        border-right: solid 1px $color;
+        flex: 1;
+        cursor: pointer;
+        text-align: center;
+        text-transform: capitalize;
+
+        &:nth-last-of-type(1) { border-right: none }
+    }
+
+    &__seleccionado {
+        border-bottom-color: #FFF;
+    }
+
+    @media (max-width: 45rem) {
+        &__cabecera {
+            flex-wrap: wrap;
+        }
+
+        &__titulo, &__seleccionado {
+            min-width: 100%;
+            border-bottom-color: $color;
+            border-right: none;
+        }
+
+        &__seleccionado {
+            background: rgba($color, .1);
+        }
+    }
+
+    &__contenido {
+        padding: 2em;
+    }
+}

@@ -1,0 +1,29 @@
+.modal {
+
+  &__fondo {
+
+  }
+
+  &__titulo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #3b7baf;
+    border-bottom: solid 1px #3b7baf;
+    padding-bottom: 10px;
+    font-weight: bold;
+  }
+
+  &__linkcerrar {
+    text-decoration: none;
+    color: #387ab3;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  &__contenido {
+
+  }
+
+}

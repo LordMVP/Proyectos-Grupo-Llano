@@ -1,0 +1,134 @@
+.jdate-picker {
+  position: relative;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.jdate-picker .jdate-picker.calendar {
+    display: block;
+    position: absolute;
+    width: 254px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #FFF;
+    z-index: 999;
+}
+.jdate-picker .jdate-picker.calendar .head-controls {
+  display: flex;
+  font-size: 13px;
+}
+
+.jdate-picker .jdate-picker.calendar .head-controls .control{
+  width: 15%;
+  text-align: center;
+  padding: 5px;
+  cursor: pointer;
+}
+.jdate-picker .jdate-picker.calendar .head-controls .control:hover{
+  background: #efefef;
+}
+
+.jdate-picker .jdate-picker.calendar .head-controls .label-date {
+  width: 70%;
+  text-align: center;
+  padding: 5px;
+  cursor: pointer;
+}
+.jdate-picker .jdate-picker.calendar .head-controls .label-date:hover {
+  background: #efefef;
+}
+
+.jdate-picker .jdate-picker.calendar .days-content{
+  display: flex;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+.jdate-picker .jdate-picker.calendar .days-content .colum.day{
+  width: calc(100% / 7);
+  text-align: center;
+  font-size: 13px;
+}
+.jdate-picker .bold{
+  font-weight: bold;
+}
+
+.days-forselection{
+  display: block;
+}
+
+.days-forselection .colum.day{
+  display: inline-block;
+  text-align: center;
+  width: calc(100% / 7);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 3px;
+}
+
+.days-forselection .colum.day:hover{
+  border-radius: 3px;
+  background: #efefef;
+}
+
+.days-forselection .colum.day.prev, .days-forselection .colum.day.next{
+  color: #848484;
+}
+
+.days-forselection .colum.day.now-border{
+  border-radius: 3px;
+  position: relative;
+  background: #efefef;
+}
+.days-forselection .colum.day.now, .days-forselection .colum.day.selected{
+  background: #007bff;
+  color: #FFF;
+  border-radius: 3px;
+}
+
+.days-forselection .colum.day.now-border:before{
+    content: '';
+    position: absolute;
+    bottom: 0px;
+    width: 10px;
+    height: 10px;
+    border-style: solid;
+    right: 0px;
+    border-color: transparent #007bff transparent transparent;
+    border-width: 11px 11px 0px 0px;
+}
+
+.months-forselection{
+  display: block;
+}
+
+.months-forselection .column.month{
+  display: inline-block;
+  width: calc(100% / 4);
+  padding: 15px;
+  text-align: center;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.months-forselection .column.month:hover{
+  background: #efefef;
+  border-radius: 3px;
+}
+.months-forselection .column.month.selected{
+  background:  #007bff;
+  color: #FFF;
+  border-radius: 3px;
+}
+
+.jdate-picker .disabled-control{
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+.jdate-picker .disabled-control{
+  background: #FFF !important;
+}
