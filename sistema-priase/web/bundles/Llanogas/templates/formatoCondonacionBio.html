@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/theme/jquery.ui.all.css" />
+    <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo.ui.css" />
+    <link rel="stylesheet" media="print" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo_imprimir.css" />
+
+    <style>
+        *{font-size: small;}
+        header, .firmaCliente{display: flex; justify-content: space-between;}
+        .firmaCliente div{ width: 48%; margin-top: 50px; text-align: center;}
+        header .div-logo{width: 50%; display: flex; align-items: center; border-right: dashed slategray;}
+        header .div-logo div:last-child{margin-left: 30px;}
+        header .div-informacion{width: 50%; text-align: end;}
+
+        .div-container{margin-top: 10px; margin-bottom: 10px;}
+        .div-contenedores{display: flex; flex-direction: column; align-content: space-between; text-align: center;}
+        .title{border-bottom: dashed slategray;border-top: dashed slategray; padding: 5px;}
+
+        .row{display: flex; justify-content: space-between; margin-top: 10px;}
+        .cols-3{width: calc(100%/3.3); padding-left: 0; display: flex; flex-direction: column;}
+
+        #imgLogo{display: inline-block; width: 170px; height: 60px;}
+        hr{width: 80%; height: 1px; background-color: black;}
+
+        .inputImpresion{background-color: inherit;border:none;border-radius:0px;border-bottom: solid 1px #999;margin-bottom: 10px; margin-top: 10px; font-size: smaller;}
+    </style>
+</head>
+
+<body id="divBody">
+    <header>
+        <div class="div-logo">
+            <div>
+                <img id="imgLogo"/>
+            </div>
+            <div>
+                <span><strong>Fecha: </strong><span id="fechaCondonacionImprimir"></span></span>
+                <br>
+                <span><strong>Radicado: </strong><span id="radicadoCondonacionImprimir"></span></span>
+            </div>
+        </div>
+        <div class="div-informacion">
+            <strong id="codigoCalidadImprimir"><strong> 
+            <br>
+            <strong id="nombreEmpresaImprimir"></strong>
+            <br>
+            <span id="tituloPrincipalImprimir"></span>
+            <br>
+            <span id="subtituloPrinciaplImprimir"></span>
+        </div>
+    </header>
+    <div class="div-contenedores">
+        <strong class="title">INFORMACION DEL SUSCRIPTOR</strong>
+        <div class="div-container">
+            <div class="row">
+                <div class="cols-3">
+                    <label for="nombreSuscriptorImprimir"><strong>NOMBRE:</strong></label>
+                    <input type="text" id="nombreSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="identificacionSuscriptorImprimir"><strong>IDENTIFICACION:</strong></label>
+                    <input type="text" id="identificacionSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="codAnteriorSuscriptorImprimir"><strong>CÓDIGO ANTERIOR:</strong></label>
+                    <input type="text" id="codAnteriorSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="cols-3">
+                    <label for="barrioSuscriptorImprimir"><strong>BARRIO:</strong></label>
+                    <input type="text" id="barrioSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="direccionSuscriptorImprimir"><strong>DIRECCION:</strong></label>
+                    <input type="text" id="direccionSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="idBioSuscriptorImprimir"><strong>ID BIO:</strong></label>
+                    <input type="text" id="idBioSuscriptorImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="cols-3">
+                    <label for="vlrInteresTotalImprimir"><strong>Interes Total Liquidado:</strong></label>
+                    <input type="text" id="vlrInteresTotalImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="vlrSaldoCondonableImprimir" ><strong>SALDO CONDONABLE:</strong></label>
+                    <input type="text" id="vlrSaldoCondonableImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="porcentajeCondonableImprimir" ><strong>% CONDONABLE:</strong></label>
+                    <input type="text" id="porcentajeCondonableImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="div-contenedores">
+        <strong class="title">OBSERVACIONES</strong>
+        <p id="observacionesParrafoImprimir" class="div-container" style="text-align: start;"></p>
+    </div>
+    <div class="div-contenedores">
+        <strong class="title">RELACION DE FACTURA</strong>
+        <div id="divTbl"></div>
+    </div>
+    <div class="div-contenedores">
+        <strong class="title">INFORMACIÓN DEL SOLICITANTE</strong>
+        <div class="div-container">
+            <div class="row">
+                <div class="cols-3">
+                    <label for="nombreSolicitanteImprimir"><strong>NOMBRE:</strong></label>
+                    <input type="text" id="nombreSolicitanteImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="identificacionSolicitanteImprimir"><strong>IDENTIFICACION:</strong></label>
+                    <input type="text" id="identificacionSolicitanteImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+                <div class="cols-3">
+                    <label for="telefonoSolicitanteImprimir"><strong>TELEFONO:</strong></label>
+                    <input type="text" id="telefonoSolicitanteImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <p id="parrafoPrincipalImprimir" class="div-container"></p>
+    </div>
+    <div class="firmaCliente">
+        <div>
+            <hr>
+            <br>
+            <strong>FIRMA CLIENTE</strong>
+        </div>
+        <div>
+            <hr>
+            <br>
+            <strong id="firmaColaborador"></strong>
+        </div>
+    </div>
+    <script type="text/javascript">
+        let logo = sessionStorage.getItem('logoEmpresa');
+        let nombreColaborador = JSON.parse(sessionStorage.getItem('datos_prisma')).usuario;
+        if (logo !== null) {
+            document.getElementById('imgLogo').setAttribute('src', '/achagua/img/logos_empresas/' + logo);
+        }
+
+        if(nombreColaborador !== null){
+            document.getElementById('firmaColaborador').textContent = "ATENDIDO POR (FIRMA): " + nombreColaborador;
+        }
+    </script>
+</body>
+
+</html>

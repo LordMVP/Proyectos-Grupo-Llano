@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: SolicitudAgendamiento/SolicitudAgendamiento.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: SolicitudAgendamiento/SolicitudAgendamiento.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Botonera, Captcha, Combo, Input, Tabla } from 'appfuture-react'
+import connect from 'react-redux/es/connect/connect'
+import { bindActionCreators } from 'redux'
+import axios from 'axios'
+//Rutas entre la vista Solicitud Agendamiento y Symfony-SolicitudAgendamientoController
+import URL from '../../global/rutas_api'
+//LLamado de la petición por POST o GET empleando AXIOS
+import Peticion from '../Assets/util/peticion'
+//Carga funciones
+import { Util } from '../Assets/util/Util'
+//Usar componente modal
+import Modal from '../Assets/componentes/Modal'
+
+/**
+ *
+ *
+ * @class SolicitudAgendamiento
+ * @extends {Component}
+ */
+class SolicitudAgendamiento extends Component {
+    //inicialización de variables
+
+    /**
+     *Define estados iniciales
+     * @memberof SolicitudAgendamiento
+     */
+    state = {
+        timer: false,
+        actividadJson: [],
+        actividad: '-1',
+        listaDisponibilidad: [],
+        referencia: '',
+        observacion: '',
+        correo: '',
+        numero: '',
+    }
+
+    //Arreglo con los id y nombre de columnas para el componente Tabla
+
+    columnas = [
+        {
+            Header: 'Solicitud agendamiento',
+
+            columns: [
+                { Header: 'Fecha', accessor: 'fechadisponbie' },
+                { Header: 'Horario', accessor: 'horadisponible' },
+
+                {
+                    Header: 'Acción',
+                    Cell: (props) => (
+                        &lt;input
+                            type="radio"
+                            name="disponibilidad"
+                            onChange={(e) => this.asignar(props.index)}
+                        />
+                    ),
+                },
+            ],
+        },
+    ]
+
+    /**
+     *Asigna la fila seleccionada para procesarla más adelante
+     *@method
+     *@param {int} index - número de la fila
+     */
+    asignar = (index) => {
+        this.setState({ listaDisponibilidad: this.state.lista[index] })
+    }
+
+    peticion = new Peticion(this)
+
+    /**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+    change = async ({ target: { id, value } }) => {
+        this.setState({ [id]: value })
+
+        if (id === 'actividad') {
+            let busquedaListaActividad = this.state.listaActividad.filter(
+                (fila) => fila.idprocesoactividad == Util.obtenerId(value)
+            )
+            busquedaListaActividad = busquedaListaActividad[0]
+
+            await this.peticion
+                .post({
+                    url: URL.SOLICITUD_AGENDAMIENTO.CONSULTAR_DISPONIBILIDAD,
+                    parametros: {
+                        suscripcion: this.state.referencia,
+                        idActividad: Util.obtenerId(value),
+                        idMunicipio: busquedaListaActividad.codigodane,
+                        descripcionActividad:
+                            busquedaListaActividad.descripcionactividad,
+                    },
+                })
+                .then((data) => {
+                    const { disponibilidad } = data[0]
+                    if (disponibilidad != null) {
+                        this.setState({ lista: disponibilidad })
+                    } else {
+                        //Modal
+                        this.setState({
+                            titulo: '¡SIN DISPONIBILIDAD!',
+                            texto: `Por el momento no hay disponibilidad`,
+                        })
+                        //despliega modal
+                        this.setState({ mostrar: true })
+                    }
+                })
+        }
+    }
+
+    /**
+     * Despliega el modal para realizar la consulta
+     * @method
+     */
+
+    handleConsulta = () =>
+        this.setState({ consultaModal: !this.state.consultaModal })
+
+    /**
+     * Se ejecuta al momento de pulsar sobre el botón Guardar
+     * @method
+     * @async
+     */
+
+    guardar = async () => {
+        //cambiar el estado del modal
+        if (
+            this.state.listaDisponibilidad.length &lt;= 0 ||
+            this.state.referencia === '' ||
+            this.state.actividad === '-1' ||
+            this.state.numero === '' ||
+            this.state.correo === ''
+        ) {
+            await this.setState({ mensaje: [] })
+            this.state.listaDisponibilidad &lt;= 0
+                ? this.state.mensaje.push('Solicitud Agendamiento')
+                : ''
+            this.state.referencia === ''
+                ? this.state.mensaje.push('Referencia Cliente')
+                : ''
+            this.state.actividad === '-1'
+                ? this.state.mensaje.push('Actividades')
+                : ''
+            this.state.numero === ''
+                ? this.state.mensaje.push('Número telefónico')
+                : ''
+            this.state.correo === '' ? this.state.mensaje.push('Correo') : ''
+
+            //Modal
+            this.setState({
+                titulo: '¡FALTA INFORMACIÓN!',
+                texto: `Falta escoger:\n ${this.state.mensaje.join(', ')}`,
+            })
+            //despliega modal
+            this.setState({ mostrar: true })
+        } else if (
+            Util.validarCorreo(this.state.correo) ||
+            Util.validarTelefono(this.state.numero)
+        ) {
+            await this.setState({ mensaje: [] })
+            Util.validarTelefono(this.state.numero)
+                ? this.state.mensaje.push(
+                      'Número telefónico inválido. Se permite de 7 a 10 dígitos númericos'
+                  )
+                : ''
+            Util.validarCorreo(this.state.correo)
+                ? this.state.mensaje.push(
+                      'Correo electrónico inválido. Ejemplo: ejemplo@ejemplo.com'
+                  )
+                : ''
+
+            //Modal
+            this.setState({
+                titulo: '¡INFORMACIÓN INVÁLIDA!',
+                texto: `${this.state.mensaje.join(', ')}`,
+            })
+            //despliega modal
+            this.setState({ mostrar: true })
+        } else {
+            let busquedaListaActividad = this.state.listaActividad.filter(
+                (fila) =>
+                    fila.idprocesoactividad ==
+                    Util.obtenerId(this.state.actividad)
+            )
+
+            const {
+                suscripcion,
+                idsuscripcion,
+                idproceso,
+                descripcionactividad,
+                idactividad,
+                idprocesoactividad,
+                camposreferencia,
+                tablareferencia,
+                duracion,
+            } = busquedaListaActividad[0]
+            const {
+                unidadresponsable,
+                fechadisponbie,
+                hora,
+                jornada,
+            } = this.state.listaDisponibilidad
+
+            let campos = {
+                sigue_ide: camposreferencia.sigueIde,
+                sigue_codemp: camposreferencia.sigueCodemp,
+            }
+
+            const datoFinal = {
+                idProceso: Util.obtenerId(idproceso),
+                suscripcion: suscripcion,
+                idsuscripcion: idsuscripcion,
+                unidadResponsable: unidadresponsable,
+                fechaProgramacion: fechadisponbie,
+                sigueIde: camposreferencia.sigueIde,
+                duracion: duracion,
+                idprocesoActividad: idprocesoactividad,
+                tipo: 'D',
+                correoCliente: this.state.correo,
+                direccionCliente: '',
+                telefonoCliente: this.state.numero,
+                nombreCliente: '',
+                actividad: '',
+                observaciones: this.state.observacion,
+            }
+
+            this.peticion.post({
+                url: URL.SOLICITUD_AGENDAMIENTO.EDITAR_ACTIVIDAD,
+                parametros: [datoFinal],
+            })
+
+            this.setState({
+                actividad: '-1',
+                listaDisponibilidad: [],
+                listaActividad: [],
+                lista: [],
+                actividadJson:[],
+                referencia: '',
+                observacion: '',
+                correo: '',
+                numero: '',
+            })
+        }
+    }
+
+    /**
+     * Restablece los valores a las condiciones iniciales
+     * @method
+     */
+
+    nuevo = () => {
+        this.setState({
+            actividad: '-1',
+            actividadJson:[],
+            listaDisponibilidad: [],
+            listaActividad: [],
+            referencia: '',
+            observacion: '',
+            correo: '',
+            numero: '',
+        })
+    }
+
+    //Arreglo para emplearlo en el componente botonera, con sus respectivas funciones
+
+    funciones = [
+        { texto: 'guardar', callback: this.guardar },
+        { texto: 'nuevo', callback: this.nuevo },
+    ]
+
+    /**
+     *Detecta el cambio de estado, al digitar en el campo de texto
+     *@method
+     *@param {Object} e - Adjudicado a un campo de texto
+     */
+    onBlur = (e) => {
+        var currentTarget = e.currentTarget
+        setTimeout(() => {
+            if (!currentTarget.contains(document.activeElement)) {
+                this.peticion
+                    .post({
+                        url: URL.SOLICITUD_AGENDAMIENTO.LISTAR_ACTIVIDADES,
+                        parametros: { idSuscripcion: this.state.referencia },
+                        config: ['idactividad', 'descripcionactividad'],
+                        json: 'actividadJson',
+                        value: 'actividad',
+                    })
+                    .then((data) => {
+                        this.setState({ listaActividad: data })
+                    })
+            }
+        }, 0)
+    }
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+    render() {
+        return (
+            &lt;React.Fragment>
+                &lt;Modal
+                    titulo={this.state.titulo}
+                    texto={this.state.texto}
+                    mostrar={this.state.mostrar}
+                    ocultarAlerta={this.change}
+                    botones={this.botones}
+                />
+
+                &lt;h1>Empresa - Solicitud agendamiento por demanda&lt;/h1>
+
+                &lt;Botonera funciones={this.funciones} />
+
+                &lt;div className="contenedor caja formulario">
+                    &lt;label className="tag">Información Ruta&lt;/label>
+                    &lt;div tabIndex="1" onBlur={this.onBlur}>
+                        &lt;Input
+                            id="referencia"
+                            label="Referencia Cliente:"
+                            value={this.state.referencia}
+                            onChange={this.change}
+                        />
+                    &lt;/div>
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="actividad"
+                        label="Actividades:"
+                        value={this.state.actividad}
+                        opciones={this.state.actividadJson}
+                        onChange={this.change}
+                    />
+                    &lt;div className="contenedor">
+                        &lt;Tabla
+                            datos={this.state.lista}
+                            columnas={this.columnas}
+                        />
+                    &lt;/div>
+                    &lt;div className="contenedor caja formulario">
+                        &lt;label className="tag">Info contacto&lt;/label>
+                        &lt;Input
+                            id="numero"
+                            label="Número telefónico cliente:"
+                            value={this.state.numero}
+                            onChange={this.change}
+                        />
+                        &lt;Input
+                            id="correo"
+                            label="Correo cliente:"
+                            value={this.state.correo}
+                            onChange={this.change}
+                        />
+                        &lt;Input
+                            id="observacion"
+                            label="Observaciones:"
+                            value={this.state.observacion}
+                            onChange={this.change}
+                        />
+                    &lt;/div>
+                &lt;/div>
+
+                {/* &lt;Captcha /> */}
+            &lt;/React.Fragment>
+        )
+    }
+}
+
+SolicitudAgendamiento.propTypes = {}
+
+const mapStateToProps =
+    //inicialización de variables
+
+    (state) => {
+        return {}
+    }
+
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators({}, dispatch)
+}
+
+const VistaRedux = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(SolicitudAgendamiento)
+
+export { VistaRedux as RSolicitudAgendamiento }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

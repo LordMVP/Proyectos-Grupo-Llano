@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/actualizarPrecio/GestionActualizarPrecio/GestionActualizarPrecio.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/actualizarPrecio/GestionActualizarPrecio/GestionActualizarPrecio.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { formatearArray, parsearJSONUniPropiedad, obtenerDatosRespuesta, limpiarHistorico } from '../../../../global/util_nominaciones';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { RConsultaContratos } from '../../../contratos/ConsultaContratos';
+import './GestionActualizarPrecio.scss';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import { toast } from 'react-toastify';
+
+const listaOpciones = [
+  { texto: '%IPC', id: 'IPC' },
+  { texto: 'Aporte GNV', id: 'GNV' },
+];
+
+
+const GNC = 'GNC';
+const CONEXION = 'CNX';
+const GNVS = 'GNVS';
+const ESTADO_ACTIVO = 'A';
+
+class GestionActualizarPrecio extends Component {
+  state = {
+    // Datos de la entidad
+    listaContratosActualizados: [],
+    listaHistorico: [],
+    listaTipo: [],
+    listaEstados: [],
+    tipo: '',
+    aporteGNV: '',
+    porcentajeIPC: '',
+    tipoContrato: '',
+    nombreTipoContrato: '',
+    //Estado de la aplicación
+    mostrarModalConsulta: false,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.listaContratos) {
+      this.cargarDatos(state.listaContratos);
+    }
+
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_ESTADOS, { criterio: '', idClase: CLASES_UNIDADES.ESTADOS_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { idClase: CLASES_UNIDADES.TIPO_CONTRATO, criterio: '' })
+    ];
+
+    axios.all(peticiones)
+      .then(
+        axios.spread((estados, tiposContrato) => {
+          const datosAplicacion = {
+            listaEstados: [],
+            listaTipo: []
+          };
+          datosAplicacion.listaTipo = formatearArray(parsearJSONUniPropiedad(tiposContrato.data.datos));
+          datosAplicacion.listaEstados = obtenerDatosRespuesta(estados);
+          this.setState({ ...datosAplicacion });
+        })
+      );
+  }
+
+  /**
+   * Método encargado de limpiar los campos del formulario al momento de ejecutar el botón limpiar
+0   */
+  limpiarFormularioTotal = () => {
+    this.setState({
+      // Datos de la entidad
+      listaHistorico: [],
+      listaContratosActualizados: [],
+      aporteGNV: '',
+      porcentajeIPC: '',
+      tipoContrato: '',
+      tipo: '',
+    });
+    limpiarHistorico(this.props);
+  };
+
+  /**
+   * Método encargado de limpiar el formulario editar al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormularioTotal();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Consultar Contrato', callback: this.consultarEntidad },
+      { texto: 'Actualizar', callback: this.actualizarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormularioTotal },
+    ];
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton de consulta
+   * @returns {bool}
+   */
+  consultarEntidad = () => {
+    if (this.state.tipo == '' || this.state.tipo == '-1') {
+      toast.error('Debe seleccionar el tipo de actualización');
+      return;
+    }
+    const estadoActivo = this.obtenerIdEstado(ESTADO_ACTIVO);
+    if (estadoActivo == -1) {
+      return;
+    }
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_ACTUALIZAR_PRECIO.url,
+        seleccionMultiple: true,
+        estadosContrato: [estadoActivo],
+        inhabilitarEstado: true,
+        tiposContrato: this.obtenerTiposContrato(),
+        tiposContratoDisabled: true,
+      }
+    });
+  };
+
+  /**
+   * Método encargado de obtener el identificador del estado del contrato dado un codigo
+   * @param {String} codigoEstado Codigo de estado
+   * @returns {number}
+   */
+  obtenerIdEstado = (codigoEstado) => {
+    const { listaEstados } = this.state;
+    if (!Util.validarArreglo(listaEstados)) {
+      this.props.mostrarAlerta('Error de configuración', 'No hay estados configurados.');
+      return -1;
+    }
+    const estado = listaEstados.find(e => (JSON.parse(e.uniPropiedad).estado == codigoEstado));
+    if (estado == null) {
+      return -1;
+    }
+    return estado.uniIderegistro;
+  };
+
+  /**
+   * Obtener tipos contrato.
+   * @return {array}
+   */
+  obtenerTiposContrato = () => {
+    const { listaTipo } = this.state;
+    const gnc = listaTipo.find(t => t.listaPropiedades.tipocontrato == GNC);
+    const gnvs = listaTipo.find(t => t.listaPropiedades.tipocontrato == GNVS);
+    const conexion = listaTipo.find(t => t.listaPropiedades.tipocontrato == CONEXION);
+    if (this.state.tipo == 'IPC') {
+      return [gnc.listaPropiedades.tipocontrato, conexion.listaPropiedades.tipocontrato];
+    } else if (this.state.tipo == 'GNV') {
+      return [gnvs.listaPropiedades.tipocontrato];
+    }
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { aporteGNV, porcentajeIPC, tipo, listaContratosActualizados } = this.state;
+    //Validaciones
+    if (tipo === '-1' || tipo === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el tipo de actualización que desea realizar' } };
+    }
+    if (tipo === 'IPC') {
+      if (porcentajeIPC &lt; 0) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El porcentaje ipc no puede ser menor a 0' } };
+      }
+
+      if (porcentajeIPC > 100) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El porcentaje ipc no puede ser mayor a 100' } };
+      }
+
+      if (isNaN(porcentajeIPC)) {
+        return { respuesta: false, mensaje: { titulo: 'Datos Erroneos', mensaje: 'El porcentaje ipc debe ser un número' } };
+      }
+
+      if (porcentajeIPC.trim() === '') {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el porcentaje IPC' } };
+      }
+    }
+
+    if (tipo === 'GNV') {
+      if (aporteGNV.trim() === '') {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el aporte GNV' } };
+      }
+
+      if (aporteGNV &lt; 0) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El aporte GNV no puede ser menor a 0' } };
+      }
+
+      if (isNaN(aporteGNV)) {
+        return { respuesta: false, mensaje: { titulo: 'Datos Erroneos', mensaje: 'El aporte GNV ipc debe ser un número' } };
+      }
+    }
+
+    if (!Util.validarArreglo(listaContratosActualizados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar al menos un contrato' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar la tabla con el historico del contrato seleccionado
+   * @param {number} idContrato Identificador del contrato seleccionado
+   */
+  verHistorico = (idContrato) => {
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_ACTUALIZAR_PRECIO.CONSULTAR_HISTORICO, { idContrato: idContrato })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaHistorico: formatearArray(this.ordernarObjecto(respuesta.data.datos)) });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de organizar el arreglo por fecha de modificación
+   * @returns {Object}
+   */
+  ordernarObjecto = (datosHistorico) => {
+    datosHistorico.sort((a, b) => {
+      let dateA = new Date(a.fechaModificacion).getTime();
+      let dateB = new Date(b.fechaModificacion).getTime();
+      return dateA > dateB ? -1 : 1;
+    });
+    return datosHistorico;
+  };
+
+  /**
+   * Método encargado de eliminar el contrato de la lista de seleccionados.
+   * @param {number} posicion Posición del arreglo que se desea remover.
+   */
+  eliminarContrato = (posicion) => {
+    const lista = [...this.state.listaContratosActualizados];
+    lista.splice(posicion, 1);
+    this.setState({
+      listaContratosActualizados: lista,
+      listaHistorico: []
+    });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los contratos actualizados
+   * @returns {Object}
+   */
+  renderTablaContratos = () => {
+    return (
+      &lt;Fragment>
+        &lt;h2 className='color-black m-all-0'>Lista Contratos&lt;/h2>
+        &lt;table className='table table-striped'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Tercero&lt;/th>
+              &lt;th>No Contrato&lt;/th>
+              &lt;th>Valor GNV&lt;/th>
+              &lt;th>Porcentaje IPC&lt;/th>
+              &lt;th>Precio&lt;/th>
+              &lt;th>Opciones&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+          &lt;/tbody>
+          {this.state.listaContratosActualizados.map((dato, index) => {
+            return (
+              &lt;tr>
+                &lt;td>{dato.terIdeagente.terNomcompleto}&lt;/td>
+                &lt;td>{dato.cntNumero}&lt;/td>
+                &lt;td>{dato.cntValoraportegnv}&lt;/td>
+                &lt;td>{dato.cntIpc}&lt;/td>
+                &lt;td>{dato.cntPreciopesos}&lt;/td>
+                &lt;td>
+                  &lt;a href="javascript:;" onClick={() => { this.eliminarContrato(index) }} title='Eliminar'>Eliminar &lt;/a>
+                  &lt;a href="javascript:;" onClick={() => { this.verHistorico(dato.cntIderegistro) }} title='Ver Historico'>Ver Historico&lt;/a>
+                &lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/table>
+      &lt;/Fragment>
+    );
+  };
+
+  /**
+   * Método encargado de convertir traida en el histórico a Date
+   * @param {number} fechaModificacion Fecha traida en la consulta del histórico
+   * @returns {Date}
+   */
+  obtenerFecha = (fechaModificacion) => {
+    let fecha = new Date(fechaModificacion);
+    const anio = fecha.getFullYear();
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth();
+    return `${((dia &lt; 9) ? '0' : '')}${dia}/${(mes &lt; 9) ? '0' : ''}${(mes + 1)}/${anio}`;
+  };
+
+  /**
+   * Método encargado de obtener el valor actual de los historicos
+   * @param {number} posicion del historico.
+   * @returns {number}
+   */
+  obtenerValorActualHistoricoPrecio = (posicion) => {
+    const lista = [...this.state.listaHistorico];
+    return lista[posicion].precio;
+  };
+
+  /**
+   * Método encargado de obtener el valor actual de los historicos
+   * @param {number} posicion del historico.
+   * @returns {number}
+   */
+  obtenerValorActualHistorico = (posicion) => {
+    const lista = [...this.state.listaHistorico];
+    return lista[posicion].ipc;
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los contratos actualizados
+   * @returns {Object}
+   */
+  renderTablaActualizados = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th colSpan={9} className='text-center'>Lista Histórico&lt;/th>
+          &lt;/tr>
+          &lt;tr>
+            &lt;th>Tercero&lt;/th>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Valor GNV Antiguo&lt;/th>
+            &lt;th>Valor GNV Actual&lt;/th>
+            &lt;th>Valor IPC Antiguo&lt;/th>
+            &lt;th>Valor IPC Actual&lt;/th>
+            &lt;th>Precio Antiguo&lt;/th>
+            &lt;th>Precio Actual&lt;/th>
+            &lt;th>Fecha Modificación&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaHistorico.map((dato, index) => {
+            return (
+              &lt;tr>
+                &lt;td>{dato.tipoContrato.cntIdecontrato.terIdeagente.terNomcompleto}&lt;/td>
+                &lt;td>{dato.tipoContrato.cntIdecontrato.cntNumero}&lt;/td>
+                &lt;td>{dato.aporteGNV}&lt;/td>
+                &lt;td>{dato.tipoContrato.cntIdecontrato.cntValoraportegnv}&lt;/td>
+                &lt;td>{dato.ipc}&lt;/td>
+                &lt;td>{(index == 0) ? dato.tipoContrato.cntIdecontrato.cntIpc : this.obtenerValorActualHistorico(index - 1)}&lt;/td>
+                &lt;td>{dato.precio}&lt;/td>
+                &lt;td>{(index == 0) ? dato.tipoContrato.cntIdecontrato.cntPreciopesos : this.obtenerValorActualHistoricoPrecio(index - 1)}&lt;/td>
+                &lt;td>{this.obtenerFecha(dato.fechaModificacion)}&lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de generar un objeto con los datos para actualizar los contratos
+   * @returns {Object}
+   */
+  obtenerObjeto = () => {
+    const { aporteGNV, porcentajeIPC, listaContratosActualizados, nombreTipoContrato } = this.state;
+    let objetoDevolver = {
+      ipc: porcentajeIPC,
+      aporteGNV: aporteGNV,
+      contratoTipo: nombreTipoContrato,
+    }
+    const lista = listaContratosActualizados.map((dato) => {
+      return {
+        cntIderegistro: dato.cntIderegistro,
+        cntPreciopesos: dato.cntPreciopesos,
+        cntVersion: dato.cntVersion,
+        uniIdeestado: { uniIderegistro: dato.uniIdeestado.uniIderegistro }
+      }
+    });
+    objetoDevolver.listaContrato = lista;
+    return objetoDevolver;
+  };
+
+  /**
+   * Método encargado de actualizar los contratos
+   * @returns {bool}
+   */
+  actualizarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerObjeto();
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_ACTUALIZAR_PRECIO.EDITAR_CONTRATO, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaContratosActualizados: respuesta.data.datos,
+            listaHistorico: []
+          });
+          this.props.mostrarAlerta('Correcto', 'Se han actualizado los valores del contrato correctamente.');
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el valor de la lista de contratos dependiendo del tipo (IPC/GNV)
+   * @returns {Array}
+   */
+  controlListaContratos = (tipo = '') => {
+    const { listaContratosActualizados } = this.state;
+    if (listaContratosActualizados.length == 0) {
+      return [];
+    }
+    if (tipo == 'IPC') {
+      if (listaContratosActualizados[0].cntValoraportegnv) {
+        return []
+      }
+      return listaContratosActualizados;
+    }
+    if (listaContratosActualizados[0].cntIpc) {
+      return []
+    }
+    return listaContratosActualizados;
+  }
+
+  /**
+   * Método encargado de controlar el cambio del valor de la lectura ingresada
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambioTipo = (evento) => {
+    let { aporteGNV, porcentajeIPC, listaTipo, tipoContrato, nombreTipoContrato, listaContratosActualizados, listaHistorico } = this.state;
+    const { value } = evento.target;
+    if (Array.isArray(listaTipo)) {
+      const contratoGNC = listaTipo.find(p => p.uniPropiedad &amp;&amp; p.uniPropiedad.tipocontrato == "GNC");
+      const contratoGNV = listaTipo.find(p => p.uniPropiedad &amp;&amp; p.uniPropiedad.tipocontrato == "GNV");
+      if (value === 'IPC') {
+        aporteGNV = '';
+        tipoContrato = contratoGNC.uniIderegistro;
+        nombreTipoContrato = contratoGNC.uniNombre1;
+        listaContratosActualizados = this.controlListaContratos('IPC');
+        listaHistorico = [];
+      }
+      if (value === 'GNV') {
+        porcentajeIPC = '';
+        tipoContrato = contratoGNV.uniIderegistro;
+        nombreTipoContrato = contratoGNV.uniNombre1;
+        listaContratosActualizados = this.controlListaContratos('GNV');
+        listaHistorico = [];
+      }
+    }
+    this.setState({
+      tipo: value,
+      aporteGNV: aporteGNV,
+      porcentajeIPC: porcentajeIPC,
+      tipoContrato: tipoContrato,
+      nombreTipoContrato: nombreTipoContrato,
+      listaContratosActualizados: listaContratosActualizados,
+      listaHistorico: listaHistorico,
+    });
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del botón de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de llenar llenar una lista con los contratos seleccionados
+   * @param {Object} contratosSeleccionados Datos de los contratos seleccionados
+   */
+  cargarDatos = (contratosSeleccionados) => {
+    this.setState({
+      listaContratosActualizados: [...contratosSeleccionados],
+      listaHistorico: [],
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={listaOpciones}
+            propTexto='texto'
+            propValor='id'
+            label='Tipo:'
+            name='tipo'
+            value={this.state.tipo}
+            onChange={this.controlarCambioTipo}
+          />
+          {this.state.tipo === 'IPC' &amp;&amp;
+            &lt;TextoNumerico
+              aceptaDecimales={true}
+              aceptaNegativos={false}
+              label='IPC%:'
+              value={this.state.porcentajeIPC}
+              onChange={this.controlarCambio}
+              name='porcentajeIPC'
+            />
+          }
+          {this.state.tipo === 'GNV' &amp;&amp;
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Aporte GNV:'
+              value={this.state.aporteGNV}
+              onChange={this.controlarCambio}
+              name='aporteGNV'
+            />
+          }
+          &lt;div className='col-12 mt28'>
+            {
+              this.renderTablaContratos()
+            }
+          &lt;/div>
+          &lt;div className='col-12'>
+            {this.state.listaHistorico.length > 0 &amp;&amp;
+              this.renderTablaActualizados()
+            }
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionActualizarPrecio.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionActualizarPrecio);
+
+export { VistaRedux as RGestionActualizarPrecio };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

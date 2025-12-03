@@ -1,0 +1,35 @@
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr{
+     border-top-right-radius: 0px !important;
+}
+
+.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
+    border-top-left-radius: 0px !important;
+}
+
+#divFiltro{
+    display:none;
+}
+#divTbl #tbody div {
+    margin-top: -7px;
+}
+
+#divTbl #tbody div:nth-child(2n){
+    background-color: #D9F3FF;
+}
+#divTbl #tbody div:nth-last-child(1){
+    border-bottom: solid 1px #408BC4;
+}
+
+#divTbl #tbody div table{
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+#divTbl tbody tr.tr-imprimir-salto{
+	max-width: 0px; 
+}
+
+#divTbl tbody tr td{
+	text-align: right;
+	font-size: 9px; 
+}

@@ -1,0 +1,26 @@
+.registro-masivo-tramo {
+
+  &__ejemplo {
+    width: 100%;
+
+    div {
+      background-color: #DEDEDE;
+      color: #0e4c84;
+      border: dashed 1px #999;
+      text-align: center;
+      font-size: 12px;
+      border-radius: 5px;
+      padding: 10px 7px;
+      font-weight: bold;
+      width: 90%;
+      
+  
+      pre {
+        margin-top: 10px;
+        font-weight: normal;
+      }
+    }
+
+  }
+
+}

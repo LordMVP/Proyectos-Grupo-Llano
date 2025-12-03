@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_driver: pdo_pgsql
+    database_host: 10.43.51.68
+    database_port: 5432
+    database_name: Tecnico
+    database_user: postgres
+    database_password: Admpos1650.
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    locale: es
+    secret: 123456789

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calculoVolumen/CalculoVolumen.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calculoVolumen/CalculoVolumen.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { get as getProp } from 'object-path';
+import { Input, Botonera, Combo, TextoNumerico, Util } from 'appfuture-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+const VALOR_CONVERSION_DIAMETRO = 0.0254;
+
+class CalculoVolumen extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    diametro: '',
+    listaAGA8: [{ valor: 1, texto: 1 }, { valor: 2, texto: 2 }, { valor: 3, texto: 3 }, { valor: 4, texto: 4 }],
+    listaTramos: [],
+    unidadMedidaTemperatura: 1,
+    unidadMedidaDiametro: 1,
+    unidadMedidaLongitud: 1,
+    unidadMedidaPresion: 1,
+    listaUnidadesMedidaTemperatura: [{ valor: 1, texto: 'ºC' }],
+    listaUnidadesMedidaDiametro: [{ valor: 1, texto: 'Pulgada' }],
+    listaUnidadesMedidaLongitud: [{ valor: 1, texto: 'Metros' }],
+    listaUnidadesMedidaPresion: [{ valor: 1, texto: 'PSI' }],
+    listaTramosSeleccionados: [],
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.consultarTramos();
+  }
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  /**
+   * Método encargado de limpiar los datos del formulario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+    });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Método encargado de realizar la consulta de los tramos
+   * @returns {Boolean}
+   */
+  consultarTramos = () => {
+    axios.post(RUTAS_API.PARAMETRIZACION.CALCULO_VOLUMEN.TRAMOS_CONSULTAR, { criterio: '' })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaTramos: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar los botones del componente Botonera
+   * @returns {Array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Calcular', callback: this.calcular },
+      // { texto: 'Buscar', callback: this.buscar },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método validar el formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    // Ejemplo Validacion
+    if (false) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un cargo de tipo AO&amp;M para poder continuar.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de realizar el la busqueda del historico
+   */
+  buscar = () => {
+    axios.post(RUTAS_API.PARAMETRIZACION.CALCULO_VOLUMEN.CONSULTAR_CALCULO, { criterio: '' })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaHistorico: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de realizar el calculo
+   * @returns {Boolean}
+   */
+  calcular = () => {
+    const { listaTramosSeleccionados, aga8, longitud, diametro, presion, temperatura } = this.state;
+    const listaTramos = listaTramosSeleccionados.map(tramo => {
+      return { trmIderegistro: tramo.trmIderegistro };
+    });
+    let conversionDiametro = diametro.split('/');
+    if (conversionDiametro.length == 1) {
+      conversionDiametro = conversionDiametro[0] * VALOR_CONVERSION_DIAMETRO;
+    } else if (conversionDiametro.length == 2) {
+      conversionDiametro = (conversionDiametro[0] / conversionDiametro[1]) * VALOR_CONVERSION_DIAMETRO;
+    } else {
+      this.props.mostrarAlerta('Error', 'El diamétro es inválido');
+      return;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.CALCULO_VOLUMEN.CALCULAR, {
+      seleccion: aga8,
+      listaTramos: listaTramos,
+      longitudM3: longitud,
+      diametro: conversionDiametro,
+      presion: presion,
+      temperaturaC: temperatura
+    })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ datosCalculo: respuesta.data.datos[0] });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    if (evento.target.name == 'diametro') {
+      var regular = new RegExp(/^[0-9./]{0,16}$/);
+      var v = regular.test(evento.target.value);
+      if (!v) {
+        this.setState({ diametro: this.state.diametro });
+        return;
+      }
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de agregar el tramo seleccionado
+   * @returns {Boolean}
+   */
+  agregarTramo = () => {
+    const { tramo, listaTramosSeleccionados } = this.state;
+    axios.post(RUTAS_API.PARAMETRIZACION.CALCULO_VOLUMEN.CONSULTAR_VALORES_TRAMO, {
+      idtramo: tramo
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        const dato = JSON.parse(respuesta.data.datos);
+        if (dato.listapuntosConsumo == null) {
+          toast.info('No se encontrarón puntos de consumo para el tramo seleccionado');
+          return;
+        }
+        listaTramosSeleccionados.push(dato);
+        this.setState({ listaTramosSeleccionados: listaTramosSeleccionados });
+      }
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el selector de tramos
+   * @returns {JSX}
+   */
+  renderSelectTramos = () => {
+    return (
+      &lt;div className='form-group col-4'>
+        &lt;label>Tramo:&lt;/label>
+        &lt;div className='input-group'>
+          &lt;select
+            className='form-control'
+            name='tramo'
+            value={this.state.tramo}
+            onChange={this.controlarCambio}
+          >
+            &lt;option key='opcionNula' value=''>Seleccione una opción&lt;/option>
+            {
+              (Util.validarArreglo(this.state.listaTramos)) &amp;&amp; (this.state.listaTramos.map(tramo => {
+                return (&lt;option key={tramo.trmIderegistro} value={tramo.trmIderegistro}>{tramo.trmNombre}&lt;/option>);
+              }))
+            }
+          &lt;/select>
+          &lt;div className='input-group-btn'>
+            &lt;button className='btn btn-primary' onClick={this.agregarTramo}>&lt;i className='fa fa-fw fa-plus'>&lt;/i> Agregar&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla de tramos
+   * @returns {JSX}
+   */
+  renderListaTramosSeleccionados = () => {
+    if (!Util.validarArreglo(this.state.listaTramosSeleccionados)) {
+      return null;
+    }
+    return (
+      &lt;div className='col-12 mt-5'>
+        &lt;h1>Tramos&lt;/h1>
+        &lt;table className='table table-condensed table-striped table-bordered'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Tramo&lt;/th>
+              &lt;th>Pto Consumo&lt;/th>
+              &lt;th>Punto Salida&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {this.state.listaTramosSeleccionados.map(tramo => {
+              let numRows = 1;
+              if (Util.validarArreglo(tramo.listapuntosConsumo)) {
+                tramo.listapuntosConsumo.forEach(puntoConsumo => {
+                  numRows++;
+                  if (Util.validarArreglo(puntoConsumo.listapuntosSalida)) {
+                    puntoConsumo.listapuntosSalida.forEach(puntoSalida => {
+                      numRows++;
+                    });
+                  }
+                });
+              }
+              return (
+                &lt;Fragment>
+                  &lt;tr key={tramo.trmIderegistro}>
+                    &lt;td rowSpan={numRows}>{tramo.trmNombre}&lt;/td>
+                  &lt;/tr>
+                  {
+                    tramo.listapuntosConsumo.map(puntoConsumo => {
+                      const numRowsPuntosConsumo = puntoConsumo.listapuntosSalida.length + 1;
+                      return (
+                        &lt;Fragment>
+                          &lt;tr key={puntoConsumo.ptsaIderegistro}>&lt;td rowSpan={numRowsPuntosConsumo}>{puntoConsumo.ptcoNombre}&lt;/td>&lt;/tr>
+                          {
+                            puntoConsumo.listapuntosSalida.map(puntoSalida => {
+                              return (
+                                &lt;tr key={puntoSalida.ptsaIderegistro}>&lt;td>{puntoSalida.ptsaNombre}&lt;/td>&lt;/tr>
+                              )
+                            })
+                          }
+                        &lt;/Fragment>
+                      );
+                    })
+                  }
+                &lt;/Fragment>
+              )
+            })}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de obtener el nombre del tramo
+   * @param {Number} idTramo Identificador del tramo
+   * @returns {String}
+   */
+  obtenerNombreTramo = (idTramo) => {
+    const tramo = this.state.listaTramos.find(tramo => tramo.trmIderegistro == idTramo);
+    return getProp(tramo, 'trmNombre', 'Indefinido');
+  };
+
+  /**
+   * Método encargado de mostrar la tabla historico
+   * @returns {JSX}
+   */
+  renderListaHistorico = () => {
+    if (!Util.validarArreglo(this.state.listaHistorico)) {
+      return null;
+    }
+    return (
+      &lt;div className='col-12 mt-5'>
+        &lt;h1>Histórico&lt;/h1>
+        &lt;table className='table table-hover table-condensed table-striped table-bordered'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Tramo&lt;/th>
+              &lt;th>Temperatura&lt;/th>
+              &lt;th>Diamétro&lt;/th>
+              &lt;th>Longitud&lt;/th>
+              &lt;th>Presión&lt;/th>
+              &lt;th>Valor Corregido&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {
+              this.state.listaHistorico.map(historico => {
+                return (
+                  &lt;tr key={historico.vtcIderegistro}>
+                    &lt;td>{this.obtenerNombreTramo(historico.trmIdetramo.trmIderegistro)}&lt;/td>
+                    &lt;td>{historico.vtcTemperaturacelsius} ºC&lt;/td>
+                    &lt;td>{historico.vtcDiametropulgada} Pulgada(s)&lt;/td>
+                    &lt;td>{historico.vtcLongitudmetros} Metro(s)&lt;/td>
+                    &lt;td>{historico.vtcPresionpsi} PSI&lt;/td>
+                    &lt;td>{JSON.parse(historico.vtcCalculo).vol_corregido}&lt;/td>
+                  &lt;/tr>
+                )
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaAGA8}
+            propTexto='texto'
+            propValor='valor'
+            label='Selección AGA8:'
+            name='aga8'
+            value={this.state.aga8}
+            onChange={this.controlarCambio}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Temperatura:'
+            cols={4}
+            value={this.state.temperatura}
+            onChange={this.controlarCambio}
+            name='temperatura'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadesMedidaTemperatura}
+            propTexto='texto'
+            propValor='valor'
+            label='Unidad medida temperatura:'
+            name='unidadMedidaTemperatura'
+            value={this.state.unidadMedidaTemperatura}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Diamétro:'
+            value={this.state.diametro}
+            onChange={this.controlarCambio}
+            name='diametro'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadesMedidaDiametro}
+            propTexto='texto'
+            propValor='valor'
+            label='Unidad Medida Diamétro:'
+            name='unidadMedidaDiametro'
+            value={this.state.unidadMedidaDiametro}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Logitud:'
+            cols={4}
+            value={this.state.longitud}
+            onChange={this.controlarCambio}
+            name='longitud'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadesMedidaLongitud}
+            propTexto='texto'
+            propValor='valor'
+            label='Unidad Medida Longitud:'
+            name='unidadMedidaLongitud'
+            value={this.state.unidadMedidaLongitud}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Presión:'
+            cols={4}
+            value={this.state.presion}
+            onChange={this.controlarCambio}
+            name='presion'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadesMedidaPresion}
+            propTexto='texto'
+            propValor='valor'
+            label='Unidad Medida Presión:'
+            name='unidadMedidaPresion'
+            value={this.state.unidadMedidaPresion}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          {this.renderSelectTramos()}
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Valor corregido:'
+            cols={4}
+            value={getProp(this.state, 'datosCalculo.vol_corregido', '')}
+            onChange={this.controlarCambio}
+            name='valorCorregido'
+            extra={{ disabled: true }}
+          />
+          {this.renderListaTramosSeleccionados()}
+          {this.renderListaHistorico()}
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  }
+}
+
+CalculoVolumen.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(CalculoVolumen);
+
+export { VistaRedux as RCalculoVolumen };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

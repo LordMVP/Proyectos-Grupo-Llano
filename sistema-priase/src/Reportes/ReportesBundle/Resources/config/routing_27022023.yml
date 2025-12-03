@@ -1,0 +1,274 @@
+#arqueo_vista:
+#    pattern:  /arqueo
+#    defaults: { _controller: ReportesBundle:RecaudosReportes:arqueoFront }
+#
+#arqueo_reporte:
+#    pattern:  /arqueoReporte
+#    defaults: { _controller: ReportesBundle:RecaudosReportes:arqueoReporte }
+#    methods:  [POST]
+
+pruebas:
+    resource: "@ReportesBundle/Controller/DefaultController.php"
+    type:     annotation
+
+admin_reportes:
+    resource: "@ReportesBundle/Controller/AdminController.php"
+    type:     annotation
+    
+#admin_index:
+#    pattern: /admin
+#    defaults: { _controller: ReportesBundle:Admin:index }
+#
+#admin_cargar:
+#    pattern: /cargarReporte
+#    defaults: { _controller: ReportesBundle:Admin:cargarReporte }
+
+cartera:
+    resource: "@ReportesBundle/Controller/CarteraController.php"
+    prefix:   /cartera
+    type:     annotation
+    
+facturacion:
+    resource: "@ReportesBundle/Controller/FacturacionController.php"
+    prefix:   /facturacion
+    type:     annotation   
+
+suspensionesReconexiones:
+    resource: "@ReportesBundle/Controller/SuspensionesReconexionesController.php"
+    prefix:   /facturacion
+    type:     annotation 
+    
+entrega_factura:
+    resource: "@ReportesBundle/Controller/EntregaFacturaController.php"
+    prefix:   /facturacion
+    type:     annotation
+
+suspensionesNovedades:
+    resource: "@ReportesBundle/Controller/SuspensionesNovedadesController.php"
+    prefix:   /facturacion
+    type:     annotation 
+
+ventas:
+    resource: "@ReportesBundle/Controller/VentasController.php"
+    prefix:   /ventas
+    type:     annotation
+    
+util:
+    resource: "@ReportesBundle/Controller/UtilController.php"
+    prefix:   /util
+    type:     annotation
+    
+contratosTable:
+    resource: "@ReportesBundle/Controller/ContratosTableController.php"
+    prefix:   /contratosTable
+    type:     annotation
+    
+devolucionesTable:
+    resource: "@ReportesBundle/Controller/DevolucionesTableController.php"
+    prefix:   /table/devoluciones
+    type:     annotation 
+
+recaudos:
+    resource: "@ReportesBundle/Controller/ConsignacionRecaudoController.php"
+    prefix:   /recaudos
+    type:     annotation
+    
+financiaciones:
+    resource: "@ReportesBundle/Controller/FinanciacionController.php"
+    prefix:   /financiaciones
+    type:     annotation    
+    
+recuperacionCartera:
+    resource: "@ReportesBundle/Controller/RecuperacionCarteraController.php"
+    prefix:   /cartera
+    type:     annotation   
+    
+contribucion:
+    resource: "@ReportesBundle/Controller/SubsidioContribucionController.php"
+    prefix:   /contribucion
+    type:     annotation  
+    
+facturacionReportes:
+    resource: "@ReportesBundle/Controller/FacturacionReportesController.php"
+    prefix:   /facturacionReportes
+    type:     annotation      
+
+financiacionesTable:
+    resource: "@ReportesBundle/Controller/FinanciacionesTableController.php"
+    prefix:   /financiacionesTable
+    type:     annotation
+    
+edadesCartera:
+    resource: "@ReportesBundle/Controller/EdadesCarteraController.php"
+    prefix:   /cartera
+    type:     annotation
+    
+conceptosTable:
+    resource: "@ReportesBundle/Controller/ConceptosTableController.php"
+    prefix:   /conceptosTable
+    type:     annotation
+
+facturacionEmitida:
+    resource: "@ReportesBundle/Controller/FacturacionEmitidaController.php"
+    prefix:   /facturacion
+    type:     annotation
+
+cobroRevisionQuinquenal:
+    resource: "@ReportesBundle/Controller/CobroRevisionQuinquenalController.php"
+    prefix:   /facturacion
+    type:     annotation
+   
+suscripcion:
+    resource: "@ReportesBundle/Controller/SuscripcionController.php"
+    prefix:   /facturacion
+    type:     annotation
+
+FinanciacionesFacturadasCiclo:
+    resource: "@ReportesBundle/Controller/FinanciacionesFacturadasCicloController.php"
+    prefix:   /cartera
+    type:     annotation
+
+ProvisionCartera:
+    resource: "@ReportesBundle/Controller/ProvisionCarteraController.php"
+    prefix:   /cartera
+    type:     annotation
+    
+PagosFacturacion:
+    resource: "@ReportesBundle/Controller/PagosFacturacionController.php"
+    prefix:   /facturacion
+    type:     annotation
+RangosConsumo:
+    resource: "@ReportesBundle/Controller/RangosConsumoController.php"
+    prefix:   /facturacion
+    type:     annotation
+RecaudosAceSeguros:
+    resource: "@ReportesBundle/Controller/RecaudoAceController.php"
+    prefix:   /facturacion
+    type:     annotation
+ModificacionUsuario:
+    resource: "@ReportesBundle/Controller/ModificacionUsuarioController.php"
+    prefix:   /facturacion
+    type:     annotation
+    
+RecaudosFinanciacion:
+    resource: "@ReportesBundle/Controller/RecaudoFinanciacionController.php"
+    prefix:   /cartera
+    type:     annotation
+
+AnticiposPendientesCruzar:
+    resource: "@ReportesBundle/Controller/AnticiposPendientesCurzarController.php"
+    prefix:   /cartera
+    type:     annotation
+    
+constructoraTable:
+    resource: "@ReportesBundle/Controller/ConstructoraTableController.php"
+    prefix:   /constructoraTable
+    type:     annotation    
+
+SuscripcionesRpCc:
+    resource: "@ReportesBundle/Controller/SuscripcionesRpCcController.php"
+    prefix:   /cartera
+    type:     annotation
+
+ValidacionRecaudosCaja:
+    resource: "@ReportesBundle/Controller/ValidacionRecaudosCajaController.php"
+    prefix:   /cartera
+    type:     annotation
+
+Intereses:
+    resource: "@ReportesBundle/Controller/InteresesController.php"
+    prefix:   /cartera
+    type:     annotation
+
+SaldoIndustriales:
+    resource: "@ReportesBundle/Controller/SaldoIndustrialesController.php"
+    prefix:   /cartera
+    type:     annotation
+
+PagosCredito:
+    resource: "@ReportesBundle/Controller/PagosCreditoController.php"
+    prefix:   /potenza
+    type:     annotation
+
+CreditosDesembolsados:
+    resource: "@ReportesBundle/Controller/CreditosDesembolsadosController.php"
+    prefix:   /potenza
+    type:     annotation
+    
+InformeCreditos:
+    resource: "@ReportesBundle/Controller/InformeCreditosController.php"
+    prefix:   /potenza
+    type:     annotation
+
+FacturacionCreditos:
+    resource: "@ReportesBundle/Controller/FacturacionCreditosController.php"
+    prefix:   /potenza
+    type:     annotation
+    
+ExtractoCreditos:
+    resource: "@ReportesBundle/Controller/ExtractoCreditosController.php"
+    prefix:   /potenza
+    type:     annotation
+    
+MedidoresInternos:
+    resource: "@ReportesBundle/Controller/MedidoresInternosController.php"
+    prefix:   /cartera
+    type:     annotation
+
+FacturadoVsRecaudado:
+    resource: "@ReportesBundle/Controller/FacturadoVsRecaudadoController.php"
+    prefix:   /cartera
+    type:     annotation
+    
+SuspensionesReconexionesFecha:
+    resource: "@ReportesBundle/Controller/SuspensionesReconexionesFechaController.php"
+    prefix:   /ssp_rco
+    type:     annotation
+    
+SuspensionesReconexionesConsolidado:
+    resource: "@ReportesBundle/Controller/SuspensionesReconexionesConsolidadoController.php"
+    prefix:   /ssp_rco
+    type:     annotation
+CartasGestionCartera:
+    resource: "@ReportesBundle/Controller/CartasGestionCarteraController.php"
+    prefix:   /cartera
+    type:     annotation
+Veredas:
+    resource: "@ReportesBundle/Controller/VeredasController.php"
+    prefix:   /facturacion
+    type:     annotation
+CartasUti:
+    resource: "@ReportesBundle/Controller/CartasUtiController.php"
+    prefix:   /facturacion
+    type:     annotation    
+
+NotasReportes:
+    resource: "@ReportesBundle/Controller/NotasReporteController.php"
+    prefix:   /facturacion
+    type:     annotation  
+   
+tarifas:
+    resource: "@ReportesBundle/Controller/TarifasReportesController.php"
+    prefix:   /Tarifas
+    type:     annotation
+
+tarifasValidar:
+    resource: "@ReportesBundle/Controller/TarifasController.php"
+    prefix:   /facturacion
+    type:     annotation   
+    
+parametrizacionReportes:
+    resource: "@ReportesBundle/Controller/ParametrizacionReportesController.php"
+    prefix:   /admin
+    type:     annotation  
+     
+parametrizacionReportesReactPriase:
+    resource: "@ReportesBundle/Controller/ReportesReactPriaseController.php"
+    prefix:   /reportespriase
+    type:     annotation  
+    
+ReportesReactPriase:
+    resource: "@ReportesBundle/Controller/ReportesReactPriaseController.php"
+    prefix:   /reportesreactpriase
+    type:     annotation           
+    

@@ -1,0 +1,240 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <!-- Latest compiled and minified CSS -->
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/recaudos/consignaciones.css')}}" media="screen" type="text/css" rel="stylesheet" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Flujo de aprobación - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <button id="btnBuscar" class="btn"> buscar</button>
+            <button id="btnAprobar" data-id="A" class="btn"> aprobar</button>
+            <button id="btnEliminar" data-id="E" class="btn"> eliminar</button>
+            <button id="btnCancelar" class="btn"> cancelar</button>
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <div class="divRecaudos">
+            <fieldset>
+                <legend>Recaudos</legend>
+                <div class="campoCorto">
+                    <label for="txtMedioPago">Medio de pago:</label>
+                    <input type="text" id="txtMedioPago" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtSucursal">Sucursal:</label>
+                    <input type="text" id="txtSucursal" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtDocumento">Documento:</label>
+                    <input type="text" id="txtDocumento" disabled="disabled"/>
+                </div>
+                <div class="campoCorto">
+                    <label for="txtFecha">Fecha:</label>
+                    <input type="text" id="txtFecha" disabled="disabled" />
+                </div>
+                <p id="pMensaje" class="pMensaje"></p>
+                <div class="divCabecera" id="divCabecera">
+                    <div class="divIzquierda">
+                        <div id="divFechasRecaudo">
+                            <table id="tblFechaRecaudo" class="tabla"></table>
+                        </div>
+                    </div>
+                    <div class="divDerecha" >
+                        <div id="divRecaudoEmpresa">
+                            <table id="tblRecaudoEmpresa" class="tabla"></table>
+                            <div id="divValor" style="text-align:right;padding-right:20px;">
+                                <label for="txtTotalRecaudoEmpresa">Total: </label>
+                                <input type="text" id="txtTotalRecaudoEmpresa" class="campo" disabled="disabled"/>
+                                <div>
+                                    <button id="btnVerRecaudoEmpresa" class="btnSimple">Ver recaudo</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="divConsignacion" style="display:none;">
+            <fieldset>
+                <legend>Consignación</legend>
+                <div id="divConsignaciones" >
+
+                    <div id="controlesFormasPago">
+                        <div id="divEfectivo" data-forma="Efectivo" class="contenedorFormaPago" style="display:none">
+                            <div class="cabeceraForma">
+                                <div class="title" id="titleEfectivo">
+                                    <h3>Forma pago <strong>Efectivo</strong></h3>
+                                </div>
+                            </div>
+
+                            <div class="divCabecera" id="contenidoEfectivo">
+                                <div class="divIzquierda" style="width: 20%">
+                                    <div id="divValorFormaPagoEfectivo" style="vertical-align:top;margin-top:20px;">
+                                        <label>Valor: </label>
+                                        <input type="text" id="txtValorFormaPagoEfectivo" disabled="disabled"/>
+                                    </div>
+                                </div>
+
+                                <div class="divDerecha" style="width: 80%">
+                                    <table id="tblBancosEfectivo" class="tabla"></table>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div id="divCheque" data-forma="Cheque" class="contenedorFormaPago" style="display:none">
+                            <div class="cabeceraForma">
+                                <div class="title" id="titleCheque">
+                                    <h3>Forma pago <strong>Cheque</strong></h3>
+                                </div>
+                            </div>
+
+                            <div class="divCabecera" id="contenidoCheque">
+                                <div class="divIzquierda" style="width: 20%">
+                                    <div id="divValorFormaPagoCheque" style="vertical-align:top;margin-top:20px;">
+                                        <label>Valor: </label>
+                                        <input type="text" id="txtValorFormaPagoCheque" disabled="disabled"/>
+                                    </div>
+                                </div>
+
+                                <div class="divDerecha" style="width: 80%">
+                                    <table id="tblBancosCheque" class="tabla"></table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset id="divResumen" style="display:none;">
+                <legend>Resumen</legend>
+                <div id="divOpciones">
+                    <div class="campo">
+                        <label for="txtTotal">Total Recaudado: </label>
+                        <input type="text" id="txtTotalRecaudado" disabled="disabled" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtTotal">Total Consignado: </label>
+                        <input type="text" id="txtTotalConsignado" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtFaltante">Faltante: (CxCobrar)</label>
+                        <input type="text" id="txtFaltante" disabled="disabled" value="0"/>
+                    </div>
+
+                    <div class="campoCorto">
+                        <label for="txtSobrante">Sobrante: (Aprovechamiento)</label>
+                        <input type="text" id="txtSobrante" disabled="disabled" value="0"/>
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtGastos">Gasto: </label>
+                        <input type="text" id="txtGasto" disabled="disabled" value="0"/>
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtCuentaPorPagar">Cuenta por Pagar: </label>
+                        <input type="text" id="txtCuentaPorPagar" disabled="disabled" value="0"/>
+                    </div>
+                    <div class="campo">
+                        <label for="cmbResponsable">Responsable: </label>
+                        <select id="cmbResponsable">
+                            <option value="-1">Seleccione una opción</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="cmbTipoDocumento">Tipo documento: </label>
+                        <select id="cmbTipoDocumento">
+                            <option value="-1">Seleccione una opción</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="txtdescripcionseven">Descripción seven</label>
+                        <textarea id="txtdescripcionseven" maxlength="200" ></textarea>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset id="divSoporte" style="display:none;">
+                <legend>Soportes</legend>
+                <div id="divArchivos"></div>
+                <p id="pMensajeArchivo" class="pMensaje"></p>
+            </fieldset>
+        </div>
+    </div>
+
+
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtNroConsignacion">Número consignación:</label>
+            <input type="text" id="txtNroConsignacion" data-attr="nroConsignacion" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="cmbMedioPagoFiltro">Medio de pago:</label>
+            <select id="cmbMedioPagoFiltro">
+                <option value="-1">Seleccione una opción</option>
+                {% for medio in listamediospagos %}
+                    <option value="{{medio.id}}">{{medio.nombre}}</option>
+                {% endfor %}
+
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtFecha">Fecha inicial:</label>
+            <input type="text" id="txtFechaIFiltro" data-attr="fecha" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFecha">Fecha final:</label>
+            <input type="text" id="txtFechaFFiltro" data-attr="fecha" maxlength="15" />
+        </div>
+        <button id="btnBuscarFiltro" class="btnSimple">Buscar</button>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <div id="divListaSelección"></div>
+    </div>
+
+    <div id="divErrores">
+        <p id="pErrorGlobal"></p>
+    </div>
+    <!-- Division de Formas de pago -->
+    <div id="divFormasPago" style="display: none;">
+        <div id="controlesFormasPago" style="max-height: 350px;overflow-y: scroll;"></div>
+        <div style="margin-top: 15px;">
+            <label for="txtSumatoria" style="display:inline !important;">Total:</label>
+            <input type="text" id="txtSumatoria" disabled="disabled" />
+        </div>
+    </div>
+
+    <div id="divRecaudos" style="display: none;">
+    </div>
+
+
+    <!-- Confirmación de cancelación -->
+    <div id="divConfirmCancelar" style="display: none;">
+        <p>Se cancelará la consignación, ¿Desea continuar?</p>
+    </div>
+
+    <div id="divCambioConsignacion" style="display: none">
+        <p>La consignación se va a <span></span> ¿Desea continuar?</p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/flujoAprobacion/flujoAprobacion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/flujoAprobacion/flujoAprobacion.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/flujoAprobacion/flujoAprobacion.vistaa.js')}}"></script>
+{% endblock %}

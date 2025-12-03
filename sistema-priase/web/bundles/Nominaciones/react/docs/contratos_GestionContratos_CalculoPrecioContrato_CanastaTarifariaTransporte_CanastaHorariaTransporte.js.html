@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/CanastaHorariaTransporte.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/CanastaHorariaTransporte.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import { Input, Combo, Util } from 'appfuture-react';
+import PropTypes from 'prop-types';
+// Util
+import { get as getProp } from 'object-path';
+import { TransporteSinRutas } from './TransporteSinRutas';
+import { TransporteConRutas } from './TransporteConRutas';
+
+const rutasGNC = [
+  { texto: 'Sí', valor: 'S' },
+  { texto: 'No', valor: 'N' }
+];
+
+class CanastaHorariaTransporte extends Component {
+  state = {
+    tipoTransporte: '',
+    horaFinIntervalo: '',
+    usaRutasGNC: 'N',
+    nombreUnidadMedida: ''
+  };
+
+  /**
+   * Método encargado de mostrar el formulario sin rutas
+   * @returns {Component}
+   */
+  renderFormularioSinRutas = () => {
+    const { canastaHorariaTransporte, actualizarTipoCalculoContrato, listaUnidadesMedida, listaTramos, mostrarAlerta, rutasGNC } = this.props;
+    return (
+      &lt;TransporteSinRutas
+        canastaHorariaTransporte={canastaHorariaTransporte}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        listaUnidadesMedida={listaUnidadesMedida}
+        listaTramos={listaTramos}
+        mostrarAlerta={mostrarAlerta}
+        rutasGNC={rutasGNC}
+        actualizarCabeceraRedux={this.props.actualizarCabeceraRedux}
+        actualizarListaContratos={this.props.actualizarListaContratos}
+      />
+    )
+  };
+
+  /**
+   * Método encargado de mostrar el formulario con rutas
+   * @returns {Component}
+   */
+  renderFormularioConRutas = () => {
+    const { canastaHorariaTransporte, listaTramos, listaUnidadesMedida, actualizarTipoCalculoContrato, actualizarListaContratos, rutasGNC, mostrarAlerta } = this.props;
+    return (
+      &lt;TransporteConRutas
+        canastaHorariaTransporte={canastaHorariaTransporte}
+        listaTramos={listaTramos}
+        listaUnidadesMedida={listaUnidadesMedida}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        actualizarListaContratos={actualizarListaContratos}
+        rutasGNC={rutasGNC}
+        mostrarAlerta={mostrarAlerta}
+        actualizarCabeceraRedux={this.props.actualizarCabeceraRedux}
+      />
+    );
+  };
+
+  /**
+   * Método encargado validar que componente mostrar
+   * @returns {Component}
+   */
+  renderFormularioPorRuta = () => {
+    const usaRutasGNC = getProp(this.props, 'canastaHorariaTransporte.usaRutasGNC', 'N');
+    if (usaRutasGNC === 'N') {
+      return this.renderFormularioSinRutas();
+    }
+    return this.renderFormularioConRutas();
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    if (target.name === 'unidadMedida') {
+      cambio['nombreUnidadMedida'] = target.text;
+    }
+    this.actualizarEstadoRedux(cambio);
+  };
+
+  /**
+   * Método encargado de controlar el cambio del objeto redux
+   * @param {Object} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    this.props.actualizarTipoCalculoContrato({ canastaHorariaTransporte: { ...this.props.canastaHorariaTransporte, ...cambio } });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='canasta-horaria container'>
+        &lt;div className='mt-3 card box-shadow'>
+          &lt;div className='card-header'>Canasta Tarifa Horaria de Transporte&lt;/div>
+          &lt;div className='card-body'>
+            &lt;div>
+              &lt;h3 className='bold text-center'>Rangos Horarios para contrato Tipo transporte&lt;/h3>
+            &lt;/div>
+            {this.renderFormularioPorRuta()}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+}
+
+CanastaHorariaTransporte.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  listaUnidadesMedida: PropTypes.array,
+  listaTramos: PropTypes.array,
+  rutasGNC: PropTypes.array,
+  actualizarTipoCalculoContrato: PropTypes.func,
+  actualizarListaContratos: PropTypes.func,
+  canastaHorariaTransporte: PropTypes.object,
+  actualizarCabeceraRedux: PropTypes.func,
+};
+
+CanastaHorariaTransporte.defaultProps = {
+  canastaHorariaTransporte: {}
+};
+
+export { CanastaHorariaTransporte };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

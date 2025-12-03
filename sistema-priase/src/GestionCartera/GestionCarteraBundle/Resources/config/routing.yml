@@ -1,0 +1,17 @@
+gestion_cartera_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: GestionCarteraGestionCarteraBundle:Default:api }
+
+gestion_cartera_index:
+    pattern:  /{ruta}
+    defaults: { _controller: GestionCarteraGestionCarteraBundle:Default:index }
+    requirements:
+        ruta: .+
+
+gestion_cartera_kio:
+    pattern:  /kio/{ruta}
+    defaults: { _controller: GestionCarteraGestionCarteraBundle:Default:kio }    
+
+gestion_cartera_todas:
+    pattern:  /
+    defaults: { _controller: GestionCarteraGestionCarteraBundle:Default:index }

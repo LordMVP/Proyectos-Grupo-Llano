@@ -1,0 +1,101 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta.css')}}" />
+<link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta_impresion.css')}}" />
+
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Proceso de provisión y castigo por suscripción {% endblock %}
+
+{% block body %}
+<div id="divPanelContenedor">
+    <fieldset>
+        <legend>Información</legend>
+        <div class="campoBusqueda">
+            <label for="btnBuscarSuscripcion">Suscripción </label>
+            <input type="text" id="txtSuscripcion"  disabled/>
+            <button id="btnBuscarSuscripcion"></button>
+        </div>
+        <div class="campoCorto">
+            <label for="txtDocumento">NIT/CC:</label>
+            <input type="text" id="txtDocumento" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtNombre">Nombre completo:</label>
+            <input type="text" id="txtNombre" disabled="disabled" />
+        </div>
+
+
+        <div class="campo">
+            <label for="txtCodAnterior">Código anterior:</label>
+            <input type="text" id="txtCodAnterior" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtMunicipio">Municipio:</label>
+            <input type="text" id="txtMunicipio" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtBarrio">Barrio:</label>
+            <input type="text" id="txtBarrio" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtDireccion">Dirección:</label>
+            <input type="text" id="txtDireccion" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtRuta">Ruta:</label>
+            <input type="text" id="txtRuta" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtMedidor">Medidor :</label>
+            <input type="text" id="txtMedidor" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtTelefono">Teléfono :</label>
+            <input type="text" id="txtTelefono" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtCelular">Celular :</label>
+            <input type="text" id="txtCelular" disabled="disabled" />
+        </div>
+        
+        <button class="btnSimple" id="btnProcesarCartera"> Provisionar y Castigar </button>
+    </fieldset>
+</div>
+<div id="divError" style="display:none;">
+    <fieldset>
+        <legend>Suscripciones con saldo</legend>
+        <p class="pMensaje" id="pMensajeError"></p>
+        <table class="tabla" id="tblSuscripciones"></table>
+    </fieldset>
+</div>
+
+<div style="display: none" id="camposBuscarSuscripcion">
+    <div class="campoMitad">
+        <label for="txtSuscripcionFiltro">Id suscripción: </label>
+        <input id="txtSuscripcionFiltro" type="text"/>
+    </div>
+    <div class="campoMitad">
+        <label for="txtCodTercero">Código tercero: </label>
+        <input id="txtCodTercero" type="text"/>
+    </div>
+    <span id="spanMensaje" class="pMensaje"></span>
+</div>
+
+<div id="divConfirmarProcesar" style="display:none;">
+    <p>¿Esta seguro de realizar el proceso de castigo?</p>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigadaSuscripcion/carteraCastigadaSuscripcion.modelo.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigadaSuscripcion/carteraCastigadaSuscripcion.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigadaSuscripcion/carteraCastigadaSuscripcion.vista.js')}}"></script>
+{% endblock %}

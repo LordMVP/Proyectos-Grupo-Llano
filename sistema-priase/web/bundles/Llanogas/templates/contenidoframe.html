@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Simulación de la amortización</title>
+        <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/theme/jquery.ui.all.css" />
+        <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo.ui.css" />
+        <!--<link rel="stylesheet" href="/achagua/sistema/web/bundles/Llanogas/css/cartera/financiacion_impresion.css" media="print" type="text/css" />-->
+        <link rel="stylesheet" media="print" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo_imprimir.css" />
+        
+    </head>
+    <body id="divBody">
+        <img id="imgLogo" src="/achagua/img/logos_empresas/Llanogas.png" style="display: inline-block; width: 170px; height: 60px;" />
+        <h2 id="title" style="display: block; text-align: center;"></h2>
+        <div id="contenido"></div>
+        <div style="height: 10vh"></div>
+        <div class="campo">
+            <input type="text" id="txtNombre" disabled="disabled" />
+        </div>
+        <div>
+            <label>Firma</label>
+            <label>Cédula de ciudadanía: </label>
+        </div>
+        <script type="text/javascript">
+            var logo = sessionStorage.getItem('logoEmpresa');
+            if (logo!==null) {
+                document.getElementById('imgLogo').setAttribute('src', '/achagua/img/logos_empresas/'+logo);
+            }
+        </script>
+    </body>
+    
+</html>

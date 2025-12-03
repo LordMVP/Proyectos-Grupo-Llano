@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/rutasSistemaNacional/GestionRutasSistemaNacional/GestionRutasSistemaNacional.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/rutasSistemaNacional/GestionRutasSistemaNacional/GestionRutasSistemaNacional.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { RConsultaTramos } from '../../tramos/ConsultaTramos';
+
+import { RConsultaRutasSistemaNacional } from '../ConsultaRutasSistemaNacional';
+import './GestionRutasSistemaNacional.scss';
+
+class GestionRutasSistemaNacional extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+
+    // Datos de la entidad
+    idRuta: null,
+    nombreRuta: '',
+    tramosSeleccionados: [],
+
+    // Estado de la aplicacion
+    mostrarModalTramos: false,
+
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      nombreRuta: '',
+      tramosSeleccionados: [],
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { nombreRuta, tramosSeleccionados } = this.state;
+    if (nombreRuta.trim().length === 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe escribir el nombre de la ruta' } };
+    }
+
+
+    if (!Util.validarArreglo(tramosSeleccionados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tramo' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar un objeto con el identificador de el tramo o tramos seleccionados
+   * @returns {Object}
+   */
+  obtenerTramos = () => {
+    const tramos = this.state.tramosSeleccionados;
+    return tramos.map(t => ({ trmIderegistro: t.trmIderegistro }));
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const { idRuta, nombreRuta, tramosSeleccionados } = this.state;
+    const entidadGuardar = {
+      // Asignar datos de la entidad
+      uniIderegistro: idRuta,
+      nombre: nombreRuta,
+      listaTramos: this.obtenerTramos()
+    };
+
+    axios.post(RUTAS_API.PARAMETRIZACION.RUTAS_SISTEMA_NAL.GUARDAR_RUTAS_SISTEMA_NAL, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del botón de consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del botón de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de generar la tabla de tramos con los tramos consultados por ruta
+   */
+  asignarTramos = (tramos) => {
+    this.setState({ tramosSeleccionados: tramos });
+  };
+
+  /**
+   * Método encargado de consultar los tramos de la ruta seleccionada
+   */
+  consultarTramosRuta = (idRuta) => {
+    axios.post(RUTAS_API.PARAMETRIZACION.RUTAS_SISTEMA_NAL.CONSULTAR_TRAMOS_RUTA, { idRuta: idRuta })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.asignarTramos(respuesta.data.datos);
+        }
+      });
+  };
+
+  /**
+   * Método encargado de llenar los campos del formulario con los datos de la ruta seleccionada
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      idRuta: entidad.uniIderegistro,
+      mostrarModalConsulta: false,
+      nombreRuta: entidad.uniNombre1,
+    });
+    this.consultarTramosRuta(entidad.uniIderegistro);
+  };
+
+  /**
+   * Método encargado agregar los tramos seleccionados
+   * @param {Object} tramos Tramos seleccionados por el usuario
+   */
+  onSeleccionarTramos = (tramos) => {
+    this.setState({
+      mostrarModalTramos: false,
+      tramosSeleccionados: [...tramos]
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de tramos
+   */
+  abrirModalTramos = () => {
+    this.setState({
+      mostrarModalTramos: true
+    });
+  };
+
+  /**
+  * Método encargado de eliminar el tramo seleccionado
+  * @param {number} posicion Posición del tramo que se desea eliminar
+  */
+  eliminarTramo = (posicion) => {
+    const lista = [...this.state.tramosSeleccionados];
+    lista.splice(posicion, 1);
+    this.setState({ tramosSeleccionados: lista });
+  };
+
+  /**
+   * Método encargado de mostrar los tramos seleccionados
+   * @returns {Array}
+   */
+  renderTramos = () => {
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th> &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.tramosSeleccionados.map((dato, index) => {
+              return (
+                &lt;tr key={"tramo_" + dato.trmIderegistro}>
+                  &lt;td>{dato.trmNombre}&lt;/td>
+                  &lt;td>&lt;button className='btnEliminar' onClick={() => {
+                    this.eliminarTramo(index)
+                  }}>X&lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='gestion-rutas row mt-5'>
+
+          &lt;Input
+            label='Nombre:'
+            value={this.state.nombreRuta}
+            onChange={this.controlarCambio}
+            name='nombreRuta'
+          />
+
+          &lt;div className='col-6'>
+            &lt;p>&lt;b>Tramos {this.state.tramosSeleccionados.length > 0 ? ` (${this.state.tramosSeleccionados.length})` : ''}&lt;/b>&lt;/p>
+            &lt;button className='btn btn-primary' onClick={this.abrirModalTramos}>Seleccionar&lt;/button>
+            &lt;div className='pt-3'>
+              {this.state.tramosSeleccionados.length > 0 &amp;&amp;
+                this.renderTramos()}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta Rutas Sistema Nacional'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaRutasSistemaNacional esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalTramos}
+          titulo='Seleccionar Tramos'
+          cerrarModal={() => this.setState({ mostrarModalTramos: false })}>
+          &lt;RConsultaTramos
+            esModal
+            seleccionMultiple
+            entidadesSeleccionadas={this.state.tramosSeleccionados}
+            seleccionarEntidades={this.onSeleccionarTramos}
+          />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionRutasSistemaNacional.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionRutasSistemaNacional);
+
+export { VistaRedux as RGestionRutasSistemaNacional };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

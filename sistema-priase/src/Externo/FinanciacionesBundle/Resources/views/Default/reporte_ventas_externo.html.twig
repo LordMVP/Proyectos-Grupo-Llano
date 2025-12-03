@@ -1,0 +1,115 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Administracion/js/plugins/multipleselect/multiple-select.css')}}" />
+    <style type="text/css">
+        .has-error input, .has-error select{
+            border: 1px solid red;
+        }
+        select{
+            background-color: #FFF;
+        }
+
+
+
+
+
+        .dropdown-menu {
+            display: none;
+            margin-top: 2px;
+            position: absolute;
+            list-style: none;
+            background: #FFF;    
+            border: 1px solid #ccc;
+            border-radius: 5px;  
+            min-width: 150px;   
+        }
+        .dropdown-menu.active{
+            display: block;
+        }
+        .dropdown-menu li{
+            margin: 0px;
+            padding: 0px;
+        }
+        .dropdown-menu li a{
+            display: block;
+            font-size: 13px;  
+            padding: 7px 15px;
+            border-bottom: 1px solid #efefef;
+        }
+        .dropdown-menu li:last-child{
+            border-bottom: 0px;
+        }
+        .dropdown-menu li a:hover{
+            background: #72a8d4;
+            color: #FFF;
+            cursor: pointer;
+        }
+
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} 
+    Reporte ventas externo
+{% endblock %}
+{% block body %}  
+
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <div class="">
+                <fieldset>
+                    <legend>Filtros</legend>
+                    <div class="campo">
+                        <label for="cmbFirmaInstaladora">Firma instaladora (*):</label>
+                        <select id="cmbFirmaInstaladora"><option value="">Seleccione</option></select>
+                    </div>
+                    <div class="campo">
+                        <label for="txtFechaInicio">Fecha Inicio (*):</label>
+                        <input type="text" id="txtFechaInicio" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtFechaFin">Fecha Fin (*):</label>
+                        <input type="text" id="txtFechaFin" />
+                    </div>
+                    <div class="campo">
+                        <label for="cmbEstadoVenta">Estado venta:</label>
+                        <select id="cmbEstadoVenta">
+                            <option value="-1">Seleccione</option>
+                            <option value="P">Pendiente</option>
+                            <option value="A">Aprobada</option>
+                            <option value="F">Facturada</option>
+                            <option value="E">Eliminada</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="txtRadicado">Radicado:</label>
+                        <input type="text" id="txtRadicado" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtFechaPago">Fecha del pago:</label>
+                        <input type="text" id="txtFechaPago" />
+                    </div>
+                    <div class="campo m-t-10">
+                        <button class="btnSimple dropdown-btn" id="btnGenerarContrato">
+                            <i class="fa fa-fw fa-caret-down"></i> Descargar reporte
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="btnGenerarReporte" data-target="G">Generar</a></li>
+                            <li><a class="btnGenerarReporte" data-target="R">Resumen</a></li>
+                        </ul>
+                    </div>
+
+                </fieldset>
+            </div>            
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}    
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/plugins/multipleselect/multiple-select.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/reporteVentas/reporteventas.control.js')}}?v={{version}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/reporteVentas/reporteventas.vista.js')}}?v={{version}}"></script>
+{% endblock %}

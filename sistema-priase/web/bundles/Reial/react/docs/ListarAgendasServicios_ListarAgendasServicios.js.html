@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ListarAgendasServicios/ListarAgendasServicios.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ListarAgendasServicios/ListarAgendasServicios.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Tabla, VentanaDialogo } from 'appfuture-react'
+
+import API from '../../global/rutas_api'
+import Util from '../../global/util'
+import Peticion from '../../global/peticion'
+import Edicion from './subcomponentes/Edicion'
+
+// redux
+
+import connect from 'react-redux/es/connect/connect'
+import { bindActionCreators } from 'redux'
+
+/**
+ *
+ *
+ * @class ListarAgendasServicios
+ * @extends {Component}
+ */
+class ListarAgendasServicios extends Component {
+
+  /**
+   *Define estados iniciales
+   * @memberof ListarAgendasServicios
+   */
+  state = {
+    lista: [],
+    dialogoModal: false,
+    edicionModal: false,
+
+    // defecto
+
+    identificador: '',
+    orden: '',
+
+    agenda: '-1',
+    empresa: '-1',
+
+    editable: {},
+  }
+
+  columnas = [
+    {
+      Header: 'Servicios por agenda',
+
+      columns: [
+        {
+          Header: 'Servicio',
+          accessor: 'servicio',
+          Cell: props => props.value.servicioNom,
+        },
+
+        { Header: 'Orden', accessor: 'serageOrdser' },
+
+        {
+          Header: 'Municipio',
+          accessor: 'municipio',
+          Cell: props => props.value.proyectoNom,
+        },
+
+        {
+          Header: 'Dependencia',
+          accessor: 'dependencia',
+          Cell: props => props.value.depempresaNom,
+        },
+
+        {
+          Header: 'Acción',
+          accessor: 'id',
+          Cell: (props) => {
+            return (
+              &lt;div className="d-flex justify-content-center btn-group">
+                &lt;button className="btn" onClick={() => this.editar(props)}>
+                  &lt;span>editar&lt;/span>
+                &lt;/button>
+              &lt;/div>
+            )
+          },
+        },
+      ],
+    }
+  ]
+
+  montado = false
+
+	/**
+     *
+     *Habilita el botón crear
+     *@method
+     *@return {JSX} Componente - Button
+     */
+
+  BotonCrear = () => {
+    const { agenda, empresa } = this.state
+
+    /* prettier-ignore */
+
+    return Util.validarObjeto({ agenda, empresa })
+      ? &lt;button className="btn" onClick={this.crear}>crear&lt;/button>
+      : &lt;button className="btn" disabled={true}>crear&lt;/button>
+  }
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+  BotonGuardar = () => {
+    const paraEnviar = this.state.lista.filter(item => item.guardar)
+
+    /* prettier-ignore */
+
+    return paraEnviar.length > 0
+      ? &lt;button className="btn" onClick={this.handleDialogo}>guardar&lt;/button>
+      : &lt;button className="btn" disabled={true}>guardar&lt;/button>
+  }
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     */
+  componentDidMount() {
+    // empresaJson
+
+    Peticion.post({
+      url: API.LISTAR_AGENDAS.LISTAR_EMPRESAS,
+      config: {
+        valor: 'empresaCod',
+        texto: 'empresaNom',
+      },
+
+      callback: empresaJson => this.setState({ empresaJson })
+    })
+
+    this.montado = true
+  }
+
+  /**
+   * Realiza las consultas previas para listar los elementos que irán en los combobox
+   * @method
+   * @param {Object} props - Cargar atributos del componente
+   */
+  componentDidUpdate(props, state) {
+    if (this.montado) {
+      // agendaJson y dependenciaJson
+
+      if (this.state.empresa !== state.empresa) {
+        // consultar dependencias
+
+        if (Util.validarValor(this.state.empresa)) {
+          this.cambioEmpresa(this.state.empresa)
+        }
+
+        else this.setState({
+          agenda: '-1',
+          dependencia: '-1',
+          municipio: '-1',
+          agendaJson: undefined,
+          dependenciaJson: undefined,
+          municipioJson: undefined,
+        })
+      }
+
+      // lista
+
+      if (this.state.agenda !== state.agenda) {
+        if (Util.validarValor(this.state.agenda)) {
+          this.buscar(this.state.agenda)
+        }
+
+        else this.setState({ lista: [] })
+      }
+    }
+  }
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+  change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+  /**
+   *
+   * Lista las agendas realizando la consulta por empresa
+   * @method
+   * @async
+   * @param {string} empresa Identificador de la empresa
+   */
+  cambioEmpresa = async (empresa) => {
+    empresa = Util.obtenerId(empresa)
+
+    // agendaJson
+    await Peticion.post({
+      url: API.LISTAR_AGENDAS.CONSULTAR_TODAS,
+      parametros: {
+        empresa: empresa
+      },
+      config: {
+        valor: 'agendaCod',
+        texto: 'agendaNom',
+      },
+      callback: agendaJson => this.setState({ agendaJson })
+    })
+  };
+
+
+  /**
+   *
+   * Busca por código  y lista la información en una tabla
+   * @method
+   * @async
+   */
+  buscar = async (agenda = this.state.agenda) => {
+    agenda = Util.obtenerId(agenda)
+
+    let parametros = { serageCodage: agenda }
+
+    let lista = await Peticion.post({
+      url: API.LISTAR_AGENDAS_SERVICIOS.CONSULTAR_POR_CODIGO,
+      parametros,
+    })
+
+    if (!lista.length) return // no hay datos
+
+    this.setState({ lista })
+  }
+
+  /**
+   *
+   * Cancela la operación sobre el formulario
+   * @method
+   * @async
+   */
+  cancelar = async () => {
+    await this.limpiarCampos()
+    await this.setState({ datos: [] })
+  }
+
+  /**
+   *
+   * Crear la agenda servicio
+   * @method
+   * @async
+   */
+  crear = async () => {
+    await this.setState({
+      editable: {
+        indice: 0,
+        serageCodemp: Util.obtenerId(this.state.empresa),
+        serageCodage: Util.obtenerId(this.state.agenda),
+      }
+    })
+
+    await this.handleEdicion(true)
+  }
+
+  /**
+   *
+   * Modifica la agenda servicio
+   * @method
+   * @async
+   * @param {object} original - fila actual
+   * @param {int} index - posición de la fila actual en la tabla
+   */
+  editar = async ({ original, index }) => {
+    await this.setState({
+      editable: { indice: index, ...original }
+    })
+
+    this.handleEdicion(true)
+  }
+
+  /**
+   *
+   * Procesa la fila seleccionada de la tabla
+   * @method
+   * @async
+   * @param {array} datos - Información a procesar
+   */
+  procesarEdicion = async (datos) => {
+    if (datos != null) {
+      if (datos.serageCod) {
+        // crear
+
+        delete datos.crear
+        delete datos.indice
+
+        datos.guardar = true
+
+        let lista = [...this.state.lista, datos]
+
+        await this.setState({ lista })
+      }
+
+      else {
+        // editar
+
+        const lista = this.state.lista.map(function (elemento, indice) {
+          if (indice === datos.indice) {
+            delete datos.crear
+            delete datos.indice
+
+            elemento = { ...datos, guardar: true }
+          }
+
+          return elemento
+        })
+
+        await this.setState({ lista })
+      }
+    }
+
+    await this.handleEdicion(false)
+  }
+
+  /**
+	 *
+	 * Permite guardar las agendas
+	 * @method
+   * @async
+	 * 
+	 */
+  guardar = async () => {
+    this.handleDialogo(false)
+
+    // filtrar y organizar
+
+    let paraEnviar = this.state.lista
+      .filter(item => item.guardar)
+      .map(elemento => {
+        delete elemento.guardar
+        delete elemento.municipio
+        delete elemento.dependencia
+        delete elemento.servicio
+
+        return elemento
+      })
+
+    // peticion
+
+    await Peticion.post({
+      url: API.LISTAR_AGENDAS_SERVICIOS.AGREGAR_SERVICIOS,
+      parametros: paraEnviar
+    })
+
+    // final
+
+    await this.limpiarCampos()
+
+    if (Util.validarValor(Util.obtenerId(this.state.agenda))) {
+      this.buscar(this.state.agenda)
+    }
+  }
+
+  /**
+   *
+   * Desplegar modal
+   * @method
+   * @param {boolean} valor - Habilita el modal
+   */
+  handleDialogo = (valor) => {
+    if (valor == undefined) valor = !this.state.dialogoModal
+    return this.setState({ dialogoModal: valor })
+  }
+
+  /**
+   *
+   * Habilitar edición
+   * @method
+   * @param {boolean} valor - Habilita la edición de la fila
+   */
+  handleEdicion = (valor) => {
+    if (valor == undefined) valor = !this.state.edicionModal
+    return this.setState({ edicionModal: valor })
+  }
+
+
+  /**
+   *
+   * Limpiar formulario
+   * @method
+   */
+  limpiarCampos = () => {
+    return this.setState({
+      lista: [],
+
+      identificador: '',
+      orden: '',
+
+      servicio: '-1',
+      tipo: '-1',
+      dependencia: '-1',
+      municipio: '-1',
+    })
+  }
+
+  botones = [
+    { texto: 'guardar', callback: this.guardar },
+    { texto: 'cancelar', callback: this.handleDialogo }
+  ]
+
+  /**
+   *Renderiza la vista 
+   * @return {JSX} componente - returna vista jsx 
+   */
+  render() {
+    const { BotonCrear, BotonGuardar } = this
+
+    const texto = this.state.identificador ? 'Editar' : 'Crear'
+
+    return (
+      &lt;React.Fragment>
+        &lt;h1>{texto} asociación agenda servicios&lt;/h1>
+
+        &lt;VentanaDialogo
+          titulo="Confirmación"
+          texto="¿Confirma transacción?"
+          mostrar={this.state.dialogoModal}
+          botones={this.botones}
+        />
+
+        &lt;div className="contenedor d-flex justify-content-center btn-group">
+          &lt;BotonGuardar />
+          &lt;BotonCrear />
+          &lt;button className="btn" onClick={this.cancelar}>
+            &lt;span>cancelar&lt;/span>
+          &lt;/button>
+        &lt;/div>
+
+        &lt;div className="contenedor formulario">
+          &lt;Combo
+            id="empresa"
+            label="empresa"
+            value={this.state.empresa}
+            opciones={this.state.empresaJson}
+            required={true}
+            onChange={this.change}
+          />
+
+          &lt;Combo
+            id="agenda"
+            label="agenda"
+            value={this.state.agenda}
+            onChange={this.change}
+            opciones={this.state.agendaJson}
+            required={true}
+            extra={{ disabled: !this.state.agendaJson }}
+          />
+        &lt;/div>
+
+        &lt;div className="contenedor">
+          &lt;Edicion
+            mostrar={this.state.edicionModal}
+            cerrarModal={this.handleEdicion}
+            procesar={this.procesarEdicion}
+            editable={this.state.editable}
+          />
+
+          &lt;Tabla
+            columnas={this.columnas}
+            datos={this.state.lista}
+          />
+        &lt;/div>
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+const mapStateToProps = (state) => {
+  return {}
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({}, dispatch)
+}
+
+const VistaRedux = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ListarAgendasServicios)
+
+export { VistaRedux as RListarAgendasServicios }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?php
+
+namespace Reportes\ReportesBundle\Tests\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+class RecuperacionCarteraControllerTest extends WebTestCase
+{
+}

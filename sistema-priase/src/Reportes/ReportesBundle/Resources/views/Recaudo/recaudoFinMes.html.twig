@@ -1,0 +1,68 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Recaudo Efecty -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="RecaudoFinMesController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                        <label>Medio de Pago</label>
+                                        <select multiple name="mediosPago" id="mediosPago" ng-model="info.mediosPago" class="form-control">                      
+                                            <option ng-repeat="medio in mediosPago" ng-value="medio.id">
+                                                {[{medio.nombre}]}
+                                            </option>                                            
+                                        </select>
+                                        
+                                </div>
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1"  />
+                                   
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2"  />
+                                   
+                                </div>                                                                
+                            </div>                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Al ingresar y validar todos los parametros necesarios y correctos, de clic en el boton Generar Reporte.
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar el reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ui-bootstrap-tpls-1.3.2.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-animate.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/recaudoFinMes.angular.js')}}"></script>
+{% endblock %}

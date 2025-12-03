@@ -1,0 +1,47 @@
+Array
+(
+    [0] => /var/www/html/achagua/sistema/src/Llanogas/LlanogasBundle/ProcesosMasivos/EjecutaProcesoNotasAutomaticas.php
+    [1] => 317
+    [2] => 2250760
+    [3] => [{"idconcepto":"3558","valor":"-1000"}]
+    [4] => D
+    [5] => 0
+    [6] => 4611
+    [7] => S
+    [8] => -1
+    [9] => /var/www/html/achagua/sistema
+)
+Lista facturasArray
+(
+    [0] => Array
+        (
+            [idfactura] => 37962114
+        )
+
+)
+Procesando tipo de nota directa
+Factura: 37962114 Concepto: 3558 Valor Nota: 13528.6 
+Array
+(
+    [operacion] => S
+    [iddetallefactura] => 1324634791
+    [estado] => A
+    [iddetalleorigen] => 
+    [cantidad] => 1.0000000
+    [valorunitario] => 14528.6000000
+    [valortotal] => 14528.6000000
+    [valor] => 14528.6000000
+    [valorreal] => 14528.6000000
+    [saldo] => 14528.6000000
+    [idfactura] => 37962114
+    [idconcepto] => 3558
+    [iddetalleamortizacion] => 
+    [iddetallepade] => 
+    [iddetallepadre] => 
+    [iddetallefinanciacion] => 
+    [version] => 1
+    [concepto] => Cuenta por cobrar servicio de aseo
+    [valorpagado] => 0.0000000
+    [existe] => 1
+    [valornota] => -1000
+)

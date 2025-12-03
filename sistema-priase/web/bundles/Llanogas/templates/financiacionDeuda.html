@@ -1,0 +1,117 @@
+<!--TEMPLATE PARA EL CONTROL DE FORMAS DE PAGO -->
+
+<script id="tplfinanciacionDeuda" type="text/template">
+<table>
+        <thead>
+            <tr><th colspan="4">DATOS CLIENTE</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>NOMBRE: </td>
+                <td>{{nombretercero}}</td>
+                <td>TIPO: </td>
+                <td>{{tipo}}</td>
+            </tr>
+            <tr>
+                <td>DIRECCIÓN: </td>
+                <td>{{direccion}}</td>
+                <td>CÓDIGO: </td>
+                <td>{{codigo}}</td>
+            </tr>
+            <tr>
+                <td>BARRIO: </td>
+                <td>{{barrio}}</td>
+                <td>MUNICIPIO: </td>
+                <td>{{municipio}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr><th colspan="4">DATOS SOLICITANTE</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>NOMBRE: </td>
+                <td>{{{nombre}}}</td>
+                <td>TELÉFONO: </td>
+                <td>{{telefono}}</td>
+            </tr>
+            <tr>
+                <td>C.C.: </td>
+                <td>{{cedula}}</td>
+                <td>PARENTESCO: </td>
+                <td>{{parentesco}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>CONCEPTO A FINANCIAR</th>
+                <th>VALOR DEUDA</th>
+                <th>VALOR ABONO</th>
+                <th>SALDO</th>
+                <th>CUOTAS</th>
+                <th>VALOR CUOTA</th>
+                <th>% INTERES MENSUAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{tipodocumento}} </td>
+                <td>{{valortotal}}</td>
+                <td>{{valorabono}}</td>
+                <td>{{saldo}}</td>
+                <td>{{cuota}}</td>
+                <td>{{valorcuota}}</td>
+                <td>{{interes}}</td>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <th>TOTALES </th>
+                <th>{{valortotal}}</th>
+                <th>{{valorabono}}</th>
+                <th>{{saldo}}</th>
+                <th>{{cuota}}</th>
+                <th>{{valorcuota}}</th>
+                <th>{{interes}}</th>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+    El abajo firmante, en su propio nombre o en nombre de la entidad que representa, autoriza a 
+    {{empresa}} para que realice el cobro de la cuota del acuerdo de pago explicito en este documento 
+    a través de la factura de Servicio Público del Gas que se le emite mensualmente.
+    </p>
+    <div>
+        <p>Para constancia se firma a los <span>{{fecha.dia}}</span> del mes de <span>{{fecha.mesletras}}</span>
+        del año <span>{{fecha.anio}}</span>, en la ciudad de <span>{{municipio}}</span></p>
+    </div>
+
+    <div class="firma">
+            <hr align="center">
+            FIRMA DEL SOLICITANTE <br>
+            <span>{{{nombre}}}</span><br/>C.C. Nº: {{cedula}} Expedida en {{lugarexpedicion}}
+    </div>
+
+</script>

@@ -1,0 +1,560 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+{% block titulo %}Cartera: Administrar Financiación - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+
+    <div id="divFormulario">
+        <fieldset id="divCabecera">
+            <legend>Suscripción</legend>
+            <div class="campo">
+                <label for="txtSuscripcion">Suscripción:</label>
+                <input type="text" id="txtSuscripcion" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtSuscriptor">Id suscriptor:</label>
+                <input type="text" id="txtSuscriptor" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNombre">Nombre completo:</label>
+                <input type="text" id="txtNombre" disabled="disabled" />
+            </div>
+
+
+            <div class="campo">
+                <label for="txtCodAnterior">Código anterior:</label>
+                <input type="text" id="txtCodAnterior" disabled="disabled" />
+            </div>
+
+        </fieldset>
+
+
+        <fieldset id="divFinanciacion">
+            <legend>Financiación</legend>
+
+            <div class="campoCorto">
+                <label for="txtNumFinanciacion">Núm. financiación:</label>
+                <input type="text" id="txtNumFinanciacion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFecha">Fecha:</label>
+                <p id="pFechaActual" style="display:none"></p>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtBanco">Banco:</label>
+                <input type="text" id="txtBanco" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtCiclo">Ciclo:</label>
+                <input type="text" id="txtCiclo" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtPeriodo">Periodo:</label>
+                <input type="text" id="txtPeriodo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtDocSolicitante">NIT/CC Solicitante:</label>
+                <input type="text" id="txtDocSolicitante" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNombreSolicitante">Nombre Solicitante:</label>
+                <input type="text" id="txtNombreSolicitante" disabled="disabled" />
+            </div>
+
+	    <div class="campo">
+                <label for="txtParentescoSolicitante">Parentesco Solicitante:</label>
+                <input type="text" id="txtParentescoSolicitante" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtLiquidacion">Liquidación:</label>
+                <input type="text" id="txtLiquidacion" disabled="disabled" />  
+            </div>
+
+            <div class="campo">
+                <label for="txtDocumento">Documento:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />  
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoDocumento">Tipo Documento:</label>
+                <input type="text" id="txtTipoDocumento" disabled="disabled" />  
+            </div>
+            <div class="campoCorto">
+                <label for="txtEstado">Estado:</label>
+                <input type="text" id="txtEstado" maxlength="2" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtCapitalInicial">Capital inicial:</label>
+                <input type="text" id="txtCapitalInicial" maxlength="2" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtSaldoCapital">Saldo capital:</label>
+                <input type="text" id="txtSaldoCapital" maxlength="2" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtNumCuotas">Cuotas:</label>
+                <input type="text" id="txtNumCuotas" maxlength="2"  disabled="disabled"/>
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtCuotasAmortizadas">Amortizadas:</label>
+                <input type="text" id="txtCuotasAmortizadas" maxlength="2" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtNumCuotasPendientes">Pendientes:</label>
+                <input type="text" id="txtNumCuotasPendientes" maxlength="2" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <input type="button" id="btnCargarFacturas" value="Ver facturas" class="btnSimple"/>
+            </div>
+            <div class="campoCorto">
+                <input type="button" id="btnVerArchivos" value="Ver adjuntos" class="btnSimple"/>
+            </div>
+            <div class="campo" style="width: auto;">
+                <input type="button" id="btnCargarAmortización" value="Ver amortizaciones" class="btnSimple"/>
+            </div>
+	    <div class="campo" style="width: auto;">
+                <input type="button" id="btnImprimirFormatos" value="Imprimir Formatos" class="btnSimple"/>
+            </div>
+            <div class="campo" style="width: auto;">
+                <button class="btnSimple" id="btnAdicionarArchivos" style="display: none;" > <i class="fa fa-arrow-up"   ></i> Adicionar archivos</button>
+            </div>
+        </fieldset>
+
+        <table id="tblFacturas" class="tabla" ></table>
+        <table id="tblAmortizacion" class="tabla" ></table>
+        <fieldset id="divArchivos" style="display: none;">
+            <legend>Adjuntos de la financiación</legend>
+            <input type="file" id="txtArchivo" />
+        </fieldset>
+
+	<fieldset id="divFormatos" style="display: none;">
+            <legend>Formatos de la financiación</legend>
+            <div id="divAdjuntosFinanciacion">
+                <div id="divArchivosContrato" data-id="fin">
+                    <div class="archivoSubido">
+                        <button class="btnSimple" data-id="PagarePersonaNaturalFinal"><i class="fa fa-file-text-o fa-lg"></i></button>
+                        <strong>Pagaré persona natural</strong>
+                    </div>
+                    <div class="archivoSubido">
+                        <button class="btnSimple" data-id="PagarePersonaJuridicaFinal"><i class="fa fa-file-text-o fa-lg"></i></button>
+                        <strong>Pagaré persona jurídica</strong>
+                    </div>
+                    <div class="archivoSubido">
+                        <button class="btnSimple" data-id="TratamientoDatos"><i class="fa fa-file-text-o fa-lg"></i></button>
+                        <strong>Autorización Tratamiento de Datos Personales y Centrales de riesgo</strong>
+                    </div>
+                    <div class="archivoSubido">
+                        <button class="btnSimple" data-id="FinanciacionDeuda"><i class="fa fa-file-text-o fa-lg"></i></button>
+                        <strong>Formato de Financiación de Deuda</strong>
+                    </div>
+                </div>
+            </div>
+        </fieldset>        
+       
+        <div id="divAdjuntosFinanciacion" style="display: none;">
+            <ul>
+                <li><a href="#divArchivos"> Adjuntos  </a></li>
+            </ul>
+         
+            <div id="divArchivosNew">
+                <div style="margin: 20px 20px">
+                    <div><input type="file" id="txtArchivoNew" multiple></div>
+                    <button class="btnSimple" id="btnSubirArchivos"  > <i class="fa fa-upload"></i> Adjuntar archivos de financiacion </button>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+    <div id="divInfoFinanciera" style="display: none;">
+        <fieldset id="divJuridica">
+            <legend>Información empresarial</legend>
+            <div class="campo">
+                <label for="txtActividadEmpresarial"> Actividad Económica: </label>
+                <input type="text" id="txtActividadEmpresarial" disabled="disabled" data-reference="actividadeconomica"/>
+            </div>
+            <div class="campo">
+                <label for="txtTipoSociedad">Tipo de sociedad: </label>
+                <input type="text" id="txtTipoSociedad" data-reference="tiposociedad" />
+            </div>
+            <div class="campo">
+                <label for="">Años Experiencia </label>
+                <div class="campoMitad" style="width: 46%">
+                    <label for="txtAnioExperienciaEmpresarial">Años :</label>
+                    <input type="text" id="txtAnioExperienciaEmpresarial" data-reference="aniolaborado" maxlength="3">
+                </div>
+
+                <div class="campoMitad" style="width: 46%">
+                    <label for="txtMesesExperienciaEmpresarial">Meses:</label>
+                    <input type="text" id="txtMesesExperienciaEmpresarial" maxlength="2" data-reference="meslaborado">
+                </div>
+            </div>
+            <div class="campo">
+                <label for="txtDireccionEmpresarial">Dirección: </label>
+                <input type="text" id="txtDireccionEmpresarial" disabled="disabled" data-reference="direccion">
+            </div>
+
+            <div class="campo">
+                <label for="txtBarrioEmpresarial">Barrio: </label>
+                <input type="text" id="txtBarrioEmpresarial" disabled="disabled" data-reference="barrio">
+            </div>
+            <div class="campo">
+                <label for="txtMunicipioEmpresarial">Municipio:</label>
+                <input type="text" id="txtMunicipioEmpresarial" disabled="disabled" data-reference="municipio">
+            </div>
+            <div class="campo">
+                <label for="txtDepartamentoEmpresarial">Departamento: </label>
+                <input type="text" id="txtDepartamentoEmpresarial" disabled="disabled" data-reference="departamento">
+            </div>
+            <div class="campo">
+                <label for="txtEstratoCat">Estrato/Categoría: </label>
+                <input type="text" id="txtEstratoCat" disabled="disabled" data-reference="estrato">
+            </div>
+            <div class="campo">
+                <label for="txtCorreoEmpresarial">Correo electrónico: </label>
+                <input type="text" id="txtCorreoEmpresarial" disabled="disabled" data-reference="correo">
+            </div>
+            <div class="campo">
+                <label for="txtTelefono1Empresarial">Teléfono 1</label>
+                <input type="text" id="txtTelefono1Empresarial" disabled="disabled" data-reference="telefonofijo">
+            </div>
+            <div class="campo">
+                <label for="txtTelefono2Empresarial">Teléfono 2</label>
+                <input type="text" id="txtTelefono2Empresarial" disabled="disabled" data-reference="telefonocelular">
+            </div>
+        </fieldset>
+        <div id="divNatural">
+            <ul>
+                <li><a href="#divLaboral">Laboral</a></li>
+                <li><a href="#divFinanciera">Financiera</a></li>
+            </ul>
+            <div id="divLaboral">
+                <h2 style="font-size: 1.6em; font-weight: normal;">Información laboral</h2>
+                <div class="campo">
+                    <label for="cmbOcupacionLaboral">Ocupación:</label>
+                    <input type="text" id="txtOcupacionLaboral" disabled="disabled" data-reference="actividadeconomica"/>
+                </div>
+                <div class="campo">
+                    <label for="txtNombreEmpresaLaboral">Nombre Empresa: </label>
+                    <input type="text" id="txtNombreEmpresaLaboral" data-reference="nombreempresalaboral">
+                </div>
+                <div class="campo">
+                    <label for="txtFechaIngresoLaboral">Fecha Ingreso: </label>
+                    <input type="text" id="txtFechaIngresoLaboral" data-reference="fechaingreso">
+                </div>
+                <div class="campo">
+                    <label for="">Años Experiencia </label>
+                    <div class="campoMitad" style="width: 46%">
+                        <label for="txtAnioExperienciaLaboral">Años :</label>
+                        <input type="text" id="txtAnioExperienciaLaboral" data-caja="number" data-reference="aniolaborado" maxlength="3">
+                    </div>
+
+                    <div class="campoMitad" style="width: 46%">
+                        <label for="txtMesesExperienciaLaboral">Meses:</label>
+                        <input type="text" id="txtMesesExperienciaLaboral" data-caja="number" data-reference="meslaborado" maxlength="2">
+                    </div>
+                </div>
+                <div class="campo">
+                    <label for="txtCargoLaboral">Cargo: </label>
+                    <input type="text" id="txtCargoLaboral" data-reference="cargolaboral" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtTelefono1Laboral">Teléfono 1: </label>
+                    <input type="text" id="txtTelefono1Laboral" data-reference="telefonofijo" disabled="disabled">
+                </div>
+                <div class="campo">
+                    <label for="txtTelefono2Laboral">Teléfono 2: </label>
+                    <input type="text" id="txtTelefono2Laboral" data-reference="telefonocelular" disabled="disabled">
+                </div>
+            </div>
+            <div id="divFinanciera">
+                <h2 style="font-size: 1.6em; font-weight: normal;">Información financiera</h2>
+                <fieldset>
+                    <legend>Ingresos Mensuales</legend>
+                    <div class="campo">
+                        <label for="txtSalarioFijo">Salario Fijo: </label>
+                        <input type="text" id="txtSalarioFijo" data-caja="number" data-reference="salariofijo">
+                    </div>
+                    <div class="campo">
+                        <label for="txtSalarioVariable">Salario Variable: </label>
+                        <input type="text" id="txtSalarioVariable" data-caja="number" data-reference="salariovariable">
+                    </div>
+                    <div class="campo">
+                        <label for="txtArrendamiento">Arrendamiento: </label>
+                        <input type="text" id="txtArrendamiento" data-caja="number" data-reference="ingresoarriendo">
+                    </div>
+                    <div class="campo">
+                        <label for="txtVentas">Ventas: </label>
+                        <input type="text" id="txtVentas" data-caja="number" data-reference="ingresoventa">
+                    </div>
+                    <div class="campo">
+                        <label for="txtNomOtroIngreso">Otro Ingreso: </label>
+                        <input type="text" id="txtNomOtroIngreso"  data-reference="otroingreso">
+                    </div>
+                    <div class="campo">
+                        <label for="txtVlrOtroIngreso">Valor otro ingreso: </label>
+                        <input type="text" id="txtVlrOtroIngreso" data-caja="number" data-reference="valorotroingreso">
+                    </div>
+                    <div class="campo">
+                        <label for="txtTotIngresos">Total Ingresos: </label>
+                        <input type="text" id="txtTotIngresos" disabled="disabled" data-reference="totalingreso" data-caja="total">
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Egresos mensuales </legend>
+                    <div class="campo">
+                        <label for="txtGastoFamiliar">Gastos familiares:</label>
+                        <input type="text" id="txtGastoFamiliar" data-caja="number" data-reference="gastofamiliar">
+                    </div>
+                    <div class="campo">
+                        <label for="txtArriendo">Arrendamiento: </label>
+                        <input type="text" id="txtArriendo" data-caja="number" data-reference="gastoarriendo">
+                    </div>
+                    <div class="campo">
+                        <label for="txtGastoFinanciera">Financieros: </label>
+                        <input type="text" id="txtGastoFinanciera" data-caja="number" data-reference="gastofinanciero">
+                    </div>
+                    <div class="campo">
+                        <label for="txtCompras">Compras: </label>
+                        <input type="text" id="txtCompras" data-caja="number" data-reference="gastocompra">
+                    </div>
+                    <div class="campo">
+                        <label for="txtNomOtroEgreso">Otro egreso: </label>
+                        <input type="text" id="txtNomOtroEgreso" data-reference="otrogasto">
+                    </div>
+                    <div class="campo">
+                        <label for="txtVlrOtroEgreso">Valor otro egreso: </label>
+                        <input type="text" id="txtVlrOtroEgreso" data-caja="number" data-reference="valorotrogasto">
+                    </div>
+                    <div class="campo">
+                        <label for="txtTotEgreso">Total egresos: </label>
+                        <input type="text" id="txtTotEgreso" disabled="disabled" data-reference="totalgasto" data-caja="total">
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Efectivo y Activos</legend>
+                    <div class="campo">
+                        <label for="txtEfectivo">Efectivo disponible: </label>
+                        <input type="text" id="txtEfectivo" data-caja="number" data-reference="efectivo">
+                    </div>
+                    <div class="campo">
+                        <label for="txtActivoCorriente">Activo corriente: </label>
+                        <input type="text" id="txtActivoCorriente" data-caja="number" data-reference="activocorriente">
+                    </div>
+                    <div class="campo">
+                        <label for="txtVehiculos">Vehículos:</label>
+                        <input type="text" id="txtVehiculos" data-caja="number" data-reference="vehiculo">
+                    </div>
+                    <div class="campo">
+                        <label for="txtOtrasPropiedades">Otras propiedades:</label>
+                        <input type="text" id="txtOtrasPropiedades" data-caja="number" data-reference="propiedad">
+                    </div>
+                    <div class="campo">
+                        <label for="txtTotalActivos">Total Activos: </label>
+                        <input type="text" id="txtTotalActivos" disabled="disabled" data-reference="totalactivo" data-caja="total">
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroFinanciacion">Id Financiación:</label>
+            <input type="text" id="txtFiltroFinanciacion" data-attr="financiacion" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha Inicio:</label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaFin">Fecha Fin:</label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+
+        <span id="spanMensaje" class="pMensaje"></span>
+    </div>
+
+
+
+    <!-- División para los detalles de la factura -->
+    <div id="divDetallesFactura" style="display:none;">
+        <fieldset>
+            <legend>Factura</legend>
+
+            <div class="campo">
+                <label for="txtIdFactura">Id Factura:</label>
+                <input type="text" id="txtIdFactura" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNumFactura">Número de Factura:</label>
+                <input type="text" id="txtNumFactura" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtFechaFactura">Fecha:</label>
+                <input type="text" id="txtFechaFactura" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtEstadoFactura">Estado:</label>
+                <input type="text" id="txtEstadoFactura" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtValorFactura">Valor:</label>
+                <input type="text" id="txtValorFactura" disabled="disabled"/>
+            </div>
+
+        </fieldset>
+        <div style=" max-height: 65vh; overflow: auto;"> 
+            <table id="tblConceptos" class="tabla"></table>
+        </div>
+    </div>
+
+
+    <div id="divDetalleAmortizacion" style="display:none;">
+        <table id="tblDetalleAmortizacion" class="tabla"></table>
+    </div>
+
+    <!-- Division para simulador -->
+    <div id="divSimulador" style="display:none;" >
+        <div style="display: flex; justify-content: space-between;">
+            <div class="rows-3" style="display: none" id="divSuscripcionImprimir">
+                <label for="txtSuscripcionImprimir" ><strong>Código de Usuario:</strong></label>
+                <input type="text" id="txtSuscripcionImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none" >
+                <label for="txtPeriodoImprimir"><strong>Periodo Facturado:</strong></label>
+                <input type="text" id="txtPeriodoImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none" >
+                <label for="txtNumFinanciacionImprimir"><strong>Financiación N°:</strong></label>
+                <input type="text" id="txtNumFinanciacionImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+            <div class="rows-3" style="display: none" >
+                <label for="txtUsuarioImprimir"><strong>Suscriptor / Usuario:</strong></label>
+                <input type="text" id="txtUsuarioImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none" >
+                <label for="txtTipoSolicitanteImprimir"><strong>Tipo de Solicitante:</strong></label>
+                <input type="text" id="txtTipoSolicitanteImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none" >
+                <label for="txtDireccionImprimir"><strong>Dirección del Predio:</strong></label>
+                <input type="text" id="txtDireccionImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+            <div class="rows-3" style="display: none" id="divFechaActualImprimir">
+                <label for="txtFechaActualImprimir"><strong>Fecha de Financiación:</strong></label>
+                <input type="text" id="txtFechaActualImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none" >
+                <label for="txtValorFacturaImprimir"><strong>Valor Factura:</strong></label>
+                <input type="text" id="txtValorFacturaImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-3" style="display: none">
+                <label for="txtCuotaInicialImprimir"><strong>Vlr Cuota Inicial:</strong></label>
+                <input type="text" id="txtCuotaInicialImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+            <div class="rows-4" >
+                <label for="txtCapitalInicialImprimir" ><strong>Valor Saldo:</strong></label>
+                <input type="text" id="txtCapitalInicialImprimir" placeholder="Capital inicial" value="200000" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-4">
+                <label for="txtNumeroCuotas"><strong>Número de Cuotas:</strong></label>
+                <input type="text" id="txtNumeroCuotas" maxlength="2" placeholder="N�mero cuotas"  value="10" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-4" style="display: none" >
+                <label for="txtVlrPrimerCuotaImprimir"><strong>Valor Cuota:</strong></label>
+                <input type="text" id="txtVlrPrimerCuotaImprimir" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+            <div class="rows-4">
+                <label for="txtIntereses">Tasa de Interes: </label>
+                <input type="text" id="txtIntereses" placeholder="El valor se divide por 100" maxlength="100" class="inputImpresion input-width-max" disabled="disabled"/>
+            </div>
+        </div>
+        
+        <div class="txtAreaFacturas" style="display: none">
+            <label for="txtFacturas">Facturas: </label>
+            <textarea id="txtFacturas" style="border: 1px solid #000 !important" placeholder="Facturas" class="inputImpresion input-width-max" disabled="disabled"></textarea>
+        </div>
+
+        <p style="margin-top: 5px;"><strong>Nota:</strong> Los Valores de la cuota son aproximados ya que la tasa de interés varia mensualmente.</p>
+        <p>Con la firma del presente documento, me comprometo firme y solidariamente a pagar la deuda de la siguiente forma, más el valor del mes:</p>
+        <p style="margin-top: 10px;">Nota: Para los usuarios con segmento Cartera G no aplica valor del mes.</p>
+        <div style="margin-top: 20px;" id="divTbl"></div>
+        <p style="margin-top: 10px;"><strong>Cláusula Aceleratoria: </strong>Conforme con lo establecido en el articulo 69 de la Ley 45 de 1990, ante el incumplimiento de pago, se hará exigible la totalidad de la obligación en la factura de servicio.</p>
+    </div>
+
+    <div id="contentFrame" style="display:none;">
+        <iframe frameborder="0" src="/achagua/sistema/web/bundles/Llanogas/templates/contenidoframe.html" id="iframePrint1"></iframe>
+        <iframe frameborder="0" src="/achagua/sistema/web/bundles/Llanogas/templates/formatoBio.html" id="iframePrint2"></iframe>
+    </div>
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/amortizador.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/NumberFormatter.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion/convertirPrecios.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/impresionformatos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion_crud/financiacion_crud.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion/control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion/modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion_crud/financiacion_crud.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion_crud/financiacion_crud.vista.js')}}"></script>
+{% endblock %}

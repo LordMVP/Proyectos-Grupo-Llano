@@ -1,0 +1,300 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Gestionar Suscriptor  {% endblock %}
+
+{% block body %}
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+    <div id="divTercero">
+        <!--Fieldset para mostrar datos del tercero-->
+        <fieldset id="fieldsetDatosTercero">
+            <legend>Datos del Tercero</legend>
+
+            <div class="campo">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNombre">Nombre:</label>
+                <input type="text" id="txtNombre" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtIdTercero">Id Tercero:</label>
+                <input type="text" id="txtIdTercero" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTelefonoFijo">Teléfono Fijo:</label>
+                <input type="text" id="txtTelefonoFijo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTelefonoCelular">Teléfono Celular:</label>
+                <input type="text" id="txtTelefonoCelular" disabled="disabled" />
+            </div>
+        </fieldset>
+    </div>
+    <div id="divSuscriptor" style="display: none;"> 
+        <fieldset id ="Datos Suscriptor">
+            <legend>Datos del Suscriptor</legend>
+            <div id ="divTblDatosSuscriptor">
+                <table id ="tblDatosSuscriptor" class="tabla"></table>
+            </div>
+            <input type="button" id ="btnAdicionarSuscriptor" value="Adicionar Suscriptor" class="btnSimple" > 
+        </fieldset>
+    </div>
+    <div id="divSuscripciones" style="display: none;">    
+        <fieldset id ="Datos Suscriptciones">
+            <legend>Datos Suscripciones</legend>
+            <div id ="divTblDatosSuscripciones">
+                <table id ="tblDatosSuscripciones" class="tabla"></table>
+            </div>
+        </fieldset>
+    </div>    
+    <div id="divAdicionarSuscriptor" style="display: none;">
+        <div class="campo">
+            <label for="ClonetxtDocumento">NIT/CC:</label>
+            <input type="text" id="ClonetxtDocumento" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="ClonetxtNombre">Nombre:</label>
+            <input type="text" id="ClonetxtNombre" disabled="disabled" />
+        </div>
+        <fieldset>
+            <legend>Información a Adicionar</legend> 
+            <div class="campo">
+                <label for="txtConvenio">Convenio: </label>
+                <select  id="cboConvenio" >
+                    <option value="-1"> Seleccione Convenio</option>
+                </select>
+            </div>
+            <label for="txtDescripcion">Descripcion: </label>
+            <textarea id="txtDescripcion"></textarea>
+        </fieldset>
+        <p id="pmensajeAdicionar" class="pMensaje"></p>
+    </div>
+    <div id="divTrasladarSuscripcion" style="display: none;">
+        <fieldset><legend>Tipo Traslado </legend>
+            <input type="radio" id="tipotraslado" name="tipoTraspado"  checked="checked" value="T" />
+            Temporal 
+            <input type="radio" id="tipotraslado" name="tipoTraspado"  value="D" /> 
+            Definitivo 
+        </fieldset>
+        <fieldset><legend>Destino</legend>
+            <div class="campo">
+                <select id="cboDestino">
+                    <option vallue="-1">Seleccione</option>
+                </select>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Información Suscripcion</legend>
+            <div class="campo">
+                <label for="txtIdSuscripcion">Id Suscripción:</label>
+                <input type="text" id="txtIdSuscripcion" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtCodigoAnterior">Código Anterior:</label>
+                <input type="text" id="txtCodigoAnterior"  disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNombreTercero">Nombre Tercero:</label>
+                <input type="text" id="txtNombreTercero"   disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtIdMedidor">Id Medidor:</label>
+                <input type="text" id="txtIdMedidor"  disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtMunicipio">Municipio:</label>
+                <input type="text" id="txtMunicipio" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtDireccion">Dirección:</label>
+                <input type="text" id="txtDireccion"  disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtBarrio">Barrio:</label>
+                <input type="text" id="txtBarrio" disabled="disabled"  >
+            </div>
+            <div class="campo">
+                <label for="txtNumeroCatastral">Número Catastral:</label>
+                <input type="text" id="txtNumeroCatastral" disabled="disabled"  />
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="divInformacionPropiedades" style="display: none;">
+        <!--Fieldset oculto para mostrar datos de la propiedad seleccionada-->
+        <fieldset id="fieldsetPropiedad">
+            <legend>Propiedad</legend>
+            <div class="campo">
+                <label for="txtNumeroPropiedad">Número Propiedad:</label>
+                <input type="text" id="txtNumeroPropiedad" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTipoPropiedad">Tipo Propiedad:</label>
+                <input type="text" id="txtTipoPropiedad" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtMunicipio">Municipio:</label>
+                <input type="text" id="txtMunicipio" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtBarrio">Barrio:</label>
+                <input type="text" id="txtBarrio" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtDireccion">Dirección:</label>
+                <input type="text" id="txtDireccion" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtSeccion">Sección:</label>
+                <input type="text" id="txtSeccion" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtManzana">Manzana:</label>
+                <input type="text" id="txtManzana" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtAltoRiesgo">Alto Riesgo:</label>
+                <input type="text" id="txtAltoRiesgo" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNumeroCatastral">Número Catastral:</label>
+                <input type="text" id="txtNumeroCatastral" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtZona">Zona:</label>
+                <input type="text" id="txtZona" disabled="disabled" />
+            </div>
+            <div>
+                <label for="txtDescripcion">Descripción:</label>
+                <textarea id="txtDescripcion" disabled="disabled" ></textarea>
+            </div>
+        </fieldset>
+    </div>
+    <div id="divDetallesSuscripcion" style="display: none;">
+        <!--Fieldset oculto para agregar detalles de la suscripción-->
+        <fieldset id="fieldsetDetallesSuscripcion">
+            <legend>Detalles de Suscripción</legend>
+
+            <div class="campo oculto">
+                <label for="txtIdSuscripcion">Id Suscripción:</label>
+                <input type="text" id="txtIdSuscripcion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFechaInicio">Fecha de Inicio:</label>
+                <input type="text" id="txtFechaInicio" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtDescripcion">Descripción:</label>
+                <input type="text" id="txtDescripcion" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoSuscripcion">Tipo Suscripción:</label>
+                <input type="text" id="txtTipoSuscripcion" disabled="disabled" />
+                </select>
+            </div>
+            <div class="campo">
+                <label for="txtRuta">Ruta:</label>
+                <input type="text" id="txtRuta" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtCiclo">Ciclo:</label>
+                <input type="text" id="txtCiclo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoUso">Tipo Uso:</label>
+                <input type="text" id="txtTipoUso" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtLiquidacion">Liquidación:</label>
+                <input  type="text" id="txtLiquidacion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="cboEstrato">Estrato:</label>
+                <select id="cboEstrato" disabled="disabled">
+                    <option value="-1">Seleccione</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="txtEstado">Estado:</label>
+                <input type="text" id="txtEstado" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFactorCorreccion">Factor Corrección:</label>
+                <input type="text" id="txtFactorCorreccion" disabled="disabled" />
+            </div>
+        </fieldset>
+    </div>         
+
+    <div id="divFiltroBuscar" style="display:none;">
+        <!--Fieldset para mostrar datos del tercero-->
+        <fieldset id="fieldsetDatosTercero">
+            <legend>Datos del Tercero</legend>
+
+            <div class="campo">
+                <label for="txtFiltDocumento">NIT/CC:</label>
+                <input type="text" id="txtFiltDocumento" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFiltNombre">Nombre:</label>
+                <input type="text" id="txtFiltNombre" disabled="disabled" />
+            </div>
+             <div class="campoCorto">
+                 <br>     
+            <input type="button" id="btnBuscarSuscriptor" class="btnSimple"value ="Buscar" />
+             </div>
+            <p id="pMensajeBuscar" class="pMensaje"></p>
+        </fieldset>
+        <div id="divFiltroBuscarResultados" style="display:none;">
+            <table id="tblSuscriptoresResultado" class="tabla"></table>
+        </div>
+    </div>    
+    <div id="DivConsolidaAdicionarSuscriptor" style="display:none;"></div>
+    <div id="divCancelar" style="display:none;">
+        Confirma Cancelar la Operación Actual ?
+    </div>
+        
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/suscriptor/gestionarSuscriptor/gestionarsuscriptor.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/suscriptor/gestionarSuscriptor/gestionarsuscriptor.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/suscriptor/gestionarSuscriptor/gestionarsuscriptor.vista.js')}}"></script>    
+{% endblock %}

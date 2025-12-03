@@ -1,0 +1,186 @@
+ consultando los recaudos para procesar 
+ Número de recaudos a procesar 1 
+
+ Informacion REcaudo inicial Array
+(
+    [idsuscripcion] => 215158
+    [idsuscriptor] => 37010
+    [idtercero] => 62175
+    [idempresa] => 317
+    [idliquidacion] => 4614
+    [idtipdocumento] => 4609
+    [iddocumento] => 24
+    [idciclo] => 150
+    [cicloanio] => 2022
+    [idperiodo] => 5528
+    [fechapago] => 2023-02-20 00:00:00
+    [valorpago] => 42942
+    [saldo] => 42942
+    [idmediopago] => 4639
+    [idformapago] => 75
+    [idsucursal] => 30
+    [idproceso] => 1
+    [idregistro] => 13568070
+    [idfinanciacion] => 0
+    [idfactura] => 0
+)
+Se aplicarán abonos a las facturas 
+
+ Inserta Distribucion :Array
+(
+    [idsuscripcion] => 215158
+    [idsuscriptor] => 37010
+    [idtercero] => 62175
+    [idempresa] => 317
+    [idliquidacion] => 4614
+    [idtipdocumento] => 4609
+    [iddocumento] => 24
+    [idciclo] => 150
+    [cicloanio] => 2022
+    [idperiodo] => 5528
+    [fechapago] => 2023-02-20 00:00:00
+    [valorpago] => 42942
+    [saldo] => 42942
+    [idmediopago] => 4639
+    [idformapago] => 75
+    [idsucursal] => 30
+    [idproceso] => 1
+    [idregistro] => 13568070
+    [idfinanciacion] => 0
+    [idfactura] => 0
+    [iddocumentorecaudo] => 83
+    [recaudo] => Array
+        (
+            [fecha] => now()
+            [estado] => A
+            [valorpagado] => 42942
+            [cambio] => 0
+            [ajuste] => 0
+            [valorreal] => 42942
+            [idmediopago] => 4639
+            [idconvenio] => 0
+            [idempresa] => 317
+            [idsuscriptor] => 37010
+            [idtercero] => 62175
+            [iddocumento] => 83
+            [fechapago] => 2023-02-20 00:00:00
+            [idsucursal] => 30
+            [idusuario] => 1226
+            [version] => 1
+            [fechaaplicado] => now()
+            [idunificado] => 13568070
+            [idrecaudo] => 13487110
+        )
+
+    [valorpagoreal] => 42942
+)
+
+ Empresa Sesion : 317
+ Info suscripcion : Array
+(
+    [estado] => A
+    [descripcion] => UsoBio
+    [codigoanterior] => 040330273001
+    [idsuscriptor] => 37010
+    [idsuscripcion] => 215158
+    [idtercero] => 62175
+    [idpropiedad] => 213665
+    [idmunicipio] => 30
+    [idbarrio] => 4444
+    [idestructuratiposuscripcion] => 24
+    [idtiposuscripcion] => 1
+    [idestructuratipousosuscripcion] => 21
+    [idtipousosuscripcion] => 271
+    [idempresa] => 317
+    [idestructuraliquidacion] => 9
+    [idliquidacion] => 4614
+    [idciclo] => 150
+    [fechainicio] => 2017-03-25
+    [fechaexpira] => 
+    [estrato] => 8
+    [fechainicioestado] => 
+    [fechafinestado] => 
+    [idtipotercero] => 19
+)
+
+ Inserta Distribucion 2 :Array
+(
+    [valorrecaudo] => 42942
+    [saldorecaudo] => 42942
+    [idrecaudo] => 13487110
+    [iddistribucionconvenio] => 0
+    [idsuscripcion] => 215158
+    [idperiodo] => 5528
+    [idciclo] => 150
+    [idempresa] => 317
+    [cicloanio] => 2022
+    [idusuario] => 1226
+    [version] => 1
+)
+
+  Distribucion Despues de Insertar :Array
+(
+    [idsuscripcion] => 215158
+    [idsuscriptor] => 37010
+    [idtercero] => 62175
+    [idempresa] => 317
+    [idliquidacion] => 4614
+    [idtipdocumento] => 4609
+    [iddocumento] => 24
+    [idciclo] => 150
+    [cicloanio] => 2022
+    [idperiodo] => 5528
+    [fechapago] => 2023-02-20 00:00:00
+    [valorpago] => 42942
+    [saldo] => 42942
+    [idmediopago] => 4639
+    [idformapago] => 75
+    [idsucursal] => 30
+    [idproceso] => 1
+    [idregistro] => 13568070
+    [idfinanciacion] => 0
+    [idfactura] => 0
+    [iddocumentorecaudo] => 83
+    [recaudo] => Array
+        (
+            [fecha] => now()
+            [estado] => A
+            [valorpagado] => 42942
+            [cambio] => 0
+            [ajuste] => 0
+            [valorreal] => 42942
+            [idmediopago] => 4639
+            [idconvenio] => 0
+            [idempresa] => 317
+            [idsuscriptor] => 37010
+            [idtercero] => 62175
+            [iddocumento] => 83
+            [fechapago] => 2023-02-20 00:00:00
+            [idsucursal] => 30
+            [idusuario] => 1226
+            [version] => 1
+            [fechaaplicado] => now()
+            [idunificado] => 13568070
+            [idrecaudo] => 13487110
+        )
+
+    [valorpagoreal] => 42942
+    [distribucion] => Array
+        (
+            [valorrecaudo] => 42942
+            [saldorecaudo] => 42942
+            [idrecaudo] => 13487110
+            [iddistribucionconvenio] => 0
+            [idsuscripcion] => 215158
+            [idperiodo] => 5528
+            [idciclo] => 150
+            [idempresa] => 317
+            [cicloanio] => 2022
+            [idusuario] => 1226
+            [version] => 1
+            [iddistribucionrecaudo] => 13530831
+        )
+
+)
+ consultando los recaudos para procesar 
+ No hay más recaudos por procesar

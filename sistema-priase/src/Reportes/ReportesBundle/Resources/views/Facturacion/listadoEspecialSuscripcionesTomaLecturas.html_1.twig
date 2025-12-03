@@ -1,0 +1,97 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Listado especial para toma de lecturas suscripciones - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="facturacionController">
+        <div id="divPanelContenedor">
+            <fieldset>  
+                <legend>Generacion de reporte de relacion de totales por consumo.</legend>
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Datos del suscriptor</h3>
+                        </div>
+                        <div class="panel-body">                            
+                            <div class="form-group col-md-12">
+                                <label>Nombre del suscriptor</label>
+                                <input type="text" ng-model="suscriptor" placeholder="Ingrese el nombre del suscriptor" uib-typeahead="terceros as terceros.tercero_nombre for terceros in buscarTerceros($viewValue)" typeahead-loading="loadingLocations" typeahead-no-results="noResults" typeahead-template-url="terceroTemplate.html" typeahead-wait-ms="300" class="form-control input-sm"/>
+                                <p class="help-block-show" ng-show="loadingLocations" >
+                                    <i class="fa fa-refresh"></i> Cargando resultados
+                                </p>
+                                <p class="help-block-show" ng-show="noResults" >
+                                    <i class="fa fa-remove"></i> No se han encontrado resultados 
+                                </p>
+                            </div>
+                            <div class="form-group col-md-12 col-lg-6">
+                                <label>Ciclo</label>
+                                <select ng-model="ciclo" ng-change="cargarPeriodosCiclo()" id="cboCiclo" class="form-control input-sm">
+                                    <option value="-1"> Seleccione </option>
+                                    {% for ciclo in ciclosActivos %}
+                                        <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-12 col-lg-6">
+                                <label>Periodo</label>
+                                <select class="form-control input-sm">
+                                    <option value="-1"> Seleccione </option>
+                                    <option ng-repeat="periodo in periodos" value="{[{periodo.id_periodo}]}">
+                                        {[{periodo.periodo_nombre}]}
+                                    </option>                                    
+                                </select>
+                            </div>
+                        </div>
+                        <ul class="list-group" ng-show="suscriptor.tercero_nombre">
+                            <li class="list-group-item">
+                                <label>Nombre:</label>
+                                {[{suscriptor.tercero_nombre}]}
+                            </li>
+                            <li class="list-group-item">
+                                <label>Documento:</label>
+                                {[{suscriptor.tercero_documento}]}
+                            </li>
+                            <li class="list-group-item">
+                                <label>Tipo tercero:</label>
+                                {[{suscriptor.tercero_tipo}]}
+                            </li>
+                            <li class="list-group-item">
+                                <label>Telefonos:</label>
+                                {[{suscriptor.tercero_telefono_celular}]} - {[{suscriptor.tercero_telefono_fijo}]}
+                            </li>                            
+                        </ul>
+                        <div class="panel-footer">
+                            <div class="col-md-12">
+                                <button ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm btn-block">
+                                    <i class="fa fa-gears fa-1x"></i> Listado para emitir lecturas
+                                </button>
+                                <button ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm btn-block">
+                                    <i class="fa fa-gears fa-1x"></i> Listado de facturacion emitida
+                                </button>
+                            </div>
+                            <div class="clearfix"/>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </div>
+        <script type="text/ng-template" id="terceroTemplate.html">
+            <a>        
+            <span ng-bind-html="match.model.tercero_nombre | uibTypeaheadHighlight:query"></span>                
+            </a>
+        </script>
+    </div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/autocomplete/ui-bootstrap-tpls-0.14.3.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/pdfjs/build/pdf.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/listados/listadoTomaLecturas.control.angular.js')}}"></script>
+{% endblock %}

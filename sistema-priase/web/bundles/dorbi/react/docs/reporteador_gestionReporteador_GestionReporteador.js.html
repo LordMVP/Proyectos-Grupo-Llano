@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: reporteador/gestionReporteador/GestionReporteador.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: reporteador/gestionReporteador/GestionReporteador.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { get as getProp } from 'object-path';
+import PropTypes from 'prop-types';
+import { Input, TextoNumerico, Botonera, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+import { SelectorMultiple } from '../../Utils/SelectorMultiple';
+
+import { RConsultaReporteador } from '../ConsultaReporteador';
+import './GestionReporteador.scss';
+
+const formatosSalida = [
+  {}
+];
+
+class GestionReporteador extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+
+    // Datos de la entidad
+    // ...
+
+    // Estado de la aplicacion
+    // ...
+
+  };
+
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+
+      // Datos de la entidad
+      // ...
+
+      // Estado de la aplicacion
+      // ...
+
+    });
+  };
+
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  validarFormulario = () => {
+    // Ejemplo Validacion
+    if (false) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un cargo de tipo AO&amp;M para poder continuar.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = {
+      // Asignar datos de la entidad
+    }
+
+    // Reemplazar con ruta del Endpoint para guardar
+    axios.post(RUTAS_API.XXXXXX, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      // Cargar datos de la entidad
+      // ...
+    });
+  };
+
+  /**
+   * Render Parámetros Generales.
+   * @return {Component}
+   */
+  renderParametrosGenerales = () => {
+    return (
+      &lt;div className='col-md-12'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Parámetros Generales&lt;/label>
+          &lt;div className='body-grid row'>
+            &lt;Combo
+              opciones={formatosSalida}
+              propTexto='texto'
+              propValor='valor'
+              label='Formato salida:'
+              name='formatoSalida'
+              value={this.state.formatoSalida}
+              onChange={this.controlarCambio}
+            />
+            &lt;Input
+              label='Demilitador Registro:'
+              value={this.state.demilitadorRegistro}
+              onChange={this.controlarCambio}
+              name='demilitadorRegistro'
+            />
+            &lt;Input
+              label='Demilitador Campo:'
+              value={this.state.demilitadorCampo}
+              onChange={this.controlarCambio}
+              name='demilitadorCampo'
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Tamaño máximo por página:'
+              cols={3}
+              value={this.state.tamanoPorPagina}
+              onChange={this.controlarCambio}
+              name='tamanoPorPagina'
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Número máximo registros:'
+              cols={3}
+              value={this.state.numMaximoRegistros}
+              onChange={this.controlarCambio}
+              name='numMaximoRegistros'
+            />
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Renderiza el panel origen datos.
+   * @return {Component}
+   */
+  renderOrigenDatos = () => {
+    return (
+      &lt;div className='col-md-6 mt-5'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Origen Datos&lt;/label>
+          &lt;div className='body-grid'>
+            &lt;SelectorMultiple
+              titulo='Origen Datos'
+              propTexto='ptcoNombre'
+              propValor='ptcIderegistro'
+              seleccionarItem={this.props.seleccionarItem}
+              lista={getProp(this.state, 'listaOrigenDatos', [])}
+            />
+            &lt;div className='col-md-12'>
+              &lt;table className='table table-condensed table-striped table-hover'>
+                &lt;thead>
+                  &lt;tr>
+                    &lt;th>Origen&lt;/th>
+                    &lt;th>Principal&lt;/th>
+                  &lt;/tr>
+                &lt;/thead>
+                &lt;tbody>
+                  {
+                    getProp(this.state, 'origenesDatos', []).map((origen, index) => {
+                      return (
+                        &lt;tr key={index}>
+                          &lt;td>{origen.nombre}&lt;/td>
+                          &lt;td>&lt;label>&lt;input type="checkbox" value={origen.id} /> Si&lt;/label>&lt;/td>
+                        &lt;/tr>
+                      );
+                    })
+                  }
+                &lt;/tbody>
+              &lt;/table>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Renderiza el panel Celda datos.
+   * @return {Component}
+   */
+  renderCeldaDatos = () => {
+    return (
+      &lt;div className='col-md-6 mt-5'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Celda Datos&lt;/label>
+          &lt;div className='body-grid row'>
+            &lt;div className='col-11 row'>
+              &lt;Combo
+                opciones={getProp(this.state, 'tablas', [])}
+                propTexto='texto'
+                propValor='valor'
+                label='Tabla:'
+                cols={6}
+                name='tabla'
+                value={this.state.tabla}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={getProp(this.state, 'columnas', [])}
+                propTexto='texto'
+                propValor='valor'
+                label='Campo:'
+                cols={6}
+                name='columna'
+                value={this.state.columna}
+                onChange={this.controlarCambio}
+              />
+            &lt;/div>
+            &lt;div className='col-1'>
+              &lt;button className='btn btn-primary m-t-24' title='Agregar'>
+                &lt;i className='fa fa-fw fa-plus'>&lt;/i>
+              &lt;/button>
+            &lt;/div>
+            &lt;div className='col-md-12'>
+              &lt;table className='table table-condensed table-striped table-hover'>
+                &lt;thead>
+                  &lt;tr>
+                    &lt;th>Tabla&lt;/th>
+                    &lt;th>Campo&lt;/th>
+                  &lt;/tr>
+                &lt;/thead>
+                &lt;tbody>
+                  {
+                    getProp(this.state, 'origenesDatos', []).map((origen, index) => {
+                      return (
+                        &lt;tr key={index}>
+                          &lt;td>{origen.nombre}&lt;/td>
+                          &lt;td>&lt;label>&lt;input type="checkbox" value={origen.id} /> Si&lt;/label>&lt;/td>
+                        &lt;/tr>
+                      );
+                    })
+                  }
+                &lt;/tbody>
+              &lt;/table>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderDependenciaFuncional = () => {
+    return (
+      &lt;div className='col-md-12 mt-5'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Dependencia Funcional&lt;/label>
+          &lt;div className='body-grid row'>
+            &lt;div className='col-12 row'>
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tabla Origen Datos:'
+                name='origenDatos'
+                value={this.state.orgienDatos}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Celda Origen Datos:'
+                name='celdaOrigenDatos'
+                value={this.state.celdaOrigenDatos}
+                onChange={this.controlarCambio}
+              />
+              &lt;div className='form-group col-3'>
+                &lt;button className='btn btn-primary m-t-24'>
+                  &lt;i className='fa fa-fw fa-plus'>&lt;/i> Agregar
+              &lt;/button>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderSeccionAgrupamiento = () => {
+    return (
+      &lt;div className='col-md-6 mt-5'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Agrupamiento&lt;/label>
+          &lt;div className='body-grid'>
+            &lt;div className='row'>
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tabla Origen:'
+                name='tablaOrigen'
+                cols={6}
+                value={this.state.tablaOrigen}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Campo:'
+                name='campo'
+                cols={6}
+                value={this.state.campo}
+                onChange={this.controlarCambio}
+              />
+              &lt;div className='col-md-12'>
+                &lt;table className='table table-condensed table-striped table-hover'>
+                  &lt;thead>
+                    &lt;tr>
+                      &lt;th>Tabla Origen&lt;/th>
+                      &lt;th>Campo&lt;/th>
+                    &lt;/tr>
+                  &lt;/thead>
+                  &lt;tbody>
+                    {
+                      getProp(this.state, 'origenesDatos', []).map((origen, index) => {
+                        return (
+                          &lt;tr key={index}>
+                            &lt;td>{origen.nombre}&lt;/td>
+                            &lt;td>{origen.campo}&lt;/td>
+                          &lt;/tr>
+                        );
+                      })
+                    }
+                  &lt;/tbody>
+                &lt;/table>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderSeccionOrdenamiento = () => {
+    return (
+      &lt;div className='col-md-6 mt-5'>
+        &lt;div className='content-grid'>
+          &lt;label className='title-grid'>Ordenamiento&lt;/label>
+          &lt;div className='body-grid'>
+            &lt;div className='row'>
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tabla Origen:'
+                name='tablaOrigen'
+                cols={6}
+                value={this.state.tablaOrigen}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Campo:'
+                name='campo'
+                cols={6}
+                value={this.state.campo}
+                onChange={this.controlarCambio}
+              />
+              &lt;div className='col-md-12'>
+                &lt;table className='table table-condensed table-striped table-hover'>
+                  &lt;thead>
+                    &lt;tr>
+                      &lt;th>Tabla Origen&lt;/th>
+                      &lt;th>Campo&lt;/th>
+                    &lt;/tr>
+                  &lt;/thead>
+                  &lt;tbody>
+                    {
+                      getProp(this.state, 'origenesDatos', []).map((origen, index) => {
+                        return (
+                          &lt;tr key={index}>
+                            &lt;td>{origen.nombre}&lt;/td>
+                            &lt;td>{origen.campo}&lt;/td>
+                          &lt;/tr>
+                        );
+                      })
+                    }
+                  &lt;/tbody>
+                &lt;/table>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          {this.renderParametrosGenerales()}
+          {this.renderOrigenDatos()}
+          {this.renderCeldaDatos()}
+          {this.renderDependenciaFuncional()}
+          {this.renderSeccionAgrupamiento()}
+          {this.renderSeccionOrdenamiento()}
+        &lt;/div>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta Reporteador'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaReporteador esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  }
+}
+
+GestionReporteador.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionReporteador);
+
+export { VistaRedux as RGestionReporteador };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#estadoConsulta">estadoConsulta</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:43:08 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

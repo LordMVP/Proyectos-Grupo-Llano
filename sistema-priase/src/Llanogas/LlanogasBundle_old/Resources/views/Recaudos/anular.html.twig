@@ -1,0 +1,108 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/anular.estilo.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+{% block scripts %}
+{% endblock %}
+{% block titulo %}Recaudos: Anular Recaudo - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+
+    <div id="divPanelContenedor">
+        <fieldset id="fieldCabecera">
+            <legend>Información del Recaudo</legend>
+            <div class="campoCorto">
+                <label for="txtIdRecaudo">ID del Recaudo:</label>
+                <input type="text" id="txtIdRecaudo" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtFecha">Fecha:</label>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNombreTercero">Nombre del Tercero:</label>
+                <input type="text" id="txtNombreTercero" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtConvenio">Convenio:</label>
+                <input type="text" id="txtConvenio" disabled="disabled" />
+            </div>
+            <button id="btnVerFormasPago" class="btnSimple">Ver Formas de Pago</button>
+        </fieldset>
+        
+        <div id="divSuscripciones">
+            <table id="tblSuscripciones" class="tabla"></table>
+        </div>
+        
+        <div id="divFacturas">
+            <table id="tblFacturas" class="tabla"></table>
+        </div>
+        
+    </div>
+
+
+<div id="divFiltro">
+    <div>
+        <div class="campo">
+            <label for="txtIdRegistroFiltro">Id Recaudo:</label>
+            <input type="text" id="txtIdRegistroFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscripcionFiltro">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcionFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscriptorFiltro">Id Suscriptor:</label>
+            <input type="text" id="txtIdSuscriptorFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtCodAnteriorFiltro">Cód Anterior:</label>
+            <input type="text" id="txtCodAnteriorFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha de Inicio:</label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha de Fin:</label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+    </div>
+    <p class="pMensaje"></p>
+    <div id="divResultadoFiltro" class="listaSeleccion"></div>
+</div>
+
+<div id="divMotivos">
+    <label for="cmbMotivo">Motivo de la anulación:</label>
+    {{cmbMotivos|raw}}
+    <label for="txtObservacion">Observaciones:</label>
+    <textarea id="txtObservacion"></textarea>
+</div>
+
+<div id="divFormasPago">
+    
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/anular/anular.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/anular/anular.modelo.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/anular/anular.vista.js')}}"></script>
+{% endblock %}

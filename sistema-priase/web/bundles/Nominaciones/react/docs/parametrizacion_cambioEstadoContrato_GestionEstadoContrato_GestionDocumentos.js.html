@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/cambioEstadoContrato/GestionEstadoContrato/GestionDocumentos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/cambioEstadoContrato/GestionEstadoContrato/GestionDocumentos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
+import { Combo, Fecha, Tabla, Util } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { get as getProp } from 'object-path';
+
+class GestionDocumentos extends Component {
+
+  state = {
+    tipoDocumento: '',
+    fechaInicio: '',
+    fechaFin: '',
+    fechaExpedicion: '',
+  };
+
+  /**
+   * Método encargado de actualizar los adjuntos en el componente padre
+   * @param {Object} nuevoCambio Cambio a ejecutar
+   */
+  actualizarAdjuntos = (nuevoCambio) => {
+    this.props.actualizarAdjuntos({
+      ...this.props.adjuntos,
+      ...nuevoCambio
+    })
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({});
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    const control = evento.target;
+    let nuevoEstado = {};
+    nuevoEstado[control.name] = control.value;
+    this.setState(nuevoEstado);
+  }
+
+  /**
+   * Método encargado de controlar el cambio de los archivos
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioArchivo = (evento) => {
+    const validacion = this.validarDocumento();
+    if (!validacion.respuesta) {
+      const { titulo, mensaje } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+    const adjunto = evento.target.files[0];
+    const { tipoDocumento, fechaInicio, fechaFin, fechaExpedicion } = this.state;
+    let nuevoArchivo = { tipoDocumento, fechaInicio, fechaFin, fechaExpedicion };
+    nuevoArchivo.archivo = adjunto;
+
+    const { adjuntos } = this.props;
+    if (Util.validarArreglo(adjuntos)) {
+      return this.actualizarAdjuntos({ adjuntos: [...adjuntos, nuevoArchivo] });
+    }
+    this.actualizarAdjuntos({ adjuntos: [nuevoArchivo] });
+  };
+
+  /**
+   * Método encargado de abrir el selector de archivos
+   * @returns {Boolean}
+   */
+  abrirSelectorArchivo = () => {
+    const validacion = this.validarDocumento();
+    if (!validacion.respuesta) {
+      const { titulo, mensaje } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+
+    this.selectorArchivo.click();
+  };
+
+  /**
+   * Método encargado de validar los datos necesarios para subir un archivo
+   * @returns {Object}
+   */
+  validarDocumento = () => {
+    const { tipoDocumento, fechaInicio, fechaFin, fechaExpedicion } = this.state;
+    if (tipoDocumento === '' || tipoDocumento === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo de documento' } };
+    }
+
+    if (fechaInicio === '' || fechaFin === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha de inicio y una fecha de fin' } };
+    }
+
+    if (fechaExpedicion == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha de expedición' } };
+    }
+    return { respuesta: true };
+  }
+
+  /**
+   * Método encargado de obtener el tipo de documento
+   * @returns {String}
+   */
+  obtenerTipoDocumento = (tipoDocumento) => {
+    const { listaTiposDocumento } = this.props;
+    const index = listaTiposDocumento.findIndex(d => d.uniIderegistro == tipoDocumento);
+    return listaTiposDocumento[index].uniNombre1;
+  };
+
+  /**
+   * Método encargado de obtener el nombre del archivo
+   * @returns {String}
+   */
+  obtenerNombreArchivo = (archivo) => {
+    return archivo.archivo.name;
+  }
+
+  /**
+   * Método encargado de mostrar la tabla de archivos
+   * @returns {JSX}
+   */
+  renderTablaArchivos = () => {
+    const listaArchivos = this.props.adjuntos;
+    return (
+      &lt;div>
+        &lt;table className="table table-condensed table-striped table-hover">
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Tipo Documento&lt;/th>
+              &lt;th>Archivo&lt;/th>
+              &lt;th>Fecha Inicio&lt;/th>
+              &lt;th>Fecha Fin&lt;/th>
+              &lt;th>Expedición&lt;/th>
+              &lt;th>Opciones&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {
+              listaArchivos.map((archivo, index) => {
+                return (
+                  &lt;tr key={index}>
+                    &lt;td>{this.obtenerTipoDocumento(archivo.tipoDocumento)}&lt;/td>
+                    &lt;td>{this.obtenerNombreArchivo(archivo)}&lt;/td>
+                    &lt;td>{archivo.fechaInicio}&lt;/td>
+                    &lt;td>{archivo.fechaFin}&lt;/td>
+                    &lt;td>{archivo.fechaExpedicion}&lt;/td>
+                    &lt;td>&lt;button className='btn btn-link' onClick={() => { this.obtenerEnlaceDescarga(archivo) }}>Descargar&lt;/button>&lt;/td>
+                  &lt;/tr>
+                )
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de obtener el link de descarga de un archivo
+   * @param {Object} archivo Datos del archivo
+   * @returns {Object}
+   */
+  obtenerEnlaceDescarga = (archivo) => {
+    if (!archivo.id) {
+      this.props.mostrarAlerta('Descarga no disponible', 'Lo sentimos la descarga no está disponible, para descargar el archivo tiene que subirlo.');
+      return;
+    }
+    axios.post(RUTAS_API.CONTRATOS.DESCARGAR_ARCHIVO, { id: archivo.id })
+      .then((respuesta) => {
+        if (respuesta.data.codigo &lt; 0) {
+          this.props.mostrarAlerta('Archivo no existe', 'Lo sentimos el archivo no existe');
+          return;
+        }
+        let a = document.createElement('a');
+        a.href = 'data:' + archivo.tipo + ';base64,' + respuesta.data.datos.contenido;
+        a.download = archivo.nombre;
+        a.target = '_blank';
+        a.click();
+      });
+  };
+
+  /**
+   * Método encargado de subir los archivos seleccionados
+   * @returns {Boolean}
+   */
+  subirArchivos = () => {
+    const listaArchivos = this.props.adjuntos;
+    const data = new FormData();
+    let archivosParaSubir = 0;
+    for (let i = 0; i &lt; listaArchivos.length; i++) {
+      const archivo = listaArchivos[i];
+      if (!archivo.id) {
+        data.append('archivo[]', archivo.archivo);
+        archivosParaSubir++;
+      }
+    }
+    if (archivosParaSubir == 0) {
+      this.props.mostrarAlerta('No hay archivos', 'No se adjuntaron archivos nuevos para subir.');
+    }
+    const configuracion = { headers: { 'Content-Type': 'multipart/form-data' } };
+    axios.post(RUTAS_API.CONTRATOS.SUBIR_ARCHIVOS, data, configuracion)
+      .then((respuesta) => {
+        if (respuesta.data.codigo &lt; 0) {
+          this.mostrarError(respuesta.data.datos);
+          return;
+        }
+        this.procesarArchivos(respuesta.data.datos);
+      });
+  };
+
+  /**
+   * Método encargado de procesar los datos de los archivos
+   * @returns {Object}
+   */
+  procesarArchivos = (datos) => {
+    const listaArchivos = this.props.adjuntos;
+    const i = listaArchivos.findIndex(archivo => archivo.archivo.name == datos[0].nombreOriginal);
+    listaArchivos[i].id = datos[0].id;
+    listaArchivos[i].tipo = datos[0].tipo;
+    listaArchivos[i].nombre = datos[0].nombreOriginal;
+    this.actualizarAdjuntos({ adjuntos: [...listaArchivos] });
+  };
+
+  /**
+   * Método encargado de mostrar lista de errores al adjuntar el archivo
+   * @param {Array} errores Lista de errores
+   */
+  mostrarError = (errores) => {
+    let strMensaje = errores.map((err, index) => (&lt;li key={index}>{`Línea ${err.linea}: ${err.mensaje}`}&lt;/li>));
+    let mensaje = (
+      &lt;Fragment>
+        &lt;span>{`Ocurrieron uno o varios errores al subir el archivo, verifique el archivo e intente nuevamente.`}&lt;/span>
+        &lt;ul className='container mt-2 pl-5'>{strMensaje}&lt;/ul>
+      &lt;/Fragment>
+    );
+    this.props.mostrarAlerta('Error', mensaje);
+  };
+
+  /**
+   * Obtiene la lista de los tipos de documento para archivos filtrando por el tipo de negocio.
+   */
+  obtenerlistaTiposDocumento = () => {
+    const { listaTiposDocumento, tipoNegocio } = this.props;
+    if (!Array.isArray(listaTiposDocumento)) {
+      return [];
+    }
+    return listaTiposDocumento.filter((tipoDocumento) => {
+      const uniPropiedad = JSON.parse(tipoDocumento.uniPropiedad);
+      const propiedad = getProp(uniPropiedad, 'negocio', '');
+      if (propiedad.search(tipoNegocio) >= 0) {
+        return tipoDocumento;
+      }
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    const { tipoNegocio } = this.props;
+    if (!tipoNegocio || tipoNegocio === '-1') {
+      return (&lt;div className='text-center'>Debe seleccionar un tipo de Negocio para continuar con esta opción&lt;/div>)
+    }
+    return (
+      &lt;div>
+        &lt;div className='row col-12 contratos-documentos'>
+
+          &lt;Combo
+            opciones={this.obtenerlistaTiposDocumento()}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de Documento:'
+            name='tipoDocumento'
+            value={this.state.tipoDocumento}
+            onChange={this.controlarCambio}
+            cols={3}
+          />
+
+          &lt;Fecha
+            label='Fecha Expedición:'
+            name='fechaExpedicion'
+            fecha={this.state.fechaExpedicion || ''}
+            onChange={this.controlarCambio}
+            cols={3}
+          />
+
+          &lt;div className="grupo-campos col-6">
+            &lt;legend className="title">Vigencia:&lt;/legend>
+            &lt;div className="row">
+              &lt;Fecha
+                label='Fecha inicio:'
+                name='fechaInicio'
+                fechaInicio={null}
+                fechaFin={this.state.fechaFin}
+                fecha={this.state.fechaInicio || ''}
+                onChange={this.controlarCambio}
+                cols={6}
+              />
+              &lt;Fecha
+                label='Fecha fin:'
+                name='fechaFin'
+                fechaInicio={this.state.fechaInicio}
+                fechaFin={null}
+                fecha={this.state.fechaFin || ''}
+                onChange={this.controlarCambio}
+                cols={6}
+              />
+            &lt;/div>
+          &lt;/div>
+
+          &lt;button className="btn btn-primary contratos-documentos__btn-archivo" onClick={this.abrirSelectorArchivo}>Seleccionar archivo&lt;/button>
+          &lt;input
+            type="file"
+            id='selectorArchivo'
+            accept='application/pdf'
+            ref={ref => (this.selectorArchivo = ref)}
+            className='contratos-documentos__input-file'
+            onChange={this.controlarCambioArchivo}
+          />
+        &lt;/div>
+
+        {
+          Util.validarArreglo(this.props.adjuntos) &amp;&amp;
+          &lt;div className='contratos-documentos__tabla-archivos'>
+            {this.renderTablaArchivos()}
+            &lt;button className="btn btn-primary" onClick={this.subirArchivos}>
+              Subir archivos
+            &lt;/button>
+          &lt;/div>
+        }
+      &lt;/div>
+    );
+  }
+
+}
+
+GestionDocumentos.propTypes = {
+  listaTiposDocumento: PropTypes.array,
+  adjuntos: PropTypes.array,
+  mostrarAlerta: PropTypes.func,
+  actualizarAdjuntos: PropTypes.func,
+};
+
+export default GestionDocumentos;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

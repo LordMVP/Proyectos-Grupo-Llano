@@ -1,0 +1,62 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Generar Amortización   {% endblock %}
+{% block body %}
+    <form action="cargar/" method="post" enctype="multipart/form-data">
+
+        <div id="divPanelContenedor">
+            <fieldset>
+                <legend>Información</legend>
+
+                <div class="campoMitad"  >
+                    <label>Ciclo</label>
+                    <select id="cboCiclo">
+                        <option value="-1"> Seleccione </option>
+                        {% for ciclo in ciclos %}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <input type="button" value="Procesar Amortizacion" id="btnProcesaAmortizacion" class="btnSimple">
+
+            </fieldset>
+        </div>
+    </form>
+
+
+{% endblock %}
+{% block javascripts %}
+    <script>
+        (function () {
+            $('#btnProcesaAmortizacion').on('click', function () {
+                __cnn.ajax({
+                    'url': 'procesar/',
+                    'data': {'idciclo': $('#cboCiclo').val()},
+                    'completado': onValidarCicloCopleto
+                });
+
+            });
+            function onValidarCicloCopleto(data) {
+                switch (data.codigoRespuesta) {
+                    case -1:
+                        __dom.ocultarCargador();
+                        __dom.toastError(data.mensajeError);
+                        break;
+                    case 1:
+                        __dom.ocultarCargador();
+                        __dom.lanzarAlerta(data.mensaje, 'Información de Ciclo');
+                        break;
+                }
+            }
+        })();
+    </script>
+{% endblock %}

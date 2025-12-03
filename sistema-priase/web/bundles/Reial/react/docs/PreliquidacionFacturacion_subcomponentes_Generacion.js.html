@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: PreliquidacionFacturacion/subcomponentes/Generacion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: PreliquidacionFacturacion/subcomponentes/Generacion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react'
+import { Combo, Input, Fecha, Util } from 'appfuture-react'
+import Autocompletado from '../../Assets/componentes/Autocompletado'
+import API from '../../../global/rutas_api'
+import Peticion from '../../../global/peticion'
+import axios from 'axios';
+import './Generacion.scss';
+
+class Generacion extends Component {
+  state = {
+    dialogoModal: false,
+    deshabilitar: true,
+    lista: [],
+    listaLiquidaciones: [],
+
+    // defecto
+
+    empresa: '-1',
+    descripcion: '',
+    municipio: '',
+    ordenTrabajo: '',
+    desde: '',
+    hasta: '',
+    enProgreso: false,
+    progreso: 0,
+  };
+
+  // componentes
+
+  BotonPreliquidar = () => {
+    /* prettier-ignore */
+    return !this.state.enProgreso
+      ? &lt;button className="btn" onClick={() => { this.preliquidar() }}>preliquidar&lt;/button>
+      : &lt;button className="btn" disabled={true}>preliquidar&lt;/button>
+  };
+
+  BotonLimpiar = () => {
+    /* prettier-ignore */
+    return !this.state.enProgreso
+      ? &lt;button className="btn" onClick={() => { this.limpiarCampos() }}>Limpiar&lt;/button>
+      : &lt;button className="btn" disabled={true}>Limpiar&lt;/button>
+  };
+
+  /**
+   * Obtiene el id del Municipio.
+   * @param {string}
+   * @return {number}
+   */
+  obtenerIdMunicipio = (texto) => {
+    const { municipioJson } = this.state;
+    const municipio = municipioJson.find(m => m.texto.trim() == texto.trim());
+    if (!municipio) {
+      return null;
+    }
+    return municipio.valor;
+  };
+
+  validarArreglo = (arreglo) => {
+    return Array.isArray(arreglo) &amp;&amp; arreglo.length;
+  };
+
+  verificarProgreso = () => {
+    this.setState({ enProgreso: true });
+    this.consultarProgreso();
+  };
+
+  consultarProgreso = () => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.VERIFICAR_PROGRESO)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ progreso: respuesta.data.datos.correcto, errores: respuesta.data.datos.errores });
+          setTimeout(this.consultarProgreso, 15000);
+        } else {
+          this.setState({ enProgreso: false });
+        }
+      });
+  };
+
+  obtenerIdOrdenTrabajo = (ordenTrabajo) => {
+    if (!Util.validarArreglo(this.state.ordenTrabajoJson)) {
+      return null;
+    }
+    const indexOrden = this.state.ordenTrabajoJson.findIndex(o => {
+      if (o.texto == ordenTrabajo) {
+        return o;
+      }
+    });
+    if (indexOrden >= 0) {
+      return this.state.ordenTrabajoJson[indexOrden].sigueOrdtra;
+    }
+    return null;
+  };
+
+  preliquidar = () => {
+    const { desde, hasta, empresa, ordenTrabajo, municipio, descripcion, liquidacion } = this.state;
+    axios.post(API.PRELIQUIDACION_FACTURACION.PRELIQUIDAR,
+      {
+        fechaInicio: desde,
+        fechaFin: hasta,
+        uniLiquidacion: liquidacion,
+        codigoEmpresa: empresa,
+        ordenTrabajo: this.obtenerIdOrdenTrabajo(ordenTrabajo),
+        observacion: descripcion,
+        proyectoIderegistro: this.obtenerIdMunicipio(municipio),
+      })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.verificarProgreso();
+        }
+      });
+  };
+
+  // confirmar = () => {
+  //   this.props.mostrarAlerta('Confirmación', '¿Desea preliquidar la información actual?', [
+  //     {
+  //       clase: 'btn btn-danger',
+  //       callback: () => this.preliquidar(),
+  //       texto: 'Aceptar'
+  //     },
+  //     {
+  //       clase: 'btn btn-secondary',
+  //       texto: 'Cancelar'
+  //     }
+  //   ]);
+  // };
+
+  BotonConsultar = () => {
+    /* prettier-ignore */
+
+    return !this.state.enProgreso
+      ? &lt;button className="btn" onClick={this.consultar}>consultar&lt;/button>
+      : &lt;button className="btn" disabled={true}>consultar&lt;/button>
+  };
+
+  consultarEmpresas = () => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.LISTAR_EMPRESAS)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            empresaJson: Util.validarArreglo(respuesta.data.datos) ? respuesta.data.datos : []
+          });
+        }
+      });
+  };
+
+  obtenerIdEmpresaSeven = (idEmpresa) => {
+    const empresa = this.state.empresaJson.find(e => e.empresaCod == idEmpresa);
+    return empresa ? empresa.empresaSevemp : null;
+  };
+
+  consultarMunicipios = () => {
+    Peticion.postCustom({
+      url: API.PRELIQUIDACION_FACTURACION.LISTAR_MUNICIPIOS,
+      config: {
+        valor: 'proyectoCod',
+        texto: 'proyectoNom',
+        autocompletado: true,
+      },
+      parametros: {
+        idEmpresaContratante: this.obtenerIdEmpresaSeven(this.state.empresa),
+      },
+      callback: municipioJson => {
+        const municipios = Util.validarArreglo(municipioJson) ? municipioJson : [];
+        this.setState({ municipioJson: municipios })
+      }
+    });
+  };
+
+  consultarLiquidaciones = () => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.LISTAR_LIQUIDACIONES_APLICAR, { criterio: '' })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaLiquidaciones: respuesta.data.datos });
+        }
+      });
+  };
+
+  parsearListaParaAutocomplete = (lista, config) => {
+    const listaFinal = [];
+    lista.forEach(item => {
+      const obj = {
+        id: item[config.valor],
+        texto: item[config.texto]
+      };
+      listaFinal.push(obj);
+    });
+    return listaFinal;
+  };
+
+  consultarOrdenesTrabajo = () => {
+    const { empresa } = this.state;
+    if (!empresa || (typeof empresa == 'string' &amp;&amp; empresa.trim() == '')) {
+      return;
+    }
+
+    Peticion.postCustom({
+      url: API.PRELIQUIDACION_FACTURACION.LISTAR_ORDENES_COMPLETAS,
+      parametros: {
+        codigoEmpresa: this.state.empresa,
+        autocompletado: true
+      },
+      config: {
+        valor: 'sigueCodsus',
+        texto: 'sigueOrdtra',
+        autocompletado: true
+      },
+      callback: (ordenTrabajoJson) => this.setState({ ordenTrabajoJson }),
+    });
+  };
+
+  componentDidMount() {
+    this.consultarEmpresas();
+    this.consultarLiquidaciones();
+  };
+
+  verificarConsultas = (id, value) => {
+    if (this.obtenerIdOrdenTrabajo(value)) {
+      return;
+    }
+
+    if (id === 'empresa') {
+      this.consultarOrdenesTrabajo();
+    }
+
+    if (id == 'ordenTrabajo') {
+      console.log(value);
+      if (this.state.empresa === '-1') {
+        !this.state.deshabilitar ? this.setState({ deshabilitar: true }) : ''
+        return;
+      }
+      this.setState({ deshabilitar: false });
+      if (value &amp;&amp; value.length >= 3) {
+        Peticion.postCustom({
+          url: API.PRELIQUIDACION_FACTURACION.LISTAR_ORDENES_COMPLETAS,
+          parametros: {
+            codigoEmpresa: this.state.empresa,
+            sigueOrdtra: value,
+            autocompletado: true
+          },
+          config: {
+            valor: 'sigueCodsus',
+            texto: 'sigueOrdtra',
+            autocompletado: true
+          },
+          callback: (ordenTrabajoJson) => this.setState({ ordenTrabajoJson }),
+        })
+      }
+    }
+  };
+
+  change = ({ target: { id, value } }) => {
+    this.setState({ [id]: value }, () => {
+      this.verificarConsultas(id, value);
+      if (!Util.validarArreglo(this.state.municipioJson) &amp;&amp; id == 'empresa') {
+        this.consultarMunicipios();
+      }
+    });
+  };
+
+  // vista
+
+  cancelar = () => {
+    this.limpiarCampos()
+    this.handleDialogo(false) // cerrar modal
+  }
+
+  consultar = () => this.props.onChange(true);
+
+  guardar = () => {
+    // TODO
+    this.cancelar();
+  }
+
+  handleDialogo = (valor) => {
+    if (valor == undefined || typeof valor != 'boolean') {
+      valor = !this.state.dialogoModal;
+    }
+    this.setState({ dialogoModal: valor })
+  }
+
+  limpiarCampos = () => {
+    // limpieza
+    this.setState({
+      desde: '',
+      hasta: '',
+      municipio: '-',
+      contratista: '-1',
+      enProgreso: false,
+      errores: [],
+    })
+  }
+
+  botones = [
+    { texto: 'guardar', callback: this.guardar },
+    { texto: 'cancelar', callback: this.cancelar },
+  ];
+
+  renderErrores = () => {
+    const { errores } = this.state;
+    return (
+      &lt;Fragment>
+        &lt;h2 className='text-danger mb-0'>&lt;i className='fa fa-fw fa-times'>&lt;/i> Errores transacción&lt;/h2>
+        &lt;table className='table table-hover table-condensed table-striped table-striped'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Agenda&lt;/th>
+              &lt;th>Código Suscripción&lt;/th>
+              &lt;th>Mensaje&lt;/th>
+              &lt;th>Código Servicio&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {errores.map(error => {
+              return (
+                &lt;tr key={error.sigueIde}>
+                  &lt;td>{error.sigueCodage}&lt;/td>
+                  &lt;td>{error.sigueCodsus}&lt;/td>
+                  &lt;th>{error.mensaje}&lt;/th>
+                  &lt;td>{error.sigueCodser}&lt;/td>
+                &lt;/tr>
+              );
+            })}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/Fragment>
+    );
+  };
+
+  render() {
+    const { BotonConsultar, BotonPreliquidar, BotonLimpiar } = this
+
+    return (
+      &lt;React.Fragment>
+        &lt;h1>Preliquidación de factura&lt;/h1>
+
+        &lt;div className="d-flex justify-content-center btn-group">
+          &lt;BotonPreliquidar />
+          &lt;BotonConsultar />
+          &lt;BotonLimpiar />
+        &lt;/div>
+        {
+          this.state.enProgreso &amp;&amp; (
+            &lt;div className='col-12 mt-5'>
+              &lt;div className='content-progress'>
+                &lt;label className='titulo'>La acción se encuentra en progreso, por favor espere...&lt;/label>
+                &lt;i className='fa fa-fw fa-spinner fa-spin'>&lt;/i>
+                &lt;label className='descripcion text-success'>Se han ejecutado {this.state.progreso} registros.&lt;/label>
+                {this.state.errores > 0 &amp;&amp; (&lt;label className='descripcion errores text-danger'>Se han generado {Util.validarArreglo(this.state.errores) &amp;&amp; this.state.errores.length} errores.&lt;/label>)}
+              &lt;/div>
+            &lt;/div>
+          )
+        }
+        {Util.validarArreglo(this.state.errores) &amp;&amp; this.renderErrores()}
+        {!this.state.enProgreso &amp;&amp; !Util.validarArreglo(this.state.errores) &amp;&amp; (
+          &lt;div className="contenedor formulario">
+            &lt;Combo
+              id="empresa"
+              label="empresa"
+              propValor='empresaCod'
+              propTexto='empresaNom'
+              name='empresa'
+              value={this.state.empresa}
+              onChange={this.change}
+              opciones={this.state.empresaJson}
+              required={true}
+            />
+
+            &lt;Input
+              id="descripcion"
+              label="descripción liquidación"
+              value={this.state.descripcion}
+              onChange={this.change}
+            />
+
+            &lt;Autocompletado
+              id="municipio"
+              label="municipio"
+              value={this.state.municipio}
+              onChange={this.change}
+              opciones={this.state.municipioJson}
+              required={true}
+            />
+
+            &lt;Autocompletado
+              id="ordenTrabajo"
+              label="orden de trabajo"
+              marcaAgua={'Escriba la orden de trabajo'}
+              opciones={this.state.ordenTrabajoJson}
+              onChange={this.change}
+              value={this.state.ordenTrabajo}
+              required={true}
+              extra={{
+                disabled: this.state.deshabilitar
+              }}
+            />
+
+            &lt;Fecha
+              id='desde'
+              label='Desde*'
+              name='desde'
+              fecha={this.state.desde}
+              onChange={this.change}
+            />
+
+            &lt;Fecha
+              id='hasta'
+              label='Hasta*'
+              name='hasta'
+              fecha={this.state.hasta}
+              onChange={this.change}
+            />
+
+            &lt;Combo
+              id='liquidacion'
+              opciones={this.state.listaLiquidaciones}
+              propTexto='liqNombre'
+              propValor='uniLiquidacion'
+              label='Liquidación aplicar:'
+              name='liquidacion'
+              value={this.state.liquidacion}
+              onChange={this.change}
+            />
+
+          &lt;/div>
+        )}
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+export default Generacion
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

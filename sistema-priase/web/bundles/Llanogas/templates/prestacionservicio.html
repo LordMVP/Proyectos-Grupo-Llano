@@ -1,0 +1,58 @@
+<script type="text/javascript" id="tplprestacionservicio">
+	<div>
+		<h2>CONTRATO DE PRESTACIÓN DEL SERVICIO PÚBLICO DE GAS NATURAL</h2>
+		<p>
+			En este Contrato las expresiones  <span><b>{{empresa}}</b></span> significa la sociedad Gases del Llano S.A. Empresa de Servicios Públicos que opera bajo la modalidad de sociedad anónima de acuerdo con las leyes colombianas, con domicilio principal en la ciudad de <span>{{municipioempresa}}</span>, y <span><b>{{{nombretercero}}}</b></span> que en adelante se llamará  “SUSCRIPTOR”, indica la persona natural o jurídica con la que se  ha celebrado un contrato de condiciones uniformes que responde a sus necesidades, para la prestación del servicio público de distribución y/o comercialización de gas combustible por red para uso ______________________, a una capacidad máxima instalada de :
+		</p>
+		<div id="divTbl">
+			<table id="tblTipoUso">
+				<thead>
+					<tr>
+						<th>Tipo de uso</th>
+						<th>Capacidad máxima instalada</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type="checkbox"/> Domiciliario comercial</td>
+						<td>3 m<sup>3</sup>/h</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox"/> Clase 1</td>
+						<td>Menor a 7 m<sup>3</sup>/h</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox"/> Clase 2</td>
+						<td>De 7 a 12  m<sup>3</sup>/h</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox"/> Clase 3</td>
+						<td>Mayor a 12 m<sup>3</sup>/h</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<p>
+			La presión de entrega es de ____  libras  por pulgada cuadrada, con una variación del 10% en la presión de entrega,  en el inmueble ubicado en  el municipio de <span class="wb">__________________________________</span> en el predio identificado con la nomenclatura urbana <span class="wb">________________________________________________________</span> Barrio: <span class="wb">__________________________________________________________</span>. 
+		</p>
+		<p>
+			<b>Objeto:</b> El contrato de prestación del servicio público de distribución y/o comercialización  de gas domiciliario por red, es un contrato uniforme y consensual en virtud del cual <span><b>{{empresa}}</b></span>, se obliga a prestar a un SUSCRIPTOR a  cambio de un precio en dinero pactado de acuerdo a la fórmula tarifaría definida por la autoridad competente, el suministro domiciliario de gas combustible conforme a las condiciones uniformes definidas por <span><b>{{empresa}}</b></span>, para suministrar dicho servicio  a un número indeterminado de usuarios o suscriptores, ubicados en: <span>{{municipio}}</span> y todos aquellos municipios en donde <span><b>{{empresa}}</b></span> inicie la prestación del servicio, de acuerdo a sus planes de expansión.  Harán parte de éste contrato no solo las estipulaciones escritas que en él se fijan por parte de <span><b>{{empresa}}</b></span>, sino que, además, las definidas por las leyes reguladoras de la prestación de servicios públicos domiciliarios y aquellas que <span><b>{{empresa}}</b></span> aplique de manera uniforme a sus usuarios o suscriptores en la prestación del servicio objeto del presente contrato.
+		</p>
+		<p>
+			Las partes convienen en someter el perfeccionamiento, ejecución y cumplimiento del presente contrato a las estipulaciones que se incorporen en el anexo de definiciones y condiciones del contrato, documento este que se entiende como parte integral de mismo. Para todos  los efectos previstos  en el presente contrato, cuando en alguna cláusula se utilicen los términos USUARIO, SUSCRIPTOR, PROPIETARIO Y/O POSEEDOR se entenderá que hace referencia a cualquiera de ellos. El usuario o suscriptor autoriza el uso de su información personal únicamente para situaciones relacionadas con el objeto contractual, suscrito en el contrato de condiciones uniformes..
+		</p>
+		<p>
+			Para constancia se firma el presente contrato y se hace entrega del mismo al suscriptor, quien confirma expresamente su recibido. Se firma en <span>{{municipio}}</span> a los <span>{{fecha.dia}}</span> dias del mes de <span>{{fecha.mesletras}}</span> del año <span>{{fecha.anio}}</span>.
+			<br />
+
+			Para conocer el texto completo del contrato puede descargarlo desde la página web www.llanogas.com.co y/o solicitar una copia en la oficina de atención al cliente mas cercana.
+		</p>
+	</div>
+	<div class="firma">
+		<hr align="center" />
+		Firma
+		<p>Nombre: <span>{{{nombre}}}</span></p>
+		<p>Cédula de ciudadanía: <span>{{cedula}}</span></p>
+
+	</div>
+</script>

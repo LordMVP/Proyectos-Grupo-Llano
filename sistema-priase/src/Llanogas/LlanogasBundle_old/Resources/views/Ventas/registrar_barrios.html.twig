@@ -1,0 +1,144 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylsheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+    <style>
+        .uploaded-item{
+
+        }
+        #divArchivos .appload-input{
+            color: #FFF !important;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Registrar : Barrios - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">            
+            <input type="button" value="Nuevo" id="btnNuevo" class="btn"  />
+            <input type="button" value="Grabar" id="btnGrabar" class="btn" />            
+            <input type="button" value="Buscar" id="btnBuscar" class="btn" />   
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <div id="divBarrio">
+            <fieldset>
+                <legend>Información del Barrio</legend>
+                <div class="campoCorto">
+                    <label for="txtCodigo">Código</label>
+                    <input type="text" id="txtCodigo" required="required" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="cmbMunicipio">Municipio:</label>
+                    <select id="cmbMunicipio" required="required" disabled="disabled">
+                        <option value="-1"> Seleccione una opción</option>
+                        {% for municipio in listamunicipios  %}
+                            <option value="{{municipio.idmunicipio}}">{{municipio.municipio}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="txtNombre">Nombre Barrio:</label>
+                    <input type="text" id="txtNombre" required="required" disabled="disabled"/>
+                </div>              
+
+                <button id="btnExisteBarrio" class="btnSimple" >Validar Existencia</button>
+
+                <div class="campo">
+
+                    <label for="txtTercerizado">Tercerizado</label>
+                    <select id="txtTercerizado" required="required" disabled="disabled">                        
+                        <option value='true'>Si</option>
+                        <option value='false'>No</option>
+                    </select>
+                </div>
+                <div class="campoCorto">
+                    <label for="txtSector">Sector:</label>
+                    <input type="text" id="txtSector" required="required" disabled="disabled"/>
+
+                </div>
+
+
+                <span id="mensajeAlerta" class="pMensaje"></span>
+
+            </fieldset>
+
+            <fieldset>
+                <legend>Vincular Rutas</legend>
+
+
+                <div class="campo">
+                    <label for="cmbRuta">Ruta:</label>
+                    <select id="cmbRuta" disabled="disabled">
+                       
+                    </select>
+                </div>
+                <button id="btnAdicionarRuta" class="btnSimple" >Adicionar Ruta</button>
+
+
+
+            </fieldset>
+
+            <fieldset>
+                <legend>Rutas Vinculadas</legend>
+                <div id="divRutasVinculadas" >
+                    <table id="tblRutasVinculadas" class="tabla" style="display:none;"></table>    
+                </div>
+            </fieldset>
+        </div>
+
+
+        <div id="divBuscarBarrio" style="display: none;">
+
+            <div class="campo" >
+                <label for="cmbMunicipioBarrio">Municipio:</label>
+                <select id="cmbMunicipioBarrio" required="required">
+                    <option value="-1"> Seleccione una opción</option>
+                    {% for municipio in listamunicipios  %}
+                        <option value="{{municipio.idmunicipio}}">{{municipio.municipio}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="txtCodBarrio">Código Barrio:</label>
+                <input type="text" id="txtCodBarrio" maxlength="15" />
+            </div>
+
+            <div class="campo">
+                <label for="txNombreBarrio">Nombre Barrio:</label>
+                <input type="text" id="txNombreBarrio" maxlength="20" />
+            </div>
+
+            <input type ="button" id="btnBuscarBarrio" class="btnSimple" value="Buscar"/>
+
+            <div id="divResultadosFiltro" style="display:none;">
+                <table id="tblResultadoFiltro" class="tabla"></table>    
+            </div>
+
+            <span id="mensajeAlertaDialogo" class="pMensaje"></span>
+        </div>
+
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/crearbarrios/crearbarrios.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/crearbarrios/crearbarrios.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/crearbarrios/crearbarrios.vista.js')}}"></script>
+    <script type="text/javascript">
+        crearBarriosVista.init();
+    </script>
+{% endblock %}

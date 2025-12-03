@@ -1,0 +1,50 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+	<style>
+		.divMensaje{
+			margin: 0 auto;
+			text-align: center;
+			width: 70%;
+		    font-size: 14px;
+    		text-align: center;
+		}
+
+		i.fa-chain-broken.fa.fa-2x {
+		    top: 10px;
+		    position: relative;
+		    margin-right: 10px;
+		}
+
+		.divMensaje .btnSimple{
+			margin-top: 10px;
+		}
+
+	</style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}Error 404 - Página no encontrada{% endblock %}
+
+{% block body %}
+	<div class="divMensaje">
+		<p class="pMensaje"><i class="fa-chain-broken fa fa-2x"></i> La página o recurso de red que busca no existe o ha cambiado de nombre, verifique la dirección URL o acceda a la página a través del menú de navegación.</p>
+		<button class="btnSimple" id="btnRegresar">Regresar</button>
+	</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+	<script type="text/javascript">
+		(function(){
+			$('#h1_base_titulo_app').text('');
+
+			$('#btnRegresar').on('click', function(){
+				window.history.back();
+			});
+		})();
+	</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!--TEMPLATE PARA EL CONTROL DE FORMAS DE PAGO -->
+
+<script id="tplpagare" type="text/template">
+<div>
+    <h2>PAGARE Nº {{modulo}}{{numeropagare}}</h2>
+    <p>
+        <span>{{#m}}_______________________________________{{/m}}{{^m}}{{{nombre}}}{{/m}}</span>, identificado con cédula de ciudadanía No. <span> <b>{{#m}}______________{{/m}}{{^m}}{{cedula}}{{/m}}</b></span>
+        expedida en <span>{{#m}}______________{{/m}}{{^m}}{{lugarexpedicion}}{{/m}}</span>; por medio del presente escrito DECLARO que por virtud del
+        presente título valor pagaré incondicionalmente, a la orden de <span><b>{{empresa}}</b> </span>
+        persona jurídica de derecho privado,
+        identificada con el NIT <span>{{#nitempresa}}_______________________________{{/nitempresa}}{{^nitempresa}}{{nitempresa}}{{/nitempresa}}</span>, con domicilio en la ciudad de <span>{{municipioempresa}}</span>,
+        o a quien represente sus derechos, en la ciudad de {{#m}}______________{{/m}}{{^m}}{{municipio}}{{/m}} el día
+        <span><u>{{#m}}____{{/m}}{{^m}}{{fecha.dialetras}}{{/m}}</u> ( <u>{{#m}}______________{{/m}}{{^m}}{{fecha.dia}}{{/m}}</u> ) del mes de <u>{{#m}}______________{{/m}}{{^m}}{{fecha.mesletras}}{{/m}}</u> del año 
+        <u>{{#m}}_______________________________{{/m}}{{^m}}{{fecha.anioletras}}{{/m}}</u> ( <u> {{#m}}______________{{/m}}{{^m}}{{fecha.anio}}{{/m}}</u>)</span>, la suma de
+        <span> <u>{{#m}}________________________________________________{{/m}}{{^m}}{{valorfinanciarletras}}{{/m}}</u></span> PESOS ($<span> <u>{{#m}}______________{{/m}}{{^m}}{{valorfinanciar}}{{/m}}</u></span>) MONEDA
+        LEGAL, que reconozco tener a titulo de deuda, más la suma de
+        <span> <u>{{#m}}________________________________________________{{/m}}{{^m}}{{interesletras}}{{/m}} </u></span> PESOS ($<span> <u>{{#m}}______________{{/m}}{{^m}}{{interes}}{{/m}}</u></span>) MONEDA LEGAL que a la
+        fecha adeudo por concepto de intereses, que pagaré a la tasa máxima legalmente
+        permitida. 
+    </p>
+     <p>
+         En caso de incumplimiento en el pago, la obligación se hará exigible en su totalidad, sin
+         necesidad de requerimiento previo. En el evento de un convenio para la prórroga del término
+         del pago, subsistirá la obligación durante el nuevo plazo.
+    </p>
+    <p>
+        En tal caso, <span><b>{{empresa}}</b></span> o
+        cualquier tenedor legítimo del presente titulo valor, podrá cobrar judicial o extrajudicialmente la
+        totalidad del saldo, más los intereses y gastos de cobranza, incluyendo honorarios de
+        abogado, efecto para el cual renuncio a requerimientos judiciales o privados.
+        <br/> Será a mi cargo el pago del impuesto de timbre que cause este Pagaré. <br/>
+     </p>
+     <p>
+         El presente pagaré se suscribe en blanco, y autorizo irrevocablemente a <span><b>{{empresa}}</b></span>
+         , de conformidad con el artículo
+         622 del Código de Comercio para llenar, sin previo aviso, y en cualquier tiempo los 
+         espacios que figuran en blanco en el presente titulo valor, de acuerdo con las 
+         instrucciones estipuladas en la carta de instrucciones que se anexa.
+     </p>
+
+     <br/><br/><br/>
+    <div class="firma primera">
+            <hr align="center">
+            <span><b>{{{nombre}}}</b></span><br/>C.C. Nº: {{cedula}} Expedida en {{lugarexpedicion}}
+    </div>
+</div>
+<div>
+        <h2> CARTA DE INSTRUCCIONES </h2>
+        <h6>Señores: </h6>
+        <h4>{{empresa}}</h4>
+        <h6>Ciudad: <span>{{municipio}}</span></h6>
+        <h6>Respetados Señores: </h6>
+        <span>{{#m}}______________{{/m}}{{^m}}{{{nombre}}}{{/m}}, identificado con cédula de ciudadanía No. <span>
+        {{#m}}______________{{/m}}{{^m}}{{cedula}}{{/m}}</span> expedida en <span>{{#m}}______________{{/m}}{{^m}}{{lugarexpedicion}}{{/m}}</span>; por medio de la presente autorizo expresamente a 
+        <span><b>{{empresa}}</b></span>, en adelante <span><b>{{empresa}}</b></span>, o cualquier tenedor legítimo del 
+        presente titulo valor, para que haciendo uso de sus facultades conferidas por el Art. 622 del Código de Comercio llene
+        sin previo aviso los espacios que se han dejado en blanco en el Pagaré Nº {{modulo}}{{numeropagare}} adjunto, cuando 
+        exista cualquier obligación a mí cargo, para lo cual deberá ceñirse a las siguientes instrucciones:
+        <ol>
+            <li>
+            <span><b>{{empresa}}</b></span> podrá llenar y utilizar dicho Pagaré cuando a su juicio fuere necesario, para 
+            efectuar el cobro de cualquier suma de dinero que resulte deber por concepto de incumplimiento de las obligaciones 
+            derivadas del acuerdo de pago N° <span>{{pago}}</span>
+            </li>
+            <li>
+                La cuantía del Pagaré por concepto de capital será igual al monto total o parcial del valor de las obligaciones 
+                exigibles que a nuestro cargo y a favor de <span><b>{{empresa}}</b></span> existan al momento de ser llenado, 
+                incluidos pero no limitados al valor principal, portes, impuestos, incluido el de timbre, gastos de cobranza, 
+                mantenimiento, seguros, multas, contribuciones, sanciones y los costos legales para cobro de dichos 
+                instrumentos, y cualquier otra suma diferente a intereses, que llegáramos a adeudar a <span><b>{{empresa}}</b>
+                </span> en razón del acuerdo de pago N° <span>{{pago}}</span> ,  y que esténinsolutas a la fecha de llenarse el 
+                Pagaré por cualquier motivo, de conformidad con el documento que contenga  la liquidación efectuada por <span><b>
+                {{empresa}}</b></span>
+            </li>
+            <li>
+                La tasa de los intereses de mora será la máxima permitida por las disposiciones vigentes el día que se 
+                diligencie el título.
+            </li>
+            <li>
+                La fecha de vencimiento será la misma en que sea llenado el documento adjunto, y serán exigibles inmediatamente 
+                todas las obligaciones a mi cargo,  sin necesidad que me requieran judicial o extrajudicialmente, para su 
+                cumplimiento.
+            </li>
+            <li>
+                Si en la fecha de diligenciamiento del Pagaré existieren intereses causados y no pagados, correspondientes a 
+                cualquiera de las obligaciones a mi cargo, autorizo a <span><b>{{empresa}}</b></span> para incluir el monto
+                total que resulte por este concepto, de conformidad con el documento que contenga la liquidación efectuada para 
+                tal fin, en el espacio que para el efecto se encuentra previsto en el Pagaré. Sobre dichas sumas no se 
+                liquidarán intereses, sin perjuicios de que <span><b>{{empresa}}</b></span> ejerza los derechos que le confiere 
+                el artículo 886 del código de comercio.
+            </li>
+            <li>
+                El pago del impuesto de timbre a que haya lugar cuando el título sea llenado, correrá por cuenta mía y si <span>
+                <b>{{empresa}}</b></span> lo cancela, su  monto puede ser cobrado a mi junto con las demás obligaciones, 
+                incorporando la suma pagada dentro del Pagaré respectivo.
+            </li>
+            <li>
+                El pagaré así llenado presta mérito ejecutivo, pudiendo  <span><b>{{empresa}}</b></span> o su tenedor legítimo
+                 exigir su cancelación, sin perjuicio de las demás acciones que pueda ejercer.
+            </li>
+            <li>
+                Que las presentes instrucciones las impartimos de conformidad con lo expuesto en el artículo 622, inciso 2º del 
+                Código de Comercio y para todos los efectos allí previstos.
+            </li>
+            <li>
+                Se hace expreso reconocimiento que he leído y conservo copia de estas instrucciones, y que en señal de 
+                conformidad las suscribimos.
+            </li>
+        </ol>
+        <p><b>INCORPORACION DEL PAGARE:</b>Se adjunta al presente documento el Pagaré en blanco arriba enunciado, el cual <span>
+        <b>{{empresa}}</b></span> declara haber recibido, comprometiéndose a custodiarlo y a utilizarlo conforme a lo aquí 
+        dispuesto. <br/>
+        Se deja constancia que el Pagaré en blanco corresponde al Número {{modulo}}{{numeropagare}}<br/>
+        En la fecha he recibido copia de esta carta de instrucciones y la acepto sin reserva alguna.
+        </p>
+
+        <h6>Atentamente,</h6>
+        <div class="firma">
+            <hr align="center">
+            <span><b>{{{nombre}}}</b></span><br/>C.C. Nº: {{cedula}} Expedida en {{lugarexpedicion}}
+        </div>
+    </div>
+</script>

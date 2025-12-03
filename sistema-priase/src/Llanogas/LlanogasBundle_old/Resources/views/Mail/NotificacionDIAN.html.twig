@@ -1,0 +1,51 @@
+{% block body %}
+    <div>
+        <h4>Cordial Saludo </h4>
+        <br>
+        <p>
+        Esta es una notificación de seguimiento de la información de consecutivos y fechas de la DIAN para factura Electrónica próximas a Caducar.
+        </p>
+        <br>
+        <table border="1"  >
+            <caption><h4>TABLA DE RESULTADOS</h4></caption>
+            <thead>
+                <tr style="text-align: center; background-color:mediumturquoise"  >
+                    <th>Codigo</th>
+                    <th>Empresa</th>
+                    <th>Prefijo</th>    
+                    <th>Fecha Inicia Resolucion</th>
+                    <th>Fecha Fin Resolucion</th>
+                    <th>Numero Autorizado</th>    
+                    <th>Numero Disponible</th>    
+                </tr>    
+            </thead>
+            <tbody>
+                {% for registro in consecutivos %}
+                    <tr style="text-align: center; background-color:powderblue">
+                       
+                        <td>{{registro.idenudo}}</td>
+                        <td style="text-align: right">{{registro.empresa}}</td>
+                        <td>{{registro.prefijo}}</td>
+                        <td>{{registro.fecharesoinicial}}</td>
+                        <td>{{registro.fecharesofinal}}</td>
+                        <td>{{registro.numhasta}}</td>
+                        <td>{{registro.numdisponible}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+            <br>
+            <p>
+            Por favor no responda este mensaje .
+            <br>
+            <br>
+            Atentamente 
+            <br>
+            <h4>Proceso Gestión de Tecnología Informática</h4>
+            </p>
+    </div>
+
+
+{% endblock %}
+
+

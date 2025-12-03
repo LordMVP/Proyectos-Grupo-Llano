@@ -1,0 +1,84 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Facturación de crédtios {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="facturacionCreditosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Búsqueda de créditos </legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                
+                                <div class="form-group col-md-3" show-errors>
+                                    <label for="txtciclo">Ciclo: </label>
+                                    <select required="true" id="txtciclo" ng-change="actualizarPeriodos()" name="ciclo" ng-model="idciclo" class="form-control">
+                                        <option ng-repeat="ciclo in ciclos" ng-value="ciclo.idciclo">{[{ciclo.ciclo}]}</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.ciclo.$error.required">
+                                        El ciclo es requerido
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-3" show-errors>
+                                    <label for="txtperiodo">Período: </label>
+                                    <select required="true" id="txtperiodo" name="periodo" ng-model="idperiodo" class="form-control">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.id_periodo">
+                                            {[{periodo.periodo_nombre}]}
+                                        </option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                        El período es obligatorio.
+                                    </p>
+                                </div> 
+                                <div class="form-group col-md-3">
+                                    <label for="cmbConvenio">Convenio: </label>
+                                    <select id="cmbConvenio" ng-model="idconvenio" class="form-control">
+                                        <option value="-1"> Seleccione una opción </option>
+                                        {% for convenio in convenios %}
+                                            <option value="{{convenio.idtercero}}">{{convenio.nombretercero}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3"> 
+                                    <label for="cmbConvenio">Id Financiació: </label>
+                                    <input type="number" id="txtid_financiacion" ng-model="idfinanciacion" class="form-control" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div class="alert-box info">
+                                    Reporte Facturacion Periodo será generado en un archivo .xlsx , la factura Periodo será generada en .pdf
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Reporte Facturación Periodo
+                                </button>
+                            </div>               
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarFormatoFC()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Formato Factura
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/potenza/facturacionCreditos.angular.js')}}"></script>
+{% endblock %}

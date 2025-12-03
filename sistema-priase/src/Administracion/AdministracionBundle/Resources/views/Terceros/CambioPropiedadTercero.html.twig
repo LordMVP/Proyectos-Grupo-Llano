@@ -1,0 +1,153 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} 
+    Cambio de propiedad tercero
+{% endblock %}
+{% block body %}   
+    <div id="divComandos">
+        <div class="divBotones">
+            <button type="button" id="btnGrabar" class="btn">Grabar</button>
+            <button type="button" id="btnCancelar" class="btn">Cancelar</button>
+            <button type="button" id="btnBuscar" class="btn">Filtro</button>
+        </div>
+    </div>
+    <fieldset><legend>Información del Tercero de Origen</legend>
+        <div id="TercActual">
+
+            <div class="campoCorto">
+                <label for="ter_documento_act">Nit/Ced</label><input type="text" name="ter_documento_act" id="ter_documento_act" disabled="disabled">          
+            </div>
+            <div class="campo">
+                <label for="ter_nomcompleto_act">Nombre completo</label><input type="text" name="ter_nomcompleto_act" id="ter_nomcompleto_act" disabled="disabled" >          
+            </div>
+            <div class="campo">
+                <label for="uni_tiptercero_act">Tipo</label><input type="text" name="uni_tiptercero_act" id="uni_tiptercero_act" disabled="disabled">          
+            </div>
+            <div class="campoCorto">
+                <label for="ter_telfijo_act">Teléfono</label><input type="text" name="ter_telfijo_act" id="ter_telfijo_act" disabled="disabled">          
+            </div>
+            <div class="campoCorto">
+                <label for="ter_telcelular_act">Celular</label><input type="text" name="ter_telcelular_act" id="ter_telcelular_act" disabled="disabled">          
+            </div>
+            <div class="campoCorto">
+                <label for="ter_sexo_act">Sexo</label><input type="text" name="ter_sexo_act" id="ter_sexo_act" disabled="disabled">          
+            </div>
+            <div class="campo"><label for=convenio">Convenio</label>
+                <input type="text" id="convenio" disabled="disabled">
+            </div>
+            <div id="propiedades_relacionadas" style="display:none; min-height:50px; max-height:200px; overflow:auto;">
+                <table id="PropTerActual" class="tabla">
+                </table>
+                <div id="propiedades_relacionadas_botonera">
+                    <button type="button" id="cmdSeleccionarTerceroDestino" class="btnSimple"  disabled="disabled">Selecionar Tercero Destino</button>
+                    <button type="button" id="cmdTrasladar" class="btnSimple" disabled="disabled">Trasladar </button>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <div id ="tercero_destino" style="display: none">
+        <fieldset><legend>Información del Tercero de Destino</legend>
+            <div id="TercNuevo">
+                <div class="campoCorto">
+                    <label for="ter_documento_new">Nit/Ced</label>
+                    <input type="text" name="ter_documento_new" id="ter_documento_new" disabled="disabled">          
+                </div>
+                <div class="campo">
+                    <label for="ter_nomcompleto_new">Nombre completo</label>
+                    <input type="text" name="ter_nomcompleto_new" id="ter_nomcompleto_new" disabled="disabled">          
+                </div>
+                <div class="campo">
+                    <label for="uni_tiptercero_new">Tipo</label>
+                    <input type="text" name="uni_tiptercero_new" id="uni_tiptercero_new" disabled="disabled">          
+                </div>
+                <div class="campoCorto">
+                    <label for="ter_telfijo_new">Teléfono</label>
+                    <input type="text" name="ter_telfijo_new" id="ter_telfijo_new" disabled="disabled">          
+                </div>
+                <div class="campoCorto">
+                    <label for="ter_telcelular_new">Celular</label>
+                    <input type="text" name="ter_telcelular_new" id="ter_telcelular_new" disabled="disabled">          
+                </div>
+                <div class="campoCorto">
+                    <label for="ter_sexo_new">Sexo</label>
+                    <input type="text" name="ter_sexo_new" id="ter_sexo_new" disabled="disabled">          
+                </div>
+                <div id="propiedades_relacionadas_destino" style="display:none; min-height:50px; max-height:200px; overflow:auto;">
+                    <div id="propiedadesdestinonuevo"> 
+                        <table id="tblPropTerDestino" class="tabla"></table>
+                    </div>
+                    <div id="propiedades_destino_botonera">
+                        <button type="button" id="cmdQuitarPropiedadDestino" class="btnSimple" disabled="disabled">Quitar Propiedad</button>
+                    </div> 
+                </div>
+            </div>
+
+        </fieldset>
+    </div>
+
+    <div id="Filtro_Tercero" style="display:none;">
+        <div class="campo"><label for="b_ter_nombre">Nombre</label>
+            <input type="text" name="b_ter_nombre" id="b_ter_nombre">
+        </div>
+        <div class="campo"><label for="b_ter_documento">Cedula / Nit</label>
+            <input type="text" name="b_ter_documento" id="b_ter_documento">
+        </div>
+        <div class="campo"><label for="b_pro_numcatastral">Número Catastral</label>
+            <input type="text" name="b_pro_numcatastral" id="b_pro_numcatastral">
+        </div>
+        <div class="campo"><label for="b_pro_idepropieda">Numero de Propiedad</label>
+            <input type="text" name="b_pro_idepropieda" id="b_pro_idepropieda">
+        </div>
+        <div class="campo"><label for="b_uni_municipio">Municipio</label>
+            <input type="text" name="b_uni_municipio" id="b_uni_municipio">
+        </div>
+        <div class="campo"><label for="b_uni_barrio">Barrio</label>
+            <input type="text" id="b_uni_barrio">
+        </div>
+        <div class="campo"><label for="b_pro_direccion">Dirección</label>
+            <input type="text" id="b_pro_direccion">
+        </div>
+        <div class="campo"><label for="b_codigo_anterior">Codigo Anterior</label>
+            <input type="text" id="b_codigo_anterior">
+        </div>
+        <br>
+        <br>
+        <div id="resultadosconsulta" style="display:none; min-height:50px; max-height:200px; overflow:auto;" > 
+            <table id="tblresultadosconsulta" class="tabla"></table>
+        </div>
+    </div> 
+    <div id="Filtro_Tercero_Destino" style="display:none;">
+       <p class="pMensaje" id="mconsultatercerodestino"></p>  
+        
+        <div class="campo"><label for="b_ter_nombre_destino">Nombre</label>
+            <input type="text" name="b_ter_nombre_destino" id="b_ter_nombre_destino">
+        </div>
+        <div class="campo"><label for="b_ter_documento_destino">Cedula / Nit</label>
+            <input type="text" name="b_ter_documento_destino" id="b_ter_documento_destino">
+        </div>
+        <br>
+        <div id="resultadosconsulta_destino" style="display:none; min-height:50px; max-height:200px; overflow:auto;" > 
+            <table id="tblresultadosconsulta_destino" class="tabla"></table>
+        </div>
+         <div id="divLlamarTercero" style="display: none;">
+             <p class="pMensaje" id="mterceronoexiste"></p>  
+         <div class="campo">
+             <button   id="btnCrearTercero" class="btnSimple">Crear Tercero</button>
+        </div> </div>
+    </div>
+   
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/terceros/cambio_propiedad/cambio_propiedad.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/terceros/cambio_propiedad/cambio_propiedad.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/terceros/cambio_propiedad/cambio_propiedad.vista.js')}}"></script>
+
+{% endblock %}

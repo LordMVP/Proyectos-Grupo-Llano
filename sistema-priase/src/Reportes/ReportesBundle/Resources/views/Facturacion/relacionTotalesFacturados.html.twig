@@ -1,0 +1,58 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Relacion de totales facturados por consumo - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="facturacionController">
+        <div id="divPanelContenedor">
+            <fieldset>
+                <legend>Generacion de reporte de relacion de totales por consumo.</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Datos generados para el reporte. </div>
+                        <div class="panel-body">
+                            <i class="fa fa-exclamation-triangle fa-2x"></i>
+                            Informacion necesaria para ejecutar el reporte, favor verifique la informacion y de click en generar reporte
+                        </div>
+                        <ul  class="list-group">
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading">Codigo del ciclo</h4>
+                                <p class="list-group-item-text">{[{info.ciclo }]}</p>                                    
+                            </li>                                
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading">Nombre del ciclo</h4>
+                                <p class="list-group-item-text">{[{info.ciclo_nombre }]}</p>                                    
+                            </li>                                
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading">Codigo del periodo</h4>
+                                <p class="list-group-item-text">{[{info.periodo }]}</p>                                    
+                            </li>                                
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading">Nombre del periodo</h4>
+                                <p class="list-group-item-text">{[{info.periodo_nombre}]} : {[{info.periodo_fecinicial}]} - {[{info.periodo_fecfinal}]}</p>                                    
+                            </li>                                
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading">Año</h4>
+                                <p class="list-group-item-text">{[{info.anno }]}</p>                                    
+                            </li>                                                          
+                        </ul>
+                        <div class="panel-footer">
+                            <button ng-click="info.format='pdf';generarReporte()" type="button" class="btn btn-default" >
+                                <i class="fa fa-gears fa-lg"></i> Generar el reporte
+                            </button> 
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}    
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/facturacion.control.angular.js')}}"></script>
+{% endblock %}

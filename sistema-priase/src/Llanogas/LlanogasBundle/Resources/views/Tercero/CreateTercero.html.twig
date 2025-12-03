@@ -1,0 +1,52 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} 
+    Registrar tercero
+{% endblock %}
+{% block body %}   
+    <div>
+        <form method="post" action="guardar/" onsubmit="return validar()">
+            <label>Documento</label>
+            <input  name="ter_documento" required id="ter_documento"/>
+            <label>Nombre</label>
+            <input type="text" name="ter_nombre" required/>
+            <label>Apellido</label>
+            <input type="text" name="ter_apellido" required/>
+            <label>Telefono celular</label>
+            <input type="text" name="ter_telcelular" required id="ter_telcelular"/>
+            <label>Telefono fij</label>
+            <input type="text" name="ter_telfijo" required/>
+            <label>Correo</label>
+            <input  name="ter_correo" required id="ter_correo"/>
+            <label>Sexo</label>
+            <select name="ter_sexo" required>
+                <option value="F">Femenino</option>
+                <option value="M">Masculino</option>            
+            </select>
+            <br/>
+            <br/>
+            <input type="submit" value="Registrar"/>
+        </form>
+    </div>
+    <div>
+        <h1>Filtrado</h1>
+        <form method="post" action="buscar/" >
+            <label>Documento</label>
+            <input name="ter_documento" />
+            <label>Nombre de tercero</label>
+            <input name="ter_nombre"/>
+            <input type="submit" value="buscar"/>
+        </form>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/tercero/create/crearTercero.vista.js')}}"></script>
+{% endblock %}

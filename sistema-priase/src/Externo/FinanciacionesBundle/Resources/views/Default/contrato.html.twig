@@ -1,0 +1,59 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Administracion/js/plugins/multipleselect/multiple-select.css')}}" />
+    <style type="text/css">
+        .hidden{
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} 
+    Generar Contrato
+{% endblock %}
+{% block body %}  
+
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <div class="">
+                <fieldset>
+                    <legend>Detalles del contrato</legend>
+                    <div class="campo">
+                        <label for="cmbFirmaInstaladora">Firma instaladora:</label>
+                        <select id="cmbFirmaInstaladora" multiple="multiple"><option value="">Seleccione</option></select>
+                    </div>
+                    <div class="campo">                        
+                        <button class="btnSimple" id="btnGenerarContrato"><i class="fa fa-fw fa-play"></i> Generar contrato</button>
+                        <button class="btnSimple" style="margin-left: 5px;" id="btnConsultarContrato"><i class="fa fa-fw fa-search"></i> Consultar contrato</button>
+                    </div>
+                </fieldset>
+            </div>            
+        </div>
+        <div id="listaContratos" class="hidden">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Nombre Firma</th>
+                        <th>Nit Firma</th>
+                        <th>Valor contrato</th>
+                        <th>Número contrato</th>
+                        <th><i class="fa fa-fw fa-eye"></i> Ver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/plugins/multipleselect/multiple-select.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/contrato/contrato.control.js?v=1.1')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/contrato/contrato.vista.js?v=1.1')}}"></script>
+{% endblock %}

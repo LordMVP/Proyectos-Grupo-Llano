@@ -1,0 +1,625 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta.css')}}" />
+    <style>
+        table#tblHistorialMedidor {
+            margin-top: 15px;
+        }
+
+        #divListaSeleccion{
+            padding-right: 10px;
+            margin-right: 5px;
+            overflow-y: scroll;
+            max-height: 200px;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Suscripciones: Seguimiento - {{empresa}} {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+
+        <div class="divBotones">
+
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+
+        <fieldset id="fieldsetDatosTercero">
+            <legend>Datos del Tercero</legend>
+
+            <div class="campo">
+                <label for="txtDocumento">Documento:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNombre">Nombre:</label>
+                <input type="text" id="txtNombre" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtIdSuscriptor">Id Suscriptor:</label>
+                <input type="text" id="txtIdSuscriptor" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtConvenio">Convenio:</label>
+                <input type="text" id="txtConvenio" disabled="disabled" />
+            </div>
+
+            <input type="button" value="Ver más" disabled="disabled" id="btnVerMas" class="btnSimple">
+            <button id="btnInformacion" class="btnSimple" disabled="disabled">Ver información tercero</button>
+        </fieldset>
+
+
+        <fieldset id="fieldsetDetallesSuscripcion" style="display: none;">
+            <legend>Detalles de Suscripción</legend>
+
+            <div class="campo oculto">
+                <label for="txtIdSuscripcionDetalle">Id Suscripción:</label>
+                <input type="text" id="txtIdSuscripcionDetalle" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtCodigoAnterior">Código Anterior:</label>
+                <input type="text" id="txtCodigoAnterior" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFechaInicio">Fecha de Inicio:</label>
+                <input type="text" id="txtFechaInicio" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtDescripcion">Descripción:</label>
+                <input type="text" id="txtDescripcion" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoSuscripcion">Tipo Suscripción:</label>
+                <input type="text" id="txtTipoSuscripcion" disabled="disabled"/>
+
+            </div>
+
+            <div class="campo">
+                <label for="txtRuta">Ruta:</label>
+                <input type="text" id="txtRuta" disabled="disabled"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtCiclo">Ciclo:</label>
+                <input type="text" id="txtCiclo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoUso">Tipo Uso:</label>
+                <input type="text" id="txtTipoUso" disabled="disabled" />
+
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="txtLiquidacion">Liquidación:</label>
+                <input type="text" id="txtLiquidacion" disabled="disabled" />
+
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="txtEstrato">Estrato:</label>
+                <input type="text" id="txtEstrato" disabled="disabled" />
+
+            </div>
+
+            <div class="campo">
+                <label for="txtEstado">Estado:</label>
+                <input type="text" id="txtEstado" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtFactorCorreccion">Factor Corrección:</label>
+                <input type="text" id="txtFactorCorreccion" disabled="disabled" />
+            </div>
+            
+            <div class="campo">
+                <label for="txtFechaMinima">Fecha Mínima:</label>
+                <input type="text" id="txtFechaMinima" disabled="disabled" />
+            </div>
+            
+            <div class="campo">
+                <label for="txtFechaMaxima">Fecha Máxima:</label>
+                <input type="text" id="txtFechaMaxima" disabled="disabled" />
+            </div>
+            
+            <div class="campo">
+                <label for="txtFechaSuspension">Fecha Suspensión:</label>
+                <input type="text" id="txtFechaSuspension" disabled="disabled" />
+            </div>
+            
+            <button id="btnVerPropiedad" class="btnSimple">Ver Propiedad</button>
+        </fieldset>
+
+
+        <fieldset id="fieldsetPropiedad" style="display: none;">
+            <legend>Propiedad</legend>
+
+            <div class="campo">
+                <label for="txtNumeroPropiedad">Número Propiedad:</label>
+                <input type="text" id="txtNumeroPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoPropiedad">Tipo Propiedad:</label>
+                <input type="text" id="txtTipoPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtMunicipio">Municipio:</label>
+                <input type="text" id="txtMunicipio" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtBarrio">Barrio:</label>
+                <input type="text" id="txtBarrio" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtDireccion">Dirección:</label>
+                <input type="text" id="txtDireccion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtSeccion">Sección:</label>
+                <input type="text" id="txtSeccion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtManzana">Manzana:</label>
+                <input type="text" id="txtManzana" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtAltoRiesgo">Alto Riesgo:</label>
+                <input type="text" id="txtAltoRiesgo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNumeroCatastral">Número Catastral:</label>
+                <input type="text" id="txtNumeroCatastral" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNumeroCatastralNacional">Número Catastral Nacional:</label>
+                <input type="text" id="txtNumeroCatastralNacional" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtZona">Zona:</label>
+                <input type="text" id="txtZona" disabled="disabled" />
+            </div>
+
+            <div>
+                <label for="txtDescripcion">Descripción:</label>
+                <textarea id="txtDescripcion" disabled="disabled" ></textarea>
+            </div>
+
+        </fieldset>
+
+
+        <fieldset>
+            <legend>Fechas de consulta</legend>
+            <div>
+                <div class="campo">
+                    <label for="txtFechaInicial">Fecha Inicial:</label>
+                    <input type="text" id="txtFechaInicial"/>
+                </div>
+                <div class="campo">
+                    <label for="txtFechaFinal">Fecha Final:</label>
+                    <input type="text" id="txtFechaFinal"/>
+                </div>
+            </div>
+        </fieldset>
+
+        <div id="divPestanias" style="display: none;">
+            <ul>
+                <li><a href="#divFactura" id="aFactura">Factura</a></li>
+                <li><a href="#divRecaudo" id="aRecaudo">Recaudo</a></li>
+                <li><a href="#divFinanciacion" id="aFinanciación">Financiación</a></li>
+                <li><a href="#divCartera" id="aCartera">Cartera</a></li>
+                <li><a href="#divFacturaOtraEmpresa" id="aFacturaOtra">Facturas otra empresa</a></li>
+                <li><a href="#divNotas" id="aNotas">Notas</a></li>
+                <li><a href="#divEstadoCuenta" id="aEstadoCuenta">Estado de cuenta</a></li>
+                <li><a href="#divLectura" id="aLectura">Lectura/Consumo</a></li>
+                <li><a href="#divSuspensionReconexion" id="aSuspensión">Suspensión/Reconexión</a></li>
+                <li><a href="#divSolicitudes" id="aSolicitudes">Solicitudes PQR</a></li>
+                <li><a href="#divSeguimiento" id="aSeguimiento">Seguimiento</a></li>
+                <li><a href="#divProvision" id="aProvision">Provisión</a></li>
+                <li><a href="#divTarifas" id="aTarifas">Tarifas</a></li>
+                <li><a href="#divAuditoria" id="aAuditoria">Actualizaciones</a></li>
+            </ul>
+
+            <!--Contenido de la pestaña de factura-->
+            <div id="divFactura">
+                <div class="campo">
+                    <label for="cmbDocumentoFactura"> Documento:  </label>
+                    <select id="cmbDocumentoFactura">
+                        <option value="-1">Seleccione una opción</option>
+                    </select>
+                </div>
+                <div class="campo" id="divTotalFacturas">
+                <label for="txtTotalFacturas">Saldo Facturas:</label>
+                <input type="text" id="txtTotalFacturas" disabled="disabled" />
+            </div>
+                <table id="tblFacturas" class="tabla"></table>
+
+                <div id="divDetalleFactura" style="display: none;">
+                    <div style="max-height: 65vh; overflow: auto;">
+                        <table id="tblDetalleFactura" class="tabla"></table>
+                    </div>
+                </div>
+                <p id="pMensajeFactura" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de recaudo-->
+            <div id="divRecaudo">
+                <p id="txtRecaudo"></p>
+                <div class="campo">
+                    <label for="cmbClasePago">Clases pago</label>
+                    <select id="cmbClasePago">
+                        <option value="-1">Seleccione una opción</option>
+                    </select>
+                </div>
+                <div id="divDetalleRecaudo" style="display: none;">
+                    <table id="tblRecaudo" class="tabla"></table>
+                </div>
+                <div id="divTblFactura">
+                    <table id="tblFacturasRecaudo" class="tabla"></table>
+                    <table id="tblConceptoFactura" class="tabla"></table>
+
+                </div>
+                <p id="pMensajeRecaudo" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de financiación-->
+            <div id="divFinanciacion">
+                <table id="tblFinanciaciones" class="tabla"></table>
+                <div id="divTblAmort">
+                    <table id="tblAmortizaciones" class="tabla"></table>
+                </div>
+                <p id="pMensajeFinanciacion" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de cartera-->
+            <div id="divCartera">
+                <table id="tblCartera" class="tabla"></table>
+                <div id="divTblCCartera">
+                    <table id="tblConceptoCartera" class="tabla"></table>
+                </div>
+                <p id="pMensajeCartera" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de facturas de otras empresas-->
+            <div id="divFacturaOtraEmpresa">
+                <div class="campo">
+                    <label for="cmbOtraEmpresa"> Empresa:    </label>
+                    <select id="cmbOtraEmpresa">
+                        <option value="-1">Seleccione una opción</option>
+                        {%  for empresa in listaEmpresas %}
+                            <option value="{{empresa.idempresa}}">{{empresa.empresa}}</option>
+                        {%endfor %}
+                    </select>
+                </div>
+                <table id="tblOtrasFacturas" class="tabla"></table>
+                <p id="pMensajeOtraEmpresa" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de notas-->
+            <div id="divNotas">
+                <div>
+                    <div class="campo">
+                        <label for="cmbDocumento">Documento</label>
+                        <select id="cmbDocumento">
+                            <option value="-1">Seleccione una opción</option>
+                        </select>
+                    </div>
+                    <table id="tblNotasFactura" class="tabla"></table>
+                    <table id="tblNotasRecaudo" class="tabla"></table>
+                    <div id="divDetalleNota">
+                        <table id="tblDetalleNota" class="tabla"></table>
+                    </div>
+                </div>
+                <p id="pMensajeNotas" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de estado de la cuenta-->
+            <div id="divEstadoCuenta">
+                <div id="divContenedorEstadoCuenta">
+                    
+                    <fieldset id="fsValoresFinanciada" style="display:none;">
+                        <legend>Valores de Financiación</legend>
+                        <div id="divValoresFinanciadas"></div>
+                    </fieldset>
+                    
+                    <fieldset id="fsCarteraFinanciada" style="display:none;">
+                        <legend>Cartera Financiada</legend>
+                        <div id="divCarterasFinanciadas"></div>
+                    </fieldset>
+
+                    <fieldset id="fsCarteraNormal" style="display:none;"> 
+                        <legend>Cartera Normal</legend>
+                        <div id="divCarterasNormales"></div>
+                    </fieldset>
+                    <button class="btnSimple" id="btnImprimir" style="display:none;">Imprimir</button>
+                </div>
+            </div>
+
+            <!--Contenido de la pestaña de lecturas y consumos-->
+            <div id="divLectura">
+                <table id="tblLectura" class="tabla"></table>
+                <div id="divDetalleLectura">
+                    <table id="tblDetalleLectura" class="tabla"></table>
+                </div>
+                <div id="divVerLecturaConsumo">
+                    <table id="tblVerLecturaConsumo" class="tabla"></table>
+                </div>
+                <p id="pMensajeLectura" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de suspensiones y reconexiones-->
+            <div id="divSuspensionReconexion">
+                <table id="tblSuspensionReconexion" class="tabla"></table>
+                <div id="divSuspensionReconexion">
+                    <table id="tblSuspension" class="tabla"></table>
+                    <table id="tblReconexion" class="tabla"></table>
+                </div>
+                <p id="pMensajeSuspension" class="pMensaje"></p>
+                <p id="pMensajeReconexion" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de Solicitudes PQR-->
+            <div id="divSolicitudes">
+                <table id="tblSolicitudes" class="tabla"></table>
+                <p id="pMensajeSolicitudes" class="pMensaje"></p>
+            </div>
+
+            <!--Contenido de la pestaña de Seguimiento-->
+            <div id="divSeguimiento">             
+                <table id="tblSeguimiento" class="tabla"></table>
+                <p id="pMensajeSeguimiento" class="pMensaje"></p>
+            </div>
+            
+            <!--Contenido de la pestaña de Provisión-->
+            <div id="divProvision">
+                <div class="campo">
+                    <label for="cmbDocumentoFactura"> Documento:  </label>
+                    <select id="cmbDocumentoFacturaP">
+                        <option value="-1">Seleccione una opción</option>
+                    </select>
+                </div>
+                <table id="tblFacturasP" class="tabla"></table>
+
+                <div id="divDetalleFacturaP" style="display: none;">
+                    <div style="max-height: 65vh; overflow: auto;">
+                        <table id="tblDetalleFacturaP" class="tabla"></table>
+                    </div>
+                </div>
+                <p id="pMensajeFacturaP" class="pMensaje"></p>
+            </div>
+            
+            <!--Contenido de la pestaña Tarifas-->
+            <div id="divTarifas">                
+                <table id="tblTarifas" class="tabla"></table>
+                <div id="divDetalleFacturaTarifa">
+                    <div style="max-height: 65vh; overflow: auto;">
+                        <table id="tblDetalleFacturaTarifa" class="tabla"></table>
+                    </div>
+                </div>
+                <p id="pMensajeTarifas" class="pMensaje"></p>
+            </div>            
+            <div id="divColapsable">
+                <fieldset>
+                    <legend>Auditoría - Suscripción</legend>
+                    
+                    <div id="divAuditoria">
+                        <div class="divContenedorColapsable" id="contenedorAuditoria" style="margin-right: 42px;">
+                                <div class="divColapsable">
+                                    <h4 class="tituloColapsable" id="unidadesLogin"><span>Ajustes - Suscripción</span></h4>
+                                    <div class="btnColapsable">
+                                        <a href="" class="fa fa-minus" tabindex="-1"></a>
+                                    </div>
+                                </div>
+                                    <div class="contenidoColapsable">
+                                        <table id="tblAuditoriaSuscripcion" class="tabla"></table>
+                                    </div> 
+                             
+                        </div> 
+                        <div class="divContenedorColapsable" id="contenedorAuditoria" style="margin-right: 42px;">
+                            <div class="divColapsable">
+                                    <h4 class="tituloColapsable" id="ajuTercero"><span>Ajustes - Terceros</span></h4>
+                                    <div class="btnColapsable">
+                                        <a href="" class="fa fa-minus" tabindex="-1"></a>
+                                    </div>
+                            </div>
+                            <div class="contenidoColapsable">
+                                        <table id="tblAuditoriaTercero" class="tabla"></table>
+                            </div>
+                        </div>
+                        <div class="divContenedorColapsable" id="contenedorAuditoria" style="margin-right: 42px;">
+                            <div class="divColapsable">
+                                    <h4 class="tituloColapsable" id="ajuPropiedad"><span>Ajustes - Propiedad</span></h4>
+                                    <div class="btnColapsable">
+                                        <a href="" class="fa fa-minus" tabindex="-1"></a>
+                                    </div>
+                            </div>
+                            <div class="contenidoColapsable">
+                                    <table id="tblAuditoriaPropiedad" class="tabla"></table>
+                            </div>
+                        </div>
+                        <div class="divContenedorColapsable" id="contenedorAuditoria" style="margin-right: 42px;">
+                            <div class="divColapsable">
+                                    <h4 class="tituloColapsable" id="ajuConcepto"><span>Ajustes - Conceptos</span></h4>
+                                    <div class="btnColapsable">
+                                        <a href="" class="fa fa-minus" tabindex="-1"></a>
+                                    </div>
+                            </div>
+                            <div class="contenidoColapsable">
+                                    <table id="tblAuditoriaConceptoExento" class="tabla"></table>
+                            </div>
+                        </div>
+                        <div class="divContenedorColapsable" id="contenedorAuditoria" style="margin-right: 42px;">
+                            <div class="divColapsable">
+                                    <h4 class="tituloColapsable" id="ajuRutas"><span>Ajustes - Rutas</span></h4>
+                                    <div class="btnColapsable">
+                                        <a href="" class="fa fa-minus" tabindex="-1"></a>
+                                    </div>
+                            </div>
+                            <div class="contenidoColapsable">
+                                    <table id="tblAuditoriaRuta" class="tabla"></table>
+                            </div>
+                        </div>
+                                    <p id="pMensajeAuditoria" class="pMensaje"></p>
+                    </div>        
+                </fieldset>
+            </div>            
+
+        </div>
+
+    </div>
+
+    <div id="divDialogoBusqueda" style="display: none;">
+        <div class="campo">
+            <label for="cmbMunicipio">Municipio:</label>
+            <select id="cmbMunicipio" >
+                <option value="-1">Seleccione una opción</option>
+                {% for municipio in listamunicipios  %}
+                    <option value="{{municipio.idmunicipio}}">{{municipio.municipio}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbBarrio">Barrio:</label>
+            <select id="cmbBarrio" >
+                <option value="-1">Seleccione una opción</option>
+
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="txtNombreTerceroBuscar">Nombre Tercero:</label>
+            <input type="text" id="txtNombreTerceroBuscar" data-attr="nombreTercero"/>
+            <input type="hidden" id="idTercero" data-attr="idTercero"/>
+        </div>
+
+        <div class="campo">
+            <label for="txtDocumentoTerceroBuscar">Documento Tercero:</label>
+            <input type="text" id="txtDocumentoTerceroBuscar" />
+        </div>
+
+        <div class="campo">
+            <label for="txtDireccionBuscar">Dirección:</label>
+            <input type="text" id="txtDireccionBuscar" />
+        </div>
+
+        <div class="campo">
+            <label for="txtNumeroCatastralBuscar">Número Catastral:</label>
+            <input type="text" id="txtNumeroCatastralBuscar" />
+        </div>
+
+        <div class="campo">
+            <label for="txtNumeroRuta">Ruta:</label>
+            <select for="txtNumeroRuta">
+                <option value="-1">Seleccione una opción</option>
+                {% for ruta in listarutas%}
+                    <option value="{{ruta.idruta}}">{{ruta.ruta}}</option>
+                {%endfor%}
+            </select>
+            
+        </div>
+
+        <div class="campo">
+            <label for="txtNumeroPropiedad">Número Propiedad:</label>
+            <input type="text" id="txtNumeroPropiedadBuscar" />
+        </div>
+
+        <div class="campo">
+            <label for="txtIdSuscripcion">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcion" />
+        </div>
+
+        <div class="campo">
+            <label for="txtCodigoAnterior">Código Anterior:</label>
+            <input type="text" id="txtCodigoAnterior" />
+        </div>
+            
+        <div class="campo">
+            <label for="txtIdeFactura">Ide Factura:</label>
+            <input type="text" id="txtIdeFactura" />
+        </div>
+
+        <div class="campo">
+            <button class="btnSimple" id="btnBuscarFiltro">Buscar</button>
+        </div>
+
+        <span id="spanMensaje" class="pMensaje"></span>
+        <div id="divListaSeleccion"></div>
+    </div>
+    <div id="divConfirmCancelar" style="display: none;">
+        <p>Se cancelará el seguimiento de la suscripción ¿Desea continuar?</p>
+    </div>
+
+    <div id="divDetalleTercero" style="display: none">
+        <div class="campo">
+            <label for="txtIdTercero">Id Tercero:</label>
+            <input type="text" id="txtIdTercero" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtTelefonoFijo">Teléfono Fijo:</label>
+            <input type="text" id="txtTelefonoFijo" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtTelefonoCelular">Teléfono Celular:</label>
+            <input type="text" id="txtTelefonoCelular" disabled="disabled" />
+        </div>
+        <div>
+            <label for="txtDescripcion">Descripción:</label>
+            <textarea id="txtDescripcion" disabled="disabled" ></textarea>
+        </div>
+
+    </div>
+
+
+    <div id="divSeleccionarPropiedad" style="display: none">
+        <fieldset id="propiedadesAsignadas">
+            <legend>Propiedades Asignadas</legend>
+            <span id="mensaje">No hay propiedades asignadas</span>
+            <table id="tblPropiedadesAsignadas" class="tabla"></table>
+        </fieldset>
+
+    </div>
+{% endblock %}
+{% block javascripts %}
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.vista.js')}}"></script>
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/suscripcion/seguimientoSuscripcion/seguimientoSuscripcion.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/suscripcion/seguimientoSuscripcion/seguimientoSuscripcion.control.js')}}"></script>
+    <script id="scriptVista" type="text/javascript" src="{{asset('bundles/Llanogas/js/suscripcion/seguimientoSuscripcion/seguimientoSuscripcion.vista.js')}}"></script>
+
+
+{% endblock %}

@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: interfazActualizacion/GestionInterfazActualizacion/GestionInterfazActualizacion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: interfazActualizacion/GestionInterfazActualizacion/GestionInterfazActualizacion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, TextoNumerico, Fecha, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+
+import './GestionInterfazActualizacion.scss';
+
+class GestionInterfazActualizacion extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    panelActivo: 'H',
+  };
+
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+
+      // Datos de la entidad
+      // ...
+
+      // Estado de la aplicacion
+      // ...
+
+    });
+  };
+
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  validarFormulario = () => {
+    // Ejemplo Validacion
+    if (false) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un cargo de tipo AO&amp;M para poder continuar.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = {
+      // Asignar datos de la entidad
+    }
+
+    // Reemplazar con ruta del Endpoint para guardar
+    axios.post(RUTAS_API.XXXXXX, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      // Cargar datos de la entidad
+      // ...
+    });
+  };
+
+  renderSeccionInformacionTercero = () => {
+    return (
+      &lt;div className='group-section'>
+        &lt;label className='legend-section'>Información Tercero&lt;/label>
+        &lt;div className='body-section'>
+          &lt;div className='row'>
+            &lt;Combo
+              opciones={[]}
+              propTexto='texto'
+              propValor='valor'
+              label='Tipo documento:'
+              name='tipoDocumento'
+              value={this.state.tipoDocumento}
+              onChange={this.controlarCambio}
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Documento:'
+              cols={4}
+              value={this.state.tipoDocumento}
+              onChange={this.controlarCambio}
+              name='tipoDocumento'
+            />
+            &lt;Input
+              label='Lugar Expedicón:'
+              value={this.state.lugarExpedicion}
+              onChange={this.controlarCambio}
+              name='lugarExpedicion'
+            />
+            &lt;Input
+              label='Nombres:'
+              value={this.state.nombres}
+              onChange={this.controlarCambio}
+              name='nombres'
+            />
+            &lt;Input
+              label='Apellidos:'
+              value={this.state.apellidos}
+              onChange={this.controlarCambio}
+              name='apellidos'
+            />
+            &lt;Input
+              label='Teléfono:'
+              value={this.state.telefono}
+              onChange={this.controlarCambio}
+              name='telefono'
+            />
+            &lt;Input
+              label='Celular:'
+              value={this.state.celular}
+              onChange={this.controlarCambio}
+              name='celular'
+            />
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderSeccionInformacionSuscripcion = () => {
+    return (
+      &lt;div className='group-section mt-1'>
+        &lt;label className='legend-section'>Información Suscripión&lt;/label>
+        &lt;div className='body-section'>
+          &lt;div className='row'>
+            &lt;Combo
+              opciones={[]}
+              propTexto='texto'
+              propValor='valor'
+              label='Tipo Uso:'
+              name='tipoUso'
+              value={this.state.tipoUso}
+              onChange={this.controlarCambio}
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Estrato:'
+              cols={2}
+              value={this.state.estrato}
+              onChange={this.controlarCambio}
+              name='estrato'
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Id Suscripción:'
+              cols={3}
+              value={this.state.idSuscripcion}
+              onChange={this.controlarCambio}
+              name='idSuscripcion'
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Código:'
+              cols={3}
+              value={this.state.codigo}
+              onChange={this.controlarCambio}
+              name='codigo'
+            />
+            &lt;Input
+              label='Dirección:'
+              value={this.state.direccion}
+              onChange={this.controlarCambio}
+              name='direccion'
+            />
+            &lt;Combo
+              opciones={[]}
+              propTexto='texto'
+              propValor='valor'
+              label='Municipio:'
+              name='municipio'
+              value={this.state.municipio}
+              onChange={this.controlarCambio}
+            />
+            &lt;Input
+              label='Barrio:'
+              value={this.state.barrio}
+              onChange={this.controlarCambio}
+              name='barrio'
+            />
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    )
+  };
+
+  /**
+   * Renderiza la secciòn de búsqueda.
+   * @return {Component}
+   */
+  renderCabeceraBusqueda = () => {
+    return (
+      &lt;Fragment>
+        {this.renderSeccionInformacionTercero()}
+        {this.renderSeccionInformacionSuscripcion()}
+      &lt;/Fragment>
+    )
+  };
+
+  controlCambioNavTabs = (evento) => {
+    console.log(evento);
+    const control = evento.target;
+    const panel = control.attributes['data-panel'].value;
+    console.log('PANEL', panel);
+    this.setState({ panelActivo: panel });
+  };
+
+  renderSeccionHomologacion = () => {
+    return (
+      &lt;div className='row'>
+        &lt;div className='col-12'>
+          &lt;h1 className='title-panel'>Homologación&lt;/h1>
+        &lt;/div>
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Empresa Alterna:'
+          name='empresaAlterna'
+          value={this.state.empresaAlterna}
+          onChange={this.controlarCambio}
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Convenio:'
+          name='convenio'
+          value={this.state.convenio}
+          onChange={this.controlarCambio}
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Suscriptor:'
+          name='suscriptor'
+          value={this.state.suscriptor}
+          onChange={this.controlarCambio}
+        />
+        &lt;Input
+          label='Suscripción:'
+          value={this.state.suscripcion}
+          onChange={this.controlarCambio}
+          name='suscripcion'
+        />
+        &lt;Input
+          label='Número Medidor:'
+          value={this.state.numeroMedidor}
+          onChange={this.controlarCambio}
+          name='numeroMedidor'
+        />
+        &lt;Input
+          label='Dirección:'
+          value={this.state.direccion}
+          onChange={this.controlarCambio}
+          name='direccion'
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Estado:'
+          name='estado'
+          value={this.state.estado}
+          onChange={this.controlarCambio}
+        />
+        &lt;Input
+          label='Facturando:'
+          value={this.state.facturando}
+          onChange={this.controlarCambio}
+          name='facturando'
+        />
+        &lt;div className='col-12'>
+          &lt;button className='btn btn-primary mr-2'>Actualizar Homologación&lt;/button>
+          &lt;button className='btn btn-primary mr-2'>Consultar&lt;/button>
+          &lt;button className='btn btn-primary mr-2'>Buscar Coincidencias&lt;/button>
+          &lt;button className='btn btn-primary'>Guardar Homologación&lt;/button>
+        &lt;/div>
+        &lt;div className='col-12 pt-5'>
+          &lt;div className='group-section'>
+            &lt;label className='legend-section'>Historial Homologaciones&lt;/label>
+            &lt;div className='body-section'>
+              &lt;table className='table table-condensed table-hover table-bordered table-striped'>
+                &lt;thead>
+                  &lt;tr>
+                    &lt;th>Empresa Alterna&lt;/th>
+                    &lt;th>Convenio&lt;/th>
+                    &lt;th>Fecha&lt;/th>
+                    &lt;th>Medidor&lt;/th>
+                    &lt;th>Código Suscripción Alterna&lt;/th>
+                  &lt;/tr>
+                &lt;/thead>
+                &lt;tbody>
+                &lt;/tbody>
+              &lt;/table>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    )
+  };
+
+  renderSeccionActualizacion = () => {
+    return (
+      &lt;div className='row'>
+        &lt;div className='col-12'>
+          &lt;h1 className='title-panel'>Actualización&lt;/h1>
+        &lt;/div>
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Empresa Alterna:'
+          name='empresaAlterna'
+          value={this.state.empresaAlterna}
+          onChange={this.controlarCambio}
+        />
+        &lt;div className='group-section'>
+          &lt;label className='legend-section'>Información Tercero&lt;/label>
+          &lt;div className='body-section'>
+            &lt;div className='row'>
+              &lt;Input
+                label='Identificación:'
+                value={this.state.identificacion}
+                onChange={this.controlarCambio}
+                name='identificacion'
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo identificación:'
+                name='tipoIdentificacion'
+                value={this.state.tipoIdentificacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Lugar Expedición:'
+                name='lugarExpedicion'
+                value={this.state.lugarExpedicion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Input
+                label='Nombres:'
+                value={this.state.nombres}
+                onChange={this.controlarCambio}
+                name='nombres'
+              />
+              &lt;Input
+                label='Apellidos:'
+                value={this.state.apellidos}
+                onChange={this.controlarCambio}
+                name='apellidos'
+              />
+              &lt;Input
+                label='Correo:'
+                value={this.state.correoActualizacion}
+                onChange={this.controlarCambio}
+                name='correoActualizacion'
+              />
+              &lt;Input
+                label='Número Contacto:'
+                value={this.state.numeroContactoActualizacion}
+                onChange={this.controlarCambio}
+                name='numeroContactoActualizacion'
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo:'
+                name='tipoActualizacion'
+                value={this.state.tipoActualizacion}
+                onChange={this.controlarCambio}
+              />
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='group-section mt-3'>
+          &lt;label className='legend-section'>Información Propiedad&lt;/label>
+          &lt;div className='body-section'>
+            &lt;div className='row'>
+              &lt;Input
+                label='Número Medidor:'
+                value={this.state.numeroMedidor}
+                onChange={this.controlarCambio}
+                name='numeroMedidor'
+              />
+              &lt;Input
+                label='Dirección:'
+                value={this.state.direccion}
+                onChange={this.controlarCambio}
+                name='direccion'
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Barrio:'
+                name='barrioActualizacion'
+                value={this.state.barrioActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Input
+                label='Cédula Catastral:'
+                value={this.state.cedulaCatastralActualizacion}
+                onChange={this.controlarCambio}
+                name='cedulaCatastralActualizacion'
+              />
+              &lt;Input
+                label='Matricula Inmobiliaria:'
+                value={this.state.matriculaInmobiliariaActualizacion}
+                onChange={this.controlarCambio}
+                name='matriculaInmobiliariaActualizacion'
+              />
+              &lt;TextoNumerico
+                aceptaDecimales={false}
+                aceptaNegativos={false}
+                label='Número Contador:'
+                cols={4}
+                value={this.state.numeroContadorActualizacion}
+                onChange={this.controlarCambio}
+                name='numeroContadorActualizacion'
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo Vivienda:'
+                name='tipoViviendaActualizacion'
+                value={this.state.tipoViviendaActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Inquilinato:'
+                name='inquilinatoActualizacion'
+                value={this.state.inquilinatoActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Independencia:'
+                name='independenciaActualizacion'
+                value={this.state.independenciaActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;TextoNumerico
+                aceptaDecimales={false}
+                aceptaNegativos={false}
+                label='Número independencia:'
+                cols={4}
+                value={this.state.numeroIndependencia}
+                onChange={this.controlarCambio}
+                name='numeroIndependencia'
+              />
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='group-section mt-3'>
+          &lt;label className='legend-section'>Información Suscripción&lt;/label>
+          &lt;div className='body-section'>
+            &lt;div className='row'>
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo de Uso:'
+                name='tipoUso'
+                value={this.state.tipoUso}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo Generador:'
+                name='tipoGeneradorActualizacion'
+                value={this.state.tipoGeneradorActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Estrato:'
+                name='estratoActualizacion'
+                value={this.state.estratoActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Macroruta:'
+                name='macroRutaActualizacion'
+                value={this.state.macroRutaActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Microruta:'
+                name='microRutaActualizacion'
+                value={this.state.microRutaActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Ciclo:'
+                name='cicloActualizacion'
+                value={this.state.cicloActualizacion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Ruta:'
+                name='ruta'
+                value={this.state.ruta}
+                onChange={this.controlarCambio}
+              />
+              &lt;Fecha
+                label='Fecha Inscripción:'
+                name='fechaInscripcionActualizacion'
+                fecha={this.state.fechaInscripcion}
+                onChange={this.controlarCambio}
+              />
+              &lt;Combo
+                opciones={[]}
+                propTexto='texto'
+                propValor='valor'
+                label='Estado:'
+                name='estadoActualizacion'
+                value={this.state.estadoActualizacion}
+                onChange={this.controlarCambio}
+              />
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='col-12'>
+          &lt;button className='btn btn-primary'>&lt;i className='fa fa-fw fa-save'>&lt;/i> Guardar&lt;/button>
+          &lt;button className='btn btn-primary'>&lt;i className='fa fa-fw fa-search'>&lt;/i> Consultar&lt;/button>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderSeccionGestionVisitas = () => {
+    return (
+      &lt;div className='row'>
+        &lt;div className='col-12'>
+          &lt;h1 className='title-panel'>Gestión Vistas&lt;/h1>
+        &lt;/div>
+        &lt;Input
+          label='Radicado:'
+          value={this.state.radicadoVisitas}
+          onChange={this.controlarCambio}
+          name='radicadoVisitas'
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Novedad Visita:'
+          name='novedadVisita'
+          value={this.state.novedadVisita}
+          onChange={this.controlarCambio}
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Novedad Liquidación:'
+          name='novedadLiquidacion'
+          value={this.state.novedadLiquidacion}
+          onChange={this.controlarCambio}
+        />
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Estado:'
+          name='estadoVisita'
+          value={this.state.estadoVisita}
+          onChange={this.controlarCambio}
+        />
+        &lt;Fecha
+          label='Fecha Programación:'
+          name='fechaProgramacionVisita'
+          fecha={this.state.fechaProgramacionVisita}
+          onChange={this.controlarCambio}
+        />
+        &lt;div className='col-4'>
+          &lt;div className='input-group'>
+            &lt;label>Radicado PQR:&lt;/label>
+            &lt;input type="text" className='form-control' />
+            &lt;div className='input-group-btn'>
+              &lt;button className='btn btn-primary'>Ver&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Técnico:'
+          name='tecnicoVisita'
+          value={this.state.tecnicoVisita}
+          onChange={this.controlarCambio}
+        />
+        &lt;Fecha
+          label='Fecha Ejecución:'
+          name='fechaEjecucion'
+          fecha={this.state.fechaEjecucion}
+          onChange={this.controlarCambio}
+        />
+        &lt;div className='col-4'>
+          &lt;label>Archivo:&lt;/label>
+          &lt;div className='input-group'>
+            &lt;input type="text" className='form-control' />
+            &lt;div className='input-group-btn'>
+              &lt;button>&lt;i className='fa fa-fw fa-paperclip'>&lt;/i> Cargar Archivo&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;Combo
+          opciones={[]}
+          propTexto='texto'
+          propValor='valor'
+          label='Instalación Nueva:'
+          name='instalacionNuevaVisita'
+          value={this.state.instalacionNuevaVisita}
+          onChange={this.controlarCambio}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Nro Medidor:'
+          cols={4}
+          value={this.state.numeroMedidorVisita}
+          onChange={this.controlarCambio}
+          name='numeroMedidorVisita'
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Nro Contador:'
+          cols={4}
+          value={this.state.numeroContadorVisita}
+          onChange={this.controlarCambio}
+          name='numeroContadorVisita'
+        />
+        &lt;Input
+          label='Consumo Adicional:'
+          value={this.state.consumoAdicionalVisita}
+          onChange={this.controlarCambio}
+          name='consumoAdicionalVisita'
+        />
+        &lt;div className='col-6'>
+          &lt;textarea>&lt;/textarea>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  renderSeccionTabs = () => {
+    return (
+      &lt;Fragment>
+        &lt;nav>
+          &lt;div className="nav nav-tabs" id="nav-tab" role="tablist">
+            &lt;a className={`nav-item nav-link ${(this.state.panelActivo === 'H') ? 'active' : ''}`} data-panel='H' onClick={this.controlCambioNavTabs}>Homologación&lt;/a>
+            &lt;a className={`nav-item nav-link ${(this.state.panelActivo === 'A') ? 'active' : ''}`} data-panel='A' onClick={this.controlCambioNavTabs}>Actualización&lt;/a>
+            &lt;a className={`nav-item nav-link ${(this.state.panelActivo === 'V') ? 'active' : ''}`} data-panel='V' onClick={this.controlCambioNavTabs}>Gestión Visitas&lt;/a>
+          &lt;/div>
+        &lt;/nav>
+        &lt;div className="tab-content" id="nav-tabContent">
+          &lt;div className="tab-pane fade show active" >
+            {(this.state.panelActivo === 'H') &amp;&amp; (this.renderSeccionHomologacion())}
+            {(this.state.panelActivo === 'A') &amp;&amp; (this.renderSeccionActualizacion())}
+            {(this.state.panelActivo === 'V') &amp;&amp; (this.renderSeccionGestionVisitas())}
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    )
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;div className='col-12'>
+            {this.renderCabeceraBusqueda()}
+          &lt;/div>
+          &lt;div className='col-12 pt-3'>
+            &lt;button className='btn btn-primary'>&lt;i className='fa fa-fw fa-search'>&lt;/i> Consultar&lt;/button>
+          &lt;/div>
+          &lt;div className='col-12 mt-5'>
+            {this.renderSeccionTabs()}
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  }
+}
+
+GestionInterfazActualizacion.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionInterfazActualizacion);
+
+export { VistaRedux as RGestionInterfazActualizacion };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#estadoConsulta">estadoConsulta</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:43:08 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

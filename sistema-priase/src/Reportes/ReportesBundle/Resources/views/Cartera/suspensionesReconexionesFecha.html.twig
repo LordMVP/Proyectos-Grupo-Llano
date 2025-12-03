@@ -1,0 +1,83 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Reporte de usuarios suspendidos y reconectados Auditoría  - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="carteraController">
+        <form name="reporte" novalidate >
+            <div id="divPanelContenedor">
+                <fieldset>  
+                    <legend>Generacion de informe de usuarios suspendidos y reconectados Auditoría</legend>
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3> Parametros para la generacion de informacion</h3>
+                            </div>
+                            <div class="panel-body"> 
+                                <div class="row">
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Fecha inicial</label>
+                                        <input type="text" id="fechaInicial" name="fechaInicial" ng-model="info.fechaInicial" required="true" class="input-sm form-control datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaInicial.$error.required">
+                                            La fecha inicial es requerida.
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Fecha final</label>
+                                        <input type="text" id="fechaFinal" name="fechaFinal" ng-model="info.fechaFinal" required="true" class="form-control datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaFinal.$error.required">
+                                            La fecha final es requerida.
+                                        </p>
+                                    </div>
+                                   
+                                    <div class="form-group col-md-12" show-errors>
+                                        <label>Proyecto</label>
+                                        <select required="true" id="proyecto" name="proyecto" ng-model="info.proyecto" class="form-control input-sm">
+                                            <option value="-1">Todos los proyectos</option>
+                                            {%for item in municipios%}
+                                            <option value="{{item.idmunicipio}}">{{item.municipio}}</option>
+                                            {%endfor%}
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.proyecto.$error.required">
+                                            El proyecto es requerido
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-12" show-errors>
+                                        <label>Tipo de uso</label>
+                                        <select required="true" id="tipoUso" name="tipoUso" ng-model="info.tipoUso" class="form-control input-sm">
+                                            <option value="-1">Todos los tipos de uso</option>
+                                            <option ng-repeat="tipoUso in tiposUso" ng-value="tipoUso.tipo_uso_id">{[{tipoUso.tipo_uso_nombre}]}</option>                                            
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipoUso.$error.required">
+                                            El tipo de uso es requerido
+                                        </p>
+                                    </div>                                    
+                                </div>                                   
+                            </div>                            
+                            <div class="panel-footer">                                
+                                <div class="col-md-4 col-md-offset-8">
+                                    <button ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-gears fa-1x"></i> Generar Reporte
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>                
+                </fieldset>
+            </div>
+        </form>        
+    </div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/moment-with-locales.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/suspensionesReconexionesFecha.control.angular.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,17 @@
+homafo_homafo_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: HomafoHomafoBundle:Default:api }
+
+homafo_homafo_index:
+    pattern:  /{ruta}
+    defaults: { _controller: HomafoHomafoBundle:Default:index }
+    requirements:
+        ruta: .+
+
+homafo_homafo_kio:
+    pattern:  /kio/{ruta}
+    defaults: { _controller: HomafoHomafoBundle:Default:kio }    
+
+homafo_homafo_todas:
+    pattern:  /
+    defaults: { _controller: HomafoHomafoBundle:Default:index }

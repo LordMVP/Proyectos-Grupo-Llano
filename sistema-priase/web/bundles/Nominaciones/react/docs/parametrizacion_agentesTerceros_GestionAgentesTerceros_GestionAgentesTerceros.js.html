@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/agentesTerceros/GestionAgentesTerceros/GestionAgentesTerceros.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/agentesTerceros/GestionAgentesTerceros/GestionAgentesTerceros.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios'; RUTAS_API
+
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+
+import { RConsultaAgentesTerceros } from '../ConsultaAgentesTerceros';
+import './GestionAgentesTercero.scss';
+import { CLASES_UNIDADES } from '../../../../global/constantes'
+import { RegistroContacto } from './RegistroContacto/RegistroContacto';
+import md5 from 'md5';
+
+class GestionAgentesTerceros extends Component {
+
+  state = {
+
+    // Datos de la entidad
+    idTerceroPrincipal: null,
+    terIderegistro: null,
+    listaContactos: [],
+    nombreEmpresa: '',
+    codigoGestor: '',
+    nitTercero: '',
+    codigoPlataformaBEO: '',
+    listaContactosEliminados: [],
+    tipoCliente: '',
+    tiposContacto: [],
+    contacto: null,
+    direccion: '',
+    visibilidadFormularioContacto: false,
+
+    // Estado de la aplicacion
+    mostrarModalConsulta: false
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_AGENTES_TERCEROS.CONSULTAR_TIPOS_CONTACTO, { criterio: '', idClase: CLASES_UNIDADES.TIPO_CONTACTO })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ tiposContacto: respuesta.data.datos });
+        } else {
+          this.props.mostrarAlerta('Error de configuración', 'No hay tipos de contacto configurados.');
+        }
+      });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de salir del componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      mostrarModalConsulta: false,
+      idTerceroPrincipal: null,
+      terIderegistro: null,
+      listaContactos: [],
+      listaContactosEliminados: [],
+      nombreEmpresa: '',
+      codigoGestor: '',
+      nitTercero: '',
+      codigoPlataformaBEO: '',
+      tipoCliente: '',
+      contacto: null,
+      direccion: '',
+    });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de salir del componente
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones para el componente Botonera
+   * @returns {Array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar los campos del formulario principal
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    if (!this.state.idTerceroPrincipal) {
+      return { respuesta: false, mensaje: { titulo: 'Seleccione un tercero', mensaje: 'Dene seleccionar un tercero para continuar.' } };
+    }
+    if (this.state.codigoPlataformaBEO.trim() == '' || this.state.codigoGestor.trim() == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Los campos Código Plataforma BEO y Código del gestor son obligatorios.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de contruir un objeto con los contactos del tercero
+   * @returns {Array}
+   */
+  procesarContactos = () => {
+    let listaContactos = this.state.listaContactos.concat(this.state.listaContactosEliminados);
+    let listaFinal = [];
+    if (listaContactos.length > 0) {
+      listaFinal = listaContactos.map(temp => {
+        if (temp.usuarioConAcceso === 'false') {
+          temp.usuarioConAcceso = 'N'
+        }
+
+        if (temp.usuarioConAcceso === 'true') {
+          temp.usuarioConAcceso = 'S'
+        }
+        return {
+          terIdecontacto: {
+            terIderegistro: temp.idContacto
+          },
+          usuario: temp.usuarioAcceso,
+          acceso: temp.usuarioConAcceso,
+          clave: (typeof temp.claveAcceso === 'string' &amp;&amp; temp.claveAcceso.trim() != '') ? md5(temp.claveAcceso) : null,
+          accion: temp.accion,
+          uniIdetipocontacto: {
+            uniIderegistro: temp.tipoContacto
+          }
+        }
+      });
+    }
+    return listaFinal;
+  };
+
+  /**
+   * Método encargado de ejecutar la petición de guardado
+   * @returns {Boolean}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = {
+      terIderegistro: this.state.terIderegistro,
+      terInfoadicional: JSON.stringify({
+        codigoGestor: this.state.codigoGestor,
+        codigoBEO: this.state.codigoPlataformaBEO,
+        direccion: this.state.direccion,
+      }),
+      listaContactos: this.procesarContactos(),
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_AGENTES_TERCEROS.GUARDAR_AGENTE_TERCERO, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el componente ventana modal
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar los cambios en el componente contacto
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioControlCompuesto = (evento) => {
+    const targetName = evento.target.name;
+    let contactoTemp = this.state.contactoTemp;
+    contactoTemp[targetName] = evento.target.value;
+    this.setState({ contactoTemp: contactoTemp });
+  };
+
+  /**
+   * Método encargado de cerrar el componente ventana modal
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado cargar los datos de la entidad seleccionada
+   * @param {Object} entidad Entidad seleccionada
+   */
+  cargarDatos = (entidad) => {
+    this.consultarContactos(entidad);
+  };
+
+  /**
+   * Método encargado de consultar los contactos del tercero seleccionado
+   * @param {Object} entidad Tercero seleccionado
+   */
+  consultarContactos = (entidad) => {
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_AGENTES_TERCEROS.CONSULTAR_CONTACTOS, { idTerceroPrincipal: entidad.terIderegistro })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          const lista = respuesta.data.datos;
+          const listaFinal = this.obtenerListaContactos(lista);
+          this.actualizarState(entidad, listaFinal);
+        } else {
+          this.actualizarState(entidad, []);
+        }
+      });
+  };
+
+  /**
+   *  Método encargado de actualizar el objeto state con los datos del tercero y de contactos
+   * @param {Object} entidad Datos del tercero
+   * @param {Array} listaFinal Datos de lcontacto
+   */
+  actualizarState = (entidad, listaFinal) => {
+    let infoAdicional = (entidad.terInfoadicional) ? JSON.parse(entidad.terInfoadicional) : null;
+    this.setState({
+      mostrarModalConsulta: false,
+      nombreEmpresa: entidad.terNomcompleto,
+      codigoGestor: (infoAdicional) ? infoAdicional.codigoGestor : '',
+      nitTercero: entidad.terDocumento,
+      codigoPlataformaBEO: (infoAdicional) ? infoAdicional.codigoBEO : '',
+      tipoCliente: this.obtenerTiposContrato(entidad.info.lista_tipo),
+      terIderegistro: entidad.terIderegistro,
+      idTerceroPrincipal: entidad.terIderegistro,
+      listaContactos: listaFinal,
+      contacto: null,
+      visibilidadFormularioContacto: false,
+      direccion: (infoAdicional) ? infoAdicional.direccion : ''
+    });
+  };
+
+  /**
+   * Obtiene los tipos de contrato de las propiedades que recibe de la tabla.
+   * @return {string}
+   */
+  obtenerTiposContrato = (lista) => {
+    const listaTipos = JSON.parse(lista);
+    if (!Array.isArray(listaTipos) || listaTipos.length == 0) {
+      return 'Indefinido';
+    }
+    return listaTipos.map(tipo => {
+      return tipo.uni_nombre1;
+    }).join(',');
+  };
+
+  /**
+   * Método encargado de obtener la lista final de contactos
+   * @returns {Array}
+   */
+  obtenerListaContactos = (lista) => {
+    return lista.map(temp => {
+      return {
+        nombreContacto: temp.terIdecontacto.terNomcompleto,
+        identificacionContacto: temp.terIdecontacto.terDocumento,
+        tipoContacto: temp.uniIdetipocontacto.uniIderegistro,
+        tipoContactoNombre: temp.uniIdetipocontacto.uniNombre1,
+        telefonoContacto: temp.terIdecontacto.terTelfijo,
+        terIderegistro: temp.terIdecontacto.terIderegistro,
+        idContacto: temp.terIdecontacto.terIderegistro,
+        emailContacto: temp.terIdecontacto.terCorreo,
+        usuarioAcceso: temp.usuario || '',
+        usuarioConAcceso: (temp.usuario) ? 'S' : 'N',
+        claveAcceso: '',
+        accion: 'N',
+      }
+    });
+  };
+
+  /**
+   * Método encargado de controlar la visibilidad de los campos del componente
+   * @param {String} componente Nombre del componente
+   * @param {Boolean} estado Estado actual del componente
+   */
+  cambiarVisibilidadComponente = (componente, estado) => {
+    let visibilidad = this.state.visibilidad;
+    visibilidad[componente] = estado;
+    let cambio = {};
+    cambio[visibilidad] = visibilidad;
+    this.setState(cambio);
+  };
+
+  /**
+   * Método encargado de obtener las columnas del componente Tabla
+   * @returns {Array}
+   */
+  obtenerColumnasListaContactos = () => {
+    return [
+      {
+        Header: 'Contactos tercero',
+        columns: [
+          {
+            Header: 'Acción',
+            accessor: 'trctIderegistro',
+            Cell: (props) => this.renderCeldaAcciones(props, this)
+          },
+          {
+            Header: 'Documento',
+            accessor: 'identificacionContacto'
+          },
+          {
+            Header: 'Nombre',
+            accessor: 'nombreContacto'
+          },
+          {
+            Header: 'Tipo contacto',
+            accessor: 'tipoContactoNombre',
+            Cell: (props) => this.obtenerNombreTipoContacto(props, this)
+          }
+        ]
+      }
+    ]
+  };
+
+  /**
+   * Método encargado de obtener el nombre del contacto
+   * @param {Object} props Propiedades del componente tabla
+   * @param {Object} contexto Contexto de la clase
+   */
+  obtenerNombreTipoContacto = (props, contexto) => {
+    const idTipoContacto = parseInt(props.row._original.tipoContacto, 0);
+    const tipoContacto = this.state.tiposContacto.find(a => a.uniIderegistro === idTipoContacto);
+    return (tipoContacto) ? tipoContacto.uniNombre1 : '';
+  };
+
+  /**
+   * Método encargado de renderizar las acciones del componente Tabla
+   * @param {Object} props Propiedades del componente tabla
+   * @param {Object} contexto Contexto de la clase
+   */
+  renderCeldaAcciones = (props, contexto) => {
+    return (
+      &lt;div className='text-center'>
+        &lt;a href='#' className='gestion-tramos__link-tabla' onClick={(evento) => {
+          Util.detenerEvento(evento);
+          contexto.editarContacto.call(contexto, props.row._original);
+        }}>Editar&lt;/a>
+
+        &lt;a href='#' className='gestion-tramos__link-tabla' onClick={(evento) => {
+          Util.detenerEvento(evento);
+          contexto.borrarContacto.call(contexto, props.row._original);
+        }}>
+          Borrar
+        &lt;/a>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de controlar la visibilidad del formulario contacto
+   */
+  controlarVisibilidadFormularioContacto = (visibilidad) => {
+    if (this.state.visibilidadFormularioContacto === visibilidad) {
+      return;
+    }
+    this.setState({ visibilidadFormularioContacto: visibilidad });
+  };
+
+  /**
+   * Método encargado de controlar la visibilidad del formulario contacto
+   */
+  editarContacto = (contacto) => {
+    contacto.visibilidadBtnAgregarContacto = false;
+    // contacto.accion = 'M';
+    contacto.usuarioConAcceso = (contacto.usuarioAcceso) ? 'S' : 'N';
+    this.setState({ contacto: contacto, visibilidadFormularioContacto: true });
+  };
+
+  /**
+   * Método encargado de eliminar un contacto
+   * @param {Object} contacto Datos del contacto a eliminar
+   */
+  borrarContacto = (contacto) => {
+    const callback = () => {
+      const index = this.state.listaContactos.findIndex(a => a.idContacto == contacto.idContacto);
+      let nuevosContactos = [...this.state.listaContactos];
+      let objParaEliminar = { ...this.state.listaContactos[index] };
+      objParaEliminar.accion = "E";
+      let nuevosContactosEliminados = [objParaEliminar, ...this.state.listaContactosEliminados];
+      nuevosContactos.splice(index, 1);
+      this.setState({ listaContactos: nuevosContactos, listaContactosEliminados: nuevosContactosEliminados });
+    };
+
+    this.props.mostrarAlerta('Confirmar', '¿Desea eliminar el contacto?', [
+      { texto: 'Eliminar', callback: callback, clase: 'btn-danger' },
+      { texto: 'Cancelar' }
+    ]);
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario contacto
+   */
+  limpiarFormularioContacto = () => {
+    var contacto = {
+      nombreContacto: '',
+      identificacionContacto: '',
+      tipoIdentificionContacto: '',
+      tipoContacto: '', telefonoContacto: '',
+      direccionContacto: '', emailContacto: '',
+      usuarioConAcceso: 'N',
+      usuarioAcceso: '',
+    };
+    this.setState({ contactoTemp: contacto });
+  };
+
+  /**
+   * Método encargado de agregar un contacto a un tercero
+   * @param {Object} datos Datos del contacto que se quiere agregar
+   * @returns {Boolean}
+   */
+  agregarContacto = (datos) => {
+    const { listaContactos } = this.state;
+    if (listaContactos.length === 0) {
+      this.setState({ 'listaContactos': [...listaContactos, datos], contacto: null });
+    }
+    for (let i = 0; i &lt; listaContactos.length; i++) {
+      const contacto = listaContactos[i];
+      if (contacto.terIderegistro == datos.terIderegistro) {
+        this.props.mostrarAlerta("Alerta", 'Este contacto ya se encuentra registrado', [
+          { texto: 'Salir', clase: 'btn' }
+        ]);
+        return false;
+      }
+      this.setState({ 'listaContactos': [...listaContactos, datos], contacto: null });
+    };
+  };
+
+  /**
+   * Método encargado de confirmar la edición de un contacto
+   */
+  confirmarCambios = (datos) => {
+    const index = this.state.listaContactos.findIndex(a => a.idContacto === datos.idContacto);
+    let nuevosContactos = [...this.state.listaContactos];
+    if (datos.usuarioConAcceso === 'N') {
+      datos.usuarioAcceso = null;
+      datos.claveAcceso = '';
+      datos.claveAccesoConfirmar = null;
+    }
+    nuevosContactos[index] = datos;
+    this.setState({ listaContactos: [...nuevosContactos], contacto: null });
+  };
+
+  /**
+   * Método encargado de descartar los cambios al momento de editar un contacto
+   */
+  descartarCambiosContacto = () => {
+    this.setState({ contacto: null, visibilidadFormularioContacto: false });
+  };
+
+  /**
+   * Método encargado de mostar el componente de contactos
+   * @returns {Component}
+   */
+  renderComponenteContactos = () => {
+    if (this.state.idTerceroPrincipal &amp;&amp; Util.validarArreglo(this.state.tiposContacto)) {
+      return (
+        &lt;div className='row'>
+          &lt;div className='col-md-12'>
+            &lt;div className='panel panel-primary '>
+              &lt;div className="panel-body">
+                &lt;RegistroContacto
+                  contacto={this.state.contacto}
+                  agregarContacto={this.agregarContacto}
+                  confirmarCambios={this.confirmarCambios}
+                  descartarCambios={this.descartarCambiosContacto}
+                  mostrarAlerta={this.props.mostrarAlerta}
+                  tiposContacto={this.state.tiposContacto}
+                  visibilidadFormulario={this.state.visibilidadFormularioContacto}
+                  controlarVisibilidadFormulario={this.controlarVisibilidadFormularioContacto}
+                />
+              &lt;/div>
+              &lt;div className='listaContactos'>
+                &lt;Tabla
+                  datos={this.state.listaContactos}
+                  columnas={this.obtenerColumnasListaContactos()}
+                />
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      );
+    }
+    return null;
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        &lt;div className='row mt-5'>
+          &lt;Input
+            label='Nombre empresa (*):'
+            value={this.state.nombreEmpresa}
+            onChange={this.controlarCambio}
+            name='nombreEmpresa'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Nit (*):'
+            value={this.state.nitTercero}
+            onChange={this.controlarCambio}
+            name='nitTercero'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Tipo cliente (*):'
+            value={this.state.tipoCliente}
+            onChange={this.controlarCambio}
+            name='tipoCliente'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Código Plataforma BEO (*):'
+            value={this.state.codigoPlataformaBEO}
+            onChange={this.controlarCambio}
+            name='codigoPlataformaBEO'
+          />
+          &lt;Input
+            label='Código del Gestor (*):'
+            value={this.state.codigoGestor}
+            onChange={this.controlarCambio}
+            name='codigoGestor'
+          />
+          &lt;Input
+            label='Dirección:'
+            value={this.state.direccion}
+            onChange={this.controlarCambio}
+            name='direccion'
+          />
+        &lt;/div>
+        {this.renderComponenteContactos()}
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta de Agentes Terceros'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaAgentesTerceros esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionAgentesTerceros.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionAgentesTerceros);
+
+export { VistaRedux as RGestionAgentesTerceros };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

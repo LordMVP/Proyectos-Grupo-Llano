@@ -1,0 +1,18 @@
+.grupo-componente{
+  display: flex;
+}
+.grupo-componente .componente{
+  display: inline-flex;
+}
+
+.grupo-componente .componente.indice{
+  width: 40%;
+}
+.grupo-componente .componente.descrip{
+  width: 60%;
+}
+.bordered-alertas{
+  border: 1px solid #00a1ff;
+  border-radius: 5px;
+  padding: 5px;
+}

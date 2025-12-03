@@ -1,0 +1,633 @@
+import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, TextoNumerico, Fecha, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+
+import './GestionReportes.scss';
+
+const TIPOS_ENTRADA = {
+  COMBO: 'combo',
+  NUMERICO: 'numerico',
+  TEXTO: 'texto',
+  FECHA: 'fecha',
+  PERIODO: 'periodo',
+};
+
+const FORMATOS = {
+  EXCEL: 'EXCEL',
+  CSV: 'CSV',
+  PDF: 'PDF'
+};
+
+const LISTA_FORMATOS = [
+  { texto: FORMATOS.EXCEL, valor: FORMATOS.EXCEL },
+  { texto: FORMATOS.CSV, valor: FORMATOS.CSV },
+  { texto: FORMATOS.PDF, valor: FORMATOS.PDF },
+];
+
+const LISTA_MOSTRAR_CRITERIOS = [
+  { texto: 'SI', valor: 'S' },
+  { texto: 'NO', valor: 'N' },
+];
+
+class GestionReportes extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    listaReportes: [],
+    mostrarCriterio: null,
+    parametros: {
+
+    }
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const { state } = this.props.history && this.props.history.location;
+    if (state && state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.consultarReportes();
+  }
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  /**
+   * Consulta los reportes...
+   */
+  consultarReportes = () => {
+    axios.post(RUTAS_API.GESTION_REPORTES.LISTAR_REPORTES)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaReportes: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      parametros: {},
+      idReporte: '',
+      columnasReporte: [],
+      datosReporte: [],
+    });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Método encargado de mostrar los botones del componente Botonera
+   * @returns {Array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Generar Reporte', callback: this.generarReporte },
+      { texto: 'Previsualizar Reporte', callback: this.previsualizarReporte },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Consultará la información del reporte y la mostrará en la interfaz...
+   */
+  previsualizarReporte = () => {
+    const respuesta = this.validarFormulario();
+    if (respuesta.respuesta == false) {
+      const { titulo, mensaje } = respuesta.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+
+    const { idReporte, formato, mostrarCriterio } = this.state;
+    let parametros = this.state.parametros;
+    parametros = this.actualizarValoresDefecto(parametros);
+    parametros = this.construirParametros(parametros);
+
+    axios.post(RUTAS_API.GESTION_REPORTES.CONSULTA_PREVISUALIZAR, {
+      idReporte: idReporte,
+      formato: formato,
+      mostrarCriterio: mostrarCriterio,
+      parametros: parametros,
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        this.setState({
+          columnasReporte: JSON.parse(respuesta.data.datos.columnas),
+          datosReporte: respuesta.data.datos.datos,
+        });
+      } else {
+        this.props.mostrarAlerta('Error al previsualizar', 'No se generó información válida para mostrar.');
+      }
+    });
+  };
+
+  /**
+ * Validará un campo en especifico teniendo en cuenta si la configuración del mismo es requerida.
+ * @return {Object}
+ */
+  validarCampo = (f) => {
+    if (!JSON.parse(f.requerido)) {
+      return { respuesta: true };
+    }
+    const valor = this.state.parametros[f.parametro];
+    //Validamos si es combo y si se ha seleccionado algún valor válido...
+    if (f.tipo == TIPOS_ENTRADA.COMBO && valor && valor.trim() != '' && valor.trim() != '-1') {
+      return { respuesta: true };
+      //Validamos si es númerico y si se ha ingresado un valor válido.
+    } else if (f.tipo == TIPOS_ENTRADA.NUMERICO && valor >= 0) {
+      return { respuesta: true };
+      //Validamos si es de texto y si se ha ingresado un valor válido.
+    } else if (f.tipo == TIPOS_ENTRADA.TEXTO && valor && valor.trim() != '') {
+      return { respuesta: true };
+      //Validamos si es de tipo fecha o periodo y si se ha ingresado una fecha válida.
+    } else if ((f.tipo == TIPOS_ENTRADA.FECHA || f.tipo == TIPOS_ENTRADA.PERIODO) && valor && valor.trim() != '') {
+      return { respuesta: true };
+    } else {
+      return { respuesta: false, mensaje: { titulo: 'Complete el formulario', mensaje: f.nombre + ' es Requerido.' } };
+    }
+  };
+
+  /**
+   * Valida el formulario.
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const reporte = this.obtenerReporte();
+    if (!reporte) {
+      return null;
+    }
+    const filtros = JSON.parse(reporte.repcFiltro);
+    if (!Util.validarArreglo(filtros)) {
+      return null;
+    }
+
+    for (let i = 0; i < filtros.length; i++) {
+      const f = filtros[i];
+      if (JSON.parse(f.requerido)) {
+        const respuesta = this.validarCampo(f);
+        if (!respuesta.respuesta) {
+          return respuesta;
+        }
+      }
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener el valor inicial del componente
+   * @param {String} key Nombre de la llave del objeto JSON
+   */
+  obtenerEtiqueta = (key) => {
+    const parametros = this.state.parametros;
+    const reporte = this.obtenerReporte();
+    const filtros = JSON.parse(reporte.repcFiltro);
+    const filtro = filtros.find(f => {
+      if (f.tipo == "combo" && f.parametro == key) {
+        return f;
+      }
+    });
+    const valorActual = parametros[key];
+    if (!filtro || valorActual == '-1' || !valorActual || valorActual.trim() == '') {
+      return null;
+    }
+    const opcion = filtro.datos.find(opcion => {
+      if (opcion.valor == valorActual) {
+        return opcion;
+      }
+    });
+    if (!opcion) {
+      return null;
+    }
+    return opcion.texto;
+  };
+
+  /**
+   * Método encargado de construir los parametros parametrizados para el reporte
+   * @param {Array} parametros Parametros del reporte
+   */
+  construirParametros = (parametros) => {
+    const listaParametros = [];
+    for (let key in parametros) {
+      let obj = { nombre: key, valor: parametros[key] };
+      obj.etiqueta = this.obtenerEtiqueta(key);
+      obj.etiqueta = (obj.etiqueta) ? obj.etiqueta : parametros[key];
+      listaParametros.push(obj);
+    }
+    return listaParametros;
+  };
+
+  /**
+   * Realiza la petición para generar el reporte.
+   */
+  generarReporte = () => {
+    const respuesta = this.validarFormulario();
+    if (respuesta.respuesta == false) {
+      const { titulo, mensaje } = respuesta.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+
+    const { idReporte, formato, mostrarCriterio } = this.state;
+    let parametros = this.state.parametros;
+    parametros = this.actualizarValoresDefecto(parametros);
+    parametros = this.construirParametros(parametros);
+
+    axios.post(RUTAS_API.GESTION_REPORTES.GENERAR_REPORTE, {
+      idReporte: idReporte,
+      formato: formato,
+      mostrarCriterio: mostrarCriterio,
+      parametros: parametros,
+    })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          const reporte = this.obtenerReporte();
+          let a = document.createElement('a');
+          let extension = '.xls';
+          let dataFormat = 'data:application/vnd.ms-excel;';
+          if (formato == FORMATOS.CSV) {
+            dataFormat = 'data:text/csv;';
+            extension = '.csv';
+          } else if (formato == FORMATOS.PDF) {
+            dataFormat = 'data:application/pdf;';
+            extension = '.pdf';
+          }
+          a.href = dataFormat + 'base64,' + respuesta.data.datos;
+          a.download = reporte.repcNombre + extension;
+          a.target = '_blank';
+          a.click();
+        } else {
+          this.props.mostrarAlerta('Error', 'No se pudo generar el reporte.');
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el componente ventana modal
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const nombrePropiedad = evento.target.name;
+    change[nombrePropiedad] = evento.target.value;
+    if (nombrePropiedad == 'idReporte') {
+      change['parametros'] = {};
+      change['columnasReporte'] = {};
+      change['datosReporte'] = [];
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Busca en la lista de filtros la configuración los parámetros con defecto y los setea en el programa.
+   * @return {array}
+   */
+  actualizarValoresDefecto = (p) => {
+    const parametros = { ...p };
+    const filtros = this.obtenerFiltros();
+    if (!Util.validarArreglo(filtros)) {
+      return parametros;
+    }
+    filtros.forEach(f => {
+      if (f.defecto && !parametros[f.parametro]) {
+        parametros[f.parametro] = f.defecto;
+      }
+    });
+    return parametros;
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioParametro = (evento) => {
+    let parametros = this.state.parametros;
+    const nombrePropiedad = evento.target.name;
+    parametros[nombrePropiedad] = evento.target.value;
+    // parametros = this.buscarValoresDefecto(parametros);
+    this.setState({ parametros: parametros });
+  };
+
+  /**
+   * Método encargado de cerrar el componente ventana modal
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Obtienel el reporte por id.
+   * @return {object}
+   */
+  obtenerReporte = () => {
+    const { idReporte, listaReportes } = this.state;
+    if (idReporte > 0) {
+      const reporte = listaReportes.find(r => r.repcIderegistro == idReporte);
+      return reporte;
+    }
+    return null;
+  };
+
+  /**
+   * Obtieene el título del reporte seleccionado...
+   * @return {string}
+   */
+  obtenerTituloReporte = () => {
+    const reporte = this.obtenerReporte();
+    if (reporte) {
+      const titulo = reporte.repcNombre;
+      return titulo;
+    }
+    return 'No ha seleccionado ningún reporte';
+  };
+
+  /**
+   * Genera el combo a partir de una configuración.
+   * @return {Combo}
+   */
+  generarCombo = (f) => {
+    const id = 'combo_' + f.parametro;
+    return (
+      <Combo
+        key={id}
+        opciones={f.datos}
+        propTexto='texto'
+        propValor='valor'
+        label={f.nombre + ((f.requerido) ? '(*)' : '') + ':'}
+        name={f.parametro}
+        value={this.state.parametros[f.parametro]}
+        onChange={this.controlarCambioParametro}
+      />
+    );
+  };
+
+  /**
+   * General el texto a partir de una configuración.
+   * @return {TextoNumerico}
+   */
+  generarEntradaTexto = (f) => {
+    const id = 'entrada_texto' + f.parametro;
+    return (
+      <Input
+        key={id}
+        label={f.nombre + ((f.requerido) ? '(*)' : '') + ':'}
+        value={this.state.parametros[f.parametro]}
+        onChange={this.controlarCambioParametro}
+        name={f.parametro}
+      />
+    );
+  };
+
+  /**
+   * Genera la entrada númerica a partir de una configuración.
+   * @return {Combo}
+   */
+  generarEntraNumerica = (f) => {
+    const id = 'texto_numerico_' + f.parametro;
+    return (
+      <TextoNumerico
+        key={id}
+        aceptaDecimales={false}
+        aceptaNegativos={false}
+        label={f.nombre + ((f.requerido) ? '(*)' : '') + ':'}
+        cols={4}
+        value={this.state.parametros[f.parametro]}
+        onChange={this.controlarCambioParametro}
+        name={f.parametro}
+      />
+    );
+  };
+
+  /**
+   * Genera la entrada fecha a partir de una configuración.
+   * @return {Combo}
+   */
+  generarEntradaFecha = (f) => {
+    const id = 'fecha_' + f.parametro;
+    return (
+      <Fecha
+        key={id}
+        label={f.nombre + ((f.requerido) ? '(*)' : '') + ':'}
+        name={f.parametro}
+        fecha={this.state.parametros[f.parametro]}
+        onChange={this.controlarCambioParametro}
+      />
+    );
+  };
+
+  /**
+   * Ǵenera la entrada de la fecha mes a partir de una configuración.
+   * @return {Combo}
+   */
+  generarEntradaFechaMes = (f) => {
+    const id = 'periodo_' + f.parametro;
+    return (
+      <Fecha
+        key={id}
+        label={f.nombre + ((f.requerido) ? '(*)' : '') + ':'}
+        name={f.parametro}
+        fecha={this.state.parametros[f.parametro]}
+        sinDia={true}
+        onChange={this.controlarCambioParametro}
+      />
+    );
+  };
+
+  /**
+   * Obtiene la lista de filtros de la configuración de un reporte.
+   * @returns {Array}
+   */
+  obtenerFiltros = () => {
+    const reporte = this.obtenerReporte();
+    if (!reporte) {
+      return null;
+    }
+    const filtros = JSON.parse(reporte.repcFiltro);
+    if (!Util.validarArreglo(filtros)) {
+      return null;
+    }
+    return filtros;
+  };
+
+  /**
+   * Procesa los campos del formulario...
+   */
+  procesarFormulario = () => {
+    const filtros = this.obtenerFiltros();
+    if (!filtros) {
+      return null;
+    }
+    return (
+      <Fragment>
+        {
+          filtros.map(f => {
+            if (f.tipo == TIPOS_ENTRADA.COMBO) {
+              return this.generarCombo(f);
+            } else if (f.tipo === TIPOS_ENTRADA.NUMERICO) {
+              return this.generarEntraNumerica(f);
+            } else if (f.tipo == TIPOS_ENTRADA.TEXTO) {
+              return this.generarEntradaTexto(f);
+            } else if (f.tipo == TIPOS_ENTRADA.FECHA) {
+              return this.generarEntradaFecha(f);
+            } else if (f.tipo == TIPOS_ENTRADA.PERIODO) {
+              return this.generarEntradaFechaMes(f);
+            }
+          })
+        }
+      </Fragment>);
+  };
+
+  /**
+ * Valida un objeto
+ * @param {Object} objeto
+ */
+  validarObjecto = (objeto) => {
+    return objeto && typeof objeto === 'object';
+  };
+
+  /**
+   * Renderiza la tabla del reporte.
+   * @return {Component}
+   */
+  renderTablaReporte = () => {
+    const { columnasReporte, datosReporte } = this.state;
+    if (!this.validarObjecto(columnasReporte) || !Util.validarArreglo(datosReporte)) {
+      return null;
+    }
+    let listaColumnasReporte = [];
+    for (let objeto in columnasReporte) {
+      listaColumnasReporte.push({ key: objeto, texto: columnasReporte[objeto] });
+    }
+    return (
+      <div className='table-responsive '>
+        <table className='table table-condensed table-bordered table-striped table-hover'>
+          <thead className='bg-dark text-white'>
+            <tr>
+              {
+
+                listaColumnasReporte.map((cr, index) => {
+                  return (<th key={index}>{cr.texto}</th>);
+                })
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              datosReporte.map((dr, indexDR) => {
+                return (
+                  <tr key={indexDR}>
+                    {
+                      listaColumnasReporte.map((cr) => {
+                        return <th>{dr[cr.key]}</th>;
+                      })
+                    }
+                  </tr>
+                )
+              })
+            }
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      <Fragment>
+        <div className='d-flex justify-content-center'>
+          <Botonera funciones={this.obtenerFunciones()} />
+        </div>
+
+        <div className='conf-general row mt-5'>
+          <Combo
+            opciones={this.state.listaReportes}
+            propTexto='repcNombre'
+            propValor='repcIderegistro'
+            label='Reporte:'
+            name='idReporte'
+            value={this.state.idReporte}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={LISTA_FORMATOS}
+            propTexto='texto'
+            propValor='valor'
+            label='Formato:'
+            name='formato'
+            value={this.state.formato}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={LISTA_MOSTRAR_CRITERIOS}
+            propTexto='texto'
+            propValor='valor'
+            label='Mostrar Criterio:'
+            name='mostrarCriterio'
+            value={this.state.mostrarCriterio}
+            onChange={this.controlarCambio}
+          />
+        </div>
+        <div className='conf-general row mt-3'>
+          <div className='col-12'>
+            <h2>{this.obtenerTituloReporte()}</h2>
+            <hr />
+          </div>
+          {this.procesarFormulario()}
+          {this.renderTablaReporte()}
+        </div>
+      </Fragment>
+    );
+  }
+}
+
+GestionReportes.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionReportes);
+
+export { VistaRedux as RGestionReportes };

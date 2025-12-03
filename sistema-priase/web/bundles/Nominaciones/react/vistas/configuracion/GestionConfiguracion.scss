@@ -1,0 +1,15 @@
+.gestion-configuracion {
+
+  &__link-accion {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.ReactModal__Content--after-open {
+  width: 66%;
+  height: 80%;
+  left: 50% !important;
+  transform: translateX(-50%);
+  top: 50px !important;
+}

@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/forms/CabeceraContrato.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/forms/CabeceraContrato.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+
+// REDUX
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { get as getProp } from 'object-path';
+import { actualizarCabeceraContrato, actualizarListaContratos } from '../../../../store/actions/ContratosAcciones';
+
+// UI
+import Modal from 'react-bootstrap4-modal';
+import { Combo, Input, Fecha, TextoNumerico } from 'appfuture-react';
+import { RConsultaAgentesTerceros } from '../../../index';
+
+import { SelectorRutas } from '../../../utils/SelectorRutas';
+
+// Util
+import moment from 'moment';
+import { preciseDiff as obteDate } from 'moment-precise-range-plugin';
+
+import { validarOR, parsearJSON, esperar } from '../../../../global/util_nominaciones';
+
+import './CabeceraContrato.scss';
+
+// TODO: Cargar de la BD
+const tiposNegocio = [
+  { id: 'C', tipo: 'Compra' },
+  { id: 'V', tipo: 'Venta' }
+];
+
+const listaAporteGNV = [
+  { valor: 'S', texto: 'Sí' },
+  { valor: 'N', texto: 'No' },
+];
+
+const opcionesTRMTecho = [
+  { id: 'S', texto: 'Sí' },
+  { id: 'N', texto: 'No' }
+];
+
+const periodosCantidadContratada = [
+  { id: 'D', texto: 'Diaria' },
+  { id: 'S', texto: 'Semanal' },
+  { id: 'M', texto: 'Mensual' },
+  { id: 'A', texto: 'Anual' }
+];
+
+class CabeceraContrato extends Component {
+
+  state = {
+    // Aplicacion
+    mostrarTiposContrato: false,
+    mostrarPuntosSalida: false,
+    mostrarRutas: false,
+    mostrarModalMedidores: false,
+    mostrarModalRutas: false,
+
+
+    /// Objetos
+    agenteTercero: null,
+    tiposContrato: this.props.tiposContrato,
+    puntosSalida: this.props.puntosSalida
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    const control = evento.target;
+    let nuevoEstado = {};
+    nuevoEstado[control.name] = control.value;
+
+    // Espacio para validaciones de controles
+    if (control.name === 'takeOrPay' &amp;&amp; control.value === 'false') {
+      nuevoEstado.topGrupal = '-1';
+    }
+
+    if (control.name === 'usaTRMTecho' &amp;&amp; this.state.trmTecho !== '') {
+      nuevoEstado.trmTecho = getProp(this.props, 'cabecera.trmDia', '0');
+    }
+
+    if (control.name === 'firmeza' || control.name === 'modalidadContrato') {
+      const valorFirmeza = (control.name === 'firmeza') ? control.value : '';
+      const valores = this.obtenerValoresFirmeza(valorFirmeza);
+      this.actualizarCabeceraRedux({ firmeza: valores.firmeza });
+    }
+
+    // Actualizar el estado
+    // this.setState(nuevoEstado);
+    this.props.actualizarCabeceraContrato(nuevoEstado);
+  };
+
+  /**
+   * Obtiene la sumatoria de los valores de cantidad de los medidores.
+   * @return {Number}
+   */
+  obtenerSumatoriaMedidores = () => {
+    const { medidores } = this.props.listas;
+    let suma = 0;
+    if (medidores) {
+      for (let i = 0; i &lt; medidores.length; i++) {
+        if (medidores[i].seleccionado) {
+          suma += medidores[i].mesuCapacidadmaxima;
+        }
+      }
+    }
+    return suma;
+  };
+
+  /**
+   * Método encargado de verificar el estado del campo de cantidad contratada
+   */
+  verificarCantidadContratada = () => {
+    let nuevoCambio = {};
+    const tiposContratosSelecccionados = this.obtenerTiposContratoSeleccionados();
+    //Verificamos si el tipo de contrato es transporte y calculamos la sumatoria de la cantidad de los puntos de salida.
+    const t = tiposContratosSelecccionados.filter(tipoContrato => tipoContrato.tipocontrato === 'T');
+    if (t.length > 0) {
+      nuevoCambio.cantidadContratada = this.obtenerSumatoriaPuntosSalida();
+      nuevoCambio.cantidadContratadaDisabled = true;
+    }
+    //Verificamos si el tipo de contrato es suministro y calculamos la sumatoria de los medidores.
+    const s = tiposContratosSelecccionados.filter(tipoContrato => tipoContrato.tipocontrato === 'S');
+    if (s.length > 0) {
+      nuevoCambio.cantidadContratada = this.obtenerSumatoriaMedidores();
+      nuevoCambio.cantidadContratadaDisabled = true;
+    }
+    if (!nuevoCambio.cantidadContratadaDisabled) {
+      nuevoCambio.cantidadContratadaDisabled = false;
+    }
+    this.actualizarCabeceraRedux(nuevoCambio);
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux de la cabecera
+   * @param {Object} nuevoCambio Cambio a realizar
+   */
+  actualizarCabeceraRedux = (nuevoCambio) => {
+    this.props.actualizarCabeceraContrato({
+      ...this.props.cabecera,
+      ...nuevoCambio
+    })
+  };
+
+  /**
+   * Método encargado de obtener los tipos de contrato seleccionado
+   * @returns {Array}
+   */
+  obtenerTiposContratoSeleccionados = () => {
+    return this.props.listas.tiposContrato.filter(t => t.seleccionado)
+      .map(t => {
+        return {
+          uniIderegistro: t.uniIderegistro,
+          tipocontrato: getProp(t, 'uniPropiedad.tipocontrato', null)
+        }
+      });
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux con el tercero seleccionado
+   * @param {Object} agente Tercero seleccionado
+   */
+  seleccionarAgente = (agente) => {
+    this.actualizarCabeceraRedux({
+      agenteTercero: { ...agente },
+      tercero: agente.terNomcompleto
+    });
+  };
+
+  /**
+   * Método encargado de cerrar el componente ventana modal de la consulta terceros
+   */
+  abrirConsultaTerceros = () => {
+    const consultaAgentes = &lt;RConsultaAgentesTerceros esModal seleccionarEntidad={this.seleccionarAgente} />;
+    this.props.mostrarProgramaModal(consultaAgentes);
+  };
+
+  /**
+   * Método encargado de limpiar los datos del campo selector terceros
+   */
+  limpiarAgenteTercero = () => {
+    this.actualizarCabeceraRedux({
+      agenteTercero: null,
+      tercero: ''
+    });
+  };
+
+  /**
+   * Máetodo encargado de mostrar el campo selector de agentes tercero
+   * @returns {JSX}
+   */
+  renderBuscadorTercero = () => {
+    const tercero = getProp(this.props, 'cabecera.tercero', '');
+    const propsInput = {
+      placeholder: 'Seleccione un agente',
+      className: 'form-control',
+      onChange: this.controlarCambio,
+      name: 'tercero',
+      title: tercero,
+      value: tercero,
+      type: 'text',
+      disabled: true
+    };
+    return (
+      &lt;div className='col-6 form-group'>
+        &lt;label>Agente Tercero:&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input {...propsInput} />
+          &lt;div className="input-group-prepend">
+            &lt;button className="btn-primary input-group-text" title='Limpiar Agente' onClick={this.limpiarAgenteTercero}>&lt;i className='fa fa-fw fa-trash'>&lt;/i>&lt;/button>
+            &lt;button className="btn-primary btn-buscador input-group-text" title='Seleccionar Agente Tercero' onClick={this.abrirConsultaTerceros}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Calcula la duración del contrato y devuelve un valor string más legible e informativo para el usuario con el formato: {# días # meses, # años}.
+   * @return {String}
+   */
+  obtenerDuracionContrato = () => {
+    const fechaInicio = getProp(this.props, 'cabecera.fechaInicio', '');
+    const fechaFin = getProp(this.props, 'cabecera.fechaFin', '');
+    if (!fechaInicio || !fechaFin) {
+      return '';
+    }
+    const momentInicio = moment(fechaInicio);
+    const momentFin = moment(fechaFin);
+    let diferencia = moment.preciseDiff(momentInicio, momentFin, true);
+    return `${diferencia.days}${(diferencia.days == 1) ? 'Día' : 'Días'} - ${diferencia.months}${(diferencia.months == 1) ? 'Mes' : 'Meses'} - ${diferencia.years}${(diferencia.years == 1) ? 'Año' : 'Años'}`;
+  };
+
+  /**
+   * Renderiza el componente selector de tipos de contrato.
+   * @returns {JSX}
+   */
+  renderBuscadorTiposContrato = () => {
+    const textoTiposContrato = '';
+    const tiposSeleccionados = this.props.listas.tiposContrato.reduce((total, tipo) => { return total + (tipo.seleccionado ? 1 : 0) }, 0);
+    const placeholder = `(${tiposSeleccionados}) seleccionados`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>Tipos de Contrato:&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={textoTiposContrato} disabled={true} type="text" className="form-control" placeholder={placeholder} />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador input-group-btn"
+              title='Seleccionar Tipos de Contrato'
+              onClick={() => this.setState({ mostrarTiposContrato: true })}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Obtiene la lista de clases de contrato para cada tipo de contrato seleccionado dependiendo de la configuración de las clases de contrato.
+   * @return {Array}
+   */
+  obtenerClasesContrato = () => {
+    const { clasesContrato } = this.props.listas;
+    let clasesContratoFiltradas = [];
+    const tiposContratoSeleccionados = this.obtenerTiposdeContratoSeleccionados();
+    const tipoNegocio = getProp(this.props, 'cabecera.tipoNegocio', null);
+    clasesContratoFiltradas = clasesContrato.filter(claseContrato => {
+      let lista = [];
+      if (tipoNegocio === 'C') {
+        const tiposCompra = claseContrato.uniPropiedad.tipocontratocompra ? claseContrato.uniPropiedad.tipocontratocompra : '';
+        lista = tiposContratoSeleccionados.filter(tipoContrato => {
+          if (tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato) {
+            if (tiposCompra.search(tipoContrato.uniPropiedad.tipocontrato) >= 0) {
+              return tipoContrato;
+            }
+          }
+        });
+      } else if (tipoNegocio === 'V') {
+        const tiposVenta = claseContrato.uniPropiedad.tipocontratoventa ? claseContrato.uniPropiedad.tipocontratoventa : '';
+        lista = tiposContratoSeleccionados.filter(tipoContrato => {
+          if (tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato) {
+            if (tiposVenta.search(tipoContrato.uniPropiedad.tipocontrato) >= 0) {
+              return tipoContrato;
+            }
+          }
+        });
+      }
+      if (lista.length) {
+        return claseContrato;
+      }
+    });
+    return clasesContratoFiltradas;
+  };
+
+  /**
+   * Obtiene la lista de los contratos seleccionados por el usuario.
+   * @return {Array}
+   */
+  obtenerTiposdeContratoSeleccionados = () => {
+    return getProp(this.props, 'listas.tiposContrato').filter(tipoContrato => tipoContrato.seleccionado);
+  };
+
+  /**
+   * Renderiza el componente clases de contrato (combo) teniendo en cuenta las condiciones del caso de uso.
+   * @returns {Component}
+   */
+  renderClasesContrato = () => {
+    const tiposContratoSeleccionados = this.obtenerTiposdeContratoSeleccionados();
+    if (tiposContratoSeleccionados.findIndex(tc => (tc.uniPropiedad) &amp;&amp; ((tc.uniPropiedad.tipocontrato === 'T') || tc.uniPropiedad.tipocontrato === 'S')) &lt; 0) {
+      return null;
+    }
+    const clasesContratoFiltradas = this.obtenerClasesContrato();
+    return (
+      &lt;Combo
+        opciones={clasesContratoFiltradas}
+        cols={3}
+        propTexto='uniNombre1'
+        propValor='uniIderegistro'
+        label='Clase de Contrato:'
+        name='claseContrato'
+        value={getProp(this.props, 'cabecera.claseContrato', '')}
+        onChange={this.controlarCambio}
+      />
+    );
+  };
+
+  /**
+   * Renderiza el componente (combo) para seleccionar la fuente de distribución teniendo en cuenta las condiciones del caso de uso.
+   * @returns {Component}
+   */
+  renderFuentesDistribucion = () => {
+    const { listas, cabecera } = this.props;
+    // Si el Tipo de Contrato es de Suministro o GNV Suministro: habilitar Fuente o el pozo de donde se provee el gas
+    const tiposContratoValidos = ['S', 'GNVS']
+    const tiposContratosSelecccionados = listas.tiposContrato.filter(
+      t => t.seleccionado &amp;&amp; (validarOR(getProp(t, 'uniPropiedad.tipocontrato', null), tiposContratoValidos))
+    );
+    let deshabilitado = true;
+    let opciones = [];
+    if (tiposContratosSelecccionados &amp;&amp; tiposContratosSelecccionados.length > 0) {
+      deshabilitado = false;
+      opciones = listas.fuentesDistribucion;
+    } else {
+      // if (cabecera.fuenteDistribucion !== '-1') {
+      //   // Se espera para actualizar el valor del combo y dejarlo en -1
+      //   esperar(100, () => { this.actualizarCabeceraRedux({ fuenteDistribucion: '-1' }) });
+      // }
+    }
+
+    return (
+      &lt;Combo
+        opciones={opciones}
+        cols={3}
+        propTexto='uniNombre1'
+        propValor='uniIderegistro'
+        label='Fuente de Distribución:'
+        name='fuenteDistribucion'
+        value={getProp(this.props, 'cabecera.fuenteDistribucion', '')}
+        onChange={this.controlarCambio}
+        extra={{ disabled: deshabilitado }}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de validar el campo take or pay
+   * @returns {Array}
+   */
+  validarEstadoTakeOrPay = () => {
+    const variables = {};
+    const claseContrato = getProp(this.props, 'cabecera.claseContrato', '');
+    const takeOrPay = getProp(this.props, 'cabecera.takeOrPay', 'false');
+    const { tiposContrato } = this.props.listas;
+    const esGnvSuministro = tiposContrato.findIndex(t => t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocontrato', null) === 'GNVS');
+    const esSuministro = tiposContrato.find(t => t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocontrato', null) === 'S');
+    const tieneTakeOrPay = this.props.listas.clasesContrato.find(c => {
+      const v = c.uniIderegistro == claseContrato &amp;&amp; c.uniPropiedad.takeorpay;
+      if (v) {
+        return c;
+      }
+    });
+    const esSuministroIndustrialNoRegualada = esSuministro &amp;&amp; claseContrato != '-1' &amp;&amp; tieneTakeOrPay;
+    const habilitar = (esGnvSuministro >= 0 || esSuministroIndustrialNoRegualada);
+    /*
+    Se valida si se cumplen las condiciones para takeOrPay, en caso de que la opción estuviera en true y
+    el usuario cambiara a un tipo de contrato que no cumple la propiedad pasa a NO.
+    Nota: Se pone timeout para que no se ejecute la actualización del estado en el render, ya que generaría un bucle infinito
+    */
+    variables.habilitar = habilitar;
+    variables.takeOrPay = takeOrPay;
+    variables.topGrupal = '-1';
+
+    if (!habilitar &amp;&amp; takeOrPay) {
+      variables.takeOrPay = false;
+      variables.topGrupal = '-1';
+    }
+    return variables;
+  };
+
+  /**
+   * Renderiza el componente (combo) para seleccionar el Take Or Pay teniendo en cuenta las condiciones del caso de uso.
+   * @returns {JSX}
+   */
+  renderTakeOrPay = () => {
+    const variables = this.validarEstadoTakeOrPay();
+    return (
+      &lt;Fragment>
+        &lt;Combo
+          opciones={[{ valor: true, texto: 'Sí' }, { valor: false, texto: 'No' }]}
+          cols={3}
+          propTexto='texto'
+          propValor='valor'
+          label='Take or Pay:'
+          name='takeOrPay'
+          value={variables.takeOrPay}
+          onChange={this.controlarCambio}
+          mostrarOpcionPorDefecto={false}
+          extra={{ disabled: !variables.habilitar }}
+        />
+
+        &lt;Combo
+          opciones={this.props.listas.topGrupal}
+          cols={3}
+          propTexto='tpgNombre'
+          propValor='tpgIderegistro'
+          label='Top Grupal:'
+          name='topGrupal'
+          value={getProp(this.props, 'cabecera.topGrupal', '')}
+          onChange={this.controlarCambio}
+          extra={{ disabled: (variables.takeOrPay != 'true') }}
+        />
+      &lt;/Fragment>
+    );
+  };
+
+  /**
+   * Rendereiza el componente (selector) para seleccionar la modalidade de contrato...
+   * @returns {Component}
+   */
+  renderModalidadesContrato = () => {
+    const { tiposModalidadContrato } = this.props.listas;
+    let modalidades = [...tiposModalidadContrato];
+    const tiposContratoSeleccionados = this.obtenerTiposContratoSeleccionados();
+
+    for (let i = modalidades.length - 1; i >= 0; i--) {
+      const modalidad = modalidades[i];
+      const tipoContratoModalidad = getProp(modalidad, 'uniPropiedad.tipocontrato', null);
+
+      // Opción de Compra de Gas || Opción de Compra de Gas contra Exportaciones: Sólo cuando se seleccione en el tipo de contrato Suministro
+      const esOpcionCompra = tipoContratoModalidad === 'S';
+      const noEsSuministro = tiposContratoSeleccionados.findIndex(t => t.tipocontrato === 'S') === -1;
+      if (esOpcionCompra &amp;&amp; noEsSuministro) {
+        modalidades.splice(i, 1);
+        continue;
+      }
+
+      //Opción de Compra de transporte: Sólo cuando se seleccione en el tipo de contrato Transporte
+      const esCompraTrans = tipoContratoModalidad === 'T';
+      const noEsTransporte = tiposContratoSeleccionados.findIndex(t => t.tipocontrato === 'T') === -1;
+      if (esCompraTrans &amp;&amp; noEsTransporte) {
+        modalidades.splice(i, 1);
+        continue;
+      }
+
+    }
+
+    return (
+      &lt;Combo
+        opciones={modalidades}
+        cols={3}
+        propTexto='uniNombre1'
+        propValor='uniIderegistro'
+        label='Modalidad Contrato:'
+        name='modalidadContrato'
+        value={getProp(this.props, 'cabecera.modalidadContrato', '')}
+        onChange={this.controlarCambio}
+      />
+    )
+  };
+
+  /**
+   * Método encargado obtener los valores de firmeza y controlas su visibilidad
+   * @param {String} valorFirmeza Valor asignado a la firmeza
+   */
+  obtenerValoresFirmeza = (valorFirmeza = '') => {
+    const tiposModalidadContrato = getProp(this.props, 'listas.tiposModalidadContrato', []);
+    const clasesContrato = getProp(this.props, 'listas.clasesContrato', []);
+    const modalidadContrato = getProp(this.props, 'cabecera.modalidadContrato', '');
+    const claseContrato = getProp(this.props, 'cabecera.claseContrato', '');
+    let firmeza = (valorFirmeza != '') ? valorFirmeza : getProp(this.props, 'cabecera.firmeza', '');
+    let deshabilitado = true;
+
+    // // Verifica si la modalidad seleccionada usa contrato
+    const usaFirmeza = tiposModalidadContrato.find(m =>
+      m.uniIderegistro == modalidadContrato &amp;&amp; getProp(m, 'uniPropiedad.usafirmeza', false)
+    );
+
+    // Verifica si la clase de contrato seleccionada es de clase C: C1, C2, CF95
+    const claseC = clasesContrato.find(c =>
+      c.uniIderegistro == claseContrato &amp;&amp; getProp(c, 'uniPropiedad.clasec', false)
+    );
+
+    if (usaFirmeza &amp;&amp; !claseC) {
+      deshabilitado = false;
+      firmeza = '';
+    }
+
+    let porcentajeFirmeza = 0;
+    // Si la clase de contrato es clase C, asigna la firmeza y deshabilita la caja de texto
+    if (!!claseC) {
+      porcentajeFirmeza = getProp(claseC, 'uniPropiedad.firmeza', 0);
+      deshabilitado = true;
+      firmeza = porcentajeFirmeza;
+    }
+
+    //Actualiza el estado...
+    const listaModalidades = getProp(this.props, 'listas.tiposModalidadContrato', []);
+    let modalidadSeleccionada = listaModalidades.filter(modalidad => modalidad.uniIderegistro == modalidadContrato);
+    if (modalidadSeleccionada != null &amp;&amp; modalidadSeleccionada.length > 0) {
+      modalidadSeleccionada = modalidadSeleccionada[0];
+      if (modalidadSeleccionada.uniPropiedad.modalidad == 'FRM' || modalidadSeleccionada.uniPropiedad.modalidad == 'FRMC') {
+        deshabilitado = (claseC &amp;&amp; firmeza > 0);
+      } else {
+        firmeza = '';
+      }
+    }
+    if (!claseC &amp;&amp; deshabilitado) {
+      firmeza = '';
+    }
+    return { deshabilitado: deshabilitado, firmeza: firmeza };
+  };
+
+
+  /**
+   * Renderiza el campo firmeza teneiendo en cuenta algunas condiciones del caso de uso.
+   * @returns {Component}
+   */
+  renderFirmeza = () => {
+    const valores = this.obtenerValoresFirmeza();
+    return (
+      &lt;TextoNumerico
+        aceptaDecimales={false}
+        aceptaNegativos={false}
+        cols={3}
+        label='% Firmeza:'
+        value={valores.firmeza}
+        onChange={this.controlarCambio}
+        name='firmeza'
+        disabled={valores.deshabilitado}
+        extra={{ disabled: valores.deshabilitado }}
+      />
+    );
+  };
+
+  /**
+   * Obtiene la lista de rutas seleccionadas por el usuario.
+   * @return {Array}
+   */
+  obtenerRutasSeleccionadas = () => {
+    return this.props.listas.rutas.filter(r => r.seleccionado);
+  };
+
+  /**
+   * Actualiza la lista rutas del objeto Redux.
+   * @param {Array} rutas Rutas a actualizar
+   */
+  actualizarRutas = (rutas) => {
+    let sumatoria = 0;
+    rutas.forEach(ruta => {
+      if (ruta.seleccionado) {
+        sumatoria += (ruta.cntuValor) ? parseFloat(ruta.cntuValor) : 0;
+      }
+    });
+    this.props.actualizarListaContratos({ rutasGNC: [...rutas], rutas: [...rutas] });
+    this.actualizarCabeceraRedux({ precioContrato: sumatoria });
+  };
+
+  /**
+   * Renderiza el botón para selecionar las rutas teniendo en cuenta las condiciones necesarias...
+   * @returns {JSX}
+   */
+  renderRutas = () => {
+    //Verificamos si el contrato es de tipo GNC o Conexión.
+    const { tiposContrato } = this.props.listas;
+    const esGNCoConexion = tiposContrato.find(t => t.seleccionado &amp;&amp; (getProp(t, 'uniPropiedad.tipocontrato', false) === 'CNX' || getProp(t, 'uniPropiedad.tipocontrato', false) === 'GNC'));
+    if (!esGNCoConexion) {
+      return null;
+    }
+
+    const rutasSeleccionadas = this.obtenerRutasSeleccionadas();
+    const placeholder = `(${rutasSeleccionadas.length}) seleccionadas`;
+    return (
+      &lt;div className='col-md-12 mt-3'>
+        &lt;div className='card'>
+          &lt;div className='card-header'>
+            &lt;h3>Rutas&lt;/h3>
+          &lt;/div>
+          &lt;div className='card-body'>
+            &lt;div className='col-12 form-group'>
+              &lt;SelectorRutas
+                titulo='Rutas:'
+                propTexto='uniNombre1'
+                propValor='uniIderegistro'
+                seleccionarItem={this.actualizarRutas}
+                unidadesMedida={getProp(this.props, 'listas.cantidad')}
+                mostrarAlerta={this.props.mostrarAlerta}
+                tiposContrato={getProp(this.props, 'listas.tiposContrato')}
+                lista={getProp(this.props, 'listas.rutasGNC', [])}
+              />
+            &lt;/div>
+            {this.obtenerRutasSeleccionadas().length > 0 &amp;&amp; (
+              &lt;div className='col-12 form-group'>
+                &lt;table className='table table-hover table-striped table-condensed labels-hidden'>
+                  &lt;thead>
+                    &lt;tr>
+                      &lt;th>Ruta&lt;/th>
+                      &lt;th>Valor&lt;/th>
+                      &lt;th>Unidad de medida&lt;/th>
+                    &lt;/tr>
+                  &lt;/thead>
+                  &lt;tbody>
+                    {
+                      rutasSeleccionadas.map(r => {
+                        return (
+                          &lt;tr key={r.uniIderegistro}>
+                            &lt;td>{r.uniNombre1}&lt;/td>
+                            &lt;td>
+                              &lt;Input
+                                label=''
+                                value={r.cntuValor}
+                                onChange={this.controlarCambioRutas}
+                                name='cntuValor'
+                                extra={{ 'data-idruta': r.uniIderegistro }}
+                              />
+                            &lt;/td>
+                            &lt;td>
+                              &lt;Combo
+                                opciones={this.props.listas.unidadesMedida}
+                                propTexto='uniNombre1'
+                                propValor='uniIderegistro'
+                                label=''
+                                name='uniIdemedida'
+                                value={r.uniIdemedida}
+                                onChange={this.controlarCambioRutas}
+                                extra={{ 'data-idruta': r.uniIderegistro }}
+                              />
+                            &lt;/td>
+                          &lt;/tr>
+                        )
+                      })
+                    }
+                  &lt;/tbody>
+                &lt;/table>
+              &lt;/div>
+            )}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div >
+    );
+  };
+
+  /**
+   * Obtiene la lista de medidores seleccioandos.
+   */
+  obtenerMedidoresSeleccionados = () => {
+    return this.props.listas.medidores.filter(m => m.seleccionado);
+  };
+
+  /**
+   * Controla los cambios de los controles de la tabla medidores.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioMedidores = (evento) => {
+    const nombrePropiedad = evento.target.name;
+    const valor = evento.target.value;
+    const medidores = [...this.props.listas.medidores];
+    const idMedidor = parseInt(evento.target.attributes['data-idmedidor'].value);
+    const index = medidores.findIndex(m => m.mesuIderegistro === idMedidor);
+    medidores[index][nombrePropiedad] = valor;
+    this.actualizarListaContratos({ medidores: [...medidores] });
+  };
+
+  /**
+   * Controla los cambios de los controles de la tabla rutas.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioRutas = (evento) => {
+    const nombrePropiedad = evento.target.name;
+    const valor = evento.target.value;
+    const rutas = [...this.props.listas.rutas];
+    const idRuta = parseInt(evento.target.attributes['data-idruta'].value);
+    const index = rutas.findIndex(r => r.uniIderegistro === idRuta);
+    rutas[index][nombrePropiedad] = valor;
+    this.actualizarListaContratos({ rutas: [...rutas] });
+  };
+
+  /**
+   * Actualiza las listas de contratos y verifica la cantidad contratada.
+   * @param {Object} cambio Datos al cambiar
+   */
+  actualizarListaContratos = (cambio) => {
+    this.props.actualizarListaContratos(cambio);
+    this.verificarCantidadContratada();
+  };
+
+
+  /**
+  * Renderiza el selector de medidores...
+  * @returns {JSX}
+  */
+  renderMedidoresSuministro = () => {
+    const { tiposContrato } = this.props.listas;
+    const esSuministro = tiposContrato.find(t => t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocontrato', null) === 'S');
+    if (!esSuministro) {
+      return null;
+    }
+
+    const medidoresSeleccionados = this.obtenerMedidoresSeleccionados();
+    const placeholder = `(${medidoresSeleccionados.length}) seleccionados`;
+    return (
+      &lt;div className='col-12'>
+        &lt;div className='card'>
+          &lt;div className='card-header'>
+            &lt;h3>Medidores suministro&lt;/h3>
+          &lt;/div>
+          &lt;div className='card-body'>
+            &lt;div className='col-3 form-group'>
+              &lt;label>Medidores suministro:&lt;/label>
+              &lt;div className="input-group mb-3">
+                &lt;input value='' disabled={true} type="text" className="form-control" placeholder={placeholder} />
+                &lt;div className="input-group-prepend">
+                  &lt;button
+                    className="btn-primary btn-buscador input-group-btn"
+                    title='Seleccionar medidores suministro'
+                    onClick={() => this.setState({ mostrarModalMedidores: true })}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+            {
+              medidoresSeleccionados.length > 0 &amp;&amp; (
+                &lt;div className='col-12'>
+                  &lt;table className='table table-hover table-striped table-condensed labels-hidden'>
+                    &lt;thead>
+                      &lt;tr>
+                        &lt;th>Nombre&lt;/th>
+                        &lt;th>Capacidad&lt;/th>
+                        &lt;th>Unidad medida&lt;/th>
+                        &lt;th>Precio&lt;/th>
+                        &lt;th>Unidad medida&lt;/th>
+                      &lt;/tr>
+                    &lt;/thead>
+                    &lt;tbody>
+                      {
+                        medidoresSeleccionados.map(m => {
+                          return (
+                            &lt;tr key={m.mesuIderegistro}>
+                              &lt;td>{m.mesuNombre}&lt;/td>
+                              &lt;td>{m.mesuCapacidadmaxima}&lt;/td>
+                              &lt;td>{getProp(m, 'uniIdemedida.uniNombre1', 'Indefinido')}&lt;/td>
+                              &lt;td>{m.mesuPrecio}&lt;/td>
+                              &lt;td>{getProp(m, 'uniIdemedidaprecio.uniNombre1', 'Indefinido')}&lt;/td>
+                            &lt;/tr>
+                          )
+                        })
+                      }
+                    &lt;/tbody>
+                  &lt;/table>
+                &lt;/div>
+              )
+            }
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Renderiza el apartado para configurar la cantidad contratada...
+   * @returns {JSX}
+   */
+  renderCantidadContratada = () => {
+    //this.props.editandoContrato
+    const { clasesContrato, unidadesMedida, cantidad, tiposContrato } = this.props.listas;
+    const esSuministro = tiposContrato.find(t => t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocontrato', null) === 'S');
+    const claseContrato = getProp(this.props, 'cabecera.claseContrato', '');
+    const cantidadContratada = getProp(this.props, 'cabecera.cantidadContratada', '');
+    const unidadMedida = getProp(this.props, 'cabecera.unidadMedida', '');
+    const periodoCantidadContratada = getProp(this.props, 'cabecera.periodoCantidadContratada', '');
+    const editandoContrato = getProp(this.props, 'editandoContrato', false);
+    let deshabilitado = editandoContrato;
+
+    const esClaseC2 = clasesContrato.find(c =>
+      c.uniIderegistro == claseContrato &amp;&amp; getProp(c, 'uniPropiedad.clasecontrato', false) === 'C2'
+    );
+
+    if (esClaseC2) {
+      deshabilitado = false;
+    }
+
+    return (
+      &lt;div className='col-12'>
+        &lt;div className='card mb-3'>
+          &lt;div className='card-header'>
+            &lt;h3>Registro de Cantidad Contratada&lt;/h3>
+          &lt;/div>
+          &lt;div className='card-body'>
+            &lt;div className="row">
+              &lt;TextoNumerico
+                aceptaDecimales={true}
+                aceptaNegativos={false}
+                label='Cant. Contratada:'
+                cols={3}
+                value={cantidadContratada}
+                onChange={this.controlarCambio}
+                name='cantidadContratada'
+                extra={{ disabled: getProp(this.props, 'cabecera.cantidadContratadaDisabled', 0) }}
+              />
+              &lt;Combo
+                opciones={cantidad}
+                cols={3}
+                propTexto='uniNombre1'
+                propValor='uniIderegistro'
+                label='Unidad de Medida:'
+                name='unidadMedida'
+                value={unidadMedida}
+                onChange={this.controlarCambio}
+                extra={{ disabled: (editandoContrato || esSuministro) }}
+              />
+              &lt;Combo
+                opciones={periodosCantidadContratada}
+                cols={3}
+                propTexto='texto'
+                propValor='id'
+                label='Periodo:'
+                name='periodoCantidadContratada'
+                value={periodoCantidadContratada}
+                onChange={this.controlarCambio}
+                extra={{ disabled: editandoContrato }}
+              />
+            &lt;/div>
+
+            {
+              esClaseC2 &amp;&amp;
+              &lt;div className='row'>
+                &lt;TextoNumerico
+                  aceptaDecimales={true}
+                  aceptaNegativos={false}
+                  label='Capacidad:'
+                  cols={3}
+                  value={getProp(this.props, 'cabecera.capacidadC2', null)}
+                  onChange={this.controlarCambio}
+                  name='capacidadC2'
+                  disabled={editandoContrato}
+                  extra={{ disabled: editandoContrato }}
+                />
+
+                &lt;Combo
+                  opciones={cantidad}
+                  cols={3}
+                  propTexto='uniNombre1'
+                  propValor='uniIderegistro'
+                  label='Und. de Medida:'
+                  name='unidadMedidaC2'
+                  value={getProp(this.props, 'cabecera.unidadMedidaC2', null)}
+                  onChange={this.controlarCambio}
+                  extra={{ disabled: editandoContrato }}
+                />
+
+              &lt;/div>
+            }
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Renderiza el modal para seleccionar los medidores...
+   * @returns {JSX}
+   */
+  renderModalMedidores = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarModalMedidores}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Medidores de Suministro&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los Medidores de Suministro&lt;/p>
+            {
+              this.props.listas.medidores.map(m => {
+                return (
+                  &lt;div key={`puntosalida_${m.mesuIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={m.mesuIderegistro} checked={m.seleccionado || false} onChange={this.seleccionarMedidor} />
+                      &lt;span> {m.mesuNombre}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarModalMedidores: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Renderiza el modal para seleccionar las rutas ...
+   * @returns {JSX}
+   */
+  renderModalRutas = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarRutas}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Seleccionar rutas&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione las rutas&lt;/p>
+            {
+              this.props.listas.rutas.map(r => {
+                return (
+                  &lt;div key={`rutas_${r.uniIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={r.uniIderegistro} checked={r.seleccionado || false} onChange={this.seleccionarRuta} />
+                      &lt;span> {r.uniNombre1}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarTiposContrato: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Renderiza el modal para seleccionar los tipos de contrato
+   * @returns {JSX}
+   */
+  renderModalTiposContrato = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarTiposContrato}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Tipos de Contrato&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los Tipos de Contrato&lt;/p>
+            {
+              this.props.listas.tiposContrato.map(t => {
+                return (
+                  &lt;div key={`tcontrato_${t.uniIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={t.uniIderegistro} checked={t.seleccionado || false} onChange={this.seleccionarTipoContrato} />
+                      &lt;span> {t.uniNombre1}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarTiposContrato: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Método encargado de controlar el cambio del tipo de contrato
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarTipoContrato = (event) => {
+    const tipos = [...this.props.listas.tiposContrato];
+    const idTipoContrato = parseInt(event.target.value);
+    const index = tipos.findIndex(t => t.uniIderegistro === idTipoContrato);
+    tipos[index].seleccionado = event.target.checked;
+    this.actualizarListaContratos({ tiposContrato: [...tipos] });
+  };
+
+  /**
+   * Renderiza el modal para seleccionar puntos de salida...
+   * @returns {JSX}
+   */
+  renderModalPuntosSalida = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarPuntosSalida}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Puntos de Salida&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los Puntos de Salida&lt;/p>
+            {
+              this.props.listas.puntosSalida.map(t => {
+                return (
+                  &lt;div key={`puntosalida_${t.ptsaIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={t.ptsaIderegistro} checked={t.seleccionado || false} onChange={this.seleccionarPuntosSalida} />
+                      &lt;span> {t.ptsaNombre}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarPuntosSalida: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Obtiene la sumatoria de la capacidad de los puntos de salida seleccionados por el usuario.
+   * @return {number}
+   */
+  obtenerSumatoriaPuntosSalida = () => {
+    let sum = 0;
+    const puntosSalida = this.props.listas.puntosSalida;
+    for (let i = 0; i &lt; puntosSalida.length; i++) {
+      const puntoSalida = puntosSalida[i];
+      if (puntoSalida.seleccionado) {
+        sum += puntoSalida.pstaCapacidad;
+      }
+    }
+    return sum;
+  };
+
+  /**
+   * Recive el evento click de los selectores de puntos de salida y setea un atributo llamado seleccionado = true, en el punto de salida específico.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarPuntosSalida = (event) => {
+    const puntos = [...this.props.listas.puntosSalida];
+    const idPuntoSalida = parseInt(event.target.value);
+    const index = puntos.findIndex(t => t.ptsaIderegistro === idPuntoSalida);
+    puntos[index].seleccionado = event.target.checked;
+    this.actualizarListaContratos({ puntosSalida: [...puntos] });
+  };
+
+  /**
+   * Recibe el evento change  de los selectores de medidores y setea un atributo llamado seleccionado = true, en el medidor específico.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarMedidor = (event) => {
+    const medidores = [...this.props.listas.medidores];
+    const idMedidor = parseInt(event.target.value);
+    const index = medidores.findIndex(t => t.mesuIderegistro === idMedidor);
+    medidores[index].seleccionado = event.target.checked;
+    this.actualizarListaContratos({ medidores: [...medidores] });
+  };
+
+  /**
+   * Recibe el evento change de los selectores de las rutas y setea un atributo llamado seleccionado = true, en el medidor específico.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarRuta = (event) => {
+    const rutas = [...this.props.listas.rutas]
+    const idRuta = parseInt(event.target.value);
+    const index = rutas.findIndex(r => r.uniIderegistro === idRuta);
+    rutas[index].seleccionado = event.target.checked;
+    this.actualizarListaContratos({ rutas: [...rutas] });
+  };
+
+  /**
+   * Renderiza el modal para seleccionar rutas...
+   * @returns {JSX}
+   */
+  renderModalRutas = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarModalRutas}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Rutas&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione las rutas&lt;/p>
+            {
+              this.props.listas.rutas.map(r => {
+                return (
+                  &lt;div key={`rutas_${r.uniIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={r.uniIderegistro} checked={r.seleccionado || false} onChange={this.seleccionarRuta} />
+                      &lt;span> {r.uniNombre1}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarModalRutas: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario aportes GNV
+   * @returns {JSX}
+   */
+  renderAportesGNV = () => {
+    const { tiposContrato } = this.props.listas;
+    const esGNV = tiposContrato.find(t => t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocontrato', null) === 'GNV');
+    if (!esGNV) {
+      return null;
+    }
+    return (
+      &lt;Fragment>
+        &lt;Combo
+          opciones={listaAporteGNV}
+          propTexto='texto'
+          propValor='valor'
+          label='Aporte GNV:'
+          name='aporteGNV'
+          value={getProp(this.props, 'cabecera.aporteGNV', null)}
+          onChange={this.controlarCambio}
+        />
+
+        {
+          (getProp(this.props, 'cabecera.aporteGNV', 'N') === 'S') &amp;&amp; (
+            &lt;TextoNumerico
+              aceptaDecimales={true}
+              aceptaNegativos={false}
+              label='Valor GNV:'
+              cols={3}
+              value={getProp(this.props, 'cabecera.valorGNV', '')}
+              onChange={this.controlarCambio}
+              name='valorGNV'
+            />
+          )
+        }
+      &lt;/Fragment>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    const { cabecera, listas } = this.props;
+    return (
+      &lt;div className='row col-12 cabecera-contrato'>
+
+        &lt;Combo
+          opciones={tiposNegocio}
+          propTexto='tipo'
+          propValor='id'
+          label='Tipo de Negocio:'
+          name='tipoNegocio'
+          value={getProp(this.props, 'cabecera.tipoNegocio', '')}
+          onChange={this.controlarCambio}
+          cols={3}
+        />
+
+        {this.renderBuscadorTercero()}
+
+        &lt;Input
+          label='No. Contrato:'
+          cols={3}
+          value={getProp(this.props, 'cabecera.numeroContrato', '')}
+          onChange={this.controlarCambio}
+          name='numeroContrato'
+          extra={
+            { disabled: getProp(this.props, 'cabecera.tipoNegocio', '') !== 'C' }
+          }
+        />
+
+        &lt;Fecha
+          label="Fecha Inicio:"
+          cols={3}
+          onChange={this.controlarCambio}
+          name='fechaInicio'
+          fechaInicio={null}
+          fechaFin={getProp(this.props, 'cabecera.fechaFin', '')}
+          fecha={getProp(this.props, 'cabecera.fechaInicio', '')}
+        />
+
+        &lt;Fecha
+          label="Fecha Fin:"
+          cols={3}
+          onChange={this.controlarCambio}
+          name='fechaFin'
+          fechaInicio={getProp(this.props, 'cabecera.fechaInicio', '')}
+          fechaFin={null}
+          fecha={getProp(this.props, 'cabecera.fechaFin', '')}
+        />
+
+        &lt;Input
+          label='Duración:'
+          cols={3}
+          value={this.obtenerDuracionContrato()}
+          onChange={this.controlarCambio}
+          name='duracionContrato'
+          extra={{ disabled: true }}
+        />
+
+        &lt;Combo
+          opciones={listas.tiposDeUso}
+          propTexto='uniNombre1'
+          cols={3}
+          propValor='uniIderegistro'
+          label='Tipo de Uso:'
+          name='tipoUso'
+          value={getProp(this.props, 'cabecera.tipoUso', '')}
+          onChange={this.controlarCambio}
+        />
+
+        {
+          getProp(this.props, 'cabecera.tipoNegocio', '') === 'C' &amp;&amp;
+          &lt;Combo
+            opciones={listas.tiposMercado}
+            cols={3}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de Mercado:'
+            name='tipoMercado'
+            value={getProp(this.props, 'cabecera.tipoMercado', '')}
+            onChange={this.controlarCambio}
+          />
+        }
+
+        {this.renderBuscadorTiposContrato()}
+
+        {this.renderClasesContrato()}
+
+        {this.renderFuentesDistribucion()}
+
+        {this.renderTakeOrPay()}
+
+        {this.renderModalidadesContrato()}
+
+        {this.renderFirmeza()}
+
+        {this.props.renderPuntosSalida()}
+
+        &lt;Input
+          label='TRM del día:'
+          value={getProp(this.props, 'cabecera.trmDia', '')}
+          extra={{ disabled: true }}
+          cols={3}
+        />
+
+        &lt;Combo
+          opciones={opcionesTRMTecho}
+          cols={3}
+          propTexto='texto'
+          propValor='id'
+          label='Usa TRM Techo:'
+          name='usaTRMTecho'
+          value={getProp(this.props, 'cabecera.usaTRMTecho', 'N')}
+          onChange={this.controlarCambio}
+        />
+
+        &lt;TextoNumerico
+          aceptaDecimales={true}
+          aceptaNegativos={false}
+          label='TRM Techo:'
+          cols={3}
+          value={getProp(this.props, 'cabecera.usaTRMTecho', false) ? getProp(this.props, 'cabecera.trmTecho', '') : ''}
+          onChange={this.controlarCambio}
+          name='trmTecho'
+          extra={{ disabled: getProp(this.props, 'cabecera.usaTRMTecho', 'N') === 'N' }}
+        />
+
+        {this.renderCantidadContratada()}
+
+        &lt;Input
+          label='Cód. Gestor:'
+          value={getProp(this.props, 'cabecera.codigoGestor', '')}
+          name='codigoGestor'
+          onChange={this.controlarCambio}
+        />
+        {this.renderAportesGNV()}
+
+        {this.renderMedidoresSuministro()}
+        {this.renderRutas()}
+
+        {this.renderModalMedidores()}
+        {this.renderModalRutas()}
+
+        {this.renderModalTiposContrato()}
+
+        {this.renderModalPuntosSalida()}
+
+      &lt;/div>
+    );
+  }
+
+}
+
+CabeceraContrato.propTypes = {
+  mostrarProgramaModal: PropTypes.func,
+  trmDia: PropTypes.number,
+  editandoContrato: PropTypes.bool,
+
+  // Redux
+  actualizarCabeceraContrato: PropTypes.func,
+  actualizarListaContratos: PropTypes.func
+};
+
+CabeceraContrato.defaultProps = {
+  editandoContrato: false,
+};
+
+const mapStateToProps = state => {
+  const { cabecera, listas } = state.contratos;
+  return { cabecera, listas };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    actualizarCabeceraContrato,
+    actualizarListaContratos
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(CabeceraContrato);
+
+export { VistaRedux as RCabeceraContrato };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

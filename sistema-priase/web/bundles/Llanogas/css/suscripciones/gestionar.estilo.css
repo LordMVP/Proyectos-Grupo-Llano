@@ -1,0 +1,33 @@
+fieldset#fieldsetConceptos,
+fieldset#fieldsetPropiedad,
+fieldset#fieldsetDetallesSuscripcion,
+div#divSeleccionarPropiedad,
+div#divConfirmarBuscarSuscripcion,
+div#divConfirmarEliminar,
+div#divConfirmarCancelar,
+div#divEditarConcepto,
+div#divBuscarSuscriptor,
+div#divBuscarSuscripcion{
+    display: none;
+}
+fieldset {
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+.btnDisabled {
+    color: red;
+}
+#divDescripcion {
+    color: white;
+    text-align: center;
+    height: 15px;
+    background-color: darkcyan;
+    display: none;
+}
+div.listaSeleccion div{
+    height: 35px;
+}
+span#mensaje {
+    text-align: center;
+    color: darkcyan;
+}

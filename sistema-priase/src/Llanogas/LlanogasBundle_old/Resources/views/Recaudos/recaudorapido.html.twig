@@ -1,0 +1,160 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Recaudo Rápido - {{empresa}}  {% endblock %}
+{% block body %}
+
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="imprimir" id="btnImprimir" class="btn" style="display:none;" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+
+        <div id="divCabecera">
+            <div class="divIzquierda">
+                <fieldset>
+                    <legend>Información</legend>
+                    <div class="campoCorto">
+                        <label for="txtSuscripcion">Suscripción:</label>
+                        <input type="text" id="txtSuscripcion" autofocus />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFactura">Factura:</label>
+                        <input type="text" id="txtFactura" maxlength="18" disabled="disabled"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFechaVencimiento">Fecha Vencimiento:</label>
+                        <input type="text" id="txtFechaVencimiento" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtValorPagado">Valor por Pagar:</label>
+                        <input type="text" id="txtValorPagado" disabled="disabled" />
+                    </div>
+                </fieldset>
+                <div id="divDetalles">
+                    <div id="divFacturas">
+                        <table id="tblFacturas" class="tabla"></table>
+                        <div class="campo">
+                                <label for="txtSaldoActual">Saldo Actual: </label>
+                                <input type="text" id="txtSaldoActual" disabled="disabled" />
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="divDerecha">
+                <fieldset>
+                    <legend>Información del Pago</legend>
+                    <div class="campoBusqueda">
+                        <label for="btnFormaPago">Valor y formas de Pago:</label>
+                        <input type="text" id="txtFormaPago" disabled="disabled" />
+                        <button id="btnFormaPago"></button>
+                    </div>
+                   
+                    
+                    <div class="campo">
+                        <label for="cmbClasePago">Clase de Pago:</label>
+                        {{cmbClasePago|raw}}
+                    </div>
+                    <div class="campo">
+                        <label for="cmbMedioPago">Medio de pago:</label>
+                        {{cmbMedioPago|raw}}
+                    </div>
+                    <div class="campo">
+                        <label for="cmbSucursal">Sucursal:</label>
+                        {{cmbSucursal|raw}}
+                    </div>
+                     <div id="divOcultar">
+                        <div class="campo" id="divRadioTimbre">
+                            <label>Imprimir timbre</label>
+                            <label style="display : inline" for="rbtnS">
+                                <input type="radio" id="rbtnS" name="radioTimbre" checked/> Sí
+                            </label>
+                            <label style="display : inline" for="rbtnN">
+                                <input type="radio" id="rbtnN" name="radioTimbre"/> No
+                            </label>
+                        </div>
+                        <div class="campoBusqueda">
+                            <label for="btnBuscarEmpresa">Empresa:</label>
+                            <input type="text" id="txtEmpresa" disabled="disabled" />
+                            <button id="btnBuscarEmpresa"></button>
+                        </div>
+                        <p class="pMensaje" id="pMensajeEmpresa"></p>
+                        <div class="campo">
+                            <label for="txtFechaPago">Fecha pago:</label>
+                            <input type="text" id="txtFechaPago" value="{{fechasugerida}}" />
+                        </div>
+                        <fieldset>
+                            <legend>Información anticipo</legend>
+                            <div class="campo">
+                                <label for="cmbTiposDocumento">Tipo Documento:</label>
+                                <select id="cmbTiposDocumento"></select>
+                            </div>
+
+                            <div class="campo">
+                                <label for="cmbDocumentos">Clase de pago:</label>
+                                {{cmbDocumentos|raw}}
+                            </div>
+                        </fieldset>
+                    </div>
+                    <input type="button" value="Grabar" id="btnGrabarFinal" class="btnSimple" />
+                </fieldset>
+            </div>
+        </div>
+
+    </div>
+    <hr class="limpiar" />
+    <input type="hidden"  value="{{idempresa}}" id="txtIdEmpresaHide"/>
+
+
+    <!-- Division de Formas de pago -->
+    <div id="divFormasPago" style="display: none;">
+        <div id="controlesFormasPago" style="max-height: 350px;overflow-y: scroll;"></div>
+        <div style="margin-top: 15px;">
+            <button id="btnAgregarForma" class="btnSimple">Agregar Forma</button>
+            <label for="txtSumatoria" style="display:inline !important;">Total:</label>
+            <input type="text" id="txtSumatoria" disabled="disabled" />
+        </div>
+    </div>
+    <div id="divEmpresaConvenio" style="display:none;">
+        <div class="listaSeleccion" id="divEmpresas"></div>
+    </div>
+    <div id="divPagoError" style="display:none;">
+        <p>
+            No se puede efectuar este pago porque el valor de las facturas no es igual al valor registrado.
+        </p>
+        <div>
+            <p id="pValor"><strong>Valor registrado: </strong> <span></span></p>
+            <p id="pValorFact"><strong>Valor de la factura: </strong> <span></span></p>
+        </div>
+    </div>
+    <!-- Iframe para el timbre -->
+    <div id="divTimbre" style="display:none;">
+        <iframe id="iFrameTimbre" frameborder="0" src="{{asset('bundles/Llanogas/templates/frametimbre.html')}}"></iframe>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion/convertirPrecios.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/rapido/rapido.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/rapido/rapido.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/rapido/rapido.vista.js')}}"></script>
+{% endblock %}

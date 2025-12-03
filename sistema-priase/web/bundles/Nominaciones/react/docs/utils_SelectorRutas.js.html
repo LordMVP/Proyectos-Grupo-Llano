@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/SelectorRutas.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/SelectorRutas.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Util } from 'appfuture-react';
+import { Combo, Input } from 'appfuture-react';
+import Modal from 'react-bootstrap4-modal';
+
+class SelectorRutas extends Component {
+
+  state = {
+    mostrarModal: false,
+    listaRutas: [],
+  };
+
+  /**
+   * Controla el cambio de estado de la propiedad mostrarModal que se usa para mostrar o ocultar el modal de selección.
+   */
+  abrirCerrarModal = (estado) => {
+    this.setState({
+      mostrarModal: estado
+    });
+  };
+
+  /**
+   * Confirma la selección de los puntos de salida, es decir invoca el método del componente padre para actualizar su lista de puntos de salida.
+   */
+  confirmarSeleccionListaRutas = (estado) => {
+    this.abrirCerrarModal(estado);
+    const v = this.validarSeleccion();
+    if (v) {
+      this.props.seleccionarItem(this.state.listaRutas);
+    }
+  };
+
+  /**
+   * Valida la selección de los puntos de salida y sus campos respectivos.
+   * @return {boolean}
+   */
+  validarSeleccion = () => {
+    let respuesta = 0;
+    this.state.listaRutas.forEach(ruta => {
+      //Verificamos si el ruta seleccionado tiene cargo seleccionado.
+      if (!this.verificarCamposSeleccion(ruta)) {
+        respuesta--;
+      }
+    });
+    return respuesta === 0;
+  };
+
+  /**
+   * Verifica que el usuario haya seleccionado correctamente los campos correspondientes a los puntos de salida que ha configurado.
+   * @return {boolean}
+   */
+  verificarCamposSeleccion = (ruta) => {
+    if (!ruta.seleccionado) {
+      return true;
+    }
+    let respuesta = true;
+    if (!ruta.cntuValor || ruta.cntuValor &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe ingresar una cantidad contratada para el punto de salida: "' + ruta[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    if (!ruta.uniIdemedida || ruta.uniIdemedida &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe seleccionar una unidad de medida para el punto de salida: "' + ruta[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    return respuesta;
+  };
+
+  /**
+   * Elimina la selección de un punto de salida especifico.
+   */
+  quitarSeleccionItem = (ruta) => {
+    const listaRutas = this.state.listaRutas.map(ps => {
+      if (ps.idRuta === ruta.idRuta) {
+        ps.seleccionado = false;
+      }
+      return ps;
+    });
+    this.setState({ listaRutas: listaRutas, mostrarModal: true });
+  };
+
+  componentDidMount() {
+    this.setState({ listaRutas: this.obtenerListaListaRutas() });
+  };
+
+  /**
+   * Devuelve la lista de puntos de salida Actualizada con algunos valores necesarios para que el componente funcione correctamente.
+   * @return {array}
+   */
+  obtenerListaListaRutas = () => {
+    // if (listaTipos.length > 0) {
+    //   const lista = this.props.lista.filter(ruta => {
+    //     const esConexion = (listaTipos.findIndex(tipoContrato => tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'CNX') >= 0);
+    //     const esGNC = (listaTipos.findIndex(tipoContrato => tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'GNC') >= 0);
+    //     if (esConexion &amp;&amp; ruta.uniPropiedad &amp;&amp; ruta.uniPropiedad.tipo === 'C') {
+    //       return ruta;
+    //     }
+    //     if (esGNC &amp;&amp; ruta.uniPropiedad &amp;&amp; ruta.uniPropiedad.tipo === 'G') {
+    //       return ruta;
+    //     }
+    //   }).map(ruta => {
+    //     ruta.idRuta = Util.generarIdControl('_idRuta_' + ruta.uniIderegistro);
+    //     ruta.cntuValor = ruta.cntuValor;
+    //     ruta.unidadMedida = ruta.unidadMedida;
+    //     return ruta;
+    //   });
+    //   return lista;
+    // }
+    const lista = this.props.lista.map(ruta => {
+      ruta.idRuta = Util.generarIdControl('_idRuta_' + ruta.uniIderegistro);
+      ruta.cntuValor = ruta.cntuValor;
+      ruta.unidadMedida = ruta.unidadMedida;
+      return ruta;
+    });
+    return lista;
+  };
+
+  actualizarListaRutas = () => {
+    this.setState({ listaRutas: this.obtenerListaListaRutas() });
+  };
+
+  /**
+   * Rendierizará el componente selector.
+   * @return {Component}
+   */
+  renderSelector = () => {
+    const texto = '';
+    const seleccionados = this.state.listaRutas.reduce((total, registro) => { return total + (registro.seleccionado ? 1 : 0) }, 0);
+    const placeholder = `(${seleccionados}) Seleccionados`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>{this.props.titulo}&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={texto} disabled={true} type="text" className="form-control" placeholder={placeholder} />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador input-group-btn"
+              title={`Seleccionar ` + this.props.titulo}
+              onClick={() => this.abrirCerrarModal(true)}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Controla el cambio de los componentes...
+   */
+  controlarCambio = (evento) => {
+    const listaRutas = [...this.state.listaRutas];
+    const control = evento.target;
+    const idRuta = control.attributes['data-idruta'].value;
+    const index = listaRutas.findIndex(ps => ps.idRuta === idRuta);
+    listaRutas[index].seleccionado = ((evento.target.name !== 'check_idruta')) ? true : evento.target.checked;
+    if ((evento.target.name !== 'check_idruta')) {
+      listaRutas[index][evento.target.name] = evento.target.value;
+    }
+    this.setState({ listaRutas: listaRutas });
+  };
+
+  /**
+   * Renderizará el componente modal del selector.
+   * @return {Component}
+   */
+  renderModalSelector = () => {
+    const listaListaRutas = this.state.listaRutas;
+
+    const tiposContratos = this.props.tiposContrato;
+    const tiposContratosSeleccionados = tiposContratos.filter(tipoContrato => tipoContrato.seleccionado);
+    const listaTipos = tiposContratosSeleccionados.filter(tc => tc.uniPropiedad &amp;&amp; (tc.uniPropiedad.tipocontrato === 'CNX' || tc.uniPropiedad.tipocontrato === 'GNC'));
+
+    return (
+      &lt;Modal visible={this.state.mostrarModal}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>{this.props.titulo}&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los {this.props.titulo}&lt;/p>
+            &lt;table className='table table-hover table-striped table-bordered table-condensed label-nodisplay'>
+              &lt;thead className='bg-dark text-white'>
+                &lt;tr>&lt;th>Ruta&lt;/th>&lt;th>Valor&lt;/th>&lt;th>Unidad Medida&lt;/th>&lt;/tr>
+              &lt;/thead>
+              &lt;tbody>
+                {
+                  listaListaRutas.filter(ruta => {
+                    const esConexion = (listaTipos.findIndex(tipoContrato => tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'CNX') >= 0);
+                    const esGNC = (listaTipos.findIndex(tipoContrato => tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'GNC') >= 0);
+                    if (esConexion &amp;&amp; ruta.uniPropiedad &amp;&amp; ruta.uniPropiedad.tipo === 'C') {
+                      return ruta;
+                    }
+                    if (esGNC &amp;&amp; ruta.uniPropiedad &amp;&amp; ruta.uniPropiedad.tipo === 'G') {
+                      return ruta;
+                    }
+                  }).map(registro => {
+                    return (
+                      &lt;tr key={`item_selector_${registro[this.props.propValor]}`}>
+                        &lt;td className='text-left' style={{ width: '40%' }}>
+                          &lt;label className='text-left display'>
+                            &lt;input name='check_idruta' key={Util.generarIdControl('_check_' + registro[this.props.propValor])} data-idruta={registro.idRuta} type="checkbox" checked={registro.seleccionado || false} onChange={this.controlarCambio} />
+                            &lt;span> {registro[this.props.propTexto]}&lt;/span>
+                          &lt;/label>
+                        &lt;/td>
+                        &lt;td>
+                          &lt;Input
+                            label=''
+                            value={(registro.cntuValor) ? registro.cntuValor : ''}
+                            onChange={this.controlarCambio}
+                            name='cntuValor'
+                            cols={12}
+                            extra={{ 'data-idruta': registro.idRuta }}
+                          />
+                        &lt;/td>
+                        &lt;td>
+                          &lt;Combo
+                            opciones={this.props.unidadesMedida}
+                            propTexto='uniNombre1'
+                            propValor='uniIderegistro'
+                            label=''
+                            name='uniIdemedida'
+                            cols={12}
+                            value={registro.uniIdemedida}
+                            onChange={this.controlarCambio}
+                            extra={{ 'data-idruta': registro.idRuta }}
+                          />
+                        &lt;/td>
+                      &lt;/tr>
+                    );
+                  })
+                }
+              &lt;/tbody>
+            &lt;/table>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.confirmarSeleccionListaRutas(false) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        {this.renderSelector()}
+        {this.renderModalSelector()}
+      &lt;/Fragment>
+    );
+  }
+}
+
+SelectorRutas.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func,
+  titulo: PropTypes.string,
+  propValor: PropTypes.string,
+  propTexto: PropTypes.string,
+  seleccionarItem: PropTypes.func,
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+export { SelectorRutas };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

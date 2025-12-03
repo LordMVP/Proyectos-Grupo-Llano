@@ -1,0 +1,11 @@
+$color-azul : #09F;
+
+.gestion-rutas {
+
+  &__btn-mensaje {
+    display: block;
+    border-radius: 50%;
+    color: $color-azul;
+  }
+
+}

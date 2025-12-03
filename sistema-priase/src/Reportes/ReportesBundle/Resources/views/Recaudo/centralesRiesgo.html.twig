@@ -1,0 +1,64 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Centrales de Riesgo -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="CentralesController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Centrales de Riesgo</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                              <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Final Factura (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                   
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Corte Informe (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    
+                                </div>     
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info" id="result">
+                                    Toda la informacion sera generada en un archivo .xls
+                                </div>  
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar el reporte Centrales de Riesgo
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" ng-click="generarReporte2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar usuarios positivos
+                                </button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/centrales.riesgo.angular.js')}}"></script>
+{% endblock %}

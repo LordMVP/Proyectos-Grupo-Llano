@@ -1,0 +1,207 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 26/10/2015, 03:06:28 PM
+    Author     : jpsierra
+*/
+
+.box { color: white; text-align: center; height: 100px; font-size: 86px; }
+.pagination{
+    float: right;
+}
+
+.alert-box {
+    color:#555;
+    border-radius:10px;
+    font-family:Tahoma,Geneva,Arial,sans-serif;font-size:11px;
+    padding:5px 25px;
+}
+.alert-box span {
+    font-weight:bold;
+    text-transform:uppercase;
+}
+.error {
+    background: url('../../img/error16.png') no-repeat 5px 50%;
+    /*border:1px solid #FFFFFF;*/
+    color: #d70000;
+}
+.success {
+    background: url('../../img/success16.png') no-repeat 5px 50%;
+    /*border:1px solid #FFFFFF;*/
+    color: #68B72D;
+}
+.warning {
+    background: url('../../img/warning16.png') no-repeat 5px 50%;
+    /*border:1px solid #FFFFFF;*/
+    color: #F7A003;
+}
+.info {
+    background: url('../../img/info16.png') no-repeat 5px 50%;
+    /*border:1px solid #FFFFFF;*/
+    color:#022673;
+}
+
+
+.blockquote-reverse, blockquote.pull-right {
+    padding-right: 15px;
+    padding-left: 0;
+    text-align: right;
+    border-right: 5px solid #eee;
+    border-left: 0;
+}
+
+.panel-title>a{
+    text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 >.panel-title {
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+}
+.input-sm{
+    height: 30px !important;
+}
+
+.dataTables_length>label>select {
+    height: auto;
+    width: auto;
+}
+
+.row-selected {
+    background-color: #286090 !important;
+    color: #ffffff;
+}
+
+.row-selected:hover {
+    color: #ffffff;
+    background-color: #286090 !important;
+}
+
+
+blockquote {
+    padding: 10px 20px;
+    margin: 0 0 10px;
+    font-size: 12px;
+    border-left: 5px solid #eee;
+}
+.bg-warning {
+    background-color: #fcf8e3;
+    padding: 10px;
+}
+.lead {
+    /*margin-bottom: 20px;*/
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.4;
+}
+
+.input-group-btn select {
+    border-color: #ccc;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 5px 5px !important;
+    /*padding-top: 7px;
+    padding-bottom: 7px;*/
+}
+select.ui-datepicker-month,.ui-datepicker-year{
+    color: #000 !important;
+    height: auto !important;
+}
+.help-block-show{
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #737373;
+}
+.form-group .help-block {
+    display: none;
+}
+
+
+.form-group.has-error .help-block {
+    display: block;
+}
+legend {
+    margin-bottom: 0px !important;
+}
+
+.ng-invalid.ng-touched{
+    color: #a94442;
+}
+
+input.form-control{
+    height: auto !important;
+}
+input.form-control,.input-sm{
+    height: 27px !important;
+    min-height: 27px !important;
+}
+.btn-llanogas{
+    color: #FFF;
+    background-color: #408BC4;
+    border-color: #2e6da4;
+}
+.btn-llanogas:hover{
+    color: #fff;
+}
+/*.btn-llanogas.active.focus, .btn-llanogas.active:focus, .btn-llanogas.active:hover, .btn-llanogas:active.focus, .btn-llanogas:active:focus, .btn-llanogas:active:hover, .open>.dropdown-toggle.btn-llanogas.focus, .open>.dropdown-toggle.btn-llanogas:focus, .open>.dropdown-toggle.btn-llanogas:hover {
+    color: #fff;
+    background-color: #4070b4;
+    border-color: #2e6da4;
+}*/
+.has-error{
+    color:  #a94442;
+}
+fieldset {
+    border: solid 1px #408BC4 !important;
+    padding-left: 0.35em !important;
+}
+legend{
+    border-bottom:none !important;
+    width: auto !important;
+}
+
+table.ktable {
+    font-family: verdana,arial,sans-serif;
+    font-size:11px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #3A3A3A;
+    border-collapse: collapse;
+    width: 100%;
+}
+table.ktable th {
+    border-width: 1px;
+    padding: 3px;
+    border-style: solid;
+    border-color: #3A3A3A;
+    background-color: #B3B3B3;
+}
+table.ktable td {
+    border-width: 1px;
+    padding: 3px;
+    border-style: solid;
+    border-color: #3A3A3A;
+    background-color: #ffffff;
+}
+
+table thead th,table tbody tr
+{
+    text-align: center;
+}
+
+.pic-container {
+    width: 600px;
+    height: 600px;
+    overflow-y: scroll;
+}
+
+#scrollArea {
+  height: 280px;
+  overflow: auto;
+}

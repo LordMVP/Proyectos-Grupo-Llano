@@ -1,0 +1,34 @@
+#divBuscarRecaudo,
+#divConfirmarCancelar,
+#mensajeRecaudoConsignado{
+    display: none;
+}
+
+fieldset{
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+div.divIzquierda{
+    width: 80%;
+    margin-right: 5px;
+}
+
+div.divDerecha{
+    width: 30%;
+}
+
+div.divIzquierda,
+div.divDerecha{
+    display: table-cell;
+    border:solid 5px #FFF;
+}
+div.divDerecha .campo,
+div.divDerecha .campoBusqueda{
+    width: 95% !important;
+}
+#mensajeRecaudoConsignado{
+    color: orange;
+    font-size: 14px;
+    margin-top: 10px;
+}

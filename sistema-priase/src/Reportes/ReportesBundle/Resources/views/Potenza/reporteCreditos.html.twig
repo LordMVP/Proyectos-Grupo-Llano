@@ -1,0 +1,113 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - crédtios {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="CreditosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Búsqueda de créditos </legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">                                
+                                <div class="form-group col-md-5" show-errors>
+                                    <label for="txtciclo">Ciclo: </label>
+                                    <select id="cmbciclo" name="ciclo" ng-model="idciclo" class="form-control">
+                                        <option value="-1"> Seleccione una opción </option>
+                                        <option ng-repeat="ciclo in ciclos" ng-value="ciclo.idciclo">{[{ciclo.ciclo}]}</option>
+                                    </select>                                    
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="cmbConvenio">Convenio: </label>
+                                    <select id="cmbConvenio" ng-model="idconvenio" class="form-control">
+                                        <option value="-1"> Seleccione una opción </option>
+                                        {% for convenio in convenios %}
+                                            <option value="{{convenio.idtercero}}">{{convenio.nombretercero}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3"> 
+                                    <label for="cmbConvenio">Documento Tercero: </label>
+                                    <input type="number" id="txtdoctercero" ng-model="doctercero" class="form-control" >
+                                </div>
+                                <div class="col-md-6 form-group" show-errors> 
+                                    <label for="fechaSolicitud" class="col-md-12 form-group" >Fecha Solicitud (yyyy-mm-dd):</label>
+                                    <div class="col-md-6 form-group" show-errors> 
+                                        <label for="fechaSolDesde">Desde:</label>
+                                        <input class="form-control datepicker input-sm" ng-model="fechaInicioSol" id="fechaInicioSol" name="fechaInicioSol" />            
+                                    </div>
+                                    <div class="col-md-6 form-group" show-errors>
+                                        <label for="fechaConsulta1">Hasta:</label>
+                                        <input class="form-control datepicker input-sm" ng-model="fechaFinSol" id="fechaFinSol" name="fechaFinSol" />   
+                                    </div>                                  
+                                </div> 
+                                <div class="col-md-6 form-group" show-errors>
+                                    <div  >
+                                        <label for="valDesembolso" class="col-md-12 form-group" >Valor Desembolso:</label>
+                                    </div>                                    
+                                    <div class="col-md-6 form-group" show-errors>
+                                        <label for="valDesembolsoDesde">Desde:</label>
+                                        <input type="number" id="txtmontodesde" ng-model="montodesde" class="form-control" >          
+                                    </div>
+                                    <div class="col-md-6 form-group" show-errors>
+                                        <label for="valDesembolsoHasta">Hasta:</label>
+                                        <input type="number" id="txtmontohasta" ng-model="montohasta" class="form-control" >  
+                                    </div>                                  
+                                </div> 
+                                <div class="col-md-6 form-group" show-errors>
+                                    <div class="col-md-12 form-group" >
+                                        <label for="morosidad">Edad de Cartera:</label>
+                                    </div>                                    
+                                    <div class="col-md-6 form-group" show-errors>
+                                        <label for="morosidadDesde">Desde:</label>
+                                        <input type="number" id="txtmorosidaddesde" ng-model="morosidaddesde" class="form-control" >          
+                                    </div>
+                                    <div class="col-md-6 form-group" show-errors>
+                                        <label for="morosidadHasta">Hasta:</label>
+                                        <input type="number" id="txtmorosidadhasta" ng-model="morosidadhasta" class="form-control" >  
+                                    </div>                                    
+                                </div>  
+                                <div class="col-md-6 form-group" show-errors>
+                                   <div class="col-md-12 form-group" >
+                                   </div>
+                                   <div class="form-group col-md-12" show-errors>
+                                    <label for="txtciclo">Estado Credito: </label>
+                                    <select id="cmbestado" name="estado" ng-model="idestado" class="form-control">
+                                        <option value="-1"> Seleccione una opción </option>
+                                        <option ng-repeat="estado in estados" ng-value="estado.idunidad">{[{estado.nombre}]}</option>
+                                    </select>                                    
+                                </div>                                 
+                                </div>  
+                            </div>
+                        </div> 
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div class="alert-box info">
+                                    Reporte de Creditos será generado en un archivo .xlsx 
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Reporte Creditos
+                                </button>
+                            </div>                             
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/potenza/reporteCreditos.angular.js')}}"></script>
+{% endblock %}

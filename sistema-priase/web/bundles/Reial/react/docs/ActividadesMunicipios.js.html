@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ActividadesMunicipios.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ActividadesMunicipios.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Botonera, Combo, Input, VentanaDialogo } from 'appfuture-react'
+
+import API from '../../global/rutas_api'
+import Peticion from '../../global/peticion'
+import Util from '../../global/util'
+
+import { toast } from 'react-toastify'
+
+// redux
+
+import connect from 'react-redux/es/connect/connect'
+import { bindActionCreators } from 'redux'
+
+/**
+ *
+ *
+ * @class ActividadesMunicipios
+ * @extends {Component}
+ */
+class ActividadesMunicipios extends Component {
+	/**
+     *Define estados iniciales
+     * @memberof ActividadesMunicipios
+     */
+	state = {
+		dialogoModal: false,
+
+		// defecto
+
+		actividad: '-1',
+		municipio: '-1',
+		empresa: '8000212729',
+		contratista: '',
+		valor: '',
+	}
+
+	modificar = false
+
+
+	/**
+     *
+     *Habilita el botón cancelar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+
+	BotonCancelar = () => {
+		const { dialogoModal, ...estado } = this.state
+
+		/* prettier-ignore */
+
+		return Util.validarObjeto(estado)
+			? &lt;button className="btn" onClick={this.limpiarCampos}>cancelar&lt;/button>
+			: &lt;button className="btn" disabled={true}>cancelar&lt;/button>
+    }
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+	BotonGuardar = () => {
+		const { dialogoModal, ...estado } = this.state
+
+		/* prettier-ignore */
+
+		return Util.validarObjeto(estado)
+			? &lt;button className="btn" onClick={this.handleDialogo}>guardar&lt;/button>
+			: &lt;button className="btn" disabled={true}>guardar&lt;/button>
+    }
+
+	// interno
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     */
+	componentDidMount() {
+		// empresaJson
+
+		Peticion.post({
+            url: API.ACTIVIDADES_MUNICIPIOS.LISTAR_EMPRESAS,
+            config: {
+                valor: 'empresaCod',
+                texto: 'empresaNom',
+            },
+            callback: empresaJson => this.setState({ empresaJson }),
+		})
+
+		// contratistaJson
+
+		Peticion.post({
+            url: API.ACTIVIDADES_MUNICIPIOS.LISTAR_CONTRATISTAS,
+            config: {
+                valor: 'empresaCod',
+                texto: 'empresaNom',
+            },
+            callback: contratistaJson => this.setState({ contratistaJson }),
+		})
+	}
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} props - Cargar atributos del componente
+     */	
+	componentDidUpdate (props, state) {
+		// municipioJson y actividadJson
+
+		if (state.empresa !== this.state.empresa ||
+			state.contratista !== this.state.contratista) {
+
+			const { empresa, contratista } = this.state
+
+			if (Util.validarValor(empresa)) {
+				// municipioJson
+
+				this.obtenerMunicipios(empresa)
+
+				// actividadJson
+
+				if (Util.validarValor(contratista)) {
+					this.obtenerActividades(empresa, contratista)
+				}
+
+				else this.setState({
+					actividad: '-1',
+					actividadJson: undefined
+				})
+			}
+
+			else this.setState({
+				actividad: '-1',
+				municipio: '-1',
+				actividadJson: undefined,
+				municipioJson: undefined,
+			})
+		}
+
+		// valor
+
+		const { actividad, municipio } = this.state
+
+		if (state.actividad !== actividad ||
+			state.municipio !== municipio) {
+
+
+			if (Util.validarValor(actividad) &amp;&amp;
+				Util.validarValor(municipio)) {
+
+				this.buscarValor(actividad, municipio)
+			}
+		}
+	}
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+	// vista
+
+	/**
+	 *
+	 *Buscar valor de manera dinámica al digitar en el componente input Valor
+	 * @async
+	 * @method
+	 * @param {string} actividad - valor del componente combobox actividad
+	 * @param {string} municipio - valor del componente autocompletado actividad
+	 */
+	buscarValor = async (actividad, municipio) => {
+		actividad = Util.obtenerId(actividad)
+		municipio = Util.obtenerId(municipio)
+
+		// peticion
+
+		const valor = await Peticion.post({
+			url: API.ACTIVIDADES_MUNICIPIOS.CONSULTAR_VALOR,
+			parametros: {
+				proIdeproyec: municipio,
+				actIdeactivi: actividad,
+				empCodempresa: Util.obtenerId(this.state.empresa),
+				conIdecontra: Util.obtenerId(this.state.contratista),
+			}
+		})
+
+		const opciones = {
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+		}
+
+		let mensaje = 'Valor obtenido correctamente'
+
+		if (!valor || valor == '') {
+			mensaje = 'La relación no tiene valor asociado'
+
+			this.modificar = false
+
+			toast.warn(mensaje, opciones)
+			return
+		}
+
+		this.modificar = true
+		toast.success(mensaje, opciones)
+
+		this.setState({ valor: valor.actProactval })
+	}
+
+	/**
+	 *
+	 *Carga la lista de municipios al escoger un contratista del combobox
+	 * @method
+	 * @param {string} empresa - Valor de la empresa escogido desde el combobox
+	 */
+	obtenerMunicipios = (empresa = this.state.empresa) => {
+		empresa = Util.obtenerId(empresa)
+
+		// municipioJson
+
+		Peticion.post({
+			url: API.ACTIVIDADES_MUNICIPIOS.LISTAR_MUNICIPIOS,
+			parametros: {
+				proyectoCodemp: Util.obtenerId(empresa)
+			},
+			config: {
+				valor: 'proyectoCod',
+				texto: 'proyectoNom',
+			},
+			callback: municipioJson => this.setState({ municipioJson })
+		})
+	}
+
+	/**
+	 *
+	 *Carga la lista de actividades al escoger un contratista del combobox
+	 * @method
+	 * @param {String} empresa - Valor de la empresa escogido desde el combobox
+	 * @param {String} contratista - Valor del contratista escogido desde el combobox  
+	 */
+	obtenerActividades = (empresa, contratista) => {
+		// actividadJson
+
+		Peticion.post({
+			url: API.ACTIVIDADES_MUNICIPIOS.LISTAR_ACTIVIDADES,
+			parametros: {
+				empCodempresa: Util.obtenerId(empresa),
+				conIdecontra: Util.obtenerId(contratista),
+			},
+			config: {
+				valor: 'actIdeactivi',
+				texto: 'actDescripci',
+			},
+			callback: actividadJson => this.setState({ actividadJson })
+		})
+	}
+
+	/**
+	 *
+	 *Crear el valor
+	 * @method
+	 * 
+	 */
+	crear = () => {
+		Peticion.post({
+			url: API.ACTIVIDADES_MUNICIPIOS.CREAR_VALOR,
+			parametros: {
+				empCodempresa: Util.obtenerId(this.state.empresa),
+				conIdecontra: Util.obtenerId(this.state.contratista),
+				proIdeproyec: Util.obtenerId(this.state.municipio),
+				actIdeactivi: Util.obtenerId(this.state.actividad),
+				actProactval: parseInt(this.state.valor),
+			}
+		})
+	}
+
+	/**
+	 *
+	 *Permite la edición del valor
+	 * @method
+	 * 
+	 */
+	editar = () => {
+		Peticion.post({
+			url: API.ACTIVIDADES_MUNICIPIOS.EDITAR_VALOR,
+			parametros: {
+				empCodempresa: Util.obtenerId(this.state.empresa),
+				conIdecontra: Util.obtenerId(this.state.contratista),
+				proIdeproyec: Util.obtenerId(this.state.municipio),
+				actIdeactivi: Util.obtenerId(this.state.actividad),
+				actProactval: parseInt(this.state.valor),
+			}
+		})
+	}
+
+	/**
+	 *
+	 * Permite guardar las actividades asociadas a los municipios
+	 * @method
+	 * 
+	 */
+	guardar = () => {
+		if (!this.modificar) this.crear()
+		else this.editar()
+
+		// final
+
+		this.handleDialogo(false)
+		this.limpiarCampos()
+	}
+
+	/**
+	 *
+	 *Despliega el modal
+	 * @method
+	 * 
+	 */
+	handleDialogo = () => {
+		this.setState({ dialogoModal: !this.state.dialogoModal })
+	}
+
+	/**
+	 *
+	 *Limpiar el formulario
+	 * @method
+	 * 
+	 */
+	limpiarCampos = () => {
+		this.modificar = true
+
+		this.setState({
+			actividad: '-1',
+			municipio: '-1',
+			empresa: '-1',
+			contratista: '-1',
+			valor: '',
+		})
+	}
+
+	funciones = [
+		{ texto: 'guardar', callback: this.handleDialogo },
+		{ texto: 'cancelar', callback: this.cerrar },
+	]
+
+	botones = [
+		{ texto: 'guardar', callback: this.guardar },
+		{ texto: 'cancelar', callback: this.handleDialogo },
+	]
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+	render() {
+		const { BotonCancelar, BotonGuardar } = this
+
+		return (
+			&lt;React.Fragment>
+				&lt;VentanaDialogo
+					titulo="Confirmación"
+					texto="¿Confirma transacción?"
+					mostrar={this.state.dialogoModal}
+					botones={this.botones}
+				/>
+
+				&lt;h1>Actividades por municipio&lt;/h1>
+
+				&lt;div className="d-flex justify-content-center btn-group">
+					&lt;BotonGuardar/>
+					&lt;BotonCancelar/>
+				&lt;/div>
+
+				&lt;div className="contenedor fila">
+					&lt;Combo
+						id="empresa"
+						label="empresa"
+						value={this.state.empresa}
+						opciones={this.state.empresaJson}
+						onChange={this.change}
+						required={true}
+					/>
+
+					&lt;Combo
+						id="contratista"
+						label="contratista"
+						value={this.state.contratista}
+						opciones={this.state.contratistaJson}
+						onChange={this.change}
+						required={true}
+					/>
+				&lt;/div>
+
+				&lt;div className="contenedor caja formulario">
+					&lt;Combo
+						id="actividad"
+						label="actividad"
+						opciones={this.state.actividadJson}
+						value={this.state.actividad}
+						onChange={this.change}
+						extra={{ disabled: !this.state.actividadJson }}
+					/>
+
+					&lt;Combo
+						id="municipio"
+						label="municipio"
+						opciones={this.state.municipioJson}
+						value={this.state.municipio}
+						onChange={this.change}
+						extra={{ disabled: !this.state.municipioJson }}
+					/>
+
+					&lt;Input
+						id="valor"
+						label="valor"
+						value={this.state.valor}
+						onChange={this.change}
+					/>
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+// redux
+
+const mapStateToProps = (state) => {
+	return {}
+}
+
+const mapDispatchToProps = (dispatch) => {
+	return bindActionCreators({}, dispatch)
+}
+
+const VistaRedux = connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(ActividadesMunicipios)
+
+export { VistaRedux as RActividadesMunicipios }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:09:37 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

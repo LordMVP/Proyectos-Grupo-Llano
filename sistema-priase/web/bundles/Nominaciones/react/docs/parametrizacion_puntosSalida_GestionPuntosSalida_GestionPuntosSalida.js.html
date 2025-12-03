@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/puntosSalida/GestionPuntosSalida/GestionPuntosSalida.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/puntosSalida/GestionPuntosSalida/GestionPuntosSalida.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, TextoNumerico, Util } from 'appfuture-react';
+import axios from 'axios';
+import { formatearArray, TIPOS_UNIDADES_MEDIDA } from '../../../../global/util_nominaciones';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { RConsultaPuntosSalida } from '../ConsultaPuntosSalida';
+import { RConsultaTramos } from '../../tramos/ConsultaTramos';
+import { RConsultaConfiguraciones } from '../../../configuracion/ConsultaConfiguraciones';
+import { ConsultaPuntosEntrada } from './ConsultaPuntosEntrada';
+import './GestionPuntosSalida.scss';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+
+const listaTipoCompresion = [
+  { id: 'S', texto: 'Con Compresion' },
+  { id: 'N', texto: 'Sin Compresion' },
+];
+const tipoPoderCalorifico = [
+  { id: 'S', valor: 'Superior' }
+];
+
+class GestionPuntosSalida extends Component {
+
+  state = {
+    // Datos de la entidad
+    idPuntoSalida: null,
+    nombrePuntoSalida: '',
+    tipoPoderCalorifico: '',
+    tipoMercado: '',
+    porcentajeDemandaReguladaResidencial: '',
+    porcentajeDemandaReguladaComercial: '',
+    porcentajeDemandaReguladaIndustrial: '',
+    identificacionBEO: '',
+    identificacionGestor: '',
+    mercadoRelevante: '',
+    consultasTerminadas: false,
+    tipoCompresion: '',
+    unidadMedida: '',
+    capacidad: '',
+    demandaGNV: '',
+    tramosSeleccionados: [],
+    puntosEntradaSeleccionados: [],
+    listaUnidadMedida: [],
+    // Estado de la aplicacion
+    mostrarModalConsulta: false,
+    mostrarModalPuntosEntrada: false,
+    mostrarModalTramos: false,
+
+    //tipos de mercadoCo
+    tiposMercado: [],
+    mercadosRelevantes: [],
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPO_DEMANDA_MERCADO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_TIPOS_MERCADO, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', 'categoria': TIPOS_UNIDADES_MEDIDA.CANTIDAD })
+    ];
+
+    axios.all(peticiones)
+      .then(axios.spread((tiposMercadoConsulta, mercadosRelevantesConsulta, unidadMedida) => {
+        const datosAplicacion = {
+          tiposMercado: [],
+          mercadosRelevantes: [],
+          listaUnidadMedida: [],
+        };
+        if (tiposMercadoConsulta.data.codigo >= 0) {
+          datosAplicacion.tiposMercado = formatearArray(tiposMercadoConsulta.data.datos);
+        }
+        if (mercadosRelevantesConsulta.data.codigo >= 0) {
+          datosAplicacion.mercadosRelevantes = formatearArray(mercadosRelevantesConsulta.data.datos);
+        }
+        if (unidadMedida.data.codigo >= 0) {
+          datosAplicacion.listaUnidadMedida = formatearArray(unidadMedida.data.datos);
+        }
+        this.setState({ ...datosAplicacion, consultasTerminadas: true });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar la entidadEditar al momento se salir
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      idPuntoSalida: null,
+      nombrePuntoSalida: '',
+      tipoPoderCalorifico: '',
+      tipoMercado: '',
+      porcentajeDemandaReguladaResidencial: '',
+      porcentajeDemandaReguladaComercial: '',
+      porcentajeDemandaReguladaIndustrial: '',
+      identificacionBEO: '',
+      identificacionGestor: '',
+      mercadoRelevante: '',
+      tipoCompresion: '',
+      tramosSeleccionados: [],
+      puntosEntradaSeleccionados: [],
+      capacidad: '',
+      unidadMedida: '',
+      demandaGNV: '',
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+      mostrarModalPuntosEntrada: false,
+      mostrarModalTramos: false
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    // Validaciones
+    const {
+      nombrePuntoSalida,
+      tipoPoderCalorifico,
+      tipoMercado,
+      mercadoRelevante,
+      porcentajeDemandaReguladaResidencial,
+      porcentajeDemandaReguladaComercial,
+      porcentajeDemandaReguladaIndustrial,
+      identificacionBEO,
+      identificacionGestor,
+      tipoCompresion,
+      unidadMedida,
+      capacidad,
+      demandaGNV,
+    } = this.state;
+
+    const strings = [
+      nombrePuntoSalida,
+      identificacionBEO,
+      tipoPoderCalorifico,
+      tipoMercado,
+      porcentajeDemandaReguladaResidencial,
+      porcentajeDemandaReguladaComercial,
+      porcentajeDemandaReguladaIndustrial,
+      identificacionGestor
+    ];
+
+    if (!Util.validarStringsRequeridos(strings)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Todos los datos son requeridos.' } };
+    }
+
+    if (tipoPoderCalorifico &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un Tipo de Poder Calorífico' } };
+    }
+
+    if (!tipoMercado || tipoMercado &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un Tipo de Demanda' } };
+    }
+
+    if (!mercadoRelevante || mercadoRelevante &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un Mercado Relevante' } };
+    }
+
+    if (tipoCompresion === '-1' || tipoCompresion === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar si el punto es con o sin compresión' } };
+    }
+
+    const residencial = parseFloat(porcentajeDemandaReguladaResidencial);
+    const comercial = parseFloat(porcentajeDemandaReguladaComercial);
+    const industrial = parseFloat(porcentajeDemandaReguladaIndustrial);
+    const gnv = parseFloat(demandaGNV);
+
+    if (isNaN(residencial) || isNaN(comercial) || isNaN(industrial) || isNaN(gnv)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Verifique los valores de los porcentajes de demanda, deben ser valores numéricos.' } };
+    }
+
+    if (residencial &lt; 0 || comercial &lt; 0 || industrial &lt; 0 || gnv &lt; 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Verifique los valores de los porcentajes de demanda, deben ser valores positivos.' } };
+    }
+
+    if ((residencial + comercial + industrial + gnv) !== 100) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La sumatoría de los porcentajes de demanda debe ser exactamente 100%.' } };
+    }
+
+    if (!Util.validarArreglo(this.state.puntosEntradaSeleccionados) &amp;&amp; !Util.validarArreglo(this.state.tramosSeleccionados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un punto de entrada o un tramo.' } };
+    }
+
+    if (capacidad === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar la capacidad del punto de salida.' } };
+    }
+
+    if (isNaN(capacidad)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La capacidad del punto debe ser un valor númerico' } };
+    }
+
+    if (demandaGNV === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el porcentaje de demanda GNV del punto de salida.' } };
+    }
+
+    if (unidadMedida &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la unidad de medida para la capacidad' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const {
+      idPuntoSalida,
+      nombrePuntoSalida,
+      tipoPoderCalorifico,
+      tipoMercado,
+      porcentajeDemandaReguladaResidencial,
+      porcentajeDemandaReguladaComercial,
+      porcentajeDemandaReguladaIndustrial,
+      identificacionBEO,
+      identificacionGestor,
+      mercadoRelevante,
+      tipoCompresion,
+      capacidad,
+      unidadMedida,
+      demandaGNV,
+    } = this.state;
+
+    const entidadGuardar = {
+      ptsaIderegistro: idPuntoSalida,
+      ptsaNombre: nombrePuntoSalida,
+      ptsaTipocalorifico: tipoPoderCalorifico,
+      pstaCompresion: tipoCompresion,
+      uniIdetipomercado: {
+        uniIderegistro: tipoMercado
+      },
+      merIderelevante: mercadoRelevante,
+      pstaRegresidencial: porcentajeDemandaReguladaResidencial,
+      pstaRegcomercial: porcentajeDemandaReguladaComercial,
+      pstaRegindustrial: porcentajeDemandaReguladaIndustrial,
+      pstaCodigobeo: identificacionBEO,
+      pstaCodigogestor: identificacionGestor,
+      pstaCapacidad: new Number(capacidad),
+      pstaDemandaporcentajegnv: demandaGNV,
+      uniIdemedida: {
+        uniIderegistro: parseInt(unidadMedida)
+      },
+      listaPuntosEntrada: this.obtenerListaPuntosEntradaGuardar(),
+      listaTramos: this.obtenerListaTramosGuardar()
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.PUNTOS_SALIDA.GUARDAR_PUNTOS_SALIDA, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de generar un objeto con los identificadores de los puntos de entrada seleccionados
+   * @returns {Object}
+   */
+  obtenerListaPuntosEntradaGuardar = () => {
+    return this.state.puntosEntradaSeleccionados.map(a => (
+      { uniIdepuntoentrada: { uniIderegistro: a.uniIderegistro } }
+    ));
+  };
+
+  /**
+   * Método encargado de generar un objeto con los identificadores de los tramos seleccionados
+   * @returns {Object}
+   */
+  obtenerListaTramosGuardar = () => {
+    return this.state.tramosSeleccionados.map(a => (
+      { trmIderegistro: { trmIderegistro: a.trmIderegistro } }
+    ));
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton de consultar
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consultar
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de puntos de entrada
+   */
+  abrirModalPuntosEntrada = () => {
+    this.setState({
+      mostrarModalPuntosEntrada: true
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de tramos
+   */
+  abrirModalTramos = () => {
+    this.setState({
+      mostrarModalTramos: true
+    });
+  };
+
+  /**
+   * Método encargado de llenar el formulario con los datos consultados
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+
+      // Cargar datos de la entidad
+      idPuntoSalida: entidad.ptsaIderegistro,
+      nombrePuntoSalida: entidad.ptsaNombre,
+      tipoPoderCalorifico: entidad.ptsaTipocalorifico,
+      tipoMercado: entidad.uniIdetipomercado.uniIderegistro,
+      porcentajeDemandaReguladaResidencial: entidad.pstaRegresidencial,
+      porcentajeDemandaReguladaComercial: entidad.pstaRegcomercial,
+      porcentajeDemandaReguladaIndustrial: entidad.pstaRegindustrial,
+      identificacionBEO: entidad.pstaCodigobeo,
+      identificacionGestor: entidad.pstaCodigogestor,
+      mercadoRelevante: entidad.merIderelevante,
+      tipoCompresion: entidad.pstaCompresion,
+      puntosEntradaSeleccionados: entidad.listaPuntosEntrada.map(a => a.uniIdepuntoentrada),
+      tramosSeleccionados: entidad.listaTramos.map(a => a.trmIderegistro),
+      capacidad: entidad.pstaCapacidad,
+      unidadMedida: entidad.uniIdemedida.uniIderegistro,
+      demandaGNV: entidad.pstaDemandaporcentajegnv,
+    });
+  };
+
+  /**
+   * Método encargado agregar los tramos seleccionados
+   * @param {Object} tramos Tramos seleccionados por el usuario
+   */
+  onSeleccionarTramos = (tramos) => {
+    this.setState({
+      mostrarModalTramos: false,
+      tramosSeleccionados: [...tramos]
+    });
+  };
+
+  /**
+   * Método encargado agregar los puntos de entrada seleccionados
+   * @param {Object} puntosEntrada Puntos de entrada seleccionados por el usuario
+   */
+  onSeleccionarPuntosEntrada = (puntosEntrada) => {
+    this.setState({
+      mostrarModalPuntosEntrada: false,
+      puntosEntradaSeleccionados: [...puntosEntrada]
+    });
+  };
+
+  /**
+   * Método encargado de eliminar el punto de entrada seleccionado
+   * @param {number} posicion Posición del punto de entrada que se desea eliminar
+   */
+  eliminarPuntoEntrada = (posicion) => {
+    const lista = [...this.state.puntosEntradaSeleccionados];
+    lista.splice(posicion, 1);
+    this.setState({ puntosEntradaSeleccionados: lista });
+  };
+
+  /**
+   * Método encargado de mostrar los puntos de entrada seleccionados
+   * @returns {Array}
+   */
+  renderPuntosEntrada = () => {
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Punto de entrada&lt;/th>
+            &lt;th> &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.puntosEntradaSeleccionados.map((dato, index) => {
+              return (
+                &lt;tr key={"pentrada" + dato.uniIderegistro}>
+                  &lt;td>{dato.uniNombre1}&lt;/td>
+                  &lt;td>&lt;button className='btnEliminar' onClick={() => {
+                    this.eliminarPuntoEntrada(index)
+                  }}>X&lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de eliminar el tramo seleccionado
+   * @param {number} posicion Posición del tramo que se desea eliminar
+   */
+  eliminarTramo = (posicion) => {
+    const lista = [...this.state.tramosSeleccionados];
+    lista.splice(posicion, 1);
+    this.setState({ tramosSeleccionados: lista });
+  };
+
+  /**
+   * Método encargado de mostrar los tramos seleccionados
+   * @returns {Array}
+   */
+  renderTramos = () => {
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th> &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.tramosSeleccionados.map((dato, index) => {
+              return (
+                &lt;tr key={"tramo_" + dato.trmIderegistro}>
+                  &lt;td>{dato.trmNombre}&lt;/td>
+                  &lt;td>&lt;button className='btnEliminar' onClick={() => {
+                    this.eliminarTramo(index)
+                  }}>X&lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    if (!this.state.consultasTerminadas) {
+      return (&lt;p className='text-center'>Cargando...&lt;/p>);
+    }
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Input
+            label='Nombre:'
+            value={this.state.nombrePuntoSalida}
+            onChange={this.controlarCambio}
+            name='nombrePuntoSalida'
+          />
+          &lt;Combo
+            opciones={tipoPoderCalorifico}
+            propTexto='valor'
+            propValor='id'
+            label='Tipo Poder Calorífico:'
+            name='tipoPoderCalorifico'
+            value={this.state.tipoPoderCalorifico}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.tiposMercado}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de Demanda:'
+            name='tipoMercado'
+            value={this.state.tipoMercado}
+            onChange={this.controlarCambio}
+          />
+          &lt;TextoNumerico
+            aceptaNegativos={false}
+            label='% Dem. Reg. Residencial:'
+            value={this.state.porcentajeDemandaReguladaResidencial}
+            onChange={this.controlarCambio}
+            name='porcentajeDemandaReguladaResidencial'
+          />
+          &lt;TextoNumerico
+            aceptaNegativos={false}
+            label='% Dem. Reg. Comercial:'
+            value={this.state.porcentajeDemandaReguladaComercial}
+            onChange={this.controlarCambio}
+            name='porcentajeDemandaReguladaComercial'
+          />
+          &lt;TextoNumerico
+            aceptaNegativos={false}
+            label='% Dem. Reg. Industrial:'
+            value={this.state.porcentajeDemandaReguladaIndustrial}
+            onChange={this.controlarCambio}
+            name='porcentajeDemandaReguladaIndustrial'
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='% Dem. GNV:'
+            value={this.state.demandaGNV}
+            onChange={this.controlarCambio}
+            name='demandaGNV'
+          />
+          &lt;Input
+            label='Identificación BEO:'
+            value={this.state.identificacionBEO}
+            onChange={this.controlarCambio}
+            name='identificacionBEO'
+          />
+          &lt;Input
+            label='Identificación Gestor:'
+            value={this.state.identificacionGestor}
+            onChange={this.controlarCambio}
+            name='identificacionGestor'
+          />
+          &lt;Combo
+            opciones={this.state.mercadosRelevantes}
+            propTexto='merNombre'
+            propValor='merIderegistro'
+            label='Mercado Relevante:'
+            name='mercadoRelevante'
+            value={this.state.mercadoRelevante}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={listaTipoCompresion}
+            propTexto='texto'
+            propValor='id'
+            label='Tipo:'
+            name='tipoCompresion'
+            value={this.state.tipoCompresion}
+            onChange={this.controlarCambio}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Capacidad:'
+            value={this.state.capacidad}
+            onChange={this.controlarCambio}
+            name='capacidad'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Unidad Medida:'
+            name='unidadMedida'
+            value={this.state.unidadMedida}
+            onChange={this.controlarCambio}
+          />
+        &lt;/div>
+
+        &lt;div className='row mt-2'>
+          &lt;div className='col-6'>
+            &lt;p>&lt;b>Puntos de Entrada {this.state.puntosEntradaSeleccionados.length > 0 ? ` (${this.state.puntosEntradaSeleccionados.length})` : ''}&lt;/b>&lt;/p>
+            &lt;button className='btn btn-primary' onClick={this.abrirModalPuntosEntrada}>Seleccionar&lt;/button>
+            &lt;div className='pt-3'>
+              {this.state.puntosEntradaSeleccionados.length > 0 &amp;&amp;
+                this.renderPuntosEntrada()
+              }
+            &lt;/div>
+          &lt;/div>
+          &lt;div className='col-6'>
+            &lt;p>&lt;b>Tramos {this.state.tramosSeleccionados.length > 0 ? ` (${this.state.tramosSeleccionados.length})` : ''}&lt;/b>&lt;/p>
+            &lt;button className='btn btn-primary' onClick={this.abrirModalTramos}>Seleccionar&lt;/button>
+            &lt;div className='pt-3'>
+              {this.state.tramosSeleccionados.length > 0 &amp;&amp;
+                this.renderTramos()
+              }
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta de Puntos de Salida'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaPuntosSalida esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalPuntosEntrada}
+          titulo='Seleccionar Puntos de Entrada'
+          cerrarModal={() => this.setState({ mostrarModalPuntosEntrada: false })}>
+          &lt;ConsultaPuntosEntrada
+            esModal
+            bloquearTipoConfiguracion
+            seleccionMultiple
+            entidadesSeleccionadas={this.state.puntosEntradaSeleccionados}
+            seleccionarEntidades={this.onSeleccionarPuntosEntrada}
+          />
+        &lt;/VentanaModal>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalTramos}
+          titulo='Seleccionar Tramos'
+          cerrarModal={() => this.setState({ mostrarModalTramos: false })}>
+          &lt;RConsultaTramos
+            esModal
+            seleccionMultiple
+            entidadesSeleccionadas={this.state.tramosSeleccionados}
+            seleccionarEntidades={this.onSeleccionarTramos}
+          />
+        &lt;/VentanaModal>
+
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionPuntosSalida.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionPuntosSalida);
+
+export { VistaRedux as RGestionPuntosSalida };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

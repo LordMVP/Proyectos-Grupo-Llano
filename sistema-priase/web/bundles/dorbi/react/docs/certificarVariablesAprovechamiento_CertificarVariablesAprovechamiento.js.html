@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: certificarVariablesAprovechamiento/CertificarVariablesAprovechamiento.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: certificarVariablesAprovechamiento/CertificarVariablesAprovechamiento.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { formatearArray } from '../../global/util_nominaciones';
+import { CLASES_UNIDADES } from '../../global/constantes';
+import RUTAS_API from '../../global/rutas_api';
+import { mostrarAlerta } from '../../store/actions/AplicacionAcciones';
+import './CertificarVariablesAprovechamiento.scss';
+
+const CERTIFICADO = 'CE';
+const ANULADO = 'CA';
+
+class CertificarVariablesAprovechamiento extends Component {
+
+  state = {
+    // Datos de la entidad
+    areaPrestacion: '',
+    aprovechador: '',
+    periodo: '',
+    listaAreaPrestacion: [],
+    listaAprovechador: [],
+    listaPeriodo: [],
+    listaConsultados: [],
+    // Estado de la aplicacion
+    estadoCampo: false
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.AREAS_PRESTACION.FILTRO, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS_APROVECHAMINETO.CONSULTAR_APROVECHADORES),
+    ];
+    axios.all(peticiones)
+
+      .then(axios.spread((areaPrestacion, terceros) => {
+        const datosAplicacion = {
+          listaAreaPrestacion: [],
+          listaVariables: [],
+          listaAprovechador: []
+        };
+        if (areaPrestacion.data.codigo > 0) {
+          datosAplicacion.listaAreaPrestacion = formatearArray(areaPrestacion.data.datos);
+        }
+        if (terceros.data.codigo >= 0) {
+          datosAplicacion.listaAprovechador = formatearArray(terceros.data.datos);
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+
+  };
+
+  /**
+   * Método encargado de convertir la fecha del desvio a formato DD/MM/YYYY
+   * @param {number} fechaNumero Fecha parseada a número
+   * @returns {string}
+   */
+  obtenerFecha = (fechaNumero) => {
+    let fecha = new Date(fechaNumero);
+    const anio = fecha.getFullYear();
+    return anio;
+  };
+
+  /**
+   * Método encargado de contruir un objeto con los periodos consultados.
+   * @param {Object} periodos Datos de los periodos consultados.
+   * @returns {Object}
+   */
+  construirObjetoPeriodos = (periodos) => {
+    return periodos.map((dato) => ({
+      idRegistro: dato.smperIderegistro,
+      nombre: `${dato.perIderegistro.perNombre}-${this.obtenerFecha(dato.perIderegistro.perFecinicial)}`
+    }));
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      areaPrestacion: '',
+      aprovechador: '',
+      periodo: '',
+      listaConsultados: [],
+      // Estado de la aplicacion
+      estadoCampo: false
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Certificar', callback: this.certificarEntidad },
+      { texto: 'Anular', callback: this.anularEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { listaConsultados } = this.state;
+    const listaFiltrada = listaConsultados.filter(p => p.seleccionado === true);
+    if (listaFiltrada.length === 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos una variable' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener las variables seleccionadas para cancelación o certificación.
+   * @param {String} estado Estado el cual se asignara a las variables seleccionadas.
+   * @returns {Object}
+   */
+  obtenerObjeto = (estado) => {
+    let { listaConsultados, periodo, aprovechador, areaPrestacion } = this.state;
+    const lista = listaConsultados.filter(p => p.seleccionado === true);
+    const verificar = (lista[0].listaRaco == null||Object.keys(lista[0].listaRaco).length === 0) ? false : true;
+    if (verificar) {
+      for (let index = 0; index &lt; lista.length; index++) {
+        const arreglo = lista[index];
+        for (let index = 0; index &lt; arreglo.listaRangos.length; index++) {
+          const elementoValores = arreglo.listaRangos[index];
+          listaFinal.push({
+            vrtaIderegistro: elementoValores.varc_ideregistro,
+            perIderegistro: {
+              smperIderegistro: periodo
+            },
+            conIderegistro: {
+              uniConcepto: {
+                uniIderegistro: arreglo.idConcepto
+              }
+            },
+            arprIderegistro: {
+              arprIderegistro: areaPrestacion
+            },
+            terIderegistro: {
+              terIderegistro: aprovechador
+            },
+            racoIderegistro: {
+              racoIderegistr: elementoValores.raco_ideregistr
+            },
+            vrtaDescripcion: (arreglo.observacion != '') ? arreglo.observacion : '',
+            vrtaValor: elementoValores.nuevovalor,
+            vrtaEstado: estado
+          });
+        }
+      }
+      return listaFinal;
+    }
+    return lista.map(dato => {
+      return {
+        vrtaIderegistro: dato.listaValores.vrta_ideregistro,
+        perIderegistro: {
+          smperIderegistro: periodo
+        },
+        conIderegistro: {
+          uniConcepto: {
+            uniIderegistro: dato.idConcepto
+          }
+        },
+        arprIderegistro: {
+          arprIderegistro: areaPrestacion
+        },
+        racoIderegistro: {
+          racoIderegistr: null
+        },
+        terIderegistro: {
+          terIderegistro: aprovechador
+        },
+        vrtaValor: dato.listaValores.nuevovalor,
+        vrtaDescripcion: (dato.observacion != '') ? dato.observacion : '',
+        vrtaEstado: estado
+      }
+    });
+  };
+
+  /**
+   * Método encargado de anular las variables seleccionadas.
+   * @returns {Bool}
+   */
+  anularEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const entidadGuardar = this.obtenerObjeto(ANULADO);
+    axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS_APROVECHAMINETO.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de certificar los datos de la entidad.
+   * @returns {bool}
+   */
+  certificarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const entidadGuardar = this.obtenerObjeto(CERTIFICADO);
+    axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS_APROVECHAMINETO.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de validar los parametros necesarios para consultar.
+   * @returns {Object}
+   */
+  validarFormularioConsultar = () => {
+    const { areaPrestacion, aprovechador, periodo } = this.state;
+    if (areaPrestacion &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar el área de prestación.' } }
+    }
+    if (periodo &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar el periodo.' } }
+    }
+    if (aprovechador &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar el aprovechador.' } }
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de contruir un objeto con los conceptos consultados.
+   * @param {Object} conceptos Datos de los conceptos consultados.
+   * @returns {Object}
+   */
+  construirObjetoVariables = (conceptos) => {
+    return conceptos.map((dato, index) => {
+      return {
+        idConcepto: dato.idConcepto,
+        listaRangos: (dato.listaRangos != '') ? JSON.parse(dato.listaRangos) : [],
+        listaValores: (dato.listaValores != '') ? JSON.parse(dato.listaValores) : [],
+        nombreConcepto: dato.nombreConcepto,
+        identificadorRegistro: Util.generarIdControl(`variable_${index}`),
+        observacion: (dato.observacion != '') ? dato.observacion : ''
+      }
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consulta
+   */
+  consultarEntidad = () => {
+    const { aprovechador, areaPrestacion, periodo } = this.state;
+    const validar = this.validarFormularioConsultar();
+    if (!validar.respuesta) {
+      this.props.mostrarAlerta(validar.mensaje.titulo, validar.mensaje.mensaje);
+      return false;
+    }
+    const parametros = {
+      areaPrestacion: areaPrestacion,
+      periodo: periodo,
+      tercero: aprovechador
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS_APROVECHAMINETO.CONSULTAR_VARIABLES_PENDIENTES, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaConsultados: this.construirObjetoVariables(respuesta.data.datos),
+            estadoCampo: true
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    if (name === "areaPrestacion") {
+      this.consultarPeriodos(value);
+    }
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar los periodos por área de prestación.
+   * @param {Integer} idArea Identificador del área de prestación.
+   * @returns {bool}
+   */
+  consultarPeriodos = (idArea) => {
+    if (idArea === '' || idArea === '-1') {
+      this.setState({
+        listaPeriodo: []
+      });
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS.CONSULTAR_PERIODOS, { idArea: idArea })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaPeriodo: this.construirObjetoPeriodos(respuesta.data.datos)
+          });
+          return;
+        }
+        this.setState({
+          listaPeriodo: []
+        });
+      });
+  };
+
+  /**
+   * Método encargado de seleccionar el punto.
+   */
+  seleccionarPunto = (evento) => {
+    const lista = [...this.state.listaConsultados];
+    const index = lista.findIndex(p => p.identificadorRegistro == evento.target.value);
+    lista[index].seleccionado = evento.target.checked;
+    this.setState({ listaConsultados: lista });
+  };
+
+  /**
+   * Método encargado de generar la tabla
+   * @returns {Object}
+   */
+  renderTabla = () => {
+    const lista = [...this.state.listaConsultados];
+    if (!Util.validarArreglo(lista)) {
+      return null;
+    }
+    const verificar = (lista[0].listaRangos == null || Object.keys(lista[0].listaRangos).length === 0) ? false : true;
+    if (verificar) {
+      return (
+        &lt;table className='table table-striped mt-8'>
+          &lt;thead className='thead-dark'>
+            &lt;tr>
+              &lt;th scope='col'>Seleccionar&lt;/th>
+              &lt;th scope='col'>Variable&lt;/th>
+              &lt;td scope='col'>Rango Inicial&lt;/td>
+              &lt;td scope='col'>Rango Final&lt;/td>
+              &lt;td scope='col'>Valor&lt;/td>
+              &lt;td scope='col'>Valor Anterior&lt;/td>
+              &lt;td scope='col'>Estado&lt;/td>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {lista.map((dato, index) => {
+              return (
+                &lt;Fragment>
+                  &lt;tr key={Util.generarIdControl(index)}>
+                    &lt;td rowSpan={(dato.listaRangos.length + 1)}>
+                      &lt;input value={dato.identificadorRegistro} type="checkbox" checked={dato.seleccionado || false} onChange={(evento) => {
+                        this.seleccionarPunto(evento)
+                      }} />
+                    &lt;/td>
+                    &lt;td rowSpan={(dato.listaRangos.length + 1)}>{dato.nombreConcepto}&lt;/td>
+                  &lt;/tr>
+                  {dato.listaRangos.map(datoRaco => {
+                    return (
+                      &lt;Fragment>
+                        &lt;tr key={Util.generarIdControl(index + '_2')}>
+                          &lt;td>{datoRaco.raco_raninicial}&lt;/td>
+                          &lt;td>{datoRaco.raco_ranfinal}&lt;/td>
+                          &lt;td>{datoRaco.nuevovalor}&lt;/td>
+                          &lt;td>{datoRaco.valoranterior}&lt;/td>
+                          &lt;td>{(datoRaco.vrta_estado.trim() == 'P') ? 'Pendiente' : ''}&lt;/td>
+                        &lt;/tr>
+                      &lt;/Fragment>
+                    );
+                  })
+                  }
+                &lt;/Fragment>
+              );
+            })
+            }
+          &lt;/tbody>
+        &lt;/table>
+      );
+    }
+    return (
+      &lt;table className='table table-striped mt-8'>
+        &lt;thead className='thead-dark'>
+          &lt;tr>
+            &lt;th scope='col'>Seleccionar&lt;/th>
+            &lt;th scope='col'>Variable&lt;/th>
+            &lt;td scope='col'>Valor&lt;/td>
+            &lt;td scope='col'>Valor Anterior&lt;/td>
+            &lt;td scope='col'>Estado&lt;/td>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            lista.map((dato, index) => {
+              return (
+                &lt;tr key={Util.generarIdControl(index)}>
+                  &lt;td>
+                    &lt;input value={dato.identificadorRegistro} type="checkbox" checked={dato.seleccionado || false} onChange={(evento) => {
+                      this.seleccionarPunto(evento)
+                    }} />
+                  &lt;/td>
+                  &lt;td>{dato.nombreConcepto}&lt;/td>
+                  &lt;td>{dato.listaValores.nuevovalor}&lt;/td>
+                  &lt;td>{(dato.listaValores.valoranterior == '') ? 0 : dato.listaValores.valoranterior}&lt;/td>
+                  &lt;td>{(dato.listaValores.vrta_estado.trim() == 'P') ? 'Pendiente' : ''}&lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo opciones={this.state.listaAreaPrestacion}
+            propTexto='arprNombre'
+            propValor='arprIderegistro'
+            label='Área de Prestación:'
+            name='areaPrestacion'
+            value={this.state.areaPrestacion}
+            onChange={this.controlarCambio}
+            extra={
+              { disabled: this.state.estadoCampo, readOnly: this.state.estadoCampo }
+            }
+          />
+          &lt;Combo opciones={this.state.listaPeriodo}
+            propTexto='nombre'
+            propValor='idRegistro'
+            label='Periodo:'
+            name='periodo'
+            value={this.state.periodo}
+            onChange={this.controlarCambio}
+            extra={
+              { disabled: this.state.estadoCampo, readOnly: this.state.estadoCampo }
+            }
+          />
+          &lt;Combo
+            opciones={this.state.listaAprovechador}
+            propTexto='terNomcompleto'
+            propValor='terIderegistro'
+            label='Aprovechador:'
+            name='aprovechador'
+            value={this.state.aprovechador}
+            onChange={this.controlarCambio}
+            extra={
+              { disabled: this.state.estadoCampo, readOnly: this.state.estadoCampo }
+            }
+          />
+        &lt;/div>
+        {this.state.listaConsultados.length > 0 &amp;&amp;
+          this.renderTabla()
+        }
+      &lt;/Fragment>
+    );
+  };
+}
+
+CertificarVariablesAprovechamiento.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(CertificarVariablesAprovechamiento);
+
+export { VistaRedux as RCertificarVariablesAprovechamiento };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#estadoConsulta">estadoConsulta</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:43:08 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

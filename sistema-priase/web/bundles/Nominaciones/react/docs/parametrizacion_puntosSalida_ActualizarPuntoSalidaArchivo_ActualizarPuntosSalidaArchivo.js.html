@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/puntosSalida/ActualizarPuntoSalidaArchivo/ActualizarPuntosSalidaArchivo.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/puntosSalida/ActualizarPuntoSalidaArchivo/ActualizarPuntosSalidaArchivo.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { Botonera, Combo } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import './ActualizarPuntosSalidaArchivo.scss';
+import { formatearArray } from '../../../../global/util_nominaciones'
+
+class ActualizarPuntosSalidaArchivo extends Component {
+
+  inputFileRef = null;
+
+  state = {
+    listaPuntosSalida: [],
+    puntoSalida: '',
+    separador: '-1',
+    cabecera: '-1'
+  };
+
+  /**
+   * Método encargado de comprobar si el componente ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.PUNTOS_SALIDA.CONSULTAR_PUNTOS_SALIDA, { criterio: '' })
+      .then(respuesta => {
+        if (respuesta.data.codigo >= 0) {
+          this.setState({ listaPuntosSalida: formatearArray(respuesta.data.datos) });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Valida el formulario y sube el archivo plano al servidor, junto con el separador y la cabecera
+   * @returns {bool}
+   */
+  onSubirArchivo = () => {
+    if (!this.validarFormulario()) {
+      return false;
+    }
+    const { puntoSalida } = this.state;
+    const configuracion = { headers: { 'Content-Type': 'multipart/form-data' } };
+    const data = new FormData();
+    data.append('lecturaBE', this.inputFileRef.files[0]);
+    data.append('idpuntoSalida', puntoSalida);
+    data.append('separador', this.state.separador);
+    data.append('cabecera', this.state.cabecera.toUpperCase());
+
+    axios.post(RUTAS_API.PARAMETRIZACION.PUNTOS_SALIDA.ACTUALIZAR_PUNTO, data, configuracion)
+      .then((respuesta) => {
+        if (respuesta.data.codigo &lt; 0) {
+          this.mostrarError(respuesta.data.datos);
+          return;
+        }
+        this.limpiarFormulario();
+      });
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { puntoSalida } = this.state;
+    if (this.inputFileRef.files.length === 0) {
+      this.props.mostrarAlerta('Atención', 'Debe seleccionar un archivo para continuar');
+      return false;
+    }
+
+    if (puntoSalida &lt;= 0) {
+      this.props.mostrarAlerta('Atención', 'Debe seleccionar un punto de salida');
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Método encargado de mostrar los errores al subir el archivo
+   */
+  mostrarError = (errores) => {
+    let strMensaje = errores.map((err, index) => (&lt;li key={index}>{`Línea ${err.linea}: ${err.mensaje}`}&lt;/li>));
+    let mensaje = (
+      &lt;Fragment>
+        &lt;span>{`Ocurrieron uno o varios errores al subir el archivo, verifique el archivo e intente nuevamente.`}&lt;/span>
+        &lt;ul className='container mt-2 pl-5'>{strMensaje}&lt;/ul>
+      &lt;/Fragment>
+    );
+    this.props.mostrarAlerta('Error', mensaje);
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      puntoSalida: '-1',
+    });
+    this.inputFileRef.value = '';
+    this.inputFileRef.files = null;
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Subir Archivo', callback: this.onSubirArchivo },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='registro-masivo-tramo'>
+        &lt;div className="d-flex justify-content-center mt-3">
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        &lt;div className="row mt-4">
+          &lt;div className='form-group col-4'>
+            &lt;label htmlFor='txtArchivoRutas'>Archivo de punto de salida:&lt;/label>
+            &lt;input id='txtArchivoRutas' ref={ref => this.inputFileRef = ref} type="file" accept=".csv" />
+          &lt;/div>
+          &lt;Combo
+            opciones={[{ id: ';', texto: '(;) Punto y Coma' }, { id: ',', texto: '(,) Coma' }, , { id: '|', texto: '(|) Pipe' }]}
+            propTexto='texto'
+            propValor='id'
+            label='Separador:'
+            value={this.state.separador}
+            onChange={this.controlarCambio}
+            name="separador"
+          />
+
+          &lt;Combo
+            opciones={[{ id: 'S', texto: 'Sí' }, { id: 'N', texto: 'No' }]}
+            propTexto='texto'
+            propValor='id'
+            label='El archivo tiene Cabecera:'
+            value={this.state.cabecera}
+            onChange={this.controlarCambio}
+            name="cabecera"
+          />
+          &lt;Combo
+            opciones={this.state.listaPuntosSalida}
+            propTexto='ptsaNombre'
+            propValor='ptsaIderegistro'
+            label='Punto de salida:'
+            name='puntoSalida'
+            value={this.state.puntoSalida}
+            onChange={this.controlarCambio}
+          />
+          &lt;div className='mt-3 d-flex justify-content-center registro-masivo-tramo__ejemplo'>
+            &lt;div>
+              &lt;p>Cabecera de Ejemplo del Archivo&lt;/p>
+              &lt;pre>
+                (fecha(YYYY-MM-DD),totalNodoEntrada,asignacionNodoSalida,balanceDiario,balanceAcumulado,totalMedidoKPC,HHV)
+              &lt;/pre>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+}
+
+ActualizarPuntosSalidaArchivo.propTypes = {
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({ mostrarAlerta }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ActualizarPuntosSalidaArchivo);
+
+export { VistaRedux as RActualizarPuntosSalidaArchivo };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

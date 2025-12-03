@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/SuministroSinRutas.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/SuministroSinRutas.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+
+import { ComboHoras } from '../Componentes/ComboHoras';
+import { TextoNumerico, Combo, Util } from 'appfuture-react';
+
+import { validarNumero } from '../../../../../global/util_nominaciones';
+
+class SuministroSinRuta extends Component {
+
+  state = {
+    horaFin: '',
+    valorRango: '123',
+    unidadMedida: '',
+    porcentajeRango: '10',
+    idRangoSinRuta: null,
+    ultimaHora: '00:00'
+  };
+
+  /**
+   * Metodo encargado de limpiar el objeto state
+   * @param {String} horaFin Hora fin actual
+   */
+  limpiarState = (horaFin) => {
+    this.setState({
+      horaFin: '',
+      valorRango: '123',
+      unidadMedida: '',
+      porcentajeRango: '10',
+      idRangoSinRuta: null,
+      ultimaHora: horaFin ? horaFin : this.state.ultimaHora,
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  actualizarState = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    this.setState(cambio);
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux
+   * @param {Event} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    this.props.actualizarTipoCalculoContrato({
+      // canastaHorariaSuministro: { ...this.props.canastaSinRutas, ...cambio }
+      canastaHorariaSuministro: { ...this.props.canastaHorariaSuministro, ...cambio }
+    });
+  };
+
+  /**
+   * Método encargado de validar los campos del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { unidadMedida, valorRango, porcentajeRango, horaFin } = this.state;
+
+    if (horaFin === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una hora de fin para el rango.' } };
+    }
+
+    if (unidadMedida === '' || unidadMedida === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una unidad de medida.' } };
+    }
+
+    if (valorRango.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el valor.' } };
+    }
+
+    if (!validarNumero(porcentajeRango) || porcentajeRango > 100 || porcentajeRango &lt; 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar un porcentaje válido menor o igual 100%.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de mostrar la tabla de rangos sin ruta
+   * @return {JSX}
+   */
+  renderTablaRangosSinRuta = () => {
+    const { canastaHorariaSuministro } = this.props;
+    if (!canastaHorariaSuministro || !canastaHorariaSuministro.canastaSinRutas || !Util.validarArreglo(canastaHorariaSuministro.canastaSinRutas)) {
+      return null;
+    }
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th id='thRangoSinRuta'>Rango&lt;/th>
+            &lt;th id='thUniMedidaSinRuta'>Und. Medida&lt;/th>
+            &lt;th id='thValorSinRuta' className='text-right'>Valor&lt;/th>
+            &lt;th id='thPorcentajeSinRuta' className='text-right'>% Comercialización&lt;/th>
+            &lt;th id='thAccionesSinRuta' className='text-center'>Acciones&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            canastaHorariaSuministro.canastaSinRutas.map((rango, index) => {
+              return (
+                &lt;tr key={rango.idRangoSinRuta}>
+                  &lt;td headers='thRangoSinRuta'>{`${rango.rango.horaInicio} - ${rango.rango.horaFin}`}&lt;/td>
+                  &lt;td headers='thUniMedidaSinRuta'>{this.obtenerNombreUnidadMedida(rango.unidadMedida)}&lt;/td>
+                  &lt;td headers='thValorSinRuta' className='text-right'>{rango.valorRango}&lt;/td>
+                  &lt;td headers='thPorcentajeSinRuta' className='text-right'>{rango.porcentajeRango} %&lt;/td>
+                  &lt;td headers='thAccionesSinRuta' className='canasta-horaria__td-acciones'>
+                    &lt;button onClick={() => { this.editarRango(rango) }}>Editar&lt;/button>
+                    {
+                      index === canastaHorariaSuministro.canastaSinRutas.length - 1 &amp;&amp;
+                      &lt;button onClick={this.borrarUltimoRango}>Borrar&lt;/button>
+                    }
+                  &lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+        &lt;tfoot>
+          &lt;tr>
+            &lt;td colSpan={4} className='text-right'>
+              {this.obtenerPorcentajeTotal()}
+            &lt;/td>
+            &lt;td />
+          &lt;/tr>
+        &lt;/tfoot>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Metodo encargado de obtener el porcentale
+   * @returns {JSX}
+   */
+  obtenerPorcentajeTotal = () => {
+    const porcentaje = this.props.canastaHorariaSuministro.canastaSinRutas.reduce((c, r) => (c + parseFloat(r.porcentajeRango)), 0);
+    let estilo = porcentaje !== 100 ? 'red' : 'green';
+    return (&lt;span style={{ color: estilo }}>Porcentaje de Comercialización Total: {porcentaje}%&lt;/span>);
+  };
+
+  /**
+   * Método encargado de obtener el nombre de la unidad de medida
+   * @param {Number} codUnidad Codigo de la unidad de medida
+   */
+  obtenerNombreUnidadMedida = (codUnidad) => {
+    return this.props.listaUnidadesMedida.find(u => u.uniIderegistro == codUnidad).uniNombre1 || '';
+  };
+
+  /**
+   * Método encargado de eliminar el ultimo rango agregado
+   */
+  borrarUltimoRango = () => {
+    // TODO: Confirmar si desea borrar el rango
+    const { canastaHorariaSuministro } = this.props;
+    const rangos = canastaHorariaSuministro.canastaSinRutas.slice(0, canastaHorariaSuministro.canastaSinRutas.length - 1);
+
+    if (Util.validarArreglo(rangos)) {
+      const nuevaHoraFin = rangos[rangos.length - 1].rango.horaFin;
+      this.limpiarState(this.obtenerNuevaHoraFin(nuevaHoraFin));
+    } else {
+      this.limpiarState('00:00');
+    }
+    this.actualizarEstadoRedux({ canastaSinRutas: rangos });
+  };
+
+  /**
+   * Método encargado de editar el rango seleccionado
+   * @param {Object} rango Datos del rango
+   */
+  editarRango = (rango) => {
+    this.setState({
+      horaFin: rango.horaFin,
+      valorRango: rango.valorRango,
+      unidadMedida: rango.unidadMedida,
+      porcentajeRango: rango.porcentajeRango,
+      idRangoSinRuta: rango.idRangoSinRuta,
+    });
+  };
+
+  /**
+   * Método encargado de guardar el formulario sin ruta
+   * @returns {Boolean}
+   */
+  guardarRangoSinRuta = () => {
+    const { horaFin, valorRango, unidadMedida, nombreUnidadMedida, porcentajeRango, idRangoSinRuta, ultimaHora } = this.state;
+
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      const { titulo, mensaje } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+
+    const { canastaHorariaSuministro } = this.props;
+    let objetoEditar = { horaFin, valorRango, unidadMedida, nombreUnidadMedida, porcentajeRango, ultimaHora };
+
+    let rangos = [];
+
+    if (Util.validarArreglo(canastaHorariaSuministro.canastaSinRutas)) {
+      rangos = [...canastaHorariaSuministro.canastaSinRutas];
+    }
+
+    // Si existe idRangoSinRuta, se esta editando un rango
+    if (idRangoSinRuta) {
+      const index = rangos.findIndex(a => a.idRangoSinRuta === idRangoSinRuta);
+      rangos[index] = { ...rangos[index], ...objetoEditar };
+      this.limpiarState();
+    } else {
+
+      // Determina cuál es la hora de inicio del rango que se va a crear
+      const horaInicio = (ultimaHora !== '00:00')
+        ? this.convertirValorAHora(parseInt(ultimaHora) - 1).substring(0, 4) + '1'
+        : ultimaHora;
+
+      objetoEditar.rango = {
+        horaInicio: horaInicio,
+        horaFin: horaFin
+      };
+      rangos.push({ idRangoSinRuta: Util.generarIdControl('canastaSinRuta_'), ...objetoEditar });
+      this.limpiarState(this.obtenerNuevaHoraFin(horaFin));
+    }
+    let precioContrato = parseFloat(rangos[0].valorRango);
+    let valorPorcentaje = parseFloat(rangos[0].porcentajeRango);
+    this.props.actualizarCabeceraRedux({ precioContrato: precioContrato, precioCanasta: precioContrato, porcentajeComercializacion: valorPorcentaje });
+    this.actualizarEstadoRedux({ canastaSinRutas: rangos });
+  };
+
+  /**
+   * Método encargado de obtener una nueva hora fin
+   * @param {Number} horaFin Hora fin actual
+   */
+  obtenerNuevaHoraFin = (horaFin) => {
+    let nuevaHoraFin = horaFin === '23:59' ? 25 : parseInt(horaFin) + 1;
+    return nuevaHoraFin;
+  };
+
+  /**
+   * Método encargado de pasar el valor seleccionado a hora
+   * @param {String} valor Valor seleccionado
+   */
+  convertirValorAHora = (valor) => {
+    valor = parseInt(valor);
+    if (valor.toString().length === 1) {
+      return `0${valor}:00`;
+    }
+    return `${valor}:00`;
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    // TODO: Ajustar estilo de estos botones
+    let botones = (
+      &lt;div className="form-group col-2 m-t-24" >
+        &lt;button className='btn btn-primary' onClick={this.guardarRangoSinRuta}>&lt;i className='fa fa-fw fa-plus'>&lt;/i> Agregar&lt;/button>
+      &lt;/div>
+    );
+
+    if (this.state.idRangoSinRuta) {
+      botones = (
+        &lt;Fragment>
+          &lt;div className="form-group btn-group">
+            &lt;button className='btn btn-primary m-t-24' onClick={this.guardarRangoSinRuta}>Editar&lt;/button>
+            &lt;button className='btn btn-danger m-t-24' onClick={this.limpiarState}>Cancelar&lt;/button>
+          &lt;/div>
+        &lt;/Fragment>
+      );
+    }
+
+    let deshabilitarComboHoras = false;
+    if (this.state.idRangoSinRuta || this.state.ultimaHora > 24) {
+      deshabilitarComboHoras = true;
+    }
+    return (
+      &lt;div>
+        &lt;div className="row">
+          &lt;ComboHoras
+            valor={this.state.horaFin}
+            onChange={this.actualizarState}
+            disabled={deshabilitarComboHoras}
+            ultimaHora={this.state.ultimaHora}
+          />
+          &lt;Combo
+            cols={3}
+            opciones={this.props.listaUnidadesMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Und. Medida:'
+            name='unidadMedida'
+            value={this.state.unidadMedida}
+            onChange={this.actualizarState}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Valor:'
+            cols={2}
+            value={this.state.valorRango}
+            onChange={this.actualizarState}
+            name='valorRango'
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Porcentaje:'
+            cols={2}
+            value={this.state.porcentajeRango}
+            onChange={this.actualizarState}
+            name='porcentajeRango'
+          />
+          {botones}
+        &lt;/div>
+        {this.renderTablaRangosSinRuta()}
+      &lt;/div>
+    );
+  }
+
+}
+
+
+SuministroSinRuta.propTypes = {
+  listaUnidadesMedida: PropTypes.array,
+  canastaHorariaSuministro: PropTypes.object,
+  actualizarTipoCalculoContrato: PropTypes.func,
+  mostrarAlerta: PropTypes.func,
+  actualizarCabeceraRedux: PropTypes.func,
+};
+
+SuministroSinRuta.defaultProps = {
+  canastaHorariaSuministro: {}
+};
+
+export { SuministroSinRuta };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

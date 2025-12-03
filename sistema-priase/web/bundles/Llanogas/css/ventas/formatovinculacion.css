@@ -1,0 +1,89 @@
+body{
+    font-size: 10px;
+    font-family: sans-serif, verdana, tahoma;
+    color:#666;
+}
+p, label{
+	font-size: 10px;
+}
+table{
+    width: 100%;
+    border:solid 1px #408BC4;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+    font-size: 10px;
+    
+}
+
+table thead {
+	background-color: #305496 !important;
+    border-bottom: solid 1px #408BC4 !important;
+}
+table thead tr{
+    background-color:#6EA9D5;
+    color:#AAA;
+    height: 25px;
+}
+
+table tbody tr:nth-child(2n){
+    background-color: #D9F3FF !important;
+}
+
+table td, table th{
+    padding:5px;
+    border-right: solid 1px #AAA;
+}
+
+table thead tr th{
+    vertical-align: middle;
+}
+
+div#divCabecera{
+    text-align: center;
+}
+td.bbottom{
+	border-bottom: solid 1px #408BC4 !important;
+}
+td.btop{
+	border-top: solid 1px #408BC4 !important;
+}
+h4, h5{
+	border-bottom: 1px solid #305496;
+	padding: 15px 0px 5px 0px;
+	margin: 15px 0px 20px 0px;
+}
+.nextPage{ page-break-after: always;}
+/*@media print {
+	h5 {
+	    background-color: #305496 !important;
+	    -webkit-print-color-adjust: exact; 
+	}
+}*/
+
+table td.sinb{
+	border: none;
+}
+table.tblSinBordeb{
+	border: none;
+}
+
+.campo input[type="text"]{
+		
+        background-color: inherit;
+        border:none;
+        border-radius:0px;
+        border-bottom: solid 1px #999;
+    }
+
+div.campo{
+    display: inline-block;
+    width: 22%;
+    margin-right: 5px;
+}
+
+
+div.campo input[type="text"]{
+    width: 96%;
+}

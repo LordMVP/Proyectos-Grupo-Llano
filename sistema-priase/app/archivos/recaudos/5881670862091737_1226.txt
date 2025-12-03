@@ -1,0 +1,2 @@
+Id Transacción,id factura,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Digite el Numero de Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+4099322132,-,2022-12-04 12:38:44,18419,APROBADA,PSE,436733	BBVA,1802469731,3,felipe.lara@cl.luxottica.com,Luxottica of Colombia,186.30.63.142

@@ -1,0 +1,164 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Cambio de Medidor - Usuarios Rutas -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="NovedadLecturaController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Cambio de Medidor</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                 <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    
+                                </div>  
+                            </div>                                                             
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Importante: este archivo puede tomar tiempo en ser generado
+                                </div>  
+                            </div>
+                              
+                                <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar el reporte
+                                </button>
+                                </div>                               
+                            
+                                                       
+                            <div class="clearfix"></div>
+                        </div>
+                </div>                
+            </fieldset>
+            <fieldset>
+                <legend>Reporte Usuarios Rutas</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Municipio</label>
+                                        <select multiple="true" type="text" name="municipio" id="municipio" ng-model="info.municipio" class="form-control">
+                                            <option value="-1">Todos los municipios</option>
+                                            <option ng-repeat="item in municipios" ng-value="item.idmunicipio">{[{item.municipio}]}</option>                                            
+                                        </select>
+                                        
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        <label>Todas las rutas</label>
+                                        <select ng-model="todasRutas" class="form-control input-sm">
+                                            <option value="0">NO</option>
+                                            <option value="1">SI</option>                                            
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        <label>Suscripciones</label>
+                                        <select multiple="true" ng-model="info.estado" class="form-control">
+                                            <option value="ALL">Todos</option>
+                                            <option value="A">Activo</option>
+                                            <option value="B">Bloqueado</option>
+                                            <option value="E">Eliminado</option>
+                                            <option value="R">Remodelacion</option>
+                                            <option value="P">Pendiente</option>
+                                            <option value="U">Suspendido</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        <label>Buscar Rutas</label>
+                                        <button ng-click="download=true;buscarRutas()" class="form-control input-sm">
+                                            <i class="fa fa-search fa-1x"></i> Buscar 
+                                        </button>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-12" uib-collapse="todasRutas==1">
+                                    <div class="col-lg-6">
+                                        <label>Seleccion de rutas</label> &nbsp;
+                                        <table ng-table="ngTable" class="table table-condensed table-responsive">                                    
+                                            <tr ng-show="!$data || $data.length==0">
+                                                <td colspan="4">No hay resultados para mostrar</td>
+                                            </tr>
+                                            <tr ng-repeat="row in $data">
+                                                <td data-title="'Id ruta'">{[{row.ideruta}]}</td>
+                                                <td data-title="'Ruta'" >{[{row.nombre}]}</td>
+                                                <td data-title="'Opcion'" >
+                                                    <a ng-click="agregarRuta(row)">
+                                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Agregar
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table> 
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label>Rutas Seleccionadas</label> &nbsp;
+                                        <table ng-table="ngTable2" class="table table-condensed table-responsive">                                    
+                                            <tr ng-repeat="row in $data">
+                                                <td data-title="'Id Ruta'">{[{row.ideruta}]}</td>
+                                                <td data-title="'Ruta'" >{[{row.nombre}]}</td>
+                                                <td data-title="'Opcion'" >
+                                                    <a ng-click="removerRuta(row)">
+                                                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Remover
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="alert-box info">
+                                        Importante: este archivo puede tomar tiempo en ser generado
+                                    </div>  
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm" ng-click="generarReporte2()">
+                                        <i class="fa fa-file-excel-o fa-lg"></i>Generar Reporte Rutas
+                                    </button>
+                                </div>
+                                
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+     <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ui-bootstrap-tpls-1.3.2.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-animate.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/novedad.lectura.angular.js')}}"></script>
+{% endblock %}

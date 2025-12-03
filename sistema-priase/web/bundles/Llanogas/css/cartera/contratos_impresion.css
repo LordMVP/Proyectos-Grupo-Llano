@@ -1,0 +1,104 @@
+/**********Estilo para la tabla****************/
+@page {
+  margin: 2cm;
+}
+@page :first {
+  margin-top: 2cm;
+}
+#divTemplateContrato .primera, .primeradoble{ page-break-after: always;}
+body{
+    font-family: sans-serif, verdana, tahoma;
+    color:#666;
+}
+#contenido{
+    border: 0px;
+}
+table{
+    width: 100%;
+    border:solid 1px #408BC4;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+    font-size: 10px;
+    
+}
+table tr{
+    border: solid 1px #AAA;
+}
+
+table thead {
+    border-bottom: solid 1px #408BC4 !important;
+}
+table thead tr{
+    background-color:#6EA9D5;
+    color:#AAA;
+    height: 25px;
+}
+
+table tbody tr:nth-child(2n){
+    background-color: #D9F3FF !important;
+}
+
+table td, table th{
+    padding:5px;
+    border-right: solid 1px #AAA;
+}
+
+table thead tr th{
+    vertical-align: middle;
+}
+
+
+
+#divTemplateContrato{
+    padding:15px;
+}
+
+#divTemplateContrato h2{
+    color: #333;
+    text-align: center;
+}
+#divTemplateContrato .firma hr, .primera hr{
+    color: #000;
+}
+#divTemplateContrato .firma, .primera{
+    margin-top: 80px;
+    font-size: 14px;    
+    text-align: left;
+    width: 60%;
+}
+#divTemplateContrato .firmas{
+    float: left;
+    margin-right: 15px;
+    margin-top: 80px;
+    font-size: 14px;    
+    text-align: left;
+    width: 45%;
+}
+#divTemplateContrato p 
+{
+    text-align: justify;
+    font-size: 14px;
+}
+#divTemplateContrato #tblTipoUso{
+    margin: 10px auto !important;
+    width: 60%;
+    border-collapse :collapse;
+}
+#tblTipoUso, td, th{
+    border: 1px solid black;
+}
+#divTbl{
+    text-align: center;
+    margin:30px 0px;
+}
+
+#tblTipoUso tbody tr td:first-child{
+   text-align:left;
+   padding-left:10px;
+}
+
+.wb{
+   word-break: break-all;
+}

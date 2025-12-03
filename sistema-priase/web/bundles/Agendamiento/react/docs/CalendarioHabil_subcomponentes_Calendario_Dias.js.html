@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: CalendarioHabil/subcomponentes/Calendario/Dias.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: CalendarioHabil/subcomponentes/Calendario/Dias.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+/**
+ * Calcula la cantidad de días dependiendo el mes y sí el año es viciesto o no
+ * @method
+ * @param {int} mes - Corresponde al mes
+ * @param {int} año - Corresponde al año
+ * @returns {int} Corresponde a la cantidad de días a listar
+ */
+function listar(mes, año) {
+    function viciesto() {
+        return (año % 100 !== 0 &amp;&amp; año % 4 === 0) || año % 400 === 0
+    }
+
+    if (mes === -1) mes = 11
+
+    switch (mes) {
+        case 0:
+        case 2:
+        case 4:
+        case 6:
+        case 7:
+        case 9:
+        case 11:
+            return 31
+            break
+
+        case 3:
+        case 5:
+        case 8:
+        case 10:
+            return 30
+            break
+
+        default:
+            return viciesto() ? 29 : 28
+            break
+    }
+}
+/**
+ * Determina el día actual
+ * @method
+ * @param {int} mes - Corresponde al mes
+ * @param {int} año -Corresponde al año
+ * @returns {int} año - Corresponde al día actual
+ */
+function inicio(mes, año) {
+    const fecha = new Date(año, mes, 1)
+    return fecha.getDay() - 1 === -1 ? 6 : fecha.getDay() - 1
+}
+
+/**
+ * renderiza los componentes en la vista
+ * @param {int} dia
+ * @param {int} mes
+ * @param {int} año
+ * @param {int} lista
+ * @param {Object} props
+ * @returns {jsx} Componente - Calendario
+ */
+export default function({ dia, mes, año, lista, ...props }) {
+    const dias = []
+    const diario = listar(mes, año)
+
+    function comparativa(a, b = lista) {
+        function comparar(a, b) {
+            return a.map((c, d) => c === b[d]).reduce((c, d) => c &amp;&amp; d)
+        }
+
+        if (b === lista) {
+            for (const fecha of b) if (comparar(fecha, a)) return true
+        } else return comparar(a, b)
+    }
+
+    for (let activo = inicio(mes, año); activo > 0; activo--) {
+        dias.push(&lt;div className="dia pasado">&lt;/div>)
+    }
+
+    for (let activo = 1; activo &lt;= diario; activo++) {
+        const className = comparativa([activo, mes, año])
+            ? activo === dia
+                ? 'dia activo habil'
+                : 'dia habil'
+            : activo === dia
+            ? 'dia activo'
+            : 'dia'
+
+        dias.push(
+            &lt;div className={className} onClick={(e) => props.onClick(activo)}>
+                {activo}
+            &lt;/div>
+        )
+    }
+
+    return &lt;div className="dias">{dias}&lt;/div>
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+#fieldsetHistorial{
+    display:none;
+}
+
+
+.contenedorFormaPago{
+    
+    margin: 10px 15px 10px 0px;
+    border:solid 1px #408BC4;
+    
+    
+}
+
+.cabeceraForma{
+    display: table;
+    width: 100%;
+    height: 22px;
+    background-color: #6EA9D5;
+    color:#FFF;
+    font-weight: bold;
+}
+
+.cabeceraForma .title,
+.cabeceraForma .commands{
+    display: table-cell;
+    padding: 3px 10px;
+}
+
+.cabeceraForma .title{
+    width: 80%
+}
+
+.cabeceraForma .commands{
+    width: 20%;
+    text-align: right;        
+}
+
+
+.divCabecera .campo-consignacion{
+    width: 50% !important;
+}
+
+
+.divCabecera {
+        width: 100%;
+        display: table;
+    }
+    div.divIzquierda,
+    div.divDerecha{
+        display: table-cell;
+        border:solid 5px #FFF;
+    }
+
+    div.divIzquierda{
+        width: 60%;
+        margin-right: 5px;
+    }
+
+    div.divDerecha{
+        width: 30%;
+    }
+    
+    #divOpciones .campo, #camposBuscarSuscripcion .campo{
+        
+        width: 23%;
+    }
+
+
+#divBotonesFooterUpload .btnSimple, 
+#divArchivos div.archivoSubido .btnSimple
+{
+    width: 35px !important;
+    height: 23px !important;
+    min-width: 30px !important;
+}
+
+
+#archivoAdjunto{
+    width: 97%;
+    margin-top: 5px;
+}
+
+.btn-file {
+    display: inline-block;
+    font-size: 13px;
+    color: #408BC4;
+    vertical-align: sub;
+    margin-left: 10px;
+}
+
+    .btn-file:hover{
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+
+a.kv-fileinput-upload.fileinput-upload-button {
+    font-size: 13px;
+    color: #408BC4;
+    text-decoration: none;
+}
+
+.clearfix{
+    clear: both;
+}
+
+
+.file-preview {
+    width: 97% !important;
+}
+
+#divArchivos i{
+    padding: 8px;
+}
+
+#divArchivos{
+    display: block;
+    padding:10px;
+    margin-top: 10px;
+}
+
+
+    #divArchivos div.archivoSubido{
+        height: 30px;
+        border-bottom: solid 1px #DEDEDE;
+        padding: 3px 10px 4px 5px;
+    }
+
+        #divArchivos div.archivoSubido i.fa-file-pdf-o{
+            margin-right: 5px;
+        }
+
+        #divArchivos div.archivoSubido a{
+            text-decoration: none;
+            color: #408BC4;
+            font-size: 13px;
+            margin-right: 10px;
+        }
+
+            #divArchivos div.archivoSubido a:hover{
+                text-decoration: underline;
+            }
+
+

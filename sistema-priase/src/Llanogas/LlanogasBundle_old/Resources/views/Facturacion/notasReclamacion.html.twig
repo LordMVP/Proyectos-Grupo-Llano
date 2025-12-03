@@ -1,0 +1,234 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <style>
+        .tipoAplicacion{
+            display: inline-block;
+            width: 40%;
+            border-right: solid 1px #408BC4;
+        }
+
+        .tipoNota{
+            display: inline-block;
+            width: 40%;
+        }
+        .noclose .ui-dialog-titlebar-close
+        {
+            display:none;
+        }
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            border-radius: 20px;
+            padding-left: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+
+        .link-archivo{
+            font-weight: bold;
+            color:#09F;
+            margin: 0px 5px 0px 10px;
+            text-decoration: none;
+            position: relative;
+            top:5px;
+        }
+
+    </style>
+
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+{% block titulo %}Facturación: Notas en Reclamación - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="procesar" id="btnProcesar" class="btn" />
+            <input type="button" value="aplicar notas" id="btnAplicarNotas" class="btn"/>
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPestanias">
+
+        <ul>         
+            <li id="liSuscripcion">
+                <a data-tipo="S" href="#divSuscripcion">Suscripción única</a>
+            </li>
+        </ul>  
+        <div id="divSuscripcion">
+            <fieldset>
+                <legend>Suscripción</legend>
+
+                <div class="campoBusqueda">
+                    <label for="btnBuscarSuscripcion">Suscripción:</label>
+                    <input type="text" id="txtSuscripcion" disabled="disabled" />
+                    <button id="btnBuscarSuscripcion"></button>
+                </div>
+
+                <div class="campo">
+                    <label for="txtDocumento">NIT/CC:</label>
+                    <input type="text" id="txtDocumento" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtNombre">Nombre Completo:</label>
+                    <input type="text" id="txtNombre" disabled>
+                </div>
+
+                <div class="campoCorto">
+                    <label for="txtCodAnterior">Código Anterior:</label>
+                    <input type="text" id="txtCodAnterior" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtSuscMunicipo">Municipo:</label>
+                    <input type="text" id="txtSuscMunicipo" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtSuscBarrio">Barrio:</label>
+                    <input type="text" id="txtSuscBarrio" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtDireccion">Dirección:</label>
+                    <input type="text" id="txtDireccion" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtTelefono">Teléfono:</label>
+                    <input type="text" id="txtTelefono" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtCelular">Celular:</label>
+                    <input type="text" id="txtCelular" disabled>
+                </div>
+
+                <div class="campo">
+                    <label for="txtSuscTipoUso">Tipo de Uso:</label>
+                    <input type="text" id="txtSuscTipoUso" disabled>
+                </div>
+                <button class="btnSimple" id="btnBuscarNotasSuscripcion">Buscar Notas</button>
+            </fieldset>
+        </div>
+    </div>
+    <div id="divFacturas">
+        <button class="btnSimple" id="btnAgregarFiltroAdicional">Agregar filtro adicional</button>
+
+        <table id="tblFacturas" class="tabla"></table>
+    </div>
+    
+      <!-- Division para los valores que se aplicaran a la nota -->
+    <div id="divValores">
+        <fieldset>
+            <legend>Conceptos que se Aplicaran</legend>
+             <div>
+                <table id="tblValores" class="tabla"></table>
+            </div>
+        </fieldset>
+    </div>
+      
+    <div id="divDetalleFactura">
+        <div style="max-height:300px; overflow-y: auto;">
+            <table id="tblConceptos" class="tabla"></table>
+        </div>
+    </div>
+
+    <!-- Division para filtro de buscar suscripcion -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div>
+            <div class="campo">
+                <label for="txtFiltroMunicipo">Municipo:</label>
+                <input type="text" id="txtFiltroMunicipo" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroSus">Suscripción:</label>
+                <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroDoc">NIT/CC:</label>
+                <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+            </div>
+        </div>
+        <div>
+            <div class="campo">
+                <label for="txtFiltroCodAnt">Código Anterior:</label>
+                <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+            </div>
+            <div class="campo">
+                <label for="txtIdPropiedad">Id Propiedad:</label>
+                <input type="text" id="txtIdPropiedad" />
+            </div>
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <button id="btnBuscar" class="btnSimple">Buscar</button>
+    </div>
+    
+    <!-- Division para filtro de buscas suscripcion -->
+    
+    <!-- Division para filtro AdicionalFacturas -->
+    
+    <div id="divFiltroAdicionalFacturas" style="display:none;">
+        <div>
+
+            <div class="campoMitad">
+                <label for="cmbFiltroConceptos">Concepto:</label>
+                <select id="cmbFiltroConceptos"></select>
+            </div>
+            <div class="campo">
+                <button class="btnSimple" id="btnAgregarFiltro">Agregar</button>
+            </div>
+        </div>
+        <div id="divListaFiltrosFacturas" style="margin-top: 7px;">
+            <table class="tabla" id="tblFiltros"></table>
+        </div>
+        <span class="pMensaje" id="spanFiltroFactura"></span>
+    </div>
+
+    <div id="divDialogoConceptos" style="display:none;">
+        <table class="tabla" id="tblConceptosProcesados"></table>
+    </div>
+
+
+    <div id="divDialogoMotivos" style="display:none;">
+        <div class="campoCompleto">
+            <label for="cmbMotivo">Mótivo:</label>
+            <select id="cmbMotivo"></select>
+        </div>
+        <div class="campoCompleto">
+            <label for="txtComentario">Comentarios:</label>
+            <textarea name="" id="txtComentarios"></textarea>
+        </div>
+    </div>
+
+    <div id="divDialogoErrores" style="display:none">
+        <table class="tabla" id="tblErrores"></table>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/jquery.dataTables.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.tableTool.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasreclamacion/notasreclamacion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasreclamacion/notasreclamacion.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasreclamacion/notasreclamacion.vista.js')}}"></script>
+{% endblock %}

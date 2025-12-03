@@ -1,0 +1,26 @@
+.autocompletado {
+    position: relative; 
+
+    ul { margin: 0 !important; }
+
+    &__contenedor.activo {
+        width: 100%;
+        max-height: 12.5em;
+        border: solid 1px #CCC;
+        background: #FFF;
+        border-radius: .2em;
+        position: absolute;
+        top: calc(100% + 1em);
+        z-index: 100;
+        overflow-y: scroll;
+        z-index: 10;
+    }
+
+    &__sugerencia {
+        height: 2.5em;
+        padding: .6em .8em;
+        cursor: pointer;
+
+        &:hover, &.activo { background: #FBFBFB; }
+    }
+}

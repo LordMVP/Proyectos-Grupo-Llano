@@ -1,0 +1,436 @@
+<?php
+
+/* LlanogasLlanogasBundle:Facturacion:contabilizarConcepto.html.twig */
+class __TwigTemplate_436dcd78f2eb6e21a8f8271c7bfa9c94335287862ca261a6b4eee76a34de8b51 extends Twig_Template
+{
+    public function __construct(Twig_Environment $env)
+    {
+        parent::__construct($env);
+
+        $this->parent = $this->env->loadTemplate("::base.html.twig");
+
+        $this->blocks = array(
+            'stylesheets' => array($this, 'block_stylesheets'),
+            'scripts' => array($this, 'block_scripts'),
+            'titulo' => array($this, 'block_titulo'),
+            'body' => array($this, 'block_body'),
+            'javascripts' => array($this, 'block_javascripts'),
+        );
+    }
+
+    protected function doGetParent(array $context)
+    {
+        return "::base.html.twig";
+    }
+
+    protected function doDisplay(array $context, array $blocks = array())
+    {
+        $this->parent->display($context, array_merge($this->blocks, $blocks));
+    }
+
+    // line 2
+    public function block_stylesheets($context, array $blocks = array())
+    {
+        // line 3
+        echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"";
+        echo twig_escape_filter($this->env, $this->env->getExtension('assets')->getAssetUrl("bundles/Llanogas/css/theme/jquery.ui.all.css"), "html", null, true);
+        echo "\" />
+<style>
+    .campoMitad select
+    {
+        width:95%;
+    }
+    .divContenedorColapsable{
+        margin-bottom: 15px;
+    }
+    .combo{
+        margin-bottom: 10px;   
+    }
+</style>
+";
+    }
+
+    // line 18
+    public function block_scripts($context, array $blocks = array())
+    {
+    }
+
+    // line 20
+    public function block_titulo($context, array $blocks = array())
+    {
+        echo "Contabilización de conceptos- ";
+        echo twig_escape_filter($this->env, (isset($context["empresa"]) ? $context["empresa"] : $this->getContext($context, "empresa")), "html", null, true);
+        echo "  ";
+    }
+
+    // line 22
+    public function block_body($context, array $blocks = array())
+    {
+        // line 23
+        echo "
+<div id=\"divComandos\">
+    <div class=\"divBotones\" style=\"margin-bottom:15px;\">
+        <button id=\"btnGrabar\" class=\"btn\">grabar</button>
+        <button id=\"btnCancelar\" class=\"btn\">cancelar</button>
+    </div>
+</div>
+<div id=\"divCabecera\">
+    <fieldset>
+        <legend>Configuración </legend>
+
+        <div class=\"campo\">
+            <h3>Empresa</h3>
+            <div class=\"campoMitad\">
+                <label><input type=\"radio\" id=\"rbtnPrincipal\" name=\"empresa\" checked=\"checked\" />Principal</label>
+                <label><input type=\"radio\" id=\"rbtnConvenio\" name=\"empresa\" />Convenio</label>
+                <span id=\"spanEmpresa\"></span>
+            </div>
+            <div class=\"campoMitad\">
+                <select id=\"cmbEmpresa\" disabled=\"disabled\"></select>
+            </div>
+        </div>
+        <div class=\"campo\">
+            <label for=\"cmbDocumento\">Documento: </label>
+            <select id=\"cmbDocumento\"></select>
+        </div>
+        <div class=\"campo\">
+            <label for=\"cmbTipoDocumento\">Tipo Documento: </label>
+            <select id=\"cmbTipoDocumento\"></select>
+        </div>
+    </fieldset>
+</div>
+
+
+
+        <div id=\"divPenstanias\" style=\"display:none;\">
+            <ul>
+                <li><a href=\"#divCausacion\" id=\"aCausacion\" active>Causación contable</a></li>
+                <li><a href=\"#divRecaudo\" id=\"aRecaudo\">Recaudo</a></li>
+                <li><a href=\"#divConsignacion\" id=\"aConsignacion\">Consignación</a></li>
+                <!--<li><a href=\"#divPresupuesto\" id=\"aPresupuesto\">Presupuesto</a></li>-->
+            </ul>
+            <div id=\"divCausacion\">
+                <div id=\"divConcepto\">
+                    <fieldset>
+                        <legend>Concepto</legend>
+                        <div class=\"campo\">
+                            <label for=\"txtNombreConcepto\">Nombre concepto: </label>
+                            <input type=\"text\" id=\"txtNombreConcepto\"/>
+                        </div>
+                        <div class=\"campo\">
+                            <label for=\"txtAlias\">Alias: </label>
+                            <input type=\"text\" id=\"txtAlias\" disabled=\"disabled\" />
+                        </div>
+                        <div class=\"campo\">
+                            <label for=\"txtAbreviatura\">Abreviatura: </label>
+                            <input type=\"text\" id=\"txtAbreviatura\" disabled=\"disabled\"/>
+                        </div>
+                    </fieldset>
+                </div>
+                <div id=\"divContenedorCausion\" style=\"display:none;\">
+                    <div class=\"divContenedorColapsable\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Contabilización</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divFormularioCausacion\">
+                                <div class=\"campo\">
+                                    <label for=\"txtCuenta\">Nombre Cuenta: </label>
+                                    <input type=\"text\" id=\"txtCuenta\" data-accion=\"CZ\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtCodigo\">Cuenta: </label>
+                                    <input type=\"text\" id=\"txtCodigo\" data-accion=\"CZ\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentaje\">Porcentaje: </label>
+                                    <input type=\"text\" id=\"txtPorcentaje\" class=\"porcentaje\" value=\"100\"/>
+                                </div>
+
+                                <div class=\"campo\">
+                                    <label for=\"cmbNaturaleza\">Naturaleza: </label>
+                                    <select id=\"cmbNaturaleza\">
+                                        <option value=\"-1\">Seleccione una opción</option>
+                                        <option value=\"C\" selected>Crédito</option>
+                                        <option value=\"D\">Dédito</option>
+                                    </select>
+                                </div>
+                                
+                                <button id=\"btnAgregarContabilizacion\" class=\"btnSimple\" data-indice=\"N\">Agregar contabilización</button>
+                                <button id=\"btnCancelarContabilizacion\" class=\"btnSimple\">Cancelar contabilización</button>
+
+                                <span class=\"pMensaje\" id=\"spanContabilizacion\"></span>
+                            </div>
+                            <table class=\"tabla\" id=\"tblContabilizacion\"></table>
+                        </div>
+                    </div>
+
+                    <div class=\"divContenedorColapsable\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Área de negocio</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divFormularioArea\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbTipoSuscripcion\">Tipo Suscripción: </label>
+                                    <select id=\"cmbTipoSuscripcion\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtAreaNegocio\">Área de negocio: </label>
+                                    <input type=\"text\" id=\"txtAreaNegocio\" data-accion=\"AN\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtCodigoArea\">Código de área: </label>
+                                    <input type=\"text\" id=\"txtCodigoArea\" data-accion=\"AN\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeArea\">Porcentaje: </label>
+                                    <input type=\"text\" id=\"txtPorcentajeArea\" class=\"porcentaje\" />
+                                </div>
+                                <button id=\"btnAgregarArea\" class=\"btnSimple\" data-indice=\"N\">Agregar área de negocio</button>
+                                <button id=\"btnCancelarArea\" class=\"btnSimple\">Cancelar área de negocio</button>
+                                <span class=\"pMensaje\" id=\"spanAreaNegocio\"></span>
+                            </div>
+                            <table class=\"tabla\" id=\"tblAreas\"></table>
+                        </div>
+                    </div>
+
+                    <div class=\"divContenedorColapsable\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Centro de costos</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divFormularioCentroCosto\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbDepartamentoCC\">Proceso: </label>
+                                    <select id=\"cmbDepartamentoCC\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtCentroCosto\">Nombre Centro de Costo: </label>
+                                    <input type=\"text\" id=\"txtCentroCosto\" data-accion=\"CC\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtCodCentroCosto\">Código Centro de Costo: </label>
+                                    <input type=\"text\" id=\"txtCodCentroCosto\" data-accion=\"CC\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeCCosto\">Porcentaje: </label>
+                                    <input type=\"text\" id=\"txtPorcentajeCCosto\" class=\"porcentaje\" />
+                                </div>
+                                <button id=\"btnAgregarCentroCostos\" class=\"btnSimple\" data-indice=\"N\">Agregar centro de costos</button>
+                                <button id=\"btnCancelarCentroCostos\" class=\"btnSimple\">Cancelar centro de costos</button>
+                                <span class=\"pMensaje\" id=\"spanCentroCosto\"></span>
+                            </div>
+                            <table class=\"tabla\" id=\"tblCentro\"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id=\"divRecaudo\">
+                <div id=\"divConceptoRecaudos\">
+                    <div class=\"campo\">
+                        <label for=\"cmbMedioPago\">Medio de pago:</label>
+                        <select id=\"cmbMedioPago\" class=\"combo\"></select>
+                    </div>
+                </div>
+                <div id=\"divContenedorRecaudo\" style=\"display:none;\">
+                    <div class=\"divContenedorColapsable\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Conceptos Flujo</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divFormularioConceptoFlujo\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConceptoFlujo\"> Concepto: </label>
+                                    <select id=\"cmbConceptoFlujo\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label> Tipo: </label>
+                                    <input type=\"text\" value=\"No aplica\" disabled=\"disabled\" class=\"noclear\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeFlujo\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeFlujo\"/>
+                                </div>
+                                <button id=\"btnAgregarConceptoFlujo\" class=\"btnSimple\">Agregar Concepto Flujo</button>
+                                <span class=\"pMensaje\" id=\"spanConceptoFlujo\"></span>
+                            </div>
+                            <table id=\"tblConceptoFlujo\" class=\"tabla\"></table>
+                        </div>
+                    </div>
+                    <div class=\"divContenedorColapsable\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Concepto Contable</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divFormularioConceptoContable\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConceptoContable\"> Concepto: </label>
+                                    <select id=\"cmbConceptoContable\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label> Tipo: </label>
+                                    <input type=\"text\" value=\"No aplica\" disabled=\"disabled\" class=\"noclear\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeContable\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeContable\"/>
+                                </div>
+                                <button id=\"btnAgregarConceptoContable\" class=\"btnSimple\">Agregar Concepto Contable</button>
+                                <span class=\"pMensaje\" id=\"spanConceptoContable\"></span>
+                            </div>
+                            <table id=\"tblConceptoContable\" class=\"tabla\"></table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div id=\"divConsignacion\">
+                <div class=\"campo\">
+                    <label for=\"cmbMedioPagoCsg\">Medio de pago:</label>
+                    <select id=\"cmbMedioPagoCsg\" class=\"combo\"></select>
+                </div>
+                <div >
+                    <div class=\"divContenedorColapsable\" id=\"divConsignacionDiferencia\" style=\"display: none;\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Diferencia en la consignación</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divDiferenciaConceptoFlujo\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConsignacionFlujo\"> Concepto: </label>
+                                    <select id=\"cmbConsignacionFlujo\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"cmbTipoDiferencia\"> Tipo: </label>
+                                    <select id=\"cmbTipoDiferencia\">
+                                        <option value=\"-1\"> Seleccione una opción</option>
+                                        <option value=\"F\">Faltante</option>
+                                        <option value=\"S\">Sobrante</option>
+                                        <option value=\"G\">Gasto</option>
+                                    </select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeConsignacionFlujo\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeConsignacionFlujo\"/>
+                                </div>
+                                <button id=\"btnAgregarDiferenciaFlujo\" class=\"btnSimple\">Agregar Concepto Flujo</button>
+                                <span class=\"pMensaje\" id=\"spanConsignacionFlujo\"></span>
+                            </div>
+                            <table id=\"tblDiferenciaFlujo\" class=\"tabla\"></table>
+                            <hr>
+
+                            <div id=\"divDiferenciaConceptoContable\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConsignacionContable\"> Concepto: </label>
+                                    <select id=\"cmbConsignacionContable\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"cmbTipoDiferenciaContable\"> Tipo: </label>
+                                    <select id=\"cmbTipoDiferenciaContable\">
+                                        <option value=\"-1\"> Seleccione una opción</option>
+                                        <option value=\"F\">Faltante</option>
+                                        <option value=\"S\">Sobrante</option>
+                                        <option value=\"G\">Gasto</option>
+                                    </select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeConsignacionContable\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeConsignacionContable\"/>
+                                </div>
+                                <button id=\"btnAgregarDiferenciaContable\" class=\"btnSimple\">Agregar Concepto Contable</button>
+                                <span class=\"pMensaje\" id=\"spanConsignacionContable\"></span>
+                            </div>
+                            <table id=\"tblDiferenciaContable\" class=\"tabla\"></table>
+                        </div>
+                    </div>
+                    <div class=\"divContenedorColapsable\" id=\"divConsignacionConsginacion\" style=\"display: none;\">
+                        <div class=\"divColapsable\">
+                            <h3 class=\"tituloColapsable\">Consignación</h3>
+                            <div class=\"btnColapsable\"><a href=\"\" class=\"fa fa-minus\"></a></div>
+                        </div>
+                        <div class=\"contenidoColapsable\">
+                            <div id=\"divConsignacionConceptoFlujo\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConsignacionFlujo\"> Concepto: </label>
+                                    <select id=\"cmbConsignacionFlujo\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label> Tipo: </label>
+                                    <input type=\"text\" value=\"No aplica\" disabled=\"disabled\" class=\"noclear\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeConsignacionFlujo\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeConsignacionFlujo\"/>
+                                </div>
+                                <button id=\"btnAgregarConsignacionFlujo\" class=\"btnSimple\">Agregar Concepto Flujo</button>
+                                <span class=\"pMensaje\" id=\"spanConsignacionFlujo\"></span>
+                            </div>
+                            <table id=\"tblConsignacionFlujo\" class=\"tabla\"></table>
+                            <hr>
+
+                            <div id=\"divConsignacionConceptoContable\">
+                                <div class=\"campo\">
+                                    <label for=\"cmbConsignacionContable\"> Concepto: </label>
+                                    <select id=\"cmbConsignacionContable\"></select>
+                                </div>
+                                <div class=\"campo\">
+                                    <label> Tipo: </label>
+                                    <input type=\"text\" value=\"No aplica\" disabled=\"disabled\" class=\"noclear\"/>
+                                </div>
+                                <div class=\"campo\">
+                                    <label for=\"txtPorcentajeConsignacionContable\"> Porcentaje: </label>
+                                    <input type=\"text\" value=\"100\" class=\"porcentaje\" id=\"txtPorcentajeConsignacionContable\"/>
+                                </div>
+                                <button id=\"btnAgregarConsignacionContable\" class=\"btnSimple\">Agregar Concepto Contable</button>
+                                <span class=\"pMensaje\" id=\"spanConsignacionContable\"></span>
+                            </div>
+                            <table id=\"tblConsignacionContable\" class=\"tabla\"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+";
+    }
+
+    // line 356
+    public function block_javascripts($context, array $blocks = array())
+    {
+        // line 357
+        echo "<script type=\"text/javascript\" src=\"";
+        echo twig_escape_filter($this->env, $this->env->getExtension('assets')->getAssetUrl("bundles/Llanogas/js/facturacion/contabilizarConcepto/contabilizarConcepto.modelo.js"), "html", null, true);
+        echo "\"></script>
+<script type=\"text/javascript\" src=\"";
+        // line 358
+        echo twig_escape_filter($this->env, $this->env->getExtension('assets')->getAssetUrl("bundles/Llanogas/js/facturacion/contabilizarConcepto/contabilizarConcepto.control.js"), "html", null, true);
+        echo "\"></script>
+<script type=\"text/javascript\" src=\"";
+        // line 359
+        echo twig_escape_filter($this->env, $this->env->getExtension('assets')->getAssetUrl("bundles/Llanogas/js/facturacion/contabilizarConcepto/contabilizarConcepto.vista.js"), "html", null, true);
+        echo "\"></script>
+";
+    }
+
+    public function getTemplateName()
+    {
+        return "LlanogasLlanogasBundle:Facturacion:contabilizarConcepto.html.twig";
+    }
+
+    public function isTraitable()
+    {
+        return false;
+    }
+
+    public function getDebugInfo()
+    {
+        return array (  417 => 359,  413 => 358,  408 => 357,  405 => 356,  70 => 23,  67 => 22,  59 => 20,  54 => 18,  35 => 3,  32 => 2,);
+    }
+}

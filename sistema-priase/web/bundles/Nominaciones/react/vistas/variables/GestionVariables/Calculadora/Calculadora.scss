@@ -1,0 +1,52 @@
+.calculadora {
+  display: flex;
+  flex-direction: column;
+
+  &__formula{
+    border: solid 1px #DEDEDE;
+    min-height: 100px;
+    width: 100%;
+    padding: 5px;
+  }
+
+  &__controles {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    &__separador {
+      width: 33.33%;
+      padding: 0 10px;
+    }
+    
+    &__operadores {
+      border-right: solid 1px #DEDEDE;
+    }
+
+    &__variables {
+      border-right: solid 1px #DEDEDE;
+    }
+
+    &__funciones {
+
+    }
+
+  }
+
+  &__botonera {
+    margin: 0 10px 5px 0;
+
+
+    .btn {
+      height: 30px;
+      line-height: 0px;
+      font-weight: bold;
+      width: 40px;
+      text-align: center;
+      padding: 0px;
+    }
+  }
+
+
+
+}

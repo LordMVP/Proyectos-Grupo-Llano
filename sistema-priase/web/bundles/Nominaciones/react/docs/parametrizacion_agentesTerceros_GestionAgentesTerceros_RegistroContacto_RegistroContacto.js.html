@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/agentesTerceros/GestionAgentesTerceros/RegistroContacto/RegistroContacto.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/agentesTerceros/GestionAgentesTerceros/RegistroContacto/RegistroContacto.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+
+import { Input, Combo, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios'; RUTAS_API
+import RUTAS_API from '../../../../../global/rutas_api';
+import { CONFIGURACIONES } from '../../../../../global/constantes';
+import { RConsultaContactosTercero } from './ConsultaContactosTercero';
+
+const opcionesUsuarioConAcceso = [
+  { texto: "Sí", valor: "S" },
+  { texto: "No", valor: "N" }
+];
+
+class RegistroContacto extends Component {
+
+  constructor(props) {
+    super(props);
+    if (props.contacto) {
+      this.state = { ...props.contacto };
+      return;
+    }
+
+    this.state = {
+      terIderegistro: null,
+      mostrarModalConsulta: false,
+      visibilidadComponenteUsuarioAcceso: 'hidden',
+      visibilidadBtnAgregarContacto: true,
+
+      accion: 'I',
+      cambiosEjecutados: false,
+      idRegistro: 0,
+      nombreContacto: '',
+      identificacionContacto: '',
+      tipoIdentificionContacto: '',
+      tipoContacto: -1,
+      telefonoContacto: '',
+      direccionContacto: '',
+      emailContacto: '',
+      usuarioConAcceso: 'N',
+      usuarioAcceso: '',
+      claveAcceso: '',
+      tipoContactoNombre: '',
+      claveAccesoConfirmar: '',
+      estado: 'NM',
+    };
+  }
+
+  /**
+   * Método encargado de controlar los cambios hechos en el componente padre
+   * @param {Object} props Propiedades del componente padre
+   * @param {Object} current_state State
+   */
+  static getDerivedStateFromProps(props, current_state) {
+    if (props.contacto &amp;&amp; (props.contacto.terIderegistro !== current_state.terIderegistro)) {
+      return { ...props.contacto };
+    }
+    return null;
+  }
+
+  /**
+   * Método encargado de controlar el cambio en los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    change.cambiosEjecutados = true;
+    if (evento.target.name === 'usuarioAcceso' || evento.target.name === 'claveAcceso') {
+      if (this.state.accion === 'N') {
+        change['accion'] = 'M';
+      }
+    }
+    if (evento.target.name === 'tipoContacto') {
+      change['tipoContactoNombre'] = evento.target.text;
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de validar el formulario contacto
+   * @returns {Object}
+   */
+  validarContacto = () => {
+    const { identificacionContacto, tipoContacto, usuarioConAcceso, usuarioAcceso, claveAcceso, claveAccesoConfirmar } = this.state;
+    if (identificacionContacto.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Seleccione un contacto', mensaje: 'Debe seleccionar un contacto.' } };
+    }
+    if (tipoContacto === -1 || tipoContacto == '' || tipoContacto === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el tipo de contacto.' } };
+    }
+
+    if (usuarioConAcceso === 'S') {
+      if (usuarioAcceso.trim() === '' || usuarioAcceso.length &lt; 3) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar un usuario de acceso de tres o más caracteres.' } };
+      }
+      if (this.props.contacto != null) {
+        if (this.props.contacto.usuarioAcceso == '') {
+          if ((claveAcceso.trim() === '' || claveAcceso.length &lt; 3) &amp;&amp; this.state.cambiosEjecutados == true) {
+            return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar una clave de acceso de tres o más caracteres.' } };
+          }
+          if ((claveAcceso !== claveAccesoConfirmar) &amp;&amp; this.state.cambiosEjecutados) {
+            return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Las claves no coinciden, verifique e intente nuevamente.' } };
+          }
+        }
+      }
+      if ((claveAcceso.trim() === '' || claveAcceso.length &lt; 3) &amp;&amp; this.state.cambiosEjecutados == true) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar una clave de acceso de tres o más caracteres.' } };
+      }
+      if ((claveAcceso !== claveAccesoConfirmar) &amp;&amp; this.state.cambiosEjecutados) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Las claves no coinciden, verifique e intente nuevamente.' } };
+      }
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de agregar un contacto al tercero seleccionado
+   * @returns {Boolean}
+   */
+  agregarContacto = () => {
+    const validacion = this.validarContacto();
+    if (!validacion.respuesta) {
+      const { mensaje, titulo } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+    let contacto = null;
+    if (this.state.accion === 'N') {
+      contacto = { ...this.state };
+    } else {
+      contacto = { idContacto: Util.generarIdControl('contacto'), accion: 'I', ...this.state };
+    }
+    this.props.agregarContacto(contacto);
+    this.limpiarContacto();
+  };
+
+  /**
+   * Método encargado de confirmar la edición a un contacto
+   * @returns {Boolean}
+   */
+  confirmarCambios = () => {
+    const validacion = this.validarContacto();
+    if (!validacion.respuesta) {
+      const { mensaje, titulo } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+    const accion = (this.state.accion === 'N') ? 'M' : this.state.accion;
+    this.props.confirmarCambios({ accion: accion, ...this.state, ...validacion });
+    this.limpiarContacto();
+  };
+
+  /**
+   * Método encargado de descartar los cambios hechos a un contacto
+   */
+  descartarCambios = () => {
+    this.limpiarContacto();
+    this.props.descartarCambios();
+  };
+
+  /**
+   * Método encargado de mostrar el modal de contacto
+   */
+  mostrarModalConsultaContacto = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de limpiar los datos del contacto del tercero
+   */
+  limpiarContacto = () => {
+    this.setState({
+      terIderegistro: null,
+      mostrarModalConsulta: false,
+      visibilidadBtnAgregarContacto: true,
+
+      accion: 'I',
+      idRegistro: 0,
+      nombreContacto: '',
+      identificacionContacto: '',
+      tipoIdentificionContacto: '',
+      tipoContacto: '',
+      telefonoContacto: '',
+      direccionContacto: '',
+      emailContacto: '',
+      usuarioConAcceso: 'N',
+      usuarioAcceso: '',
+      claveAcceso: '',
+      claveAccesoConfirmar: '',
+      tipoContactoNombre: '',
+    });
+  };
+
+  /**
+   * Método encargado de cerrar el modal de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({ mostrarModalConsulta: false });
+  };
+
+  /**
+   * Método encargado de cargar los datos de la entidad seleccionada
+   * @param {Object} entidad Datos de la entidad seleccionada
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      // Cargar datos de la entidad
+      terIderegistro: entidad.terIderegistro,
+      nombreContacto: entidad.terNomcompleto,
+      idContacto: entidad.terIderegistro,
+      identificacionContacto: entidad.terDocumento,
+      telefonoContacto: entidad.terTelfijo,
+      emailContacto: entidad.terCorreo,
+      accion: "I",
+    });
+    this.props.controlarVisibilidadFormulario(true);
+  };
+
+  /**
+   * Método encargado de renderizar todo los elementos HTML del componente
+   * @param {JSX}
+   */
+  render() {
+    return (
+      &lt;div>
+        &lt;div className='mt-5'>
+          &lt;div className="form-group">
+            &lt;div className="text-left">
+              &lt;button className="btn btn-primary" onClick={this.mostrarModalConsultaContacto}>Buscar contacto&lt;/button>
+            &lt;/div>
+            &lt;hr />
+          &lt;/div>
+          {this.props.visibilidadFormulario &amp;&amp;
+            &lt;div className='row'>
+              &lt;Fragment>
+                &lt;Input
+                  label='Nombre (*):'
+                  value={this.state.nombreContacto}
+                  onChange={this.controlarCambio}
+                  name='nombreContacto'
+                  disabled={true}
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Identificación (*):'
+                  value={this.state.identificacionContacto}
+                  onChange={this.controlarCambio}
+                  name='identificacionContacto'
+                  disabled={true}
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Teléfono (*):'
+                  value={this.state.telefonoContacto}
+                  onChange={this.controlarCambio}
+                  name='telefonoContacto'
+                  disabled={true}
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Dirección:'
+                  value={this.state.direccionContacto}
+                  onChange={this.controlarCambio}
+                  name='direccionContacto'
+                  disabled={true}
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Correo:'
+                  value={this.state.emailContacto}
+                  onChange={this.controlarCambio}
+                  name='emailContacto'
+                  disabled={true}
+                  extra={{ disabled: true }}
+                />
+                &lt;Combo
+                  opciones={this.props.tiposContacto}
+                  propTexto='uniNombre1'
+                  propValor='uniIderegistro'
+                  label='Tipo contacto (*):'
+                  name='tipoContacto'
+                  value={this.state.tipoContacto}
+                  onChange={this.controlarCambio}
+                />
+                &lt;Combo
+                  opciones={opcionesUsuarioConAcceso}
+                  propTexto='texto'
+                  propValor='valor'
+                  label='Usuario con acceso:'
+                  name='usuarioConAcceso'
+                  value={this.state.usuarioConAcceso}
+                  onChange={this.controlarCambio}
+                />
+              &lt;/Fragment>
+              {
+                this.state.usuarioConAcceso === 'S' &amp;&amp;
+                &lt;Fragment>
+                  &lt;Input
+                    label='Usuario:'
+                    value={this.state.usuarioAcceso}
+                    onChange={this.controlarCambio}
+                    name='usuarioAcceso'
+                  />
+
+                  &lt;Input
+                    label='Clave:'
+                    type='password'
+                    value={this.state.claveAcceso}
+                    onChange={this.controlarCambio}
+                    name='claveAcceso'
+                  />
+
+                  &lt;Input
+                    label='Confirmar Clave:'
+                    type='password'
+                    value={this.state.claveAccesoConfirmar}
+                    onChange={this.controlarCambio}
+                    name='claveAccesoConfirmar'
+                  />
+                &lt;/Fragment>
+              }
+              &lt;div className="form-group col-12">
+                &lt;hr />
+                &lt;div className="text-right">
+                  {this.state.visibilidadBtnAgregarContacto &amp;&amp;
+                    &lt;button className='btn btn-primary mr-2' onClick={this.agregarContacto} >Agregar contacto&lt;/button>}
+
+                  {!this.state.visibilidadBtnAgregarContacto &amp;&amp;
+                    &lt;button className='btn btn-primary mr-2' onClick={this.confirmarCambios} >Confirmar cambios&lt;/button>
+                  }
+                  &lt;button className="btn btn-default" onClick={this.descartarCambios}>Cancelar&lt;/button>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          }
+
+
+        &lt;/div>
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta de contactos'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaContactosTercero esModal seleccionarEntidad={this.cargarDatos} mostrarAlerta={this.props.mostrarAlerta} />
+        &lt;/VentanaModal>
+      &lt;/div>
+    );
+  };
+}
+
+RegistroContacto.propTypes = {
+  contacto: PropTypes.object,
+  agregarContacto: PropTypes.func,
+  confirmarCambios: PropTypes.func,
+  descartarCambios: PropTypes.func,
+  mostrarAlerta: PropTypes.func,
+  tiposContacto: PropTypes.array,
+  visibilidadFormulario: PropTypes.bool,
+  controlarVisibilidadFormulario: PropTypes.func,
+}
+
+export { RegistroContacto };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

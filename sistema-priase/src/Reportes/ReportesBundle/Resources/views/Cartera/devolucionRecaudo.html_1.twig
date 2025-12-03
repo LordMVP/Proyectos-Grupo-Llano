@@ -1,0 +1,139 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+
+{% block titulo %}Recaudos: Consultas - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="devolucionesController">
+        <div id="divComandos">
+            <div class="divBotones">
+                <input type="button" ng-click="buscarDevolucion()" value="buscar" id="btnBuscar" class="btn" />
+                <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+                <input type="button" ng-click="imprimirDevolucion()" value="Imprimir" id="btnImprimir" class="btn ocultar" />
+            </div>
+        </div>
+        <div id="divPanelContenedor">
+            <fieldset id="fieldCabecera">
+                <legend>Informacion del recaudo</legend>
+                <div class="col-md-2 form-group">
+                    <label for="txtIdRecaudo">ID del Recaudo:</label>
+                    <input ng-model="recaudoSeleccionado.info.idrecaudo" type="text" id="txtIdRecaudo" disabled="disabled" class="form-control input-sm" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="txtFecha">Fecha:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.fecha" type="text" id="txtFecha" disabled="disabled" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="txtDocumento">NIT/CC:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.idtercero" type="text" id="txtDocumento" disabled="disabled" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="txtNombreTercero">Nombre del Tercero:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.nombre" type="text" id="txtNombreTercero" disabled="disabled" />
+                </div>
+                <div class="col-md-5 form-group">
+                    <label for="txtConvenio">Convenio:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.convenio" type="text" id="txtConvenio" disabled="disabled" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="txtValorPagado">Valor Pagado:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.valorpagado" type="text" id="txtValorPagado" disabled="disabled" />
+                </div>
+                <div class="col-md-2 form-group">
+                    <label for="txtCambio">Cambio:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.valorcambio" type="text" id="txtCambio" disabled="disabled" />
+                </div>
+                <div class="col-md-2 form-group">
+                    <label for="txtAjuste">Ajuste:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.valorajuste" type="text" id="txtAjuste" disabled="disabled" />
+                </div>
+                <div class="col-md-5 form-group">
+                    <label for="txtClasePago">Clase Pago:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.documento" type="text" id="txtClasePago" disabled="disabled" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label for="txtMedioPago">Medio de Pago:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.mediopago" type="text" id="txtMedioPago" disabled="disabled" />
+                </div>                
+                <div class="col-md-4 form-group">
+                    <label for="txtSucursal">Sucursal:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.sucursal" type="text" id="txtSucursal" disabled="disabled" />
+                </div>
+                <div class="col-md-5 form-group">
+                    <label for="txtCifrado">Cifrado:</label>
+                    <input class="form-control input-sm" ng-model="recaudoSeleccionado.info.cifrado" type="text" id="txtCifrado" disabled="disabled" />
+                </div>
+            </fieldset>
+        </div>
+        <div id="divBuscar" style="display: none;">
+            <form name="formBuscar" novalidate id="formBuscarDevoluciones">
+                <div class="col-md-12 form-group" show-errors>                        
+                    <label for="campoBusquedadValor">Id de suscripcion o codigo anterior</label>
+                    <input ng-pattern="/^\-?\d+$/" class="form-control input-sm" required="true" type="text" name="valorBusquedad" id="valorBusquedad" ng-model="datosBusquedad.valorBusquedad" />
+                    <p class="help-block" ng-if="formBuscar.valorBusquedad.$error.pattern">
+                        El dato debe ser numerico
+                    </p>
+                    <p class="help-block" ng-if="formBuscar.valorBusquedad.$error.required">
+                        El codigo de la suscripcion o codigo anterior es requerido.
+                    </p>
+                </div>
+                <div class="col-md-6 form-group" show-errors>
+                    <label for="txtFechaInicio">Fecha de Inicio:</label>
+                    <input class="form-control datepicker input-sm" required="true" name="fechaInicio" type="text" id="fechaInicio" ng-model="datosBusquedad.fechaInicio" />
+                    <p class="help-block" ng-if="formBuscar.fechaInicio.$error.required">
+                        La fecha de inicio es requerida.
+                    </p>
+                </div>
+                <div class="col-md-6 form-group" show-errors>
+                    <label for="txtFechaFin">Fecha de Fin:</label>
+                    <input class="form-control datepicker input-sm" required="true" name="fechaFinal" type="text" id="fechaFinal" ng-model="datosBusquedad.fechaFinal"/>
+                    <p class="help-block" ng-if="formBuscar.fechaFinal.$error.required">
+                        La fecha de final es requerida.
+                    </p>
+                </div>
+                <div id="messages" class="col-md-12 form-group"></div>
+                <hr/>
+                <div class="col-md-12">
+                    <h4>Recaudos encontrados</h4>
+                    <table id="recaudosTable" class="table table-condensed">
+                        <thead>
+                            <tr>                                
+                                <th>Id</th>
+                                <th>Fecha</th>
+                                <th>Documento</th>
+                                <th>Valor</th>
+                                <th>Municipio</th>
+                                <th>Opcion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="recaudo in recaudos">
+                                <td>{[{ recaudo.idrecaudo}]}</td>
+                                <td>{[{ recaudo.fecha }]}</td>
+                                <td>{[{ recaudo.documento }]}</td>
+                                <td>{[{ recaudo.valor }]}</td>
+                                <td>{[{ recaudo.proyecto_nom }]}</td>
+                                <td>
+                                    <a ng-click="cargarRecaudo(recaudo.idrecaudo)">
+                                        <i class="fa fa-arrow-down "></i> Cargar
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}    
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/devolucion.control.angular.js')}}"></script>
+{% endblock %}

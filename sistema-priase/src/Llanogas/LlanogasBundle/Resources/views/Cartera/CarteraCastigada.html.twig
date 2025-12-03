@@ -1,0 +1,52 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta_impresion.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Proceso de provisión y castigo {% endblock %}
+
+{% block body %}
+    <fieldset>
+        <legend>Información del proceso </legend>
+        <div id="divControles">
+            <div class="campoMitad"  >
+                <label>Ciclo: </label>
+                <select id="cboCiclo">
+                    <option value="-1"> Seleccione una opción</option>
+                    {% for ciclo in ciclos %}
+                        <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="button" value="Castigar y Procesar" id="btnProcesarCartera" class="btnSimple">
+        </div>
+        <div>
+            <h3 id="h3InformacionProceso"></h3>
+        </div>
+        <div id="divCargando" style="margin-bottom: 25px; display:none;"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Provisionando y castigando información, <br>esto puede tardar unos minutos...</p>        		
+        </div>
+        <table id="tblProgreso" class="tabla" style="margin-top:20px;"></table>
+    </fieldset>
+    <div id="divError" style="display:none;">
+        <p class="pMensaje" id="pMensajeError"></p>
+        <table class="tabla" id="tblSuscripciones"></table>
+    </div>
+
+    <div id="divConfirmarProcesar" style="display:none;">
+        <p>Se iniciará el proceso de castigo ¿Desea iniciar el proceso?</p>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigada/carteraCastigada.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigada/carteraCastigada.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/carteraCastigada/carteraCastigada.vista.js')}}"></script>
+{% endblock %}

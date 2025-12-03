@@ -1,0 +1,433 @@
+/****** ESTILOS PARA LOS CONTROLES DE USUARIO DE TODAS LAS PAGINAS ******/
+input[type="text"],
+input[type="number"],
+input[type="password"]{
+    padding-left: 5px;
+    height: 24px;
+}
+
+div.campoCorto{
+    display: inline-block;
+    margin-right: 15px;
+    width: 100px;
+}
+
+.campoCorto input{
+    width: 104px;
+    padding-left: 3px !important;
+    
+}
+
+
+textarea{
+    max-width: 98%;
+    max-height: 100px;
+    min-width: 95%;
+    min-height: 50px;
+    padding: 3px 5px 5px 4px;
+    font-family: inherit;
+    font-size: 1.2em;
+}
+
+.limpiar{
+    clear:both;
+    opacity: 0;
+}
+
+label{
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 7px;
+    font-size: 1.1em;
+
+}
+
+div.campo{
+    display: inline-block;
+    width: 31%;
+    margin-right: 1%;
+}
+
+
+div.campo input[type="text"],
+div.campo select,
+div.campoCorto select{
+    width: 96%;
+}
+
+div.campo .campoCorto{
+    width:45% !important;
+}
+
+div.campoBusqueda{
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+div.campoBusqueda input[type="text"]{
+    width:70%;
+    display: table-cell;
+    margin-top: 0px;
+    border-radius: 5px 0px 0px 5px;
+    border:solid 1px #999;
+    border-right: none;
+    height: 26px;
+    border-collapse:collapse;
+    border-spacing: 0px;
+}
+
+div.campoBusqueda button{
+    width:20%;
+    vertical-align: top;
+    display: table-cell;
+    height: 30px;
+    background-size: 100% 100%;
+    border: none;
+    background-image: url('img/buscar_filtroBtn.fw.png');
+    background-repeat: no-repeat;
+    border-radius: 0px 10px 10px 0px;
+    left: -5px;
+    position: relative;
+}
+
+    div.campoBusqueda button:hover{
+        cursor: pointer;
+    }
+
+div#divComandos{
+    padding:0px;
+    text-align: center;
+}
+
+div.divBotones{
+    margin-right: 20px;
+    display: inline-block;
+}
+
+div.divBotones .btn{
+    background-image: url('img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    color:#FFF;
+    float:left;
+}
+
+
+.btn:disabled, 
+.btnSimple:disabled,
+.tblBtn:disabled{
+    color:#666 !important;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#dddad9+50,aaaaaa+51,bfbfbf+51,b2b2b2+100 */
+    background: #dddad9; /* Old browsers */
+    background: -moz-linear-gradient(top, #dddad9 50%, #aaaaaa 51%, #bfbfbf 51%, #b2b2b2 100%) !important; /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(50%,#dddad9), color-stop(51%,#aaaaaa), color-stop(51%,#bfbfbf), color-stop(100%,#b2b2b2)) !important; /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* IE10+ */
+    background: linear-gradient(to bottom, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dddad9', endColorstr='#b2b2b2',GradientType=0 ) !important; /* IE6-9 */
+}
+
+.btnSimple, .tblBtn{
+    background-image: url('img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    margin-top:5px;
+    color:#FFF;
+    border-radius: 10px;
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.tblBtn{
+    height: 22px !important;
+}
+
+div.divBotones .btn:hover,
+.btnSimple:hover, .tblBtn:hover{
+    cursor:pointer;
+    background-image: url('img/bgBotonesHover.jpg');
+}
+
+div.divBotones .btn:first-child{
+    border-radius: 10px 0px 0px 10px;
+}
+
+div.divBotones .btn:last-of-type{
+    border-radius: 0px 10px 10px 0px;
+}
+
+.pMensaje{
+    font-weight: bold;
+    margin-bottom: 15px;
+    color:#F90;
+    display: block;
+    margin-top: 10px;
+}
+
+select{
+    height: 30px;
+    width: 100%;
+}
+
+/**********Estilo para la tabla****************/
+
+fieldset .tabla{
+    width: 97%;
+}
+
+.tabla{
+    width: 100%;
+    border:solid 1px #408BC4;
+    border-collapse: collapse;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+}
+
+    .tabla tbody tr:hover{
+        background-color: rgba(165, 191, 232, 0.6) !important;
+        color: #09F;
+    }
+
+    .tabla tr.selected{
+        font-weight: bold;
+        background-color:rgba(117,161,232,0.6) !important;
+        border-bottom: solid 1px #001687;
+        color:#FFF;
+    }
+
+    .tabla thead tr{
+        background-color:#408BC4;
+        background-image: url('img/bgBotones.jpg');
+        background-repeat: repeat-x;
+        
+        color:#FFF;
+        height: 30px;
+    }
+
+    .tabla caption{
+            color:#408BC4;
+            font-size: 1.6em;
+            margin-bottom: 5px;
+            margin-top: 10px;
+    }
+
+    .tabla tbody tr:nth-child(2n){
+        background-color: #D9F3FF;
+    }
+
+    .tabla td{
+        padding:5px; 
+        border-right: solid 1px #408BC4;
+    }
+    
+    .tabla td label{
+        display: inline;
+    }
+    
+    .tabla thead tr th{
+        vertical-align: middle;
+    }
+    
+    .tabla thead tr th[data-sort="asc"],
+    .tabla thead tr th[data-sort="desc"]{
+            text-decoration: underline;
+    }
+
+    .tabla thead tr th[data-sort="asc"]:hover,
+    .tabla thead tr th[data-sort="desc"]:hover{
+            cursor: pointer;
+    }
+        
+    .tabla td label{
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .tabla td.td-currency{
+        text-align: right;
+    }
+
+/***********************/
+.campoValido{
+    box-shadow: 0px 0px 3px #46c82e;
+    border: solid 1px #999;
+}
+
+.campoInvalido{
+    box-shadow: 0px 0px 5px #F90;
+    border:solid 1px #7A0000;
+}
+
+div.toast{
+    position:fixed;
+    top:10px;
+    right:20px;
+    padding:10px;
+    border:solid 1px #ec4f12;
+    background-color:#fa3838;
+    color:#FFF;
+    border-radius:10px;
+    display:none;
+    min-height:50px;
+    min-width:50px;
+    max-width: 300px;
+    text-align:left;
+    z-index:9999999;
+}
+
+    div.toast p{
+        font-size: 13px;
+    }
+    
+.campoMitad{
+    width: 45%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+    .campoMitad input[type="text"],
+    .campoMitad input[type="number"]
+    {
+        width:95%;
+    }
+
+
+.campoRadio fieldset label{
+    display: inline !important;
+}
+
+
+.divContenedorColapsable{
+
+}
+    .divColapsable{
+        background-image: url('img/bgBotones.jpg');
+        height: 25px;
+        padding: 3px 6px 3px 5px;
+        margin:0px 0px;
+    }
+
+        .divColapsable:hover{
+            cursor: pointer;
+        }
+    
+    .divColapsable .tituloColapsable{
+        width: 90%;
+        margin: 0px;
+        font-weight: bold;
+        display: inline-block;
+        font-size: 13px;
+        color: #FFF;
+        padding-top: 3px;
+    }
+
+    .divColapsable .btnColapsable{
+        display: inline-block;
+        text-align: right;
+        color: #FFF;
+        width: 9%;
+    }
+
+        .divColapsable .btnColapsable a{
+            text-decoration: none;
+            color: #FFF !important;
+            font-weight: bold;
+        }
+
+    .contenidoColapsable{
+        border:solid 1px #408BC4;
+        padding: 10px;
+    }
+    
+    
+.ui-widget {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: inherit !important;
+}
+
+ul.ui-autocomplete{
+    max-height: 200px;
+    overflow: auto;
+    box-shadow: #72aad3 0px 3px 10px 1px;
+    width: 248px;
+    background-color: rgb(255, 255, 255);
+}
+
+
+/****SOBREESCRITURA DE LOS ESTILOS DE FILEINPUT ******/
+.file-preview-text{
+    word-wrap: break-word;
+}
+
+
+    .close.fileinput-remove{
+        font-size: 2em;
+    }
+
+    .close.fileinput-remove:hover{
+        cursor: pointer;
+    }
+
+
+
+
+    .file-preview-frame {
+        display: inline-block;
+        width: 16% !important;
+        margin: 11px;
+        height: 160px;
+        border: 1px solid #ddd;
+        box-shadow: 1px 1px 5px 0 #a2958a;
+        max-height: 160px !important;
+        min-height: 160px !important;
+    }
+
+        .file-preview-frame object{
+            width: 90% !important;
+            height: 100px;
+        }
+
+        .file-caption-name{
+            width: 90% !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow:ellipsis;
+        }
+
+        div.divBotones {
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+    .file-caption .file-caption-name .kv-caption-icon{
+        margin-right: 5px;
+    }
+
+    .kv-fileinput-error.file-error-message{
+        margin-top: 4px;
+    }
+
+        .kv-fileinput-error.file-error-message ul li{
+            list-style: none;
+        }
+
+
+.kv-fileinput-error.file-error-message{
+    max-width: 90%;
+}

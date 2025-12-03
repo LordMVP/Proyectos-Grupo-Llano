@@ -1,0 +1,124 @@
+<!--TEMPLATE PARA CONSTRUIR UNA FÓRMULA -->
+<script id="tplConstructorFormula" type="text/template">
+    <div id="divConstructor" style="display:none">
+    <fieldset>
+        <legend>Constructor de fórmula</legend>
+        <div id="divAgregarConcepto{{rango}}">
+            <table id="tblAgregarConcepto{{rango}}" class="tabla"></table>
+        </div>
+        <div class="divCabecera" id="divFormula{{rango}}">
+            <div class="divIzquierda">
+                <fieldset>
+                    <legend>Fórmula </legend>
+                    <p id="pFormula{{rango}}"> </p>
+                    <div>
+                        <label for="cmbConceptos">Conceptos a relacionar</label>
+                        <div id="botonesConcepto{{rango}}"></div>
+                    </div>
+
+                </fieldset>
+            </div>
+            <div class="divDerecha">
+                <fieldset>
+                    <legend>Panel de operaciones</legend>
+                    <div id="botonesOperaciones{{rango}}">
+                        <button class="btnSimple">+</button>
+                        <button class="btnSimple">-</button>
+                        <button class="btnSimple">*</button>
+                        <button class="btnSimple">/</button>
+                        <div id="parentesis{{rango}}">
+                            <button class="btnSimple">(</button>
+                            <button class="btnSimple">)</button>
+                        </div>
+                        <button class="btnSimple" id="btnCE{{rango}}"><strong>CE</strong></button>
+                    </div>
+                    <div class="campoBusqueda" id="divCampoBusqueda{{rango}}">
+                        <label for="txtValorNumerico{{rango}}">Valor númerico</label>
+                        <input type="text" id="txtValorNumerico{{rango}}" />
+                        <button id="btnAgregaValor{{rango}}"><i class="fa fa-plus"></i></button>
+                    </div><br>
+                    <div id="divFunciones{{rango}}" class="campo">
+                        <label for="cmbFunciones">Funciones</label>
+                        <select id="cmbFunciones{{rango}}">
+                            <option value="-1">Seleccione...</option>
+                            {% for funcion in funciones %}
+                            <option value="{{funcion.idfuncion}}">{{funcion.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <div id="divParametros{{rango}}">
+                            <div id="divParametrosConceptos"></div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+
+        </div>
+</div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div id="divFormaPago{{numero}}" class="contenedorFormaPago">
+            <div class="cabeceraForma">
+                <div class="title" id="title{{numero}}">
+                    <h3>Forma pago {{numero}}: <span></span></h3>
+                </div>
+                <div class="commands">
+                    <button class="btn" id="btnMinimizar{{numero}}"><i class="fa fa-minus"></i></button>
+                    <button class="btn" id="btnCerrar{{numero}}"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+
+            <div class="divCabecera" id="contenido{{numero}}">
+                <div class="divIzquierda" style="width: 35%;">
+                    <div class="campo campo-consignacion">
+                        <label>Forma de pago: </label>
+                        <select id="cmbFormaPago{{numero}}">
+                            <option value="75">Efectivo</option>
+                            <option value="78">Cheque</option>
+                        </select>
+                    </div>
+                    <div id="divValorFormaPago{{numero}}" class="campoBusqueda">
+                        <label>Valor: </label>
+                        <input type="text" id="txtValorFormaPago{{numero}}"/>
+                        <button id="btnAgregar{{numero}}"></button>
+                    </div>
+                    <div>
+                        <button id="btnAgregarBanco{{numero}}" class="btnSimple">Agregar banco</button>
+                    </div>
+                </div>
+
+                <div class="divDerecha">
+                    <table id="tblBancos{{numero}}" class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Banco</th>
+                                <th>Tipo cuenta</th>
+                                <th>Cuenta</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    
+    
+    
+    
+   
+</script>

@@ -1,0 +1,18 @@
+input:not(.inputImpresion) {
+    display:none;
+}
+
+.inputImpresion{
+    background-color: inherit;
+    border:none;
+    border-bottom: solid 1px #999;
+}
+.inputImpresion,
+    .campoCorto input[type="text"],
+    .campo input[type="text"],
+    .campoBusqueda input[type="text"]{
+        background-color: inherit;
+        border:none;
+        border-radius:0px;
+        border-bottom: solid 1px #999;
+    }

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ConsultaPeriodos/subcomponentes/Gestion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ConsultaPeriodos/subcomponentes/Gestion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import { Combo, Input, VentanaDialogo } from 'appfuture-react';
+
+import Peticion from '../../../global/peticion';
+import Util from '../../../global/util';
+import API from '../../../global/rutas_api';
+
+/**
+ *
+ *
+ * @class Gestion
+ * @extends {Component}
+ */
+class Gestion extends Component {
+	/**
+     *Define estados iniciales
+     * @memberof Gestion
+     */
+    state = {
+        dialogoModal: false,
+
+        // defecto
+
+        liquidacionJson: [
+            { valor: 'LN', texto: 'LN' },
+            { valor: 'LS', texto: 'LS' }
+        ],
+
+        liquidacion: '',
+
+        periodo: '',
+        fechaInicial: '',
+        fechaFinal: '',
+
+        estado: 0,
+        estadoJson: [
+            { texto: 'Activo', valor: 1 },
+            { texto: 'Inactivo', valor: 0 }
+        ]
+    }
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+    BotonGuardar = () => {
+        const { dialogoModal, ...estado } = this.state
+
+        /* prettier-ignore */
+
+        return Util.validarObjeto(estado)
+            ? &lt;button className="btn" onClick={this.handleDialogo}>guardar&lt;/button>
+            : &lt;button className="btn" disabled={true}>guardar&lt;/button>
+    }
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+    async componentDidMount() {
+        const { id } = this.props.value
+
+        if (id) {
+            let datos = await Peticion.post({
+                url: API.CONSULTA_PERIODOS.CONSULTAR_PERIODO_POR_ID,
+                parametros: {
+                    ppeIderegistro: id
+                }
+            })
+
+            if (!datos.ppeIderegistro) return // no hay datos
+
+            this.setState({
+                periodo: datos.ppeDescripcion,
+                liquidacion: datos.ppeTipo,
+                estado: parseInt(datos.ppeEstado),
+                fechaInicial: datos.ppeMinvalue,
+                fechaFinal: datos.ppeMaxvalue,
+            })
+        }
+    }
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+    change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+    /**
+     *
+     * Cancela gestión y actualiza al componente padre
+     * @method
+     */
+    cancelar = () => this.props.onChange(null)
+
+    /**
+     *
+     * Crea gestión y actualiza al componente padre
+     * @method
+     */
+    crear = () => {
+        Peticion.post({
+            url: API.CONSULTA_PERIODOS.REGISTRAR_PERIODO,
+            parametros: {
+                ppeMinvalue: this.state.fechaInicial,
+                ppeMaxvalue: this.state.fechaFinal,
+                ppeDescripcion: this.state.periodo,
+                ppeTipo: this.state.liquidacion,
+                ppeEstado: this.state.estado
+            }
+        })
+
+        // final
+
+        this.cancelar()
+    }
+
+
+    /**
+     *
+     * Despliega modal
+     * @method
+     */
+    handleDialogo = () => this.setState({ dialogoModal: !this.state.dialogoModal })
+
+	/**
+	 *
+	 * Permite guardar las actividades asociadas a los municipios
+	 * @method
+	 * 
+	 */
+    guardar = () => {
+        const { id } = this.props.value
+
+        if (!id) { this.crear() }
+
+        else {
+            Peticion.post({
+                url: API.CONSULTA_PERIODOS.ACTUALIZAR_PERIODO,
+                parametros: {
+                    ppeIderegistro: id,
+                    ppeMinvalue: this.state.fechaInicial,
+                    ppeMaxvalue: this.state.fechaFinal,
+                    ppeDescripcion: this.state.periodo,
+                    ppeTipo: this.state.liquidacion,
+                    ppeEstado: this.state.estado
+                }
+            })
+
+            this.cancelar()
+        }
+    }
+
+    botones = [
+        { texto: 'guardar', callback: this.guardar },
+        { texto: 'cancelar', callback: this.handleDialogo }
+    ]
+
+    /**
+ *Renderiza la vista 
+ * @return {JSX} componente - returna vista jsx 
+ */
+    render() {
+        return (
+            &lt;React.Fragment>
+                &lt;VentanaDialogo
+                    titulo="Confirmación"
+                    texto="¿Confirma transacción?"
+                    mostrar={this.state.dialogoModal}
+                    botones={this.botones}
+                />
+
+                &lt;h1>Parametrizacion rangos de fecha vigente&lt;/h1>
+
+                &lt;div className="contenedor d-flex justify-content-center btn-group">
+                    &lt;this.BotonGuardar />
+                    &lt;button className="btn" onClick={this.cancelar}>cancelar&lt;/button>
+                &lt;/div>
+
+                &lt;div className="contenedor formulario">
+                    &lt;Input
+                        id="periodo"
+                        label="periodo"
+                        value={this.state.periodo}
+                        onChange={this.change} />
+
+                    &lt;Combo
+                        id="liquidacion"
+                        label="liquidacion"
+                        value={this.state.liquidacion}
+                        opciones={this.state.liquidacionJson}
+                        onChange={this.change} />
+
+                    &lt;Input
+                        type="date"
+                        id="fechaInicial"
+                        label="fecha inicial"
+                        value={this.state.fechaInicial}
+                        onChange={this.change} />
+
+                    &lt;Input
+                        type="date"
+                        id="fechaFinal"
+                        label="fecha final"
+                        value={this.state.fechaFinal}
+                        onChange={this.change} />
+
+                    &lt;Combo
+                        id="estado"
+                        label="estado"
+                        value={this.state.estado}
+                        opciones={this.state.estadoJson}
+                        onChange={this.change} />
+                &lt;/div>
+            &lt;/React.Fragment>
+        );
+    }
+}
+
+export default Gestion;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

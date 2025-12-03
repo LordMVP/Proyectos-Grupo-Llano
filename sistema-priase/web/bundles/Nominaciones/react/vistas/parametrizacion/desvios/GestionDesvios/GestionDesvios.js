@@ -1,0 +1,899 @@
+import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Botonera, Combo, VentanaModal, Util, TextoNumerico, Input } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { RConsultaTramosDesvios } from '../ConsultaTramosDesvios';
+import { RConsultaContratosDesvios } from '../ConsultaContratosDesvios';
+import { RConsultaPuntosSalidaDesvios } from '../ConsultaPuntosSalidaDesvios';
+import { RConsultaPuntosSalidaDestino } from '../ConsultaPuntosSalidaDestino';
+import { RConsultaDesvios } from '../ConsultaDesvios';
+import { formatearArray, TIPOS_UNIDADES_MEDIDA } from '../../../../global/util_nominaciones';
+import './GestionDesvios.scss';
+
+const listaTipo = [
+  { nombre: 'Interno', id: 'I' },
+  { nombre: 'Transportador', id: 'T' }
+];
+
+class GestionDesvios extends Component {
+  state = {
+    // Datos de la entidad
+    idDesvio: '',
+    tramosSeleccionados: [],
+    listaIdTramo: [],
+    listaPuntosConsumoInicial: [],
+    listaPuntosConsumoFinal: [],
+    listaRutas: [],
+    listaUnidadMedida: [],
+    rutaDesvio: '',
+    puntoConsumoI: '',
+    nombreDesvio: '',
+    puntoConsumoF: '',
+    tipo: '',
+    capacidadDesvio: '',
+    unidadMedida: '',
+    contrato: {
+      nombre: '',
+      id: '',
+      idEditar: '',
+    },
+    puntoSalidaOrigen: {
+      nombre: '',
+      id: '',
+    },
+    puntoSalidaDestino: {
+      nombre: '',
+      id: '',
+      idEditar: '',
+    },
+    // Estado de la aplicacion
+    mostrarModalTramos: false,
+    mostrarModalPuntosSalidaGeneral: false,
+    mostrarModalPuntosSalida: false,
+    mostrarModalContratos: false,
+    mostrarModalDesvios: false,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history && this.props.history.location;
+    if (state && state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_RUTA, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', 'categoria': TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+    ];
+
+    axios.all(peticiones)
+      .then(axios.spread((rutas, unidadMedida) => {
+        const datosAplicacion = {
+          listaRutas: [],
+          listaUnidadMedida: [],
+        };
+        if (rutas.data.codigo > 0) {
+          datosAplicacion.listaRutas = formatearArray(rutas.data.datos);
+        }
+        if (unidadMedida.data.codigo > 0) {
+          datosAplicacion.listaUnidadMedida = formatearArray(unidadMedida.data.datos);
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      idDesvio: '',
+      tramosSeleccionados: [],
+      listaIdTramo: [],
+      listaPuntosConsumoInicial: [],
+      listaPuntosConsumoFinal: [],
+      rutaDesvio: '',
+      puntoConsumoI: '',
+      puntoConsumoF: '',
+      tipo: '',
+      capacidadDesvio: '',
+      unidadMedida: '',
+      nombreDesvio: '',
+      contrato: {
+        nombre: '',
+        id: '',
+        idEditar: '',
+      },
+      puntoSalidaOrigen: {
+        nombre: '',
+        id: '',
+      },
+      puntoSalidaDestino: {
+        nombre: '',
+        id: '',
+        idEditar: '',
+      },
+      // Estado de la aplicacion
+      mostrarModalTramos: false,
+      mostrarModalPuntosSalidaGeneral: false,
+      mostrarModalPuntosSalida: false,
+      mostrarModalContratos: false,
+      mostrarModalDesvios: false,
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario,
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del botón de consulta
+   */
+  consultarEntidad = () => {
+    this.setState({
+      mostrarModalDesvios: true,
+    });
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario,
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    //Variables
+    const { tipo,
+      rutaDesvio,
+      tramosSeleccionados,
+      contrato,
+      puntoSalidaDestino,
+      puntoSalidaOrigen,
+      puntoConsumoI, puntoConsumoF,
+      capacidadDesvio, unidadMedida,
+      nombreDesvio } = this.state;
+
+    //Validaciones
+    if (nombreDesvio.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el nombre del desvio.' } };
+    }
+
+    if (tipo === '' || tipo === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo.' } };
+    }
+
+    if (capacidadDesvio === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar la capacidad del desvío.' } };
+    }
+
+    if (isNaN(capacidadDesvio)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La capacidad del desvío debe ser un valor númerico.' } };
+    }
+
+    if (unidadMedida <= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la unidad de medida.' } };
+    }
+
+    if (rutaDesvio === '' || rutaDesvio === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una ruta.' } };
+    }
+
+    if (contrato.id === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un contrato.' } };
+    }
+
+    if (puntoSalidaOrigen.id === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de salida origen.' } };
+    }
+
+    if (puntoSalidaDestino.id === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de salida destino.' } };
+    }
+
+    if (puntoSalidaDestino.id === puntoSalidaOrigen.id) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El punto de salida de destino no puede ser igual al destino.' } };
+    }
+
+    if (!Util.validarArreglo(tramosSeleccionados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un tramo.' } };
+    }
+
+    if (tipo === 'I') {
+      if (puntoConsumoI === '' || puntoConsumoI === '-1') {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de consumo inicial.' } };
+      }
+
+      if (puntoConsumoF === '' || puntoConsumoF === '-1') {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de consumo final.' } };
+      }
+    }
+    if (tipo === 'T') {
+      if (puntoConsumoI != '' && puntoConsumoI != '-1') {
+        if (puntoConsumoF === '' || puntoConsumoF === '-1') {
+          return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de consumo final.' } };
+        }
+      }
+      if (puntoConsumoF != '' && puntoConsumoF != '-1') {
+        if (puntoConsumoI === '' || puntoConsumoI === '-1') {
+          return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de consumo inicial.' } };
+        }
+      }
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de consultar los puntos de consumo.
+   * @param {number} idPuntoSalidaOrigen Identificador del punto de salida origen.
+   * @param {number} idPuntoSalidaDestino Identificador del punto de salida destino.
+   * @param {Object} entidad Datos del desvio seleccionado.
+   * @returns {Object}
+   */
+  consultarPuntosConsumo = async (idPuntoSalidaOrigen, idPuntoSalidaDestino, entidad) => {
+    let { contrato, puntoSalidaDestino, puntoSalidaOrigen } = this.state;
+    const datosPS = entidad.desvioPuntosSalida;
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTO_CONSUMO_INICIAL, { criterio: '', puntosEntrada: idPuntoSalidaOrigen }),
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTO_CONSUMO_FINAL, { criterio: '', puntosSalida: idPuntoSalidaDestino })
+    ];
+    contrato.nombre = entidad.desvioContrato.cntIdecontrato.cntNumero;
+    contrato.id = entidad.desvioContrato.cntIdecontrato.cntIderegistro;
+    contrato.idEditar = entidad.desvioContrato.descIderegistro;
+    puntoSalidaDestino.nombre = datosPS.ptsaPuntosalidadestino.ptsaNombre;
+    puntoSalidaDestino.id = datosPS.ptsaPuntosalidadestino.ptsaIderegistro;
+    puntoSalidaDestino.idEditar = datosPS.desoIderegistro;
+    puntoSalidaOrigen.nombre = datosPS.ptsaPuntosalidaorigen.ptsaNombre;
+    puntoSalidaOrigen.id = datosPS.ptsaPuntosalidaorigen.ptsaIderegistro;
+    await axios.all(peticiones)
+      .then(axios.spread((puntosConsumoOrigen, puntosConsumoDestino) => {
+        this.setState({
+          listaPuntosConsumoInicial: formatearArray(puntosConsumoOrigen.data.datos),
+          listaPuntosConsumoFinal: formatearArray(puntosConsumoDestino.data.datos),
+          mostrarModalDesvios: false,
+          nombreDesvio: entidad.desvio.desNombre,
+          tipo: entidad.desvio.desTipo,
+          rutaDesvio: entidad.desvio.uniIderuta.uniIderegistro,
+          unidadMedida: entidad.desvio.uniIdemedida.uniIderegistro,
+          capacidadDesvio: entidad.desvio.desCapacidadmaxima,
+          tramosSeleccionados: this.obtenerDatosTramo(entidad.tramos),
+          listaIdTramo: this.obtenerIdsTramo(entidad.tramos),
+          puntoSalidaOrigen: puntoSalidaOrigen,
+          puntoSalidaDestino: puntoSalidaDestino,
+          contrato: contrato,
+          idDesvio: entidad.desvio.desIderegistro,
+          puntoConsumoI: (entidad.desvio.ptcIdepuntoinicial.ptcIderegistro) ? entidad.desvio.ptcIdepuntoinicial.ptcIderegistro : null,
+          puntoConsumoF: (entidad.desvio.ptcIdepuntofinal.ptcIderegistro) ? entidad.desvio.ptcIdepuntofinal.ptcIderegistro : null,
+        });
+      }));
+
+
+  };
+
+  /**
+   * Método encargado de construir un objeto con los tramos del desvio seleccionado.
+   * @param {Object} tramos Tramos del desvio consultado.
+   * @returns {Object}
+   */
+  obtenerDatosTramo = (tramos) => {
+    const lista = tramos.map((dato) => {
+      return {
+        trmIderegistro: dato.trmIdetramo.trmIderegistro,
+        trmNombre: dato.trmIdetramo.trmNombre,
+      }
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de obtener los identificadores del desvio seleccionado.
+   * @param {Object} tramos Tramos del desvio seleccionado.
+   * @returns {Object}
+   */
+  obtenerIdsTramo = (tramos) => {
+    return tramos.map(d => d.trmIdetramo.trmIderegistro);
+  };
+
+  /**
+   * Método encargado de mostrar los datos del desvio que se desea editar.
+   * @param {Object} entidad Datos del desvio seleccionado.
+   */
+  cargarDatos = (entidad) => {
+    let { contrato, puntoSalidaDestino, puntoSalidaOrigen } = this.state;
+    const datosPS = entidad.desvioPuntosSalida;
+    if (entidad.desvio.ptcIdepuntoinicial.ptcoNombre) {
+      this.consultarPuntosConsumo(datosPS.ptsaPuntosalidaorigen.ptsaIderegistro, datosPS.ptsaPuntosalidadestino.ptsaIderegistro, entidad);
+      return;
+    }
+    contrato.nombre = entidad.desvioContrato.cntIdecontrato.cntNumero;
+    contrato.id = entidad.desvioContrato.cntIdecontrato.cntIderegistro;
+    contrato.idEditar = entidad.desvioContrato.descIderegistro;
+    puntoSalidaDestino.nombre = datosPS.ptsaPuntosalidadestino.ptsaNombre;
+    puntoSalidaDestino.id = datosPS.ptsaPuntosalidadestino.ptsaIderegistro;
+    puntoSalidaDestino.idEditar = datosPS.desoIderegistro;
+    puntoSalidaOrigen.nombre = datosPS.ptsaPuntosalidaorigen.ptsaNombre;
+    puntoSalidaOrigen.id = datosPS.ptsaPuntosalidaorigen.ptsaIderegistro;
+    this.setState({
+      mostrarModalDesvios: false,
+      nombreDesvio: entidad.desvio.desNombre,
+      tipo: entidad.desvio.desTipo,
+      rutaDesvio: entidad.desvio.uniIderuta.uniIderegistro,
+      unidadMedida: entidad.desvio.uniIdemedida.uniIderegistro,
+      capacidadDesvio: entidad.desvio.desCapacidadmaxima,
+      tramosSeleccionados: this.obtenerDatosTramo(entidad.tramos),
+      listaIdTramo: this.obtenerIdsTramo(entidad.tramos),
+      puntoSalidaOrigen: puntoSalidaOrigen,
+      puntoSalidaDestino: puntoSalidaDestino,
+      contrato: contrato,
+      idDesvio: entidad.desvio.desIderegistro
+    });
+  };
+
+  /**
+   * Método encargado de generar un objeto con los identificadores de los tramos seleccionados.
+   * @returns {Object}
+   */
+  obtenerTramos = () => {
+    const listaTramos = this.state.tramosSeleccionados.map(tramo => {
+      return {
+        'trmIdetramo': { 'trmIderegistro': tramo.trmIderegistro }
+      }
+    });
+    return listaTramos;
+  };
+
+  /**
+   * Método encargado de formar el objeto para guardar el desvio.
+   * @returns {Object}
+   */
+  construirObjetoGuardar = () => {
+    const { rutaDesvio, tipo, puntoConsumoI, puntoConsumoF, capacidadDesvio, unidadMedida,
+      puntoSalidaDestino, puntoSalidaOrigen, contrato, nombreDesvio, idDesvio } = this.state;
+    const entidadGuardar = {
+      desvio: {
+        desIderegistro: (idDesvio != '') ? idDesvio : null,
+        desTipo: tipo,
+        uniIderuta: {
+          uniIderegistro: rutaDesvio
+        },
+        ptcIdepuntoinicial: {
+          ptcIderegistro: (puntoConsumoI != '') ? puntoConsumoI : null
+        },
+        ptcIdepuntofinal: {
+          ptcIderegistro: (puntoConsumoF != '') ? puntoConsumoF : null
+        },
+        desCapacidadmaxima: capacidadDesvio,
+        desNombre: nombreDesvio,
+        uniIdemedida: {
+          uniIderegistro: unidadMedida
+        },
+      },
+      desvioContrato: {
+        descIderegistro: (contrato.idEditar != '') ? contrato.idEditar : '',
+        cntIdecontrato: { cntIderegistro: contrato.id },
+      },
+      desvioPuntosSalida: {
+        desoIderegistro: (puntoSalidaDestino.idEditar != '') ? puntoSalidaDestino.idEditar : '',
+        ptsaPuntosalidaorigen: { ptsaIderegistro: puntoSalidaOrigen.id },
+        ptsaPuntosalidadestino: { ptsaIderegistro: puntoSalidaDestino.id },
+      },
+      tramos: this.obtenerTramos(),
+    }
+    return entidadGuardar;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad.
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const entidadGuardar = this.construirObjetoGuardar();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de las variables.
+   * @param {Event} evento Evento ejecutado en el control de usuario.
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el cambio al seleccionar una ruta.
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioRuta = (evento) => {
+    const { contrato, puntoSalidaDestino } = this.state;
+    let change = {};
+    change = evento.target.value;
+    this.setState({
+      rutaDesvio: change,
+      contrato: {
+        nombre: '',
+        id: '',
+        idEditar: (contrato.idEditar != '') ? contrato.idEditar : ''
+      },
+      puntoSalidaOrigen: {
+        nombre: '',
+        id: '',
+        idEditar: (puntoSalidaDestino.idEditar != '') ? puntoSalidaDestino.idEditar : ''
+      },
+      tramosSeleccionados: [],
+      listaPuntosConsumoFinal: [],
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de tramos.
+   */
+  abrirModalTramos = () => {
+    const { rutaDesvio } = this.state;
+    if (rutaDesvio === '-1' || rutaDesvio === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar una ruta');
+      return false;
+    }
+    this.setState({
+      mostrarModalTramos: true
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de puntos de entrada.
+   */
+  abrirModalPuntosSalidaGeneral = () => {
+    const { tramosSeleccionados, puntoSalidaOrigen } = this.state;
+    if (tramosSeleccionados.length <= 0) {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar al menos un tramo');
+      return false;
+    }
+    if (puntoSalidaOrigen.id === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el punto de salida origen');
+      return false;
+    }
+    this.setState({
+      mostrarModalPuntosSalidaGeneral: true
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de puntos de salida
+   */
+  abrirModalPuntosSalida = () => {
+    const { contrato } = this.state;
+    if (contrato.id === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar un contrato');
+      return false;
+    }
+    this.setState({
+      mostrarModalPuntosSalida: true
+    });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de contratos
+   */
+  abrirModalContratos = () => {
+    const { rutaDesvio } = this.state;
+    if (rutaDesvio === '-1' || rutaDesvio === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar una ruta');
+      return false;
+    }
+    this.setState({
+      mostrarModalContratos: true
+    });
+  };
+
+  /**
+   * Método encargado de obtener los identificadores de los tramos seleccionados.
+   * @returns {Array}
+   */
+  obtenerIdTramo = (tramos) => {
+    this.setState({ listaIdTramo: tramos.map(d => d.trmIderegistro) });
+  };
+
+  /**
+   * Método encargado agregar los tramos seleccionados.
+   * @param {Object} tramos tramos seleccionados por el usuario.
+   */
+  onSeleccionarTramos = (tramos) => {
+    const { puntoSalidaDestino } = this.state;
+    this.obtenerIdTramo(tramos);
+    this.setState({
+      mostrarModalTramos: false,
+      tramosSeleccionados: [...tramos],
+      puntoSalidaDestino: {
+        id: '',
+        nombre: '',
+        idEditar: (puntoSalidaDestino.idEditar != '') ? puntoSalidaDestino.idEditar : '',
+      },
+      listaPuntosConsumoFinal: [],
+    });
+  };
+
+  /**
+   * Método encargado agregar los puntos de salida seleccionados
+   * @param {Object} puntoSalida Punto de salida seleccionados por el usuario
+   */
+  onSeleccionarPuntoSalida = (puntoSalida) => {
+    let { puntoSalidaOrigen, puntoSalidaDestino } = this.state;
+    const datosPunto = puntoSalida.ptsaIdesalida;
+    this.obtenerPuntosConsumoInicial(datosPunto.ptsaIderegistro);
+    puntoSalidaOrigen.nombre = datosPunto.ptsaNombre;
+    puntoSalidaOrigen.id = datosPunto.ptsaIderegistro;
+    this.setState({
+      mostrarModalPuntosSalida: false,
+      puntoSalidaOrigen: puntoSalidaOrigen,
+      puntoSalidaDestino: {
+        id: '',
+        nombre: '',
+        idEditar: (puntoSalidaDestino.idEditar != '') ? puntoSalidaDestino.idEditar : '',
+      }
+    });
+  };
+
+  /**
+   * Método encargado agregar los contratos seleccionados
+   * @param {Object} contratos Contratos seleccionados por el usuario
+   */
+  onSeleccionarContrato = (entidad) => {
+    let { contrato } = this.state;
+    contrato.nombre = `${entidad.cntNumero}-${entidad.terIdeagente.terNomcompleto}`;
+    contrato.id = entidad.cntIderegistro;
+    this.setState({
+      mostrarModalContratos: false,
+      contrato: contrato,
+      puntoSalidaOrigen: {
+        nombre: '',
+        id: '',
+      },
+      listaPuntosConsumoInicial: [],
+    });
+  };
+
+  /**
+   * Método encargado agregar los puntos de entrada seleccionados
+   * @param {Object} puntoDestino Puntos de entrada seleccionados por el usuario
+   */
+  onSeleccionarPuntosSalidaDestino = (puntoDestino) => {
+    let { puntoSalidaDestino } = this.state;
+    puntoSalidaDestino.id = puntoDestino.ptsaIderegistro;
+    puntoSalidaDestino.nombre = puntoDestino.ptsaNombre;
+    this.obtenerPuntosConsumoFinal(puntoDestino.ptsaIderegistro);
+    this.setState({
+      mostrarModalPuntosSalidaGeneral: false,
+      puntoSalidaDestino: puntoSalidaDestino
+    });
+  };
+
+  /**
+   * Método encargado de consultar los puntos de consumo origen
+   * @param {Object} idPuntoSalida Identificador del punto de salida seleccionado por el usuario
+   */
+  obtenerPuntosConsumoInicial = (idPuntoSalida) => {
+    if (idPuntoSalida === '') {
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTO_CONSUMO_INICIAL, { criterio: '', puntosEntrada: idPuntoSalida })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaPuntosConsumoInicial: respuesta.data.datos
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de consultar los puntos de consumo destino
+   * @param {Object} idPuntoSalida Identificador del punto de salida seleccionado por el usuario
+   */
+  obtenerPuntosConsumoFinal = (idPuntoSalida) => {
+    if (idPuntoSalida === '') {
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTO_CONSUMO_FINAL, { criterio: '', puntosSalida: idPuntoSalida })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaPuntosConsumoFinal: respuesta.data.datos
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de eliminar el tramo seleccionado
+   * @param {number} posicion Posición del tramo que se desea eliminar
+   */
+  eliminarTramo = (posicion) => {
+    const lista = [...this.state.tramosSeleccionados];
+    lista.splice(posicion, 1);
+    this.setState({ tramosSeleccionados: lista });
+  };
+
+  /**
+   * Método encargado de mostrar tramos seleccionados
+   * @returns {Array}
+   */
+  renderTramos = () => {
+    return (
+      <table className='table table-striped'>
+        <thead>
+          <tr>
+            <th>Tramo</th>
+            <th> </th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            this.state.tramosSeleccionados.map((dato, index) => {
+              return (
+                <tr key={"tramo_" + dato.trmIderegistro}>
+                  <td>{dato.trmNombre}</td>
+                  <td><button className='btnEliminar' onClick={() => {
+                    this.eliminarTramo(index)
+                  }}>X</button>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    return (
+      <Fragment>
+        <Botonera funciones={this.obtenerFunciones()} />
+        <div className='conf-general row mt-5'>
+          <Input
+            label='Nombre:'
+            value={this.state.nombreDesvio}
+            onChange={this.controlarCambio}
+            name='nombreDesvio'
+          />
+          <Combo
+            opciones={listaTipo}
+            propTexto='nombre'
+            propValor='id'
+            label='Tipo:'
+            name='tipo'
+            value={this.state.tipo}
+            onChange={this.controlarCambio}
+          />
+          <TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Capacidad del Desvio:'
+            value={this.state.capacidadDesvio}
+            onChange={this.controlarCambio}
+            name='capacidadDesvio'
+          />
+          <Combo
+            opciones={this.state.listaUnidadMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Unidad de Medida:'
+            name='unidadMedida'
+            value={this.state.unidadMedida}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={this.state.listaRutas}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Ruta Desvio:'
+            name='rutaDesvio'
+            value={this.state.rutaDesvio}
+            onChange={this.controlarCambioRuta}
+          />
+        </div>
+
+        <div className='row mt-2'>
+          <div className='col-6 form-group'>
+            <label htmlFor="txtBuscarContrato">Contrato:</label>
+            <div className='input-group'>
+              <input type="text"
+                id="txtBuscarContrato"
+                className='form-control'
+                placeholder='Buscar Contrato'
+                value={this.state.contrato.nombre}
+                disabled={true}
+              />
+              <div className='form-group-btn'>
+                <button className='btn btn-primary' onClick={this.abrirModalContratos}><i className='fa fa-fw fa-search'></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div className='col-6'>
+            <p><b>Tramos {this.state.tramosSeleccionados.length > 0 ? ` (${this.state.tramosSeleccionados.length})` : ''}</b></p>
+            <button className='btn btn-primary' onClick={this.abrirModalTramos}>Seleccionar</button>
+            <div className='pt-3'>
+              {this.state.tramosSeleccionados.length > 0 &&
+                this.renderTramos()
+              }
+            </div>
+          </div>
+        </div>
+
+        <div className='row mt-2'>
+          <div className='col-6 form-group'>
+            <label htmlFor="txtBuscarPuntoSalidaOrigen">Punto De Salida Origen:</label>
+            <div className='input-group'>
+              <input
+                type="text"
+                id="txtBuscarPuntoSalidaOrigen"
+                className='form-control'
+                placeholder='Buscar Punto de Salida Origen'
+                value={this.state.puntoSalidaOrigen.nombre}
+                disabled={true}
+              />
+              <div className='form-group-btn'>
+                <button className='btn btn-primary' onClick={this.abrirModalPuntosSalida}><i className='fa fa-fw fa-search'></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div className='col-6 form-group'>
+            <label htmlFor="txtBuscarPuntoSalidaDestino">Punto De Salida Destino:</label>
+            <div className='input-group'>
+              <input
+                type="text"
+                id="txtBuscarPuntoSalidaDestino"
+                className='form-control'
+                placeholder='Buscar Punto de Salida Destino'
+                value={this.state.puntoSalidaDestino.nombre}
+                disabled={true}
+              />
+              <div className='form-group-btn'>
+                <button className='btn btn-primary' onClick={this.abrirModalPuntosSalidaGeneral}><i className='fa fa-fw fa-search'></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='conf-general row mt-5'>
+          <Combo
+            opciones={this.state.listaPuntosConsumoInicial}
+            propTexto='ptcoNombre'
+            propValor='ptcIderegistro'
+            label='Punto de Consumo Origen:'
+            name='puntoConsumoI'
+            value={this.state.puntoConsumoI}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={this.state.listaPuntosConsumoFinal}
+            propTexto='ptcoNombre'
+            propValor='ptcIderegistro'
+            label='Punto de Consumo Destino:'
+            name='puntoConsumoF'
+            value={this.state.puntoConsumoF}
+            onChange={this.controlarCambio}
+          />
+        </div>
+        <VentanaModal
+          mostrar={this.state.mostrarModalContratos}
+          titulo='Seleccionar Contrato'
+          cerrarModal={() => this.setState({ mostrarModalContratos: false })}>
+          <RConsultaContratosDesvios
+            esModal
+            seleccionarEntidad={this.onSeleccionarContrato}
+            rutaSeleccionada={this.state.rutaDesvio}
+            mostrarAlerta={this.props.mostrarAlerta}
+          />
+        </VentanaModal>
+
+        <VentanaModal
+          mostrar={this.state.mostrarModalTramos}
+          titulo='Seleccionar Tramos'
+          cerrarModal={() => this.setState({ mostrarModalTramos: false })}>
+          <RConsultaTramosDesvios
+            esModal
+            seleccionMultiple
+            entidadesSeleccionadas={this.state.tramosSeleccionados}
+            seleccionarEntidades={this.onSeleccionarTramos}
+            rutaSeleccionada={this.state.rutaDesvio}
+            mostrarAlerta={this.props.mostrarAlerta}
+          />
+        </VentanaModal>
+
+        <VentanaModal
+          mostrar={this.state.mostrarModalPuntosSalida}
+          titulo='Seleccionar Punto de Salida Origen'
+          cerrarModal={() => this.setState({ mostrarModalPuntosSalida: false })}>
+          <RConsultaPuntosSalidaDesvios
+            esModal
+            seleccionarEntidad={this.onSeleccionarPuntoSalida}
+            contratoSeleccionados={this.state.contrato.id}
+            mostrarAlerta={this.props.mostrarAlerta}
+          />
+        </VentanaModal>
+
+        <VentanaModal
+          mostrar={this.state.mostrarModalPuntosSalidaGeneral}
+          titulo='Seleccionar Punto de Salida de Destino'
+          cerrarModal={() => this.setState({ mostrarModalPuntosSalidaGeneral: false })}>
+          <RConsultaPuntosSalidaDestino
+            esModal
+            seleccionarEntidad={this.onSeleccionarPuntosSalidaDestino}
+            mostrarAlerta={this.props.mostrarAlerta}
+            listaTramos={this.state.listaIdTramo.toString()}
+            puntoSalidaOrigen={this.state.puntoSalidaOrigen.id}
+          />
+        </VentanaModal>
+
+        <VentanaModal
+          mostrar={this.state.mostrarModalDesvios}
+          titulo='Seleccionar Desvio'
+          cerrarModal={() => this.setState({ mostrarModalDesvios: false })}>
+          <RConsultaDesvios
+            esModal
+            seleccionarEntidad={this.cargarDatos}
+            mostrarAlerta={this.props.mostrarAlerta}
+          />
+        </VentanaModal>
+      </Fragment>
+    );
+  };
+}
+
+GestionDesvios.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionDesvios);
+
+export { VistaRedux as RGestionDesvios };

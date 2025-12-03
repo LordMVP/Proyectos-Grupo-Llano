@@ -1,0 +1,33 @@
+
+div#divContenedorEstadoCuenta div.divFinanciacion{
+    padding-right: 20px;
+
+}
+
+div#divContenedorEstadoCuenta div.detalleFinanciacion{
+    margin-left:25px;
+    padding-bottom:5px;
+}
+
+div#divContenedorEstadoCuenta div.detalleFinanciacion{
+
+}
+
+div#divContenedorEstadoCuenta div.detalleFinanciacion:nth-child(2n){
+    background-color: #D9F3FF;
+}
+
+div#divContenedorEstadoCuenta .inputImpresion{
+    background-color: inherit;
+    border:none;
+    border-bottom: solid 1px #999;
+}
+
+div#divContenedorEstadoCuenta h2{
+    color:#408BC4;
+    text-align: left;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 7px;
+    margin-bottom: 5px;
+}

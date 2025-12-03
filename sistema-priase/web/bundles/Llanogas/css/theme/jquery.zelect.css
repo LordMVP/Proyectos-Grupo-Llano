@@ -1,0 +1,75 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 27 ene. 2022, 13:53:04
+    Anexado por: Felipe Rodriguez
+*/
+
+
+
+.zelect {
+    display: inline-block;
+    background-color: white;
+    width: 100%;
+    cursor: pointer;
+    line-height: 26px;
+    border: 1px solid #767676;
+    border-radius: 1px;
+    position: relative;
+}
+.zelected {
+    font-weight: bold;
+    padding-left: 10px;
+}
+.zelected.placeholder {
+    color: #999f82;
+}
+.zelected:hover {
+    border-color: #408bc4;
+    box-shadow: inset 0px 5px 8px -6px #dbdece;
+}
+.zelect.open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.dropdown {
+    background-color: white;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border: 1px solid #dbdece;
+      border-top: none;
+    position: absolute;
+    left:-1px;
+    right:-1px;
+    top: 36px;
+    z-index: 2;
+    padding: 3px 5px 3px 3px;
+}
+.dropdown input {
+    font-family: sans-serif;
+    outline: none;
+    font-size: 14px;
+    border: 1px solid #408bc4;
+    box-sizing: border-box;
+    width: 96%;
+    padding: 7px 0 7px 10px;
+}
+.dropdown ol {
+    padding: 0;
+    margin: 3px 0 0 0;
+    list-style-type: none;
+    max-height: 150px;
+    overflow-y: scroll;
+}
+.dropdown li {
+    padding-left: 10px;
+}
+.dropdown li.current {
+    background-color: #408bc4;
+    color: #FFF
+}
+.dropdown .no-results {
+    margin-left: 10px;
+}

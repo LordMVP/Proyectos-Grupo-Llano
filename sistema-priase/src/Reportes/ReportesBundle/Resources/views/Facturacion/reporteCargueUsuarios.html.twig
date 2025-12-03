@@ -1,0 +1,109 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/ng-table.min.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Reporte Cargue de Usuarios Achagua  -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="CargueUsuariosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Cargue Usuarios</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>ciclos</label>
+                                        <select type="text" name="idciclo" id="idciclo" ng-model="info.idciclo" class="form-control input-sm">
+                                            <option value="all">Todos los ciclos</option>
+                                            <option ng-repeat="item in ciclos" ng-value="item.idciclo">{[{item.ciclo}]}</option>                                            
+                                        </select>
+
+                                    </div>
+
+                                    <div class="col-md-2 form-group">
+                                        <label>Generar</label>
+                                        <button ng-click="download=true;buscarUsuariosConsolidado()" class="form-control input-sm">
+                                            <i class="fa fa-search fa-1x"></i> Buscar 
+                                        </button>
+                                    </div>                                    
+                                </div>
+                                <div class="form-group col-md-6" >
+
+                                    <label>Consolidado Usuarios Aprobados</label> &nbsp;
+                                    <table ng-table="ngTable" class="table table-condensed table-responsive">                                    
+                                        <tr ng-show="!agrupados || agrupados.length==0">
+                                            <td colspan="4">No hay resultados para mostrar</td>
+                                        </tr>
+                                        <thead>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                        </thead>
+                                        <tr ng-repeat="row in $data">
+                                            <td>{[{row.estado}]}</td>
+                                            <td>{[{row.cuenta}]}</td>                                                
+                                        </tr>
+                                    </table> 
+
+                                </div>
+                                <div class="form-group col-md-6" >
+
+                                    <label>Consolidado Usuarios Pendientes</label> &nbsp;
+                                    <table ng-table="ngTable3" class="table table-condensed table-responsive">                                    
+                                        <tr ng-show="!estados || estados.length==0">
+                                            <td colspan="4">No hay resultados para mostrar</td>
+                                        </tr>
+                                        <thead>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                        </thead>
+                                        <tr ng-repeat="row in $data">
+                                            <td>{[{row.estado}]}</td>
+                                            <td>{[{row.cuenta}]}</td>                                                
+                                        </tr>
+                                    </table> 
+
+                                </div>
+                                <div class="form-group col-md-12" uib-collapse="todos==1">
+
+                                    <label>Usuarios No Cargados a Fes</label> &nbsp;
+                                    <table ng-table="ngTable2" class="table table-condensed table-responsive">                                    
+                                        <tr ng-show="!todos || $data.length==0">
+                                            <td colspan="4">No hay resultados para mostrar</td>
+                                        </tr>
+                                        <thead>
+                                        <th>Factura</th>
+                                        <th>Suscripcion</th>
+                                        </thead>
+
+                                        <tr ng-repeat="row in $data">
+                                            <td data-title="'Factura'">{[{row.factura}]}</td>
+                                            <td data-title="'Suscripcion'" >{[{row.suscripcion}]}</td>                                                
+                                        </tr>
+                                    </table> 
+
+                                </div>  
+                            </div>
+                        </div>
+
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>    
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-animate.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/cargue.usuarios.angular.js')}}"></script>
+{% endblock %}

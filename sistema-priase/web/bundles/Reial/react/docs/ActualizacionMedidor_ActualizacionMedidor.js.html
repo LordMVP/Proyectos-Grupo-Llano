@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ActualizacionMedidor/ActualizacionMedidor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ActualizacionMedidor/ActualizacionMedidor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Input, VentanaDialogo } from 'appfuture-react'
+
+import API from '../../global/rutas_api'
+import Peticion from '../../global/peticion'
+import Util from '../../global/util'
+
+import { toast } from 'react-toastify'
+
+// redux
+
+import connect from 'react-redux/es/connect/connect'
+import { bindActionCreators } from 'redux'
+
+/**
+ *
+ *
+ * @class ActualizacionMedidor
+ * @extends {Component}
+ */
+class ActualizacionMedidor extends Component {
+	/**
+     *Define estados iniciales
+     * @memberof ActualizacionMedidor
+     */
+	state = {
+		dialogoModal: false,
+
+		// defecto
+
+		empresa: '',
+		suscriptor: '0113800501601',
+
+		medidor: '',
+		capacidad: '',
+		marca: '',
+		lectura: '',
+	}
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */
+	BotonGuardar = () => {
+		if (this.state.empresa) {
+			const { dialogoModal, ...estado } = this.state
+
+			/* prettier-ignore */
+
+			return Util.validarObjeto(estado)
+                ? &lt;button className="btn" onClick={this.handleDialogo}>guardar&lt;/button>
+                : &lt;button className="btn" disabled={true}>guardar&lt;/button>
+        }
+
+        /* prettier-ignore */
+
+        else return &lt;button className="btn" disabled={true}>guardar&lt;/button>
+    }
+	
+	/**
+     *
+     *Habilita el botón cancelar
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */	
+    BotonCancelar = () => {
+        /* prettier-ignore */
+
+        return this.state.empresa
+            ? &lt;button className="btn" onClick={this.limpiar}>cancelar&lt;/button>
+            : &lt;button className="btn" disabled={true}>cancelar&lt;/button>
+    }
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+	
+/**
+ *
+ *
+ * Buscar por suscriptor
+ * @method
+ * @async
+
+ */
+buscar = async () => {
+		let datos = await Peticion.post({
+			url: API.ACTUALIZACION_MEDIDOR.CONSULTA_POR_SUSCRIPTOR,
+			parametros: {
+				idSuscriptor: this.state.suscriptor,
+			},
+		})
+
+		if (!datos.medidorCodmar) {
+            // no hay datos
+
+			let opciones = {
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+			}
+
+			toast.error('Medidor no encontrado', opciones)
+			return
+		}
+
+		this.setState({
+			empresa: datos.medidorCodemp,
+
+			medidor: datos.medidorNummed,
+			capacidad: datos.medidorCap,
+			marca: datos.medidorCodmar,
+			lectura: datos.medidorVallec,
+		})
+	}
+
+	/**
+	 *
+	 *Despliega el modal
+	 * @method
+	 * 
+	 */
+	handleDialogo = () => {
+		this.setState({ dialogoModal: !this.state.dialogoModal })
+	}
+
+	/**
+	 *
+	 *Limpiar el formulario
+	 * @method
+	 * 
+	 */
+	limpiar = () => {
+		// limpieza
+
+		this.setState({
+			empresa: '',
+
+			medidor: '',
+			capacidad: '',
+			marca: '',
+			lectura: '',
+		})
+	}
+
+	/**
+	 *
+	 *Permite guardar los medidores y después limpiar el formulario
+	 * @method
+	 * 
+	 */	
+	guardar = () => {
+		Peticion.post({
+			url: API.ACTUALIZACION_MEDIDOR.ACTUALIZAR_MEDIDOR,
+			parametros: {
+				medidorNummed: this.state.medidor,
+				medidorCap: this.state.capacidad,
+				medidorCodmar: this.state.marca,
+				medidorVallec: this.state.lectura,
+				medidorCodsus: this.state.suscriptor,
+				medidorCodemp: this.state.empresa,
+			},
+		})
+
+		// final
+
+		this.limpiar()
+		this.handleDialogo()
+	}
+
+	/**
+	 *
+	 *Limpiar el formulario y ocultar el modal
+	 * @method
+	 * 
+	 */		
+	cancelar = () => {
+		this.limpiar()
+		this.handleDialogo() // Cerrar modal
+	}
+
+	botones = [
+		{ texto: 'guardar', callback: this.guardar },
+		{ texto: 'cancelar', callback: this.cancelar },
+	]
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */	
+	render() {
+		return (
+			&lt;React.Fragment>
+				&lt;VentanaDialogo
+					titulo="Confirmación"
+					texto="¿Confirma transacción?"
+					mostrar={this.state.dialogoModal}
+					botones={this.botones}
+				/>
+
+				&lt;h1>Actualización medidor&lt;/h1>
+
+				&lt;div className="contenedor d-flex justify-content-center btn-group">
+					&lt;this.BotonGuardar />
+					&lt;this.BotonCancelar />
+				&lt;/div>
+
+				&lt;div className="contenedor fila">
+					&lt;Input
+						id="suscriptor"
+						label="suscriptor"
+						value={this.state.suscriptor}
+						onChange={this.change}
+						extra={{ disabled: this.state.empresa }}
+					/>
+
+					&lt;div>
+						&lt;button className="btn" onClick={this.buscar}>
+							&lt;span>buscar&lt;/span>
+						&lt;/button>
+					&lt;/div>
+				&lt;/div>
+
+				&lt;div className="contenedor caja formulario">
+					&lt;label className="tag">Datos por suscriptor&lt;/label>
+
+					&lt;Input
+						id="medidor"
+						label="medidor"
+						value={this.state.medidor}
+						onChange={this.change}
+						extra={{ disabled: !this.state.empresa }}
+					/>
+
+					&lt;Input
+						id="capacidad"
+						label="capacidad"
+						value={this.state.capacidad}
+						onChange={this.change}
+						extra={{ disabled: !this.state.empresa }}
+					/>
+
+					&lt;Input
+						id="marca"
+						label="marca"
+						value={this.state.marca}
+						onChange={this.change}
+						extra={{ disabled: !this.state.empresa }}
+					/>
+
+					&lt;Input
+						id="lectura"
+						label="lectura"
+						value={this.state.lectura}
+						onChange={this.change}
+						extra={{ disabled: !this.state.empresa }}
+					/>
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+// redux
+
+const mapStateToProps = (state) => {
+	return {}
+}
+
+const mapDispatchToProps = (dispatch) => {
+	return bindActionCreators({}, dispatch)
+}
+
+const VistaRedux = connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(ActualizacionMedidor)
+
+export { VistaRedux as RActualizacionMedidor }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,726 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="/achagua/css/appload.css" />
+    <style>
+
+        .label-enlinea{
+            display: inline !important;
+            margin-right: 15px;
+        }
+        .file-item-desc{
+            width: 50%;
+        }
+        .file-item-btns {
+            width: 43%;
+        }
+
+        .file-item:nth-child(2n+1) {
+            background-color: inherit !important; 
+        }
+
+        #tblActivos tbody tr td input{
+            width: 95%;
+        }
+        .campodoble{
+            display: inline-block;
+            width: 65%
+        }
+        .campo-linea{
+            width: 45%;
+            display: inline-block;
+        }
+        .campo-linea label{
+            display: inline-block;
+        }
+        .campo-linea input{
+            width: 25%;
+            margin-right: 10px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        :invalid {
+            box-shadow: none;
+        }
+        :-moz-submit-invalid{
+            box-shadow: none;
+        }
+        :-moz-ui-invalid{
+            box-shadow: none;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Agregar Solicitud Préstamo - {{empresa}} {% endblock %}
+{% block body %}
+
+
+    <div id="divComandos">
+        <div class="divBotones" style="margin-bottom:15px;">
+            <button id="btnGrabar" class="btn">grabar</button>
+            <button id="btnCancelar" class="btn">cancelar</button>
+        </div>
+    </div>
+
+    <div id="contenedor" novalidate="novalidate">
+        <a id="linkExportar" target="_blank" style="display: none;" ></a>
+        <div id="divTabs">
+            <ul>
+                <li><a href="#tabPrincipal" id="aPrincipal" active>Formulario en línea</a></li>
+                <li><a href="#tabDescarga" id="aDescarga">Descargar Formulario</a></li>
+            </ul>
+
+            <div id="tabPrincipal">
+                <div style="text-align:center;">
+                    <img class="col-md-6 col-xs-6" id="imgLogo" src="/achagua/sistema/web/bundles/Libranza/img/logopotenza1.png">
+                </div>
+
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">SOLICITUD DE CRÉDITO POR LIBRANZA</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div class="campo">
+                            <label for="txtFechaSolicitud">FECHA DE LA SOLICITUD</label>
+                            <input type="text" id="txtFechaSolicitud" data-reference="fechasolicitud" value="{{fecha}}" disabled="disabled"/>
+                        </div>
+                        <div class="campo"></div>
+                        <div class="campo">
+                            <label for="txtNumRadicado">RADICADO Nº </label>
+                            <input type="text" id="txtNumRadicado" data-reference="numeroradicado" disabled="disabled"/> 
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">INFORMACIÓN BÁSICA</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div class="campo">
+                            <label for="txtPrimerNombre">Nombre Completo:</label>
+                            <input type="text" id="txtPrimerNombre" data-reference="primernombre" required="required" maxlength="50">
+                        </div>
+                        <div class="campo">
+                            <label for="txtPrimerApellido">Primer Apellido</label>
+                            <input type="text" id="txtPrimerApellido" data-reference="primerapellido" required="required" maxlength="25">
+                        </div>
+                        <div class="campo">
+                            <label for="txtSegundoApellido">Segundo Apellido:</label>
+                            <input type="text" class="form-control" id="txtSegundoApellido" data-reference="segundoapellido" maxlength="25">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbTipoDocumento">Tipo Documento:</label>
+                            <select name="" id="cmbTipoDocumento" required data-reference="idtipodocumento" data-cargar="tipoidentificacion" data-value="idunidad" data-text="nombre"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtNumDocumento">Numero Documento:</label>
+                            <input type="text" id="txtNumDocumento" required data-reference="documento" data-caja="number" maxlength="20">
+                        </div>
+                        <div class="campo">
+                            <label for="txtFechaNacimiento">Fecha Nacimiento:</label>
+                            <input type="text" id="txtFechaNacimiento" data-reference="fechanacimiento" required="required">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbPaisNacimiento">País Nacimiento:</label>
+                            <select id="cmbPaisNacimiento" data-cargar="paises" data-reference="paisnacimiento" data-value="idpais" data-text="nombre"></select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="cmbDepartamentoNacimiento">Departamento Nacimiento:</label>
+                            <select id="cmbDepartamentoNacimiento" data-reference="departamentonacimiento"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="cmbLugarNacimiento">Lugar Nacimiento:</label>
+                            <select id="cmbLugarNacimiento" data-reference="lugarnacimiento" required="required"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="cmbEstadoCivil">Estado Civil:</label>
+                            <select id="cmbEstadoCivil" data-reference="estadocivil" required="required" data-cargar="estadocivil" data-value="idunidad" data-text="nombre">
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="">Sexo:</label>
+                            <label id="rbtnSexoF" class="label-enlinea">
+                                <input type="radio" id="rbtnSexoF" name="rbtnSexo" data-reference="sexo" data-value="F" required="required">F
+                            </label>
+                            <label id="rbtnSexoM" class="label-enlinea">
+                                <input type="radio" id="rbtnSexoM" name="rbtnSexo" data-reference="sexo" data-value="M" required="required">M
+                            </label>
+                        </div>
+                        <div class="campo" >
+                            <label for="txtCargoMenores">Personas a cargo:</label>
+                            <input type="text" id="txtCargoMenores" data-reference="personasacargo" required="required" data-caja="number" value="0">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbNivelEducacion">Nivel de Educación:</label>
+                            <select id="cmbNivelEducacion" data-reference="niveleducacion" data-cargar="niveleducativo" data-value="idunidad" data-text="nombre">
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="cmbProfesion">Ocupación:</label>
+                            <select id="cmbProfesion" data-reference="profesion" data-cargar="profesiones" data-value="idunidad" data-text="nombre"></select>
+                            <!--<input type="text" id="txtProfesion" data-reference="profesion">-->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">DATOS DEL CONYUGUE</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable" id="divConyugue">
+                        <div class="campo">
+                            <label for="txtNombreConyugue">Nombres:</label>
+                            <input type="text" id="txtNombreConyugue" data-reference="nombreconyugue" maxlength="25">
+                        </div>
+                        <div class="campo">
+                            <label for="txtApellidoConyugue">Apellidos:</label>
+                            <input type="text" id="txtApellidoConyugue" data-reference="apellidoconyugue" maxlength="25">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbTipoDocumentoConyugue">Tipo Documento:</label>
+                            <select name="" id="cmbTipoDocumentoConyugue" data-reference="tipodocumentoconyugue">
+                                <option value="cc">C.C.</option>
+                                <option value="ce">C.E.</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtNumDocConyugue">No. Documento:</label>
+                            <input type="text" id="txtNumDocConyugue" data-reference="documentoconyugue" data-caja="number" maxlength="20">
+                        </div> 
+                        <div class="campo">
+                            <label for="rbtnTrabajaSi">Actualmente Trabaja:</label>
+                            <label id="rbtnTrabajaSi" class="label-enlinea">
+                                <input type="radio" id="rbtnTrabajaSi" name="rbtnTrabaja" data-reference="conyuguetrabaja" data-value="S">Sí
+                            </label>
+                            <label id="rbtnTrabajaNo" class="label-enlinea">
+                                <input type="radio" id="rbtnTrabajaNo" name="rbtnTrabaja" data-reference="conyuguetrabaja" data-value="N" checked>No
+                            </label>
+                        </div>
+                        <div class="campo">
+                            <label for="txtEmpresa">Empresa:</label>
+                            <input type="text" id="txtEmpresa" data-reference="empresaconyugue" data-info="trabaja-empresa" maxlength="100" disabled="disabled">
+                        </div>
+                        <div class="campo">
+                            <label for="txtTelefonoConyugue">Teléfono Empresa:</label>
+                            <input type="text" id="txtTelefonoConyugue" data-reference="telefonoconyugue" class="number" data-info="trabaja-empresa" maxlength="20" disabled="disabled" value="0">
+                        </div>
+                        <div class="campo">
+                            <label for="txtDireccionConyugue">Dirección Empresa:</label>
+                            <input type="text" id="txtDireccionConyugue" data-reference="direccionconyugue" data-info="trabaja-empresa" maxlength="250" disabled="disabled">
+                        </div>
+                        <div class="campo">
+                            <label for="txtCiudadConyugue">Ciudad Empresa:</label>
+                            <input type="text" id="txtCiudadConyugue" data-reference="ciudadconyugue" data-info="trabaja-empresa" maxlength="100" disabled="disabled">
+                        </div>                
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">UBICACIÓN</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div class="campo">
+                            <label for="cmbPais">País:</label>
+                            <select id="cmbPais" data-cargar="paises" data-value="idpais" data-text="nombre" data-reference="pais" required="required"></select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="cmbDepartamento">Departamento:</label>
+                            <select id="cmbDepartamento" data-reference="departamento" required="required"></select>
+                            <!--<input type="text" id="txtDepartamento" data-reference="departamento" required="required">-->
+                        </div>
+                        <div class="campo">
+                            <label for="cmbMunicipio">Municipio:</label>
+                            <select id="cmbMunicipio" required="required" data-reference="idmunicipio"></select>
+                            <!--<input type="text" id="txtCiudad" data-reference="ciudad" required="required">-->
+                        </div>
+                        <div class="campo">
+                            <label for="cmbBarrio">Barrio:</label>
+                            <select id="cmbBarrio" data-reference="barrio" required="required"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtDireccion">Dirección:</label>
+                            <input type="text" id="txtDireccion" data-reference="direccion" required="required" maxlength="50">
+                        </div>
+
+                        <div class="campo">
+                            <label for="">Zona Residencial:</label>
+                            <label id="rbtnZonaResidencialRural" class="label-enlinea">
+                                <input type="radio" id="rbtnZonaResidencialRural" name="rbtnZonaResidencial" data-reference="zonaresidencial" data-value="R">Rural
+                            </label>
+                            <label id="rbtnZonaResidencialUrbana" class="label-enlinea">
+                                <input type="radio" id="rbtnZonaResidencialUrbana" name="rbtnZonaResidencial" data-reference="zonaresidencial" data-value="U">Urbana
+                            </label>
+                        </div>
+                        <div class="campo">
+                            <label for="txtTelefonoFijo">Teléfono Fijo:</label>
+                            <input type="text" id="txtTelefonoFijo" data-reference="telefonofijo" required="required" class="number" maxlength="20">
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtCelular">Teléfono Celular:</label>
+                            <input type="text" id="txtCelular" data-reference="celular" required="required" class="number" maxlength="20">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbTipoVivienda">Tipo de Vivienda:</label>
+                            <select id="cmbTipoVivienda" data-reference="tipovivienda" required="required" data-cargar="tiposvivienda" data-value="idunidad" data-text="nombre"></select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtMesTiempo">Tiempo de Residencia (meses):</label>
+                            <input type="text" id="txtMesTiempo" class="number" maxlength="3" data-reference="mesesresidencia" data-caja="number">
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtArriendo">Valor Arriendo Mensual:</label>
+                            <input type="text" id="txtArriendo" data-reference="valorarriendo" value="0" data-caja="currency" disabled="disabled">
+                        </div>
+                        <div class="campo">
+                            <label for="txtCorreo">Correo Electrónico:</label>
+                            <input type="text" id="txtCorreo" data-reference="correo" required="required" maxlength="250">
+                        </div>
+                        <div class="label-enlinea" id="divCorrespondencia" data-tipo="check">
+                            <label for="">Envío de Correspondencia:</label>
+                        </div>
+
+
+
+                        <div class="campo">
+                            <label for="cmbEstrato">Estrato:</label>
+                            <select id="cmbEstrato" data-reference="estrato" required="required">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">INFORMACIÓN LABORAL</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+
+                        <div class="campo">
+                            <label class="label-enlinea" for="btnAgregarActividad" style="font-size: 13px;">
+                                Actividades económicas</label>
+                        </div>
+                        <div class="campo">
+                            <button id="btnAgregarActividad" class="btnSimple">Agregar Nueva Actividad</button>
+                        </div>
+                        <div id="divContenidoActividades" data-reference="actividadeconomica" data-info="actividad" style="margin-top: 10px;" required="required"></div>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable" style="display: none;">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">REFERENCIAS</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+
+                        <div> <!-- familiar -->
+                            <div class="campo">
+                                <label class="label-enlinea" for="btnAgregarRefFamiliar" style="font-size: 13px;">
+                                    Referencias Familiares</label>
+                            </div>
+                            <div class="campo">
+                                <button class="btnSimple" id="btnAgregarRefFamiliar">
+                                    Agregar Ref. Familiar
+                                </button>
+                            </div>
+                            <div id="divReferenciaFamiliares" data-info="referencia" data-reference="referenciafamiliar" style="margin-top: 10px;" ></div>
+                        </div>
+                        <div> <!-- Personal -->
+                            <div class="campo">
+                                <label class="label-enlinea" for="btnAgregarRefPersonal" style="font-size: 13px;">Referencias Personales </label></div>
+                            <div class="campo">
+                                <button class="btnSimple" id="btnAgregarRefPersonal">
+                                    Agregar Ref. Personal
+                                </button>
+                            </div>
+                            <div id="divReferenciaPersonales" data-reference="referenciapersonal" style="margin-top: 10px;" data-info="referencia" ></div>
+                        </div>
+                    </div>
+                </div> 
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">INFORMACIÓN ACTIVOS</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div>
+                            <button class="btnSimple" id="btnAgregarActivo"> <i class="fa fa-plus"></i> Agregar Activo</button>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <table class="tabla" id="tblActivos" data-reference="activos" required="required">
+                                <thead>
+                                    <tr>
+                                        <th> TIPO ACTIVO </th>
+                                        <th>DETALLE DEL BIEN</th>
+                                        <th>DIRECCIÓN O PLACA</th>
+                                        <th>DEPARTAMENTO</th>
+                                        <th>CIUDAD</th>
+                                        <th>VALOR COMERCIAL</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="campoMitad">
+                            <label for="txtTotalActivos1"><b>Total Activos: (Inmuebles, Vehículos, Maquinaria, etc) </b></label>
+                            <input type="text" id="txtTotalActivos1" disabled="disabled" value="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">INFORMACIÓN FINANCIERA</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable" id="divValoresFinanciacion">
+                        <fieldset>
+                            <legend> Información ingresos </legend>
+                            <div class="campo">
+                                <label for="txtSalarioBasico">Salario Devengado:</label>
+                                <input type="text" id="txtSalarioBasico" data-id="ingreso" data-reference="salariobasico" required="required" disabled="disabled" data-tipo="tocurrency">
+                            </div>
+                            <div class="campo">
+                                <label for="txtOtrosIngresos">Comisiones y bonificaciones:</label>
+                                <input type="text" id="txtOtrosIngresos" data-id="ingreso" data-reference="otrosingresos" value="0" data-caja="number">
+                            </div>
+                            <div class="campo">
+                                <label for="txtOtrosIngresosArriendo">Otros Ingresos: (Arriendos, otros)</label>
+                                <input type="text" id="txtOtrosIngresosArriendo" data-id="ingreso" data-reference="otrosingresosarriendo" value="0" data-caja="number">
+                            </div>
+                            <div class="campo">
+                                <label for="txtDescripcionOtrosIngresos">Descripción otros ingresos:</label>
+                                <input type="text" id="txtDescripcionOtrosIngresos" data-reference="descripcionotrosingresos" maxlength="250"/>
+                            </div>
+                            <div class="campo">
+                                <label for="txtTotalIngresosMes"><b>Total Ingresos Mensuales:</b></label>
+                                <input type="text" id="txtTotalIngresosMes" data-reference="totalingresosmes" required="required" disabled="disabled" data-caja="number">
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Información gastos</legend>
+                            <div class="campo">
+                                <label for="txtGastosHogar">Gastos Hogar: (Alimentación, educación, transporte otros)</label>
+                                <input type="text" id="txtGastosHogar" data-reference="gastoshogar" data-id="gasto" required="required" value="0" data-caja="number">
+                            </div>
+                            <div class="campo">
+                                <label for="txtArriendoCuota">Arriendo y/o cuota vivienda:</label>
+                                <input type="text" id="txtArriendoCuota" data-reference="arriendocuotavivienda" data-id="gasto" value="0" data-caja="number">
+                            </div>
+                            <div class="campo">
+                                <label for="txtCuotaBanco">Cuotas Bancos:</label>
+                                <input type="text" id="txtCuotaBanco" data-reference="cuotabanco" data-id="gasto" value="0" data-caja="number">
+                            </div>
+
+                            <div class="campo">
+                                <label for="txtOtrosGastos">Otros Gastos:</label>
+                                <input type="text" id="txtOtrosGastos" data-reference="otrosgastos" data-id="gasto" value="0" data-caja="number">
+                            </div>
+                            <div class="campo">
+                                <label for="txtTotalGastos"><b>Total Gastos: </b></label>
+                                <input type="text" id="txtTotalGastos" data-reference="totalgastos" required="required" disabled="disabled" data-tipo="tocurrency" data-caja="number">
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend> Resumen </legend>
+                            <div class="campo">
+                                <label for="">Declara Renta:</label>
+
+                                <label for="rbtnDeclaraRentaSi" class="label-enlinea">
+                                    <input type="radio" id="rbtnDeclaraRentaSi" name="rbtnDeclaraRenta"  data-reference="declararenta" data-value="S" required="required"> Sí
+                                </label>
+                                <label for="rbtnDeclaraRentaNo" class="label-enlinea">
+                                    <input type="radio" id="rbtnDeclaraRentaNo" data-reference="declararenta" name="rbtnDeclaraRenta" data-value="N" required="required"> No
+                                </label>
+                            </div>
+                            <div class="campo">
+                                <label for="txtTotalActivos"><b>Total Activos: (Bienes, vehículos, etc) </b></label>
+                                <input type="text" id="txtTotalActivos" data-reference="totalactivos" required="required" disabled="disabled" data-tipo="tocurrency" data-valor="0" value="0" data-caja="number">
+                            </div>
+
+
+                            <div class="campo">
+                                <label for="txtTotalPasivos"><b>Total Pasivos: (Deudas Bancos, otras deudas)</b></label>
+                                <input type="text" id="txtTotalPasivos" data-reference="totalpasivos" required="required" data-caja="number" value="0">
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">EXPERIENCIA FINANCIERA</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable" >
+                        <div id="divExperienciaFinanciera">
+                            <label>Dígite la cantidad de productos financieros según el tipo:</label>
+                        </div>
+                    </div>
+                </div> 
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">PRODUCTO SOLICITADO</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div>
+                            <div class="campo">
+                                <label for="cmbProductoFinanciero">Producto financiero:</label>
+                                <select id="cmbProductoFinanciero" data-reference="productofinanciero" 
+                                        required="required" data-cargar="destinocredito" data-value="idunidad" data-text="nombre">
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label for="txtMontoSolicitado">Monto Solicitado:</label>
+                                <input type="text" id="txtMontoSolicitado" data-reference="montosolicitado" required="required" data-caja="currency">
+                            </div>
+                            <div class="campo">
+                                <label for="cmbDestinoCredito">Destino Crédito:</label>
+                                <select id="cmbDestinoCredito" data-reference="destinocredito" 
+                                        required="required">
+                                    <option value="L">LIBRE INVERSIÓN</option>
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label for="txtPlazo">Plazo: (Mes)</label>
+                                <select id="txtPlazo" data-reference="plazo" required="required">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                    <option value="24">24</option>
+                                    <option value="25">25</option>
+                                    <option value="26">26</option>
+                                    <option value="27">27</option>
+                                    <option value="28">28</option>
+                                    <option value="29">29</option>
+                                    <option value="30">30</option>
+                                    <option value="31">31</option>
+                                    <option value="32">32</option>
+                                    <option value="33">33</option>
+                                    <option value="34">34</option>
+                                    <option value="35">35</option>
+                                    <option value="36">36</option>
+                                    <option value="37">37</option>
+                                    <option value="38">38</option>
+                                    <option value="39">39</option>
+                                    <option value="40">40</option>
+                                    <option value="41">41</option>
+                                    <option value="42">42</option>
+                                    <option value="43">43</option>
+                                    <option value="44">44</option>
+                                    <option value="45">45</option>
+                                    <option value="46">46</option>
+                                    <option value="47">47</option>
+                                    <option value="48">48</option>
+                                    <option value="49">49</option>
+                                    <option value="50">50</option>
+                                    <option value="51">51</option>
+                                    <option value="52">52</option>
+                                    <option value="53">53</option>
+                                    <option value="54">54</option>
+                                    <option value="55">55</option>
+                                    <option value="56">56</option>
+                                    <option value="57">57</option>
+                                    <option value="58">58</option>
+                                    <option value="59">59</option>
+                                    <option value="60">60</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">AUTORIZACIÓN DE DESEMBOLSO</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+                        <div class="campo">
+                            <label for="cmbEntidadFinanciera">Entidad Financiera:</label>
+                            <select id="cmbEntidadFinanciera" data-reference="entidadfinanciera" required="required" data-cargar="bancos" data-value="idtercero" data-text="nombretercero"></select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="cmbTipoCuentaDesembolso">Tipo de Cuenta:</label>
+                            <select id="cmbTipoCuentaDesembolso" data-reference="tipocuentadesembolso" required="required">
+                                <option value="A">Cuenta de Ahorros</option>
+                                <option value="C">Cuenta Corriente</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtNumeroCuento">No. Cuenta:</label>
+                            <input type="text" id="txtNumeroCuento" data-reference="numerocuenta" required="required" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divContenedorColapsable">
+                    <div class="divColapsable">
+                        <h3 class="tituloColapsable">POLIZA DE SEGURO</h3>
+                        <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                    </div>
+                    <div class="contenidoColapsable">
+
+                        <div class="campo">
+                            <label for="txtBeneficiario">Nombre del Beneficiario:</label>
+                            <input type="text" id="txtBeneficiario" data-reference="nombrebeneficiario" required="required" value="POTENZA INVERSIONES SAS" disabled="disabled">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbTipoDocumentoBeneficiario">Tipo Identificación:</label>
+                            <select id="cmbTipoDocumentoBeneficiario" data-reference="tipoidentificacion" disabled="disabled">
+                                <option value="NI">NIT</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtNumeroDocBeneficiario">No. Documento:</label>
+                            <input type="text" id="txtNumeroDocBeneficiario" data-reference="numerodocumentobeneficiario" required="required" disabled="disabled" value="900618586" data-caja="number">
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtPorcentaje">Porcentaje:</label>
+                            <input id="txtPorcentaje"  type="text" disabled="disabled" value="100%"/>
+                        </div>
+                        <div class="campo" style="display: none;">
+                            <label for="cmbParentescoBeneficiario">Parentesco:</label>
+                            <select id="cmbParentescoBeneficiario"  data-cargar="parentesco" data-value="idunidad" data-text="nombre">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabDescarga">
+                <h3>
+                    <a href="{{asset('bundles/Libranza/docs/Formato.pdf')}}" target="_blank">
+                        <i class="fa  fa-file-pdf-o fa-2x" id="iconArchivo"></i>
+                        Descargar Formulario de Solicitud de Préstamo
+                    </a>
+                </h3>
+            </div>
+        </div>
+
+        <fieldset style="margin: 10px 10px 10px 10px;" id="divSubirSoportes">
+            <legend>Subir Soportes </legend>
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Formato</th>
+                        <th>Subir el archivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Formato Diligenciado</span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoFormato">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Fotocopia documento al 150% <span class="pMensaje">(Este archivo es obligatorio)</span> </span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoDocumento">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Certificación Laboral <span class="pMensaje">(Este archivo es obligatorio)</span></span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoCertificado">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Últimos desprendibles de Pago <span class="pMensaje">(Este archivo es obligatorio)</span></span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoDesprendible">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Visto Bueno</span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoVistoBno">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:30%;">
+                            <i class="fa fa-file-o fa-2x" style="font-size:14px"> </i><span> Autorización de Consulta y Reporte en las centrales de Riesgo.</span>
+                        </td>
+                        <td style="width:70%">
+                            <input type="file" id="txtArchivoCentralRiesgo">
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </fieldset>
+
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="/achagua/js/Appload.js"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/solicitudCredito/solicitudCredito.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/solicitudCredito/solicitudCredito.vista.js')}}"></script>
+{% endblock %}

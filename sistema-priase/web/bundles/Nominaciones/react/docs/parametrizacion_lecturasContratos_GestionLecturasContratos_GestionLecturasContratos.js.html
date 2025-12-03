@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/lecturasContratos/GestionLecturasContratos/GestionLecturasContratos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/lecturasContratos/GestionLecturasContratos/GestionLecturasContratos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico, Fecha } from 'appfuture-react';
+import axios from 'axios';
+import { formatearArray, TIPOS_UNIDADES_MEDIDA } from '../../../../global/util_nominaciones';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionLecturasContratos.scss';
+
+const listaCertificado = [
+  { valor: 'S', texto: 'Certificado' },
+  { valor: 'N', texto: 'No Certificado' }
+];
+
+class GestionLecturasContratos extends Component {
+
+  state = {
+    // Datos de la entidad
+    listaContratos: [],
+    listaRutas: [],
+    listaUnidadMedida: [],
+    contrato: '',
+    fecha: '',
+    fechaInicio: '',
+    fechaFin: '',
+    tipoUso: '',
+    agente: '',
+    consultasTerminadas: false,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.CONSULTAR_CONTRATO, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+    ];
+
+    axios.all(peticiones)
+      .then(axios.spread((contratos, unidadesMedida) => {
+        const datosAplicacion = {
+          listaContratos: [],
+          listaUnidadMedida: [],
+        };
+        if (contratos.data.codigo >= 0) {
+          datosAplicacion.listaContratos = formatearArray(contratos.data.datos);
+        }
+        if (unidadesMedida.data.codigo >= 0) {
+          datosAplicacion.listaUnidadMedida = formatearArray(unidadesMedida.data.datos);
+        }
+        this.setState({ ...datosAplicacion, consultasTerminadas: true });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      contrato: '',
+      fecha: ' ',
+      listaRutas: [],
+      fechaInicio: '',
+      fechaFin: '',
+      tipoUso: '',
+      agente: '',
+
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario },
+    ];
+  };
+
+  /**
+   * Método encargado de validar los datos de la tabla ruta
+   * @returns {bool}
+   */
+  validarValorRuta = () => {
+    for (let i = 0; i &lt; this.state.listaRutas.length; i++) {
+      const ruta = this.state.listaRutas[i];
+      if (!ruta.lcdLectura || ruta.lcdLectura === '') {
+        this.props.mostrarAlerta('Datos incompletos', 'Debe ingresar una lectura para la ruta: ' + ruta.uniIderuta.uniNombre1);
+        return false;
+      }
+
+      if (!ruta.uniIdemedida.uniIderegistro || ruta.uniIdemedida.uniIderegistro === '' || ruta.uniIdemedida.uniIderegistro === '-1') {
+        this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar una unidad de medida para la ruta: ' + ruta.uniIderuta.uniNombre1);
+        return false;
+      }
+
+      if (!ruta.lcdCerticado || ruta.lcdCerticado === '' || ruta.lcdCerticado === '-1') {
+        this.props.mostrarAlerta('Datos incompletos', 'Debe especificar si la ruta ' + ruta.uniIderuta.uniNombre1 + ' se encuentra certificada o no');
+        return false;
+      }
+
+    };
+    return true;
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    //Validaciones
+    const { contrato, fecha } = this.state;
+    const fechaDate = new Date(fecha);
+    const fechaActual = new Date();
+    if (contrato === '' || contrato === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un contrato' } };
+    }
+
+    if (fecha.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha' } };
+    }
+
+    if (fechaDate > fechaActual) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La fecha seleccionada no puede ser mayor a la fecha actual' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar un JSON con los valores ingresados
+   * @returns {Object}
+   */
+  obtenerValores = () => {
+    const { contrato, fecha } = this.state;
+    let datos = {
+      'fechaLectura': fecha,
+      'cntContrato': { 'cntIderegistro': contrato },
+    };
+    const valores = this.state.listaRutas.map(dato => (
+      {
+        'uniIderuta': { 'uniIderegistro': dato.uniIderuta.uniIderegistro },
+        'lcdLectura': parseInt(dato.lcdLectura),
+        'uniIdemedida': { 'uniIderegistro': dato.uniIdemedida.uniIderegistro },
+        'lcdCerticado': dato.lcdCerticado,
+      }
+    ));
+
+    datos.listaValores = valores;
+    return datos;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    const validarValor = this.validarValorRuta();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    if (!validarValor) {
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerValores();
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de convertir la fecha ingresada a Date
+   * @param {string} fechaContrato fecha seleccionada por el usuario
+   * @returns {Date}
+   */
+  obtenerFecha = (fechaContrato) => {
+    let fecha = new Date(fechaContrato);
+    fecha = (fecha.getFullYear() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getDate());
+    return fecha;
+  };
+
+  /**
+   * Método encargado de consultar las rutas del contrato seleccionado
+   * @param {number} idContratoSeleccionado contrato seleccionado por el usuario
+   * @param {string} fecha Fecha seleccionada por el usuario
+   * @returns {bool}
+   */
+  consultarRuta = (idContratoSeleccionado, fecha) => {
+    const fechaDate = Date.parse(fecha);
+    const fechaActual = new Date();
+    if (idContratoSeleccionado === '-1') {
+      return false
+    }
+    if (fecha.trim() === '') {
+      return false;
+    }
+    if (fechaDate > Date.parse(fechaActual)) {
+      this.props.mostrarAlerta('Atención', 'La fecha seleccionada no puede ser mayor a la fecha actual');
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.CONSULTAR_RUTAS_CONTRATOS, { idContrato: idContratoSeleccionado, fecha: fecha })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaRutas: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de consultar los datos del contrato seleccionado
+   * @param {number} idContrato contrato seleccionado por el usuario
+   * @returns {bool}
+   */
+  consultarDatosContrato = (idContrato) => {
+    if (!Util.validarArreglo(this.state.listaContratos)) {
+      return;
+    }
+    if (idContrato === '-1') {
+      this.setState({
+        fechaInicio: '',
+        fechaFin: '',
+        tipoUso: '',
+        agente: '',
+        listaRutas: [],
+      });
+      return false
+    }
+    const contrato = this.state.listaContratos.find(p => idContrato == p.cntIderegistro);
+    this.setState({
+      fechaInicio: this.obtenerFecha(contrato.cntFechainicio),
+      fechaFin: this.obtenerFecha(contrato.cntFechafin),
+      tipoUso: contrato.uniIdetipouso.uniNombre1,
+      agente: contrato.terIdeagente.terNomcompleto,
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    const { contrato } = this.state;
+    let change = {};
+    const { name, value } = evento.target;
+    change[name] = value;
+    this.consultarRuta(contrato, value);
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el cambio al momento de seleccionar un contrato
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambioContrato = (evento) => {
+    const { fecha } = this.state;
+    let change = {};
+    const { name, value } = evento.target;
+    change[name] = value;
+    this.consultarRuta(value, fecha);
+    this.consultarDatosContrato(value);
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el cambio al ingresar nuevas lecturas
+   * @param {number} index Posición que se esta modificando
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioValorLectura = (index, evento) => {
+    const listaRutas = [...this.state.listaRutas];
+    listaRutas[index].lcdLectura = evento.target.value;
+    this.setState({ listaRutas });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al seleccionar nuevas unidades de medida
+   * @param {number} index Posición que se esta modificando
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioValorUnidadMedida = (index, evento) => {
+    const listaRutas = [...this.state.listaRutas];
+    listaRutas[index].uniIdemedida.uniIderegistro = evento.target.value;
+    this.setState({ listaRutas });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al cambiar el estado de la lectura
+   * @param {number} index Posición que se esta modificando
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioEstadoCertificacion = (index, evento) => {
+    const listaRutas = [...this.state.listaRutas];
+    listaRutas[index].lcdCerticado = evento.target.value;
+    this.setState({ listaRutas });
+  };
+
+  /**
+   * Método encargado de generar los datos de la tabla de rutas
+   * @return {Array}
+   */
+  renderBodyTabla = () => {
+    return this.state.listaRutas.map((dato, index) => (
+      &lt;tr key={dato.uniIderuta.uniIderegistro}>
+        &lt;td>{dato.uniIderuta.uniNombre1}&lt;/td>
+        &lt;td>
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            value={dato.lcdLectura}
+            cols={12}
+            onChange={(evento) => {
+              this.controlarCambioValorLectura(index, evento);
+            }}
+            name='lectura'
+          />&lt;/td>
+        &lt;td>
+          &lt;Combo
+            opciones={this.state.listaUnidadMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            name='unidadMedida'
+            value={dato.uniIdemedida.uniIderegistro}
+            cols={12}
+            onChange={(evento) => {
+              this.controlarCambioValorUnidadMedida(index, evento);
+            }}
+          />
+        &lt;/td>
+        &lt;td>
+          &lt;Combo
+            opciones={listaCertificado}
+            propTexto='texto'
+            propValor='valor'
+            name='certificado'
+            value={dato.lcdCerticado}
+            cols={12}
+            onChange={(evento) => {
+              this.controlarCambioEstadoCertificacion(index, evento);
+            }}
+          />
+        &lt;/td>
+      &lt;/tr>
+    ));
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    if (!this.state.consultasTerminadas) {
+      return (&lt;p className='text-center'>Cargando...&lt;/p>);
+    }
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaContratos}
+            propTexto='cntNumero'
+            propValor='cntIderegistro'
+            label='Contratos:'
+            name='contrato'
+            value={this.state.contrato}
+            onChange={this.controlarCambioContrato}
+          />
+          &lt;Input
+            label='Agente:'
+            value={this.state.agente}
+            extra={{ disabled: true, readOnly: true }}
+            name='agente'
+          />
+          &lt;Input
+            label='Tipo de uso:'
+            value={this.state.tipoUso}
+            extra={{ disabled: true, readOnly: true }}
+            name='tipoUso'
+          />
+          &lt;Input
+            label='Fecha inicio:'
+            value={this.state.fechaInicio}
+            extra={{ disabled: true, readOnly: true }}
+            name='fechaInicio'
+          />
+          &lt;Input
+            label='Fecha fin:'
+            value={this.state.fechaFin}
+            extra={{ disabled: true, readOnly: true }}
+            name='fechaFin'
+          />
+          &lt;Fecha
+            label='Fecha:'
+            name='fecha'
+            fecha={this.state.fecha}
+            onChange={this.controlarCambio}
+          />
+        &lt;/div>
+        {this.state.listaRutas.length > 0 &amp;&amp;
+          &lt;div className='conf-general row mt28 gestion-lecturas-contratos'>
+            &lt;table className='table table-striped'>
+              &lt;thead>
+                &lt;tr>
+                  &lt;th>Ruta GNC&lt;/th>
+                  &lt;th>Lectura Consumo&lt;/th>
+                  &lt;th>Unidad Medida&lt;/th>
+                  &lt;th>Certificado&lt;/th>
+                &lt;/tr>
+              &lt;/thead>
+              &lt;tbody>
+                {this.renderBodyTabla()}
+              &lt;/tbody>
+            &lt;/table>
+          &lt;/div>
+        }
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionLecturasContratos.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionLecturasContratos);
+
+export { VistaRedux as RGestionLecturasContratos };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

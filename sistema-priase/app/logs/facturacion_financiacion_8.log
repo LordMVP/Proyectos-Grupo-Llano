@@ -1,0 +1,15 @@
+Parámetros para iniciar el proceso 
+Array
+(
+    [idacceso] => 2252210
+    [idciclo] => 145
+    [idproceso] => 8
+    [idempresa] => 317
+)
+Variable global inicializada
+Registrando proceso
+Iniciando proceso
+Procesando financiacionesArray
+(
+)
+Finalizando proceso

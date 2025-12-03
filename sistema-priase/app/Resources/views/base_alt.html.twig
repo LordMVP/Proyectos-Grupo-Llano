@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Llanogas SA E.S.P{% endblock %}</title>
+
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/estilo.layout.css')}}" />
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/estilo.ui.css')}}" />
+        <link rel="stylesheet" type="text/css" href="/achagua/css/style.css" />
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+
+        {% block stylesheets %}{% endblock %}
+        <script type="text/javascript" src="/achagua/js/app.prototypes.js"></script>
+        <script type="text/javascript" src="/achagua/js/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="/achagua/js/jquery.plugins.js"></script>
+        <script type="text/javascript" src="/achagua/js/jquery-ui-1.10.4.custom.min.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.ui.core.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.ui.widget.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.ui.datepicker.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.datetimepicker.js"></script>
+        <script type="text/javascript" src="/achagua/js/maskedinput.min.js"></script>
+        <script type="text/javascript" src="/achagua/js/mustache.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.ui.tabs.js"></script>
+        <script type="text/javascript" src="/achagua/js/ui/jquery.ui.autocomplete.js"></script>
+        <script type="text/javascript" src="/achagua/js/jquery.tree.js"></script>
+        <script type="text/javascript" src="/achagua/js/jquery.cookie.js"></script>
+        
+        <script type="text/javascript" src="/achagua/js/app.funciones.js"></script>
+        <script type="text/javascript" src="/achagua/js/app.global.js"></script>
+        <script type="text/javascript" src="/achagua/js/app.ui.js"></script>
+        <script type="text/javascript" src="/achagua/js/app.tabla.js"></script>
+        <script type="text/javascript">
+            var __app = new App();
+            var __cnn = new Cnn();
+            var __dom = new Dom();
+        </script>
+
+        <script type="text/javascript" src="/achagua/js/menu/menu.model.js"></script>
+        <script type="text/javascript" src="/achagua/js/menu/menu.control.js"></script>
+        <script type="text/javascript" src="/achagua/js/menu/menu.vista.js"></script>
+
+
+        <style type="text/css">
+            .ui-autocomplete { z-index:1000 !important; }
+        </style>
+
+        {% block scripts %}{% endblock %}
+
+    </head>
+    <body>
+
+        <div id="divCargador">
+            <img src="{{asset('bundles/Llanogas/img/cargando2.gif')}}" />
+            <span>Cargando...</span>
+        </div>
+
+        <div id="divDialogo">
+        </div>
+
+        <div id="contenedor">
+            <div id="divTitulo">
+                <h1>Sistema de información de {{empresa}}</h1>
+            </div>
+            <div>
+                <div id="menu">
+                    <div id="userData">
+                        <p>Bienvenido: </p>
+                        <p id="nomUsuarioTxt"></p>
+                        <a href="/achagua/index.html">Cerrar Sesión</a>
+                    </div>
+                    <!-- para crear el menu -->
+                    <div class="filtroBusqueda">
+                        <input type="text"
+                               id="txtFiltroMenu" 
+                               placeholder="Buscar..." autofocus="autofocus">
+                    </div>
+                    <div class="tree contentMenu" id="contenedorOpcionesMenu">
+                        <ul id='menuItems'>
+
+                        </ul>
+                    </div>
+                </div>
+                <div id="divGeneral">
+                    <h2>{% block titulo %}{% endblock %}</h2>
+                    <div id="divFormulario">{% block body %}{% endblock %}</div>
+                </div>
+            </div>
+            <hr class="limpiar" />
+            <div id="piePagina">
+                <p> </p>
+            </div>
+            <div style="display:none;">
+                <input type="hidden" id="hiddenEmpresa" value="{{empresa}}" />
+            </div>
+        </div>
+        {% block javascripts %}{% endblock %}
+        <script type="text/javascript">
+            (function($) {
+                //menuVista.init();
+            })(jQuery);
+        </script>
+    </body>
+</html>

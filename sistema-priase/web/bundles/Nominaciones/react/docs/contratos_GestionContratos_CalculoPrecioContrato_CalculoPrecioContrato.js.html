@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CalculoPrecioContrato.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CalculoPrecioContrato.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+
+// REDUX
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { actualizarCabeceraContrato, actualizarListaContratos, actualizarTipoCalculoContrato } from '../../../../store/actions/ContratosAcciones';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+
+// UI
+import Modal from 'react-bootstrap4-modal';
+import { Input, Combo, Util, TextoNumerico } from 'appfuture-react';
+
+// Util
+import { get as getProp } from 'object-path';
+
+import './CalculoPrecioContrato.scss';
+import { CanastaHorariaSuministro } from './CanastaTarifariaSuministro/CanastaHorariaSuministro';
+import { CanastaConsumoSuministro } from './CanastaTarifariaSuministro/CanastaConsumoSuministro';
+import { CanastaHorariaTransporte } from './CanastaTarifariaTransporte/CanastaHorariaTransporte';
+import { CanastaConsumoTransporte } from './CanastaTarifariaTransporte/CanastaConsumoTransporte';
+import { CanastaDuplexTransporte } from './CanastaTarifariaTransporte/CanastaDuplexTransporte';
+import { CanastaDuplexSuministro } from './CanastaTarifariaSuministro/CanastaDuplexSuministro';
+import { SelectorTramos } from '../../../utils/SelectorTramos';
+
+const tiposServicio = [
+  { texto: 'Suministro', valor: 'S' },
+  { texto: 'Transporte', valor: 'T' }
+];
+
+class CalculoPrecioContrato extends Component {
+
+  state = {
+    mostrarModalTramos: false,
+    tipoCalculo: 'N',
+    unidadMedida: '',
+    precioContrato: '',
+    precioContrato: 0
+  };
+
+  /**
+   * Limpia el formulario específico haciendo limpieza total de la propiedad del objeto global redux.
+   */
+  limpiarFormulario = (evento) => {
+    this.actualizarTipoCalculoRedux({});
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const valorPesos = this.calcularPrecioEnPesos({ name: 'precioContrato', value: this.props.cabecera.precioContrato });
+    this.actualizarCabeceraRedux({ valorPesos: valorPesos });
+  };
+
+  /**
+   * Obtiene el objeto de la unidad seleccionada por id.
+   * @param {Number} idUnidad Identificador de la unidad de medida
+   * @return {object}
+   */
+  obtenerUnidad = (idUnidad) => {
+    let unidadMedida = this.props.listas.unidadesMedida.find(unidad => unidad.uniIderegistro == idUnidad);
+    return unidadMedida;
+  };
+
+  /**
+   * Calcula el precio en  pesos, si la unidad del valor actual seleccionado es dolares (USD).
+   * @param {Event} target Evento ejecutado en el control de usuario
+   */
+  calcularPrecioEnPesos = (target) => {
+    if (target.name === 'unidadMedidaPrecio' || target.name === 'precioContrato') {
+      const idUnidadMedida = (target.name === 'unidadMedidaPrecio') ? target.value : this.props.cabecera.unidadMedidaPrecio;
+      const unidadMedidaActual = this.obtenerUnidad(idUnidadMedida);
+      const precioContrato = (target.name === 'precioContrato') ? target.value : this.props.cabecera.precioContrato;
+      const tipo = getProp(unidadMedidaActual, 'uniPropiedad.tipo', null);
+      if (unidadMedidaActual &amp;&amp; tipo === 'USD') {
+        const trmDia = (this.props.cabecera.trmDia ? this.props.cabecera.trmDia : 0);
+        const trmTecho = ((this.props.cabecera.trmTecho) ? this.props.cabecera.trmTecho : trmDia);
+        const valorPesos = trmTecho * precioContrato;
+        return valorPesos;
+      } else {
+        if (target.name === 'precioContrato') {
+          return target.value;
+        } else if (target.name === 'unidadMedidaPrecio') {
+          return this.props.cabecera.precioContrato;
+        }
+        return this.props.cabecera.valorPesos;
+      }
+    }
+    return this.props.cabecera.valorPesos;
+  };
+
+  /**
+   * Controla los cambios de los componentes y los guarda en el objeto redux global.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const target = evento.target;
+    change[target.name] = target.type === 'checkbox' ? target.checked : target.value;
+    const valorPesos = this.calcularPrecioEnPesos(target);
+    change.valorPesos = valorPesos;
+    if (target.name === 'precioContrato' || target.name == 'porcentajeComercializacion' || target.name == 'unidadMedidaPrecio') {
+      change[target.name] = target.value >= 0 ? (target.value) : 0;
+      this.actualizarCabeceraRedux(change);
+      return;
+    }
+    this.actualizarTipoCalculoRedux(change);
+  };
+
+
+  /**
+   * Controla los cambios de los componentes y los guarda en la lista de tramos selecionados.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioTramo = (evento) => {
+    const control = evento.target;
+    const valor = control.value;
+    const nombrePropiedad = control.name;
+    const idTramo = control.attributes['data-target'].value;
+    const nuevosTramos = [...this.props.listas.listaTramos];
+    const indexTramo = nuevosTramos.findIndex(a => a.idTramo == idTramo);
+    nuevosTramos[indexTramo][nombrePropiedad] = valor;
+    this.props.actualizarListaContratos({ listaTramos: nuevosTramos });
+    this.calcularPrecioContrato();
+  };
+
+  /**
+   * Actualiza la propiedad tipoCalculo en el objeto global redux de contratos.
+   * @param {Object} nuevoCambio Cambio a realizar
+   */
+  actualizarTipoCalculoRedux = (nuevoCambio) => {
+    this.props.actualizarTipoCalculoContrato({
+      ...getProp(this.props, 'tipoCalculo', {}),
+      ...nuevoCambio
+    })
+  };
+
+  /**
+   * Actualiza el objeto cabecera el objeto global redux de contratos.
+   * @param {Object} nuevoCambio Cambio a realizar
+   */
+  actualizarCabeceraRedux = (nuevoCambio) => {
+    this.props.actualizarCabeceraContrato({
+      ...getProp(this.props, 'cabecera', {}),
+      ...nuevoCambio
+    });
+  };
+
+  /**
+   * Método encargado de validar el tipo de contrato que aplica
+   * @returns {Boolean}
+   */
+  validarTipoContratoAplicaNinguna = () => {
+    const tiposContrato = this.props.listas.tiposContrato;
+    const tipos = tiposContrato.filter(tipoContrato => {
+      const esTransporte = tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'T';
+      if (esTransporte) {
+        return tipoContrato;
+      }
+    });
+    return (tipos.length === 0);
+  };
+
+  /**
+   * Obtiene la lista de tipos calculo.
+   * @return {Array}
+   */
+  obtenerListaTiposCalculo = () => {
+    const tiposContrato = this.props.listas.tiposContrato || [];
+    let opciones = [];
+    const tiposContratoSeleccionados = tiposContrato.filter(t => t.seleccionado);
+    const esTipoTransporte = tiposContratoSeleccionados.findIndex(t => getProp(t, 'uniPropiedad.tipocontrato', null) === 'T') !== -1;
+    const usaCanasta = tiposContratoSeleccionados.findIndex(t => getProp(t, 'uniPropiedad.tipocanasta', null)) !== -1;
+    if (this.validarTipoContratoAplicaNinguna()) {
+      opciones.push({ texto: 'Ninguna de las Anteriores', valor: 'N' });
+    }
+    if (esTipoTransporte) {
+      opciones.push({ texto: 'Tramos', valor: 'T' });
+    }
+    if (usaCanasta) {
+      opciones.push({ texto: 'Canasta', valor: 'C' });
+    }
+
+    if (opciones.filter(opcion => opcion.valor === getProp(this.props, 'tipoCalculo.tipoCalculo', null)).length === 0) {
+      this.props.actualizarTipoCalculoContrato({ tipoCalculo: opciones[0].valor });
+    }
+    return opciones;
+  };
+
+  /**
+   * Realizará la conversión de dólares a pesos evaluando si la unidad de medida es dólares...
+   * @returns {Number}
+   */
+  convertirPrecioContrato = () => {
+    const { precioContrato, trmDia, unidadMedida } = getProp(this.props, 'cabecera', {});
+    //Obtener la lista y de ella la unidad de me dida para verificar el uniPropiedad.tipo...
+    const valor = precioContrato * trmDia;
+    return valor;
+  };
+
+  /**
+   * Actualiza el objeto cabecera el objeto global redux de contratos.
+   * @param {Object} tramos Tramos a actualizar en la cabecera
+   */
+  actualizarTramos = (tramos) => {
+    this.props.actualizarListaContratos({ listaTramos: [...tramos] });
+    this.calcularPrecioContrato();
+  };
+
+  /**
+   * Renderiza el formulario tramos.
+   * @return {Component}
+   */
+  obtenerFormularioTramos = () => {
+    return (
+      &lt;div className="col-md-12 mt-3 row">
+        &lt;SelectorTramos
+          titulo='Tramos:'
+          propTexto='trmNombre'
+          propValor='trmIderegistro'
+          seleccionarItem={this.actualizarTramos}
+          mostrarAlerta={this.props.mostrarAlerta}
+          lista={getProp(this.props, 'listas.listaTramos', [])}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={true}
+          aceptaNegativos={false}
+          label='Precio Contrato:'
+          cols={3}
+          value={getProp(this.props, 'cabecera.precioContrato', 0)}
+          onChange={this.controlarCambio}
+          name='precioContrato'
+          extra={{ disabled: true }}
+        />
+        &lt;Combo
+          opciones={getProp(this.props, 'listas.monedas', [])}
+          propTexto='uniNombre1'
+          propValor='uniIderegistro'
+          label='Unidad Medida:'
+          name='unidadMedidaPrecio'
+          cols={3}
+          value={getProp(this.props, 'cabecera.unidadMedidaPrecio')}
+          onChange={this.controlarCambio}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='% Comercialización:'
+          cols={3}
+          value={getProp(this.props, 'cabecera.porcentajeComercializacion', 0)}
+          onChange={this.controlarCambio}
+          name='porcentajeComercializacion'
+        />
+        &lt;div className='col-12 form-group'>
+          {this.renderTablaTramosSeleccionados()}
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de validar los tramos de los cargos
+   * @param {Object} tramo Datos del tramo
+   */
+  validarTramo = (tramo) => {
+    if (!Array.isArray(tramo.listaCargos) || tramo.listaCargos.length === 0) {
+      this.props.mostrarAlerta('Atención', 'El tramo seleccionado no tiene cargos configurados.');
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Obtiene la lista de los tramos seleccionados por el usuario.
+   * @return {Array}
+   */
+  obtenerTramosSeleccionados = () => {
+    return this.props.listas.listaTramos.filter((t) => {
+      if (t.seleccionado) { t.idTramo = Util.generarIdControl('rangoTramo'); return t; }
+    });
+  };
+
+  /**
+    * Obtiene el valor cargo de un tramo.
+    * @param {Object} tramo Datos del tramo
+    * @param {String} tipo Tipo del cargo
+    * @return {Number}
+    */
+  obtenerValorCargo = (tramo, tipo) => {
+    //Verificamos el cargo seleccionado...
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    if (!cargoSeleccionado) {
+      return 0;
+    }
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.trcaCargovariable;
+      case 'F':
+        return cargoSeleccionado.trcaCargofijo;
+      case 'A':
+        return cargoSeleccionado.trcaCargoaoym;
+    }
+  };
+
+  /**
+   * Renderiza la tabla con los tramos seleccionados.
+   * @return {Component}
+   */
+  renderTablaTramosSeleccionados = () => {
+    const listaTramosSeleccionados = this.obtenerTramosSeleccionados();
+    if (listaTramosSeleccionados.length == 0) {
+      return null;
+    }
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th>C. Variable&lt;/th>
+            &lt;th>C. Fijo&lt;/th>
+            &lt;th>C. AO&amp;M&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            listaTramosSeleccionados.map(t => {
+              return (
+                &lt;tr key={t.idTramo}>
+                  &lt;td>{t.trmNombre}&lt;/td>
+                  &lt;td>
+                    &lt;Input
+                      label=''
+                      value={(t.cargoVariable) ? t.cargoVariable : ((t.listaCargos.find(cargo => cargo.seleccionado)) != null ? (t.listaCargos.find(cargo => cargo.seleccionado)).trcaCargovariable : '')}
+                      onChange={this.controlarCambioTramo}
+                      extra={{ 'data-target': t.idTramo }}
+                      name='cargoVariable'
+                    />
+                  &lt;/td>
+                  &lt;td>{this.obtenerValorCargo(t, 'F')}&lt;/td>
+                  &lt;td>{this.obtenerValorCargo(t, 'A')}&lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Calcula el precio del contrato y actualiza el Redux (objeto cabecera).
+   */
+  calcularPrecioContrato = () => {
+    const tramosSeleccionados = this.obtenerTramosSeleccionados();
+    let valores = {
+      precioContrato: 0,
+      valorCargos: {
+        variable: 0,
+        fijo: 0,
+        aom: 0
+      }
+    };
+    for (let i = 0; i &lt; tramosSeleccionados.length; i++) {
+      const tramo = tramosSeleccionados[i];
+      let valorVariable = tramo.cargoVariable > 0 ? parseFloat(tramo.cargoVariable) : this.obtenerValorCargo(tramo, 'V');
+      let ValorFijo = this.obtenerValorCargo(tramo, 'F');
+      let valorAOM = this.obtenerValorCargo(tramo, 'A');
+      valores.valorCargos.variable += valorVariable;
+      valores.valorCargos.fijo += ValorFijo;
+      valores.valorCargos.aom += valorAOM;
+      valores.precioContrato += (valorVariable + ValorFijo + valorAOM);
+    }
+
+    this.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, valorCargos: valores.valorCargos });
+  };
+
+  /**
+   * Obtiene el precio del contrato sumando los valores de los cargos de los tramos seleccionados.
+   * @param {Object} rango Datos del rango
+   * @return {Object}
+   */
+  obtenerPrecioContratoPorTramos = (rango) => {
+    let valores = {
+      precioContrato: 0,
+      valorCargos: {
+        variable: 0,
+        fijo: 0,
+        aom: 0
+      }
+    };
+    const ruta = rango.rutas[0];
+    if (!Array.isArray(ruta.tramos) || ruta.tramos.length == 0) {
+      return valores;
+    }
+    //Recorremos los tramos y sumamos los valores.
+    const tramos = ruta.tramos;
+    for (let i = 0; i &lt; tramos.length; i++) {
+      const tramo = tramos[i];
+      const valorCargoVariable = this.obtenerValorCargo(tramo, 'V');
+      const valorCargoFijo = this.obtenerValorCargo(tramo, 'F');
+      const valorCargoAOM = this.obtenerValorCargo(tramo, 'A');
+      valores.valorCargos.variable += valorCargoVariable;
+      valores.valorCargos.fijo += valorCargoFijo;
+      valores.valorCargos.aom += valorCargoAOM;
+      valores.precioContrato += (valorCargoVariable + valorCargoFijo + valorCargoAOM);
+    }
+    return valores;
+  };
+
+
+  /**
+   * Obtiene los tipos de contrato...
+   * @returns {Array}
+   */
+  obtenerTiposServicio = () => {
+    const tiposContratoSeleccionados = this.props.listas.tiposContrato.filter(t => {
+      if (t.seleccionado &amp;&amp; getProp(t, 'uniPropiedad.tipocanasta', null)) {
+        return t;
+      }
+    });
+
+    const tiposServicio = [];
+
+    for (let i = 0; i &lt; tiposContratoSeleccionados.length; i++) {
+      const tipoContrato = tiposContratoSeleccionados[i];
+      const tiposContrato = getProp(tipoContrato, 'uniPropiedad.tipocanasta', '').split(',');
+      if (tiposContrato.length) {
+        tiposContrato.filter(tipoContratoFiltro => {
+          this.props.listas.tiposContrato.find(tipoContratoBusqueda => {
+            const codigoTipoContrato = getProp(tipoContratoBusqueda, 'uniPropiedad.tipocontrato', '');
+            if (codigoTipoContrato.trim() == (tipoContratoFiltro.trim())) {
+              //Verificamos si no existe un tipo contrato con el mismo tipo de contrato.
+              const index = tiposServicio.findIndex(tipoServicio => getProp(tipoServicio, 'uniPropiedad.tipocontrato', '') == codigoTipoContrato);
+              if (index &lt; 0) {
+                tiposServicio.push(tipoContratoBusqueda);
+              }
+            }
+          });
+        });
+      }
+    }
+    return tiposServicio;
+  };
+
+  /**
+   * Obtiene el formulario de canasta.
+   * @return {Component}
+   */
+  obtenerFormularioCanasta = () => {
+    const tarifaHoraria = getProp(this.props, 'tipoCalculo.tarifaHoraria', false);
+    const tarifaConsumo = getProp(this.props, 'tipoCalculo.tarifaConsumo', false);
+    const checkboxProps = {
+      type: 'checkbox',
+      className: 'checkbox',
+      onChange: this.controlarCambio
+    };
+    return (
+      &lt;Fragment>
+        &lt;Combo
+          opciones={this.obtenerTiposServicio()}
+          propTexto='uniNombre1'
+          propValor='uniPropiedad.tipocontrato'
+          label='Tipo de Servicio:'
+          name='tipoServicio'
+          cols={3}
+          value={getProp(this.props, 'tipoCalculo.tipoServicio', '-1')}
+          onChange={this.controlarCambio}
+        />
+        &lt;Input
+          label='Precio Canasta:'
+          value={getProp(this.props, 'cabecera.precioCanasta', 0)}
+          onChange={this.controlarCambio}
+          name='precioCanasta'
+          cols={3}
+          extra={{ disabled: true }}
+        />
+        &lt;Combo
+          opciones={getProp(this.props, 'listas.monedas', [])}
+          propTexto='uniNombre1'
+          propValor='uniIderegistro'
+          label='Unidad Medida:'
+          name='unidadMedidaPrecio'
+          value={getProp(this.props, 'cabecera.unidadMedidaPrecio')}
+          onChange={this.controlarCambio}
+          cols={4}
+        />
+        &lt;div className='col-3 form-group m-t-22'>
+          &lt;div className="form-group-checkbox">
+            &lt;label className='checkbox'>
+              &lt;input {...checkboxProps} checked={tarifaHoraria || false} name='tarifaHoraria' />
+              &lt;span>Canasta Tarifa Horaria&lt;/span>
+            &lt;/label>
+          &lt;/div>
+          &lt;div className='form-group-checkbox'>
+            &lt;label className='checkbox'>
+              &lt;input {...checkboxProps} checked={tarifaConsumo || false} name='tarifaConsumo' />
+              &lt;span>Canasta Tarifa Consumo&lt;/span>
+            &lt;/label>
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+
+  /**
+   * Renderiza el formulario dependiendo el tipo de calculo seleccionado.
+   * @return {Component}
+   */
+  renderPorTipoCalculo = () => {
+    switch (getProp(this.props, 'tipoCalculo.tipoCalculo', '')) {
+      case 'T':
+        return this.obtenerFormularioTramos();
+      case 'C':
+        return this.obtenerFormularioCanasta();
+      default:
+        return (
+          &lt;div className='col-12 row mt-3'>
+            &lt;TextoNumerico
+              aceptaDecimales={true}
+              aceptaNegativos={false}
+              label='Precio del contrato x:'
+              cols={4}
+              value={getProp(this.props, 'cabecera.precioContrato', '')}
+              onChange={this.controlarCambio}
+              name='precioContrato'
+            />
+            &lt;Combo
+              cols={3}
+              opciones={this.props.listas.monedas}
+              propTexto='uniNombre1'
+              propValor='uniIderegistro'
+              label='Und. Medida:'
+              name='unidadMedidaPrecio'
+              value={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+              onChange={this.controlarCambio}
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={true}
+              aceptaNegativos={false}
+              label='Valor en pesos:'
+              cols={3}
+              value={getProp(this.props, 'cabecera.valorPesos', 0)}
+              onChange={this.controlarCambio}
+              name='valorPesos'
+              extra={{ disabled: true }}
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='% Comercialización:'
+              cols={2}
+              value={getProp(this.props, 'cabecera.porcentajeComercializacion', 0)}
+              onChange={this.controlarCambio}
+              name='porcentajeComercializacion'
+            />
+          &lt;/div>
+        );
+    }
+  };
+
+  /**
+   * Renderiza el formulario de canasta.
+   * @return {Component}
+   */
+  renderFormularioCanasta = () => {
+    // const { tipoCalculo, tarifaConsumo, tarifaHoraria, tipoServicio } = getProp(this.props, 'tipoCalculo', {});
+    // Si el tipo de cálculo es diferente de Canasta o no se ha seleccionado ningún tipo de canasta, no mostrar nada
+    const tipoCalculo = getProp(this.props, 'tipoCalculo.tipoCalculo', '');
+    const tarifaConsumo = getProp(this.props, 'tipoCalculo.tarifaConsumo', '');
+    const tarifaHoraria = getProp(this.props, 'tipoCalculo.tarifaHoraria', '');
+    const tipoServicio = getProp(this.props, 'tipoCalculo.tipoServicio', '');
+
+    if (tipoCalculo !== 'C' || (!tarifaConsumo &amp;&amp; !tarifaHoraria)) {
+      return null;
+    }
+
+    let formHoraria = null;
+    let formConsumo = null;
+    let formUnificado = null;
+
+    if (tarifaHoraria) {
+      if (tipoServicio === 'S') {
+        formHoraria = (
+          &lt;CanastaHorariaSuministro
+            canastaHorariaSuministro={getProp(this.props, 'tipoCalculo.canastaHorariaSuministro', {})}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaUnidadesMedida={this.props.listas.monedas}
+            listaTiposContrato={this.props.listas.tiposContrato}
+            rutasGNC={this.props.listas.rutasGNC}
+            mostrarAlerta={this.props.mostrarAlerta}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+          />
+        );
+      }
+      if (tipoServicio === 'T') {
+        formHoraria = (
+          &lt;CanastaHorariaTransporte
+            canastaHorariaTransporte={getProp(this.props, 'tipoCalculo.canastaHorariaTransporte', {})}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaTramos={this.props.listas.listaTramos}
+            mostrarAlerta={this.props.mostrarAlerta}
+            rutasGNC={this.props.listas.rutasGNC}
+            listaUnidadesMedida={this.props.listas.monedas}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+          />
+        );
+      }
+    }
+
+    if (tarifaConsumo) {
+      if (tipoServicio === 'S') {
+        formConsumo = (
+          &lt;CanastaConsumoSuministro
+            canastaConsumoSuministro={this.props.tipoCalculo.canastaConsumoSuministro}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaUnidadesMedida={this.props.listas.monedas}
+            rutasGNC={this.props.listas.rutasGNC}
+            mostrarAlerta={this.props.mostrarAlerta}
+            listaTiposContrato={this.props.listas.tiposContrato}
+            cabecera={this.props.cabecera}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+          />
+        );
+      }
+      if (tipoServicio === 'T') {
+        // TODO: Agregar el formulario de consumo para transporte
+        formConsumo = (
+          &lt;CanastaConsumoTransporte
+            canastaConsumoTransporte={getProp(this.props, 'tipoCalculo.canastaConsumoTransporte', {})}
+            listaTramos={this.props.listas.listaTramos}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaUnidadesMedida={this.props.listas.monedas}
+            rutasGNC={this.props.listas.rutasGNC}
+            mostrarAlerta={this.props.mostrarAlerta}
+            cabecera={this.props.cabecera}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+
+          />
+        );
+      }
+    }
+
+    if (tarifaHoraria &amp;&amp; tarifaConsumo) {
+      formHoraria = null;
+      formConsumo = null;
+      if (tipoServicio === 'T') {
+        formUnificado = (
+          &lt;CanastaDuplexTransporte
+            canastaDuplexTransporte={getProp(this.props, 'tipoCalculo.canastaDuplexTransporte', {})}
+            listaTramos={this.props.listas.listaTramos}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaUnidadesMedida={this.props.listas.monedas}
+            rutasGNC={this.props.listas.rutasGNC}
+            mostrarAlerta={this.props.mostrarAlerta}
+            cabecera={this.props.cabecera}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+          />
+        );
+      } else if (tipoServicio === 'S') {
+        formUnificado = (
+          &lt;CanastaDuplexSuministro
+            canastaDuplexSuministro={getProp(this.props, 'tipoCalculo.canastaDuplexSuministro', {})}
+            listaTiposContrato={this.props.listas.tiposContrato}
+            actualizarTipoCalculoContrato={this.props.actualizarTipoCalculoContrato}
+            actualizarListaContratos={this.props.actualizarListaContratos}
+            listaUnidadesMedida={this.props.listas.monedas}
+            rutasGNC={this.props.listas.rutasGNC}
+            mostrarAlerta={this.props.mostrarAlerta}
+            cabecera={this.props.cabecera}
+            actualizarCabeceraRedux={this.actualizarCabeceraRedux}
+            valorUnidad={getProp(this.props, 'cabecera.unidadMedidaPrecio', '')}
+          />
+        );
+      }
+    }
+
+    return (
+      &lt;Fragment>
+        {formHoraria}
+        {formConsumo}
+        {formUnificado}
+      &lt;/Fragment>
+    )
+  };
+
+  /**
+   * Render principal...
+   * @return {Component}
+   */
+  render() {
+    return (
+      &lt;div className='row mt-5 calculo-contrato'>
+        &lt;Combo
+          opciones={this.obtenerListaTiposCalculo()}
+          propTexto='texto'
+          propValor='valor'
+          mostrarOpcionPorDefecto={false}
+          label='Tipo de cálculo precio:'
+          cols={3}
+          name='tipoCalculo'
+          value={getProp(this.props, 'tipoCalculo.tipoCalculo', '')}
+          onChange={this.controlarCambio}
+        />
+
+        {this.renderPorTipoCalculo()}
+        {this.renderFormularioCanasta()}
+      &lt;/div>
+    );
+  }
+}
+
+CalculoPrecioContrato.propTypes = {
+  cabecera: PropTypes.object,
+  listas: PropTypes.object,
+  actualizarCabeceraContrato: PropTypes.func,
+  actualizarListaContratos: PropTypes.func,
+  actualizarTipoCalculoContrato: PropTypes.func,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  const { cabecera, listas, tipoCalculo } = state.contratos;
+  return { cabecera, listas, tipoCalculo };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    actualizarCabeceraContrato,
+    actualizarListaContratos,
+    actualizarTipoCalculoContrato,
+    mostrarAlerta
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(CalculoPrecioContrato);
+
+export { VistaRedux as RCalculoPrecioContrato };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

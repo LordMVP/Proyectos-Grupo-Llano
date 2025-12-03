@@ -1,0 +1,494 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylsheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/ventas/registro_ventas.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/contratos.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Ventas: Aprobación - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="aprobar" data-id="A" id="btnAprobar" class="btn" />
+            <input type="button" value="eliminar" data-id="E" id="btnEliminar" class="btn" />
+        </div>
+    </div>
+    <div id="divPanelContenedor">
+        <div id="divTercero">
+            <fieldset>
+                <legend>Información del Tercero</legend>
+                <div class="campoCorto">
+                    <label for="txtNit">NIT:</label>
+                    <input type="text" id="txtNit" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtNombre">Nombre:</label>
+                    <input type="text" id="txtNombre" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtTipoTercero">Tipo Tercero:</label>
+                    <input type="text" id="txtTipoTercero" disabled="disabled" />
+                </div>
+                <button id="btnVerDetalle" class="btnSimple" disabled="disabled">Ver detalle</button>
+            </fieldset>
+        </div>
+        <div id="Suscripcion">
+            <fieldset id="fieldsetDetallesSuscripcion">
+                <legend>Suscripción</legend>
+
+                <div class="campo oculto">
+                    <label for="txtIdSuscripcionDetalle">Id Suscripción:</label>
+                    <input type="text" id="txtIdSuscripcionDetalle" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtCodigoAnterior">Código Anterior:</label>
+                    <input type="text" id="txtCodigoAnterior" disabled="disabled"/>
+
+                </div>
+                <div class="campo">
+                    <label for="txtTipoSuscripcion">Tipo Suscripción:</label>
+                    <input type="text" id="txtTipoSuscripcion" disabled="disabled"/>
+
+                </div>
+                <div class="campo">
+                    <label for="txtLiquidacion">Liquidación:</label>
+                    <input type="text" id="txtLiquidacion" disabled="disabled" />
+
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="txtTipoUso">Tipo Uso:</label>
+                    <input type="text" id="txtTipoUso" disabled="disabled" />
+
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="txtDescripcion">Descripción:</label>
+                    <input type="text" id="txtDescripcion" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtEstado">Estado:</label>
+                    <input type="text" id="txtEstado" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtDirrecion">Dirección:</label>
+                    <input type="text" id="txtDirrecion" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtMunicipio">Municipio:</label>
+                    <input type="text" id="txtMunicipio" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtBarrio">Barrio:</label>
+                    <input type="text" id="txtBarrio" disabled="disabled" />
+                </div>
+
+                <button id="btnVerPropiedad" class="btnSimple" disabled="disabled">Ver Propiedad</button>
+            </fieldset>
+
+        </div>
+        <div id="divVenta">
+            <fieldset>
+                <legend>Venta</legend>
+                <div class="campo">
+                    <label for="txtNumeroVenta">Número Venta:</label>
+                    <input id="txtNumeroVenta" type="text" disabled="disabled"/>
+                </div>
+
+                <div class="campo">
+                    <label for="txtFechaVenta">Fecha:</label>
+                    <input id="txtFechaVenta" type="text" disabled="disabled" value="{{fecha}}" />
+                </div>
+                <div class="campo">
+                    <label for="txtEstadoVenta">Estado:</label>
+                    <input id="txtEstadoVenta" type="text" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtFechaAprobacion">Fecha Aprobación:</label>
+                    <input id="txtFechaAprobacion" type="text" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtFechaEliminado">Fecha Eliminado:</label>
+                    <input id="txtFechaEliminado" type="text" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtTipoVenta">Tipo Venta:</label>
+                    <input id="txtTipoVenta" type="text" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtTipoDocumento">Tipo Documento:</label>
+                    <input type="text" id="txtTipoDocumento" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtDocumento">Documento:</label>
+                    <input type="text" id="txtDocumento" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtObservacion">Observaciones:</label>
+                    <input id="txtObservacion" type="text" disabled="disabled" maxlength="255" />
+                </div>
+                <div class="campo">
+                    <label for="txtMetodoPago">Método Pago:</label>
+                    <select id="txtMetodoPago" disabled="disabled" >
+                        <option value="-1">Seleccione una opción</option>
+                        <option value="C">Contado</option>
+                        <option value="F">Financiado</option>
+                    </select>
+                </div>
+            </fieldset>
+        </div>
+
+    </div>
+    <div id="tabs">
+        <ul>
+            <li><a href="#divFirmaInstaladora"><i class="fa fa-check fa-1x"></i>Firma instaladora</a></li>
+            <li><a href="#divAsesor"><i class="fa fa-check fa-x2"></i>Asesor</a></li>
+        </ul>
+
+        <div id="divFirmaInstaladora">
+            <fieldset>
+                <legend>Firma instaladora</legend>
+                <div class="campo">
+                    <label for="txtEmpresaInstaladora">Empresa Instaladora:</label>
+                    <input type="text" id="txtEmpresaInstaladora" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtFuncionarioCertificador">Funcionario:</label>
+                    <input type="text" id="txtFuncionarioCertificador" disabled="disabled"  />
+                </div>
+                <div class="campo">
+                    <label for="txtCertificado">Certificado:</label>
+                    <input type="text" id="txtCertificado" disabled="disabled"/>
+                </div>
+
+                <div class="campoCorto">
+                    <label for="txtFechaInicioCertificado">Inicio Certificado:</label>
+                    <input id="txtFechaInicioCertificado" disabled="disabled" type="text" disabled="disabled">
+                </div>
+
+                <div class="campoCorto">
+                    <label for="txtFechaFinCertificado">Fin Certificado:</label>
+                    <input id="txtFechaFinCertificado" disabled="disabled" type="text" disabled="disabled" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Organismos de inspección acreditados</legend>
+                <div class="campo">
+                    <label for="txtOrganismosInspeccion"></label>
+                    <input type="text" id="txtOrganismosInspeccion" disabled="disabled"/>
+                </div>
+            </fieldset>
+        </div>
+        <div id="divAsesor">
+            <fieldset>
+                <legend>Asesor</legend>
+                <div class="campo">
+                    <label for="txtNombreAsesorVenta">Nombre Asesor:</label>
+                    <input type="text" id="txtNombreAsesorVenta" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtDocumentoAsesorVenta">Documento Asesor:</label>
+                    <input type="text" id="txtDocumentoAsesorVenta" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtTipoTerceroVenta">Tipo de Tercero:</label>
+                    <input type="text" id="txtTipoTerceroVenta" disabled="disabled" />
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <div id="pestanias">
+        <ul>
+            <li><a href="#divLiquidacionVenta"><i class="fa fa-check fa-1x"></i>Liquidación Venta</a></li>
+            <li><a href="#divAdjunto"><i class="fa fa-check fa-x2"></i>Adjunto Venta</a></li>
+            <li><a href="#divFinanciacion"><i class="fa fa-check fa-x2"></i>Financiación</a></li>
+        </ul>
+        <div id="divLiquidacionVenta">
+            <table class="tabla" id="tblLiquidaciones"></table>
+            <table class="tabla" id="tblConceptosInformativos"></table>
+            <div class="campo">
+                <label for="txtValorVenta">Valor total:</label>
+                <input id="txtValorVenta" type="text" disabled="disabled" />
+            </div>
+        </div>
+        <div id="divAdjunto">
+            <input type="file" id="txtArchivos" style="display:none;">
+        </div>
+        <div id="divFinanciacion">
+            <p class="pMensaje" id="pFinanciacion"></p>
+            <div id="divInfoFinanciacion">
+                <div class="campoCorto">
+                    <label for="txtNumFinanciacion">Num. financiación:</label>
+                    <input type="text" id="txtNumFinanciacion" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtCiclo">Ciclo:</label>
+                    <input type="text" id="txtCiclo" disabled="disabled" />
+                </div>
+
+                <div class="campoCorto">
+                    <label for="txtPeriodo">Período:</label>
+                    <input type="text" id="txtPeriodo" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtFecha">Fecha:</label>
+                    <input type="text" id="txtFecha" disabled="disabled"/>
+                </div>
+
+                <div class="campo">
+                    <label for="txtDocSolicitante">NIT/CC Solicitante:</label>
+                    <input type="text" id="txtDocSolicitante" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtNombreSolicitante">Nombre Solicitante:</label>
+                    <input type="text" id="txtNombreSolicitante" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtParentesto">Parentesco:</label>
+                    <input id="txtParentesto" type="text" disabled="disabled"/>
+                </div>
+                <div class="campo">
+                    <label for="txtBanco">Banco:</label>
+                    <input type="text" id="txtBanco" disabled="disabled"/>
+                </div>
+
+                <div class="campo">
+                    <label for="txtValorMinPago">Valor No Financiable:</label>
+                    <input type="text" id="txtValorMinPago" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtValorFinanciable">Valor financiable:</label>
+                    <input type="text" id="txtValorFinanciable" disabled="disabled"/>
+                </div>
+
+                <div class="campo">
+                    <label for="txtValorFinanciar">Valor a financiar:</label>
+                    <input type="text" id="txtValorFinanciar" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtValorCuotaInicial">Valor cuota inicial:</label>
+                    <input type="text" id="txtValorCuotaInicial" disabled="disabled" />
+                </div>
+                <div class="campoCorto">
+                    <label for="txtNumCuotas">Cuotas:</label>
+                    <input type="text" id="txtNumCuotas" disabled="disabled"/>
+                </div>
+                <fieldset>
+                    <legend>Soportes</legend>
+                    <input type="file" id="txtArchivosFinanciacion" />
+                </fieldset>
+                <fieldset>
+                    <legend>Conceptos financiados</legend>
+                    <table id="tblFinanciaciones" class="tabla"></table>
+                    <table id="tblNoFinanciables" class="tabla"></table>
+                </fieldset>
+
+            </div>
+        </div>
+    </div>
+
+    <!--División para buscar una venta -->
+    <div id="divBuscarVenta" style="display:none">
+        <div class="campo">
+            <label for="txtFiltroNombreTercero">Nombre Tercero:</label>
+            <input type="text" id="txtFiltroNombreTercero" data-attr="nombreTercero"/>
+            <input type="hidden" id="idTercero" data-attr="idTercero"/>
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDocumento">Nit/CC :</label>
+            <input type="text" id="txtFiltroDocumento" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodigoAnterior">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodigoAnterior" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFiltroNumVenta">Num. venta:</label>
+            <input type="text" id="txtFiltroNumVenta" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroIdPropiedad">Id Propiedad:</label>
+            <input type="text" id="txtFiltroIdPropiedad" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroIdSuscripcion">Id Suscripción:</label>
+            <input type="text" id="txtFiltroIdSuscripcion" />
+        </div>
+        <div class="campo">
+            <fieldset>
+                <legend>Rango fechas</legend>
+                <div class="campo">
+                    <label for="txtFiltroFechaInicio">Inicio: </label>
+                    <input id="txtFiltroFechaInicio" type="text"/>
+                </div>
+                <div class="campo">
+                    <label for="txtFiltroFechaFin">Fin: </label>
+                    <input id="txtFiltroFechaFin" type="text"/>
+                </div>
+            </fieldset>
+        </div>
+        <div class="campo">
+            <button class="btnSimple" id="btnBuscarVenta">Buscar</button>
+        </div>
+        <span id="pMensajeVenta" class="pMensaje"></span>
+        <div id="divListaSelecciónVenta" style="max-height: 200px; overflow: auto;"></div>
+    </div>
+
+    <div>
+        <fieldset id="fieldsetPropiedad" style="display: none;">
+            <legend>Propiedad</legend>
+
+            <div class="campo">
+                <label for="txtNumeroPropiedad">Número Propiedad:</label>
+                <input type="text" id="txtNumeroPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTipoPropiedad">Tipo Propiedad:</label>
+                <input type="text" id="txtTipoPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtMunicipioPropiedad">Municipio:</label>
+                <input type="text" id="txtMunicipioPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtBarrioPropiedad">Barrio:</label>
+                <input type="text" id="txtBarrioPropiedad" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtDireccion">Dirección:</label>
+                <input type="text" id="txtDireccion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtSeccion">Sección:</label>
+                <input type="text" id="txtSeccion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtManzana">Manzana:</label>
+                <input type="text" id="txtManzana" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtAltoRiesgo">Alto Riesgo:</label>
+                <input type="text" id="txtAltoRiesgo" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNumeroCatastral">Número Catastral:</label>
+                <input type="text" id="txtNumeroCatastral" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtZona">Zona:</label>
+                <input type="text" id="txtZona" disabled="disabled" />
+            </div>
+
+            <div>
+                <label for="txtDescripcionPropiedad">Descripción:</label>
+                <textarea id="txtDescripcionPropiedad" disabled="disabled" ></textarea>
+            </div>
+
+        </fieldset>
+    </div>
+
+    <!-- División para el filtro de terceros -->
+    <div id="divDetalleTercero" style="display: none">
+
+        <div class="campo">
+            <label for="txtDetalleDocumento">Documento:</label>
+            <input type="text" id="txtDetalleDocumento" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtDetalleNombre">Nombre:</label>
+            <input type="text" id="txtDetalleNombre" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtIdTercero">Id Tercero:</label>
+            <input type="text" id="txtIdTercero" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtTelefonoFijo">Teléfono Fijo:</label>
+            <input type="text" id="txtTelefonoFijo" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtTelefonoCelular">Teléfono Celular:</label>
+            <input type="text" id="txtTelefonoCelular" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtIdSuscriptor">Id Suscriptor:</label>
+            <input type="text" id="txtIdSuscriptor" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtConvenio">Convenio:</label>
+            <input type="text" id="txtConvenio" disabled="disabled" />
+        </div>
+
+        <div>
+            <label for="txtDetalleDescripcion">Descripción:</label>
+            <textarea id="txtDetalleDescripcion" disabled="disabled" ></textarea>
+        </div>
+
+    </div>
+
+    <div id="divCambioVenta" style="display: none">
+        <p> La venta se va a <span></span> ¿Desea continuar?</p>
+    </div>
+
+    <div id="divAgenda" style="display: none">
+        <label for="cmbAgenda">Agenda:</label>
+        <select id="cmbAgenda"></select>
+        <label for="txtObservacionAprobacion">Observación:</label>
+        <textarea id="txtObservacionAprobacion"></textarea>
+        <div>
+            <p id="pMensajeAprobar" class="pMensaje"></p>
+        </div>
+    </div>
+    <div id="divDetallesFinanciacion" style="display: none;">
+        <table id="tblDetalleFinanciacion" class="tabla"></table>
+    </div>
+    <div id="divTemplateContrato" style="display:none"></div>
+    <div id="frameContratos" style="display:none;">
+        <iframe src="/achagua/sistema/web/bundles/Llanogas/templates/framecontrato.html" frameborder="0" id="iframePagare"></iframe>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/financiarventas/financiarventas.control.js')}}?v={{version}}"></script>
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/registroventas/registroventas.model.js')}}?v={{version}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/registroventas/registroventas.control.js')}}?v={{version}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/registroventas/registroventas.vista.js')}}?v={{version}}"></script>
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/aprobarventas/aprobarventas.modelo.js')}}?v={{version}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/aprobarventas/aprobarventas.control.js')}}?v={{version}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/aprobarventas/aprobarventas.vista.js')}}?v={{version}}"></script>
+
+{% endblock %}

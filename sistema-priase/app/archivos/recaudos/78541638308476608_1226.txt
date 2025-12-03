@@ -1,0 +1,2 @@
+Id Transacción,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Número De Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+3154793343,2021-11-21 20:38:24,31629,APROBADA,PSE,31921553	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155

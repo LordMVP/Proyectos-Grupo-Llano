@@ -1,0 +1,344 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="/achagua/css/appload.css" />
+    <style>
+        .label-enlinea{
+            display: inline !important;
+            margin-right: 15px;
+        }
+        .file-item-desc{
+            width: 50%;
+        }
+        .file-item-btns {
+            width: 43%;
+        }
+        .file-item:nth-child(2n+1) {
+            background-color: inherit !important; 
+        }
+
+        .campodoble{
+            display: inline-block;
+            width: 65%
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Resumen de créditos - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divComandos">
+        <div class="divBotones" style="margin-bottom:15px;">
+            <button id="btnBuscar" class="btnSimple">Buscar créditos</button>
+        </div>
+    </div>
+    <a href="../detalles/" id="linkExportar" target="_blank"></a>
+    <div>
+        <table class="tabla" id="tblSolicitudes"></table>
+    </div>
+
+    <div id="divFiltroCreditos" style="display: none;">
+        <div class="campo">
+            <label for="cmbEtapa">Etapa de crédito: </label>
+            <select id="cmbEtapa"></select>
+        </div>
+        <div class="campo">
+            <label for="cmbProducto">Producto financiero: </label>
+            <select id="cmbProducto"></select>
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Documento Solicitante: </label>
+            <input type="text" id="txtDocuemntoSol" />
+        </div>
+        <div class="campo">
+            <label for="txtNombreSolicitante">Nombre solicitante: </label>
+            <input type="text" id="txtNombreSolicitante" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha inicial: </label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha final: </label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+        <div class="campo">
+            <label for="txtMontoInicio">Monto inicial: </label>
+            <input type="text" id="txtMontoInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtMontoFin">Monto final: </label>
+            <input type="text" id="txtMontoFin" />
+        </div>
+        <div class="campo">
+            <label for="cmbEmpresas">Empresas: </label>
+            <select id="cmbEmpresas"></select>
+        </div>
+        <span class="pMensaje"></span>
+        <div class="campo">
+            <button class="btnSimple" id="btnBuscarCreditos">Buscar </button>
+        </div>
+
+    </div>
+    <div id="divComentarios" style="display: none;">
+        <table id="tblComentarios" class="tabla"></table>
+    </div>
+    <div id="divDetallesSolicitud" style="display:none;">
+
+        <h2>Información de solicitud de crédito </h2>
+        <div style="padding: 10px 10px 10px 10px">
+            <div class="campo">
+                <label for="txtFechaSolicitud">FECHA DE LA SOLICITUD</label>
+                <input type="text" id="txtFechaSolicitud" data-reference="fechasolicitud" disabled="disabled"/>
+            </div>
+            <div class="campo"></div>
+            <div class="campo">
+                <label for="txtNumRadicado">RADICADO Nº </label>
+                <input type="text" id="txtNumRadicado" data-reference="numeroradicado" disabled="disabled"/> 
+            </div>
+        </div>
+        <div style="max-height: 65vh; overflow: auto;">
+            <div class="divContenedorColapsable">
+                <div class="divColapsable">
+                    <h3 class="tituloColapsable">INFORMACIÓN BÁSICA</h3>
+                    <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                </div>
+                <div class="contenidoColapsable">
+                    <div class="campo">
+                        <label for="txtNombre">Nombre completo: </label>
+                        <input type="text" id="txtNombre" data-reference="nombrecompleto" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="cmbTipoDocumento">Tipo Documento:</label>
+                        <select name="" id="cmbTipoDocumento" data-reference="tipodocumento" disabled="disabled">
+                            <option value="cc">C.C.</option>
+                            <option value="ce">C.E.</option>
+                            <option value="ti">T.I.</option>
+                            <option value="rc">R.C.</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="txtNumDocumento">Numero Documento:</label>
+                        <input type="text" id="txtNumDocumento" required data-reference="documento" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="txtFechaNacimiento">Fecha Nacimiento:</label>
+                        <input type="text" id="txtFechaNacimiento" data-reference="fechanacimiento" disabled="disabled" >
+                    </div>
+                    <div class="campo">
+                        <label for="cmbLugarNacimiento">Lugar Nacimiento:</label>
+                        <input type="text" data-reference="lugarnacimiento" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="cmbEstadoCivil">Estado Civil:</label>
+                        <input type="text" data-reference="estadocivil" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="">Sexo:</label>
+                        <label id="rbtnSexoF" class="label-enlinea">
+                            <input type="radio" id="rbtnSexoF" name="rbtnSexo" data-reference="sexo" data-value="F" disabled="disabled">F
+                        </label>
+                        <label id="rbtnSexoM" class="label-enlinea">
+                            <input type="radio" id="rbtnSexoM" name="rbtnSexo" data-reference="sexo" data-value="M" disabled="disabled">M
+                        </label>
+                    </div>
+                    <div class="campodoble">
+                        <label for="">No. de Personas a Cargo</label>
+                        <div class="campo" style="width: 48%">
+                            <label for="txtCargoMenores">Menores de 18 años:</label>
+                            <input type="text" id="txtCargoMenores" data-reference="menoresedad" disabled="disabled">
+                        </div>
+
+                        <div class="campo" style="width: 48%">
+                            <label for="txtCargoMayor">Mayores de 18 años:</label>
+                            <input type="text" id="txtCargoMayor" data-reference="mayoresedad" disabled="disabled">
+                        </div>
+                    </div>
+                    <div class="campo">
+                        <label for="cmbNivelEducacion">Nivel de Educación:</label>
+                        <input type="text" data-reference="niveleducacion" id="txtNivelEducacion" disabled="disabled">
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtProfesion">Profesión/Ocupación:</label>
+                        <input type="text" data-reference="profesion" id="txtProfesion" disabled="disabled">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divContenedorColapsable">
+                <div class="divColapsable">
+                    <h3 class="tituloColapsable">PRODUCTO SOLICITADO</h3>
+                    <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                </div>
+                <div class="contenidoColapsable">
+                    <div>
+                        <div class="campo">
+                            <label for="cmbProductoFinanciero">Producto financiero:</label>
+                            <input type="text" id="cmbProductoFinanciero" data-reference="productofinanciero"  disabled="disabled" >
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtMontoSolicitado">Monto Solicitado:</label>
+                            <input type="text" id="txtMontoSolicitado" data-reference="montosolicitado" disabled="disabled">
+                        </div>
+                        <div class="campo">
+                            <label for="cmbDestinoCredito">Destino Crédito:</label>
+                            <select id="cmbDestinoCredito" data-reference="destinocredito" disabled="disabled">
+                                <option value="C"> COMPRA DE CARTERA</option>
+                                <option value="L">LIBRE INVESIÓN</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtPlazo">Plazo: (Mes)</label>
+                            <select id="txtPlazo" data-reference="plazo" disabled="disabled">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                                <option value="31">31</option>
+                                <option value="32">32</option>
+                                <option value="33">33</option>
+                                <option value="34">34</option>
+                                <option value="35">35</option>
+                                <option value="36">36</option>
+                                <option value="37">37</option>
+                                <option value="38">38</option>
+                                <option value="39">39</option>
+                                <option value="40">40</option>
+                                <option value="41">41</option>
+                                <option value="42">42</option>
+                                <option value="43">43</option>
+                                <option value="44">44</option>
+                                <option value="45">45</option>
+                                <option value="46">46</option>
+                                <option value="47">47</option>
+                                <option value="48">48</option>
+                                <option value="49">49</option>
+                                <option value="50">50</option>
+                                <option value="51">51</option>
+                                <option value="52">52</option>
+                                <option value="53">53</option>
+                                <option value="54">54</option>
+                                <option value="55">55</option>
+                                <option value="56">56</option>
+                                <option value="57">57</option>
+                                <option value="58">58</option>
+                                <option value="59">59</option>
+                                <option value="60">60</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="divContenedorColapsable">
+                <div class="divColapsable">
+                    <h3 class="tituloColapsable">INFORMACIÓN FINANCIERA</h3>
+                    <div class="btnColapsable"><a href="" class="fa fa-minus" tabindex="-1"></a></div>
+                </div>
+                <div class="contenidoColapsable">
+                    <div class="campo">
+                        <label for="txtSalarioBasico">Salario Básico:</label>
+                        <input type="text" id="txtSalarioBasico" data-id="ingreso" data-reference="salariobasico" disabled="disabled" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="txtOtrosIngresos">Otros Ing. Laborales: (Comisiones-Horas extras)</label>
+                        <input type="text" id="txtOtrosIngresos" data-id="ingreso" data-reference="otrosingresos" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="txtOtrosIngresosArriendo">Otros Ingresos: (Arriendos, otros)</label>
+                        <input type="text" id="txtOtrosIngresosArriendo" data-id="ingreso" data-reference="otrosingresosarriendo" disabled="disabled">
+                    </div>
+                    <div>
+                        <label for="txtDescripcionOtrosIngresos">Descripción otros ingresos:</label>
+                        <textarea style="width:100%" id="txtDescripcionOtrosIngresos" data-reference="descripcionotrosingresos"disabled="disabled"></textarea>
+                    </div>
+                    <div class="campo">
+                        <label for="txtGastosHogar">Gastos Hogar: (Alimentación, educación, transporte otros)</label>
+                        <input type="text" id="txtGastosHogar" data-reference="gastoshogar" data-id="gasto" disabled="disabled" value="0">
+                    </div>
+                    <div class="campo">
+                        <label for="txtArriendoCuota">Arriendo y/o cuota vivienda:</label>
+                        <input type="text" id="txtArriendoCuota" data-reference="arriendocuotavivienda" data-id="gasto" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="txtCuotaBanco">Cuotas Bancos:</label>
+                        <input type="text" id="txtCuotaBanco" data-reference="cuotabanco" data-id="gasto" disabled="disabled">
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtOtrosGastos">Otros Gastos:</label>
+                        <input type="text" id="txtOtrosGastos" data-reference="otrosgastos" data-id="gasto" disabled="disabled">
+                    </div>
+
+                    <div class="campo">
+                        <label for="">Declara Renta:</label>
+
+                        <label for="rbtnDeclaraRentaSi" class="label-enlinea">
+                            <input type="radio" id="rbtnDeclaraRentaSi" data-reference="declararenta" name="rbtnDeclaraRenta" data-value="S" disabled="disabled"> Sí
+                        </label>
+                        <label for="rbtnDeclaraRentaNo" class="label-enlinea">
+                            <input type="radio" id="rbtnDeclaraRentaNo" data-reference="declararenta" name="rbtnDeclaraRenta" data-value="N" disabled="disabled"> No
+                        </label>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtTotalIngresosMes"><b>Total Ingresos Mensuales:</b></label>
+                        <input type="text" id="txtTotalIngresosMes" data-reference="totalingresosmes" required="required" disabled="disabled">
+                    </div>
+                    <div class="campo">
+                        <label for="txtTotalGastos"><b>Total Gastos: </b></label>
+                        <input type="text" id="txtTotalGastos" data-reference="totalgastos" required="required" disabled="disabled">
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtTotalActivos"><b>Total Activos: (Inmuebles, Vehículos, Maquinaria, etc) </b></label>
+                        <input type="text" id="txtTotalActivos" data-reference="totalactivos" disabled="disabled">
+                    </div>
+
+
+                    <div class="campo">
+                        <label for="txtTotalPasivos"><b>Total Pasivos: (Deudas Bancos, otras deudas)</b></label>
+                        <input type="text" id="txtTotalPasivos" data-reference="totalpasivos" disabled="disabled">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="/achagua/js/Appload.js"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/resumenCredito/resumenCredito.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/resumenCredito/resumenCredito.vista.js')}}"></script>
+{% endblock %}

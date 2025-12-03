@@ -1,0 +1,78 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+
+    <style>
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            margin-right: 55px;
+            display: inline-block;
+            width: 40%;
+            position: relative;
+            top: 16px;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Financiaciones: Consultar  -  {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="Consultar" id="btnConsultar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <fieldset>
+            <legend>Financiaciones Especiales</legend>
+            <div class="campo">
+                <label for="txtCodigoUsuario">Ingrese el Codigo de Usuario: </label>
+                <input type="text" id="txtCodUsuario"/>
+            </div>
+            <div class="campo">
+                <label for="txtCodigoUsuario">Ingrese el Id Financiación: </label>
+                <input type="text" id="txtIdFinanciacion"/>
+            </div>
+            <div id="divResultados">
+                <div style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblFinanciaciones" class="tabla"></table>
+                </div>
+                <div id="divPagos" style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblPagos" class="tabla"></table>
+                </div>
+                <div id="divAmortizaciones" style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblAmortizaciones" class="tabla"></table>
+                </div>
+                <div id="divTerceros" style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblTerceros" class="tabla"></table>
+                </div>
+                
+            </div>
+        </fieldset>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/consultar/consultarFinan.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/consultar/consultarFinan.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/consultar/consultarFinan.vista.js')}}"></script>
+{% endblock %}

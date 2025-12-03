@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/SuministroConRutas.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/SuministroConRutas.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { ComboHoras } from '../Componentes/ComboHoras';
+import { Util, TextoNumerico, Combo } from 'appfuture-react';
+import { get as getProp } from 'object-path';
+
+import { SelectorRutas } from '../../../../utils/SelectorRutas';
+
+import Modal from 'react-bootstrap4-modal';
+
+import './SuministroConRutas.scss';
+
+class SuministroConRuta extends Component {
+
+  state = {
+    mostrarRutas: false,
+    horaFin: '',
+    ultimaHora: '00:00'
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  actualizarState = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    this.setState(cambio);
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux
+   * @param {Event} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    const llave = !this.props.intervalos ? 'canastaHorariaSuministro' : 'canastaConsumoSuministro';
+    let obj = {};
+    obj[llave] = { ...this.props[llave], ...cambio };
+    this.props.actualizarTipoCalculoContrato(obj);
+  };
+
+  /**
+   * Método encargado de obtener las rutas seleccionadas
+   * @returns {Array}
+   */
+  obtenerRutasSeleccionadas = () => {
+    const rutas = this.props.rutasGNC.filter(r => (r.seleccionado));
+    return [...rutas];
+  }
+
+  /**
+   * Método encargado de mostrar el buscador de rutas
+   * @returns {JSX}
+   */
+  renderBuscadorRutas = () => {
+    return (
+      &lt;SelectorRutas
+        titulo='Rutas:'
+        propTexto='uniNombre1'
+        propValor='uniIderegistro'
+        seleccionarItem={this.actualizarRutas}
+        unidadesMedida={getProp(this.props, 'listaUnidadesMedida')}
+        mostrarAlerta={this.props.mostrarAlerta}
+        tiposContrato={getProp(this.props, 'listaTiposContrato')}
+        lista={getProp(this.props, 'rutasGNC', [])}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de actualizar las rutas en el objeto redux
+   * @returns {Boolean}
+   */
+  actualizarRutas = (rutas) => {
+    let sumatoria = 0;
+    rutas.forEach(ruta => {
+      if (ruta.seleccionado) {
+        sumatoria += (ruta.cntuValor) ? parseFloat(ruta.cntuValor) : 0;
+      }
+    });
+    this.props.actualizarListaContratos({ rutasGNC: [...rutas], rutas: [...rutas] });
+    this.actualizarCabeceraRedux({ precioContrato: sumatoria });
+    this.actualizarRutasEnRangos();
+  };
+
+  /**
+   * Método encargado de actualizar las rutas en los rangos en el objeto redux
+   * @returns {Boolean}
+   */
+  actualizarRutasEnRangos = () => {
+    // Si no hay rangos seleccionados, no hacer nada
+    const { canastaHorariaSuministro } = this.props;
+    if (!canastaHorariaSuministro || !Util.validarArreglo(canastaHorariaSuministro.canastaConRutas)) {
+      return;
+    }
+
+    const rutasSeleccionadas = [...this.obtenerRutasSeleccionadas()];
+    let nuevaCanasta = [...canastaHorariaSuministro.canastaConRutas];
+
+    nuevaCanasta.forEach(canasta => {
+
+      if (!Util.validarArreglo(canasta.rutas)) {
+        return;
+      }
+
+      let nuevasRutas = [...canasta.rutas];
+
+      // Validar que las rutas del rango coincidan con las rutas seleccionadas
+      rutasSeleccionadas.forEach(ruta => {
+
+        // Si hay más rutas seleccionadas que rutas en el rango, se agregan las nuevas rutas
+        if (rutasSeleccionadas.length > nuevasRutas.length) {
+          const rutaExiste = nuevasRutas.findIndex(rr => rr.uniIderegistro === ruta.uniIderegistro) > -1;
+          if (!rutaExiste) {
+            nuevasRutas.push({ ...ruta, valor: 0, unidadMedida: -1, porcentaje: 0, idRutaRango: Util.generarIdControl('rangoRuta') });
+          }
+        }
+
+        // Si el rango tiene más rutas de las que están seleccionadas, remover la ruta sobrante
+        if (nuevasRutas.length > rutasSeleccionadas.length) {
+          nuevasRutas = nuevasRutas.filter(rangoRuta => rutasSeleccionadas.findIndex(r => r.uniIderegistro === rangoRuta.uniIderegistro) > -1);
+        }
+
+      });
+      canasta.rutas = nuevasRutas;
+    });
+
+
+    this.actualizarEstadoRedux({ canastaConRutas: nuevaCanasta });
+  };
+
+  /**
+   * Método encargado de agregar el rango parametrizado a la tabla
+   * @returns {Boolean}
+   */
+  agregarRango = () => {
+    // Validar si hay rutas y la hora es valida
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      const { titulo, mensaje } = validacion.mensaje;
+      this.props.mostrarAlerta(titulo, mensaje);
+      return;
+    }
+
+    const { canastaHorariaSuministro } = this.props;
+    const { horaFin, ultimaHora } = this.state;
+    let rangos = [];
+
+    if (Util.validarArreglo(canastaHorariaSuministro.canastaConRutas)) {
+      rangos = [...canastaHorariaSuministro.canastaConRutas];
+    }
+
+    // Determina cuál es la hora de inicio del rango que se va a crear
+    const horaInicio = (ultimaHora !== '00:00')
+      ? this.convertirValorAHora(parseInt(ultimaHora) - 1).substring(0, 4) + '1'
+      : ultimaHora;
+
+    const nuevoRango = {
+      rango: {
+        horaInicio: horaInicio,
+        horaFin: horaFin
+      },
+      rutas: this.configurarRangoPorRutas()
+    };
+
+    rangos.push({ idRangoConRuta: Util.generarIdControl('canastaConRuta_'), ...nuevoRango });
+    this.setState({ ultimaHora: this.obtenerNuevaHoraFin(horaFin) });
+    this.actualizarEstadoRedux({ canastaConRutas: rangos });
+  };
+
+  /**
+   * Método encargado de configurar los rangos dependiendo de la ruta
+   * @returns {Array}
+   */
+  configurarRangoPorRutas = () => {
+    const rutas = [...this.obtenerRutasSeleccionadas()];
+    return rutas.map(r => (
+      { ...r, valor: 0, unidadMedida: -1, porcentaje: 0, idRutaRango: Util.generarIdControl('rangoRuta') }
+    ));
+  };
+
+  /**
+   * Método encargado de obtener una nueva hora fin
+   * @param {Number} horaFin Hora fin actual
+   */
+  obtenerNuevaHoraFin = (horaFin) => {
+    let nuevaHoraFin = horaFin === '23:59' ? 25 : parseInt(horaFin) + 1;
+    return nuevaHoraFin;
+  };
+
+  /**
+   * Método encargado de pasar el valor seleccionado a hora
+   * @param {String} valor Valor seleccionado
+   */
+  convertirValorAHora = (valor) => {
+    valor = parseInt(valor);
+    if (valor.toString().length === 1) {
+      return `0${valor}:00`;
+    }
+    return `${valor}:00`;
+  };
+
+  /**
+   * Método encargado de validar los campos del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    // Validar que haya rutas seleccionadas
+    if (!Util.validarArreglo(this.obtenerRutasSeleccionadas())) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos una ruta.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de controlar el cambio en los rangos de la ruta
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioRangoRuta = (evento) => {
+    // Controlar cambio
+    const control = evento.target;
+    const valor = control.value;
+    const nombrePropiedad = control.name;
+    const idRango = control.attributes['data-rango'].value;
+    const idRuta = control.attributes['data-ruta'].value;
+    const nuevosRangos = !this.props.intervalos ? [...this.props.canastaHorariaSuministro.canastaConRutas] : [...this.props.canastaConsumoSuministro.canastaConRutas];
+
+    const indexRango = nuevosRangos.findIndex(a => a.idRangoConRuta === idRango);
+    const indexRuta = nuevosRangos[indexRango].rutas.findIndex(b => b.idRutaRango === idRuta);
+    const rango = { ...nuevosRangos[indexRango] };
+    const rutas = [...rango.rutas];
+    const ruta = { ...rutas[indexRuta] };
+    ruta[nombrePropiedad] = valor;
+    rutas[indexRuta] = ruta;
+    rango.rutas = rutas;
+    nuevosRangos[indexRango] = rango;
+    if (nombrePropiedad == 'valor') {
+      const valorPorcentaje = parseFloat(nuevosRangos[0].rutas[0].porcentaje);
+      this.props.actualizarCabeceraRedux({ precioContrato: parseFloat(valor), precioCanasta: valor, porcentajeComercializacion: valorPorcentaje });
+    }
+    this.actualizarEstadoRedux({ canastaConRutas: nuevosRangos });
+  };
+
+  /**
+   * Método encargado de eliminar el ultimo rango agregado
+   */
+  borrarUltimoRango = () => {
+    // TODO: Confirmar si desea borrar el rango
+    const { canastaHorariaSuministro } = this.props;
+    const rangos = canastaHorariaSuministro.canastaConRutas.slice(0, canastaHorariaSuministro.canastaConRutas.length - 1);
+
+    if (Util.validarArreglo(rangos)) {
+      const nuevaHoraFin = rangos[rangos.length - 1].rango.horaFin;
+      this.setState({ ultimaHora: parseInt(nuevaHoraFin) + 1, horaFin: '' });
+    } else {
+      this.setState({ ultimaHora: '00:00', horaFin: '' });
+    }
+    this.actualizarEstadoRedux({ canastaConRutas: rangos });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla de rangos
+   * @return {JSX}
+   */
+  renderTablaRangos = () => {
+
+    // TODO: Si se agregan rutas después de que la tabla se ha renderizado, actualizar la tabla
+    const { canastaHorariaSuministro } = this.props;
+    const canastaSuministro = (!this.props.intervalos) ? this.props.canastaHorariaSuministro : this.props.canastaConsumoSuministro;
+    console.log(canastaSuministro);
+
+    if (!canastaSuministro || !canastaSuministro.canastaConRutas || !Util.validarArreglo(canastaSuministro.canastaConRutas)) {
+      console.log('RETORNA AQUI');
+      return null;
+    }
+    // TODO: Agregar cabecera a esta tabla
+    return (
+      &lt;div className='mt-5'>
+        &lt;div className="lst-canasta-rangos">
+          &lt;div className="lst-canasta-rangos__rango header">
+            &lt;div className="text-center horas-rango">Rango&lt;/div>
+          &lt;/div>
+          &lt;div className="lst-canasta-rangos__rutas header">
+            &lt;div className="lst-canasta-rangos__rutas__fila">
+              &lt;div className="lst-canasta-rangos__rutas__fila__ruta header">Ruta&lt;/div>
+              &lt;div className="lst-canasta-rangos__rutas__fila__unidad-medida header">Unidad Medida&lt;/div>
+              &lt;div className='lst-canasta-rangos__rutas__fila__valor header'>Valor&lt;/div>
+              &lt;div className='lst-canasta-rangos__rutas__fila__porcentaje header'>%&lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        {
+          canastaSuministro.canastaConRutas.map((rango, index) => {
+            return (
+              &lt;div className='lst-canasta-rangos' key={rango.idRangoConRuta}>
+                &lt;div className="lst-canasta-rangos__rango">
+                  &lt;div className='text-center horas-rango'>
+                    {`${(rango.rango.horaInicio) ? rango.rango.horaInicio : rango.rango.inicio} - ${(rango.rango.horaFin) ? rango.rango.horaFin : rango.rango.fin}`}
+                  &lt;/div>
+                  {
+                    index === canastaSuministro.canastaConRutas.length - 1 &amp;&amp;
+                    &lt;div className='text-center mt-3'>
+                      &lt;button className='btn btn-danger btn-eliminar-rango btn-sm' title="Eliminar" onClick={this.borrarUltimoRango}>&lt;i className="fa fa-fw fa-trash">&lt;/i>&lt;/button>
+                    &lt;/div>
+                  }
+                &lt;/div>
+                &lt;div className="lst-canasta-rangos__rutas">
+                  {
+                    rango.rutas.map(ruta => {
+                      return (
+                        &lt;div key={ruta.idRutaRango} className="lst-canasta-rangos__rutas__fila">
+                          &lt;div className="lst-canasta-rangos__rutas__fila__ruta">
+                            {ruta.uniNombre1}
+                          &lt;/div>
+                          &lt;div className="lst-canasta-rangos__rutas__fila__unidad-medida">
+                            &lt;Combo
+                              opciones={this.props.listaUnidadesMedida}
+                              propTexto='uniNombre1'
+                              propValor='uniIderegistro'
+                              label='Unidad Medida'
+                              cols={12}
+                              name='unidadMedida'
+                              value={getProp(this.props, 'valorUnidad', '')}
+                              onChange={this.controlarCambioRangoRuta}
+                              extra={{ 'data-rango': rango.idRangoConRuta, 'data-ruta': ruta.idRutaRango, disabled: true }}
+                            />
+                          &lt;/div>
+                          &lt;div className="lst-canasta-rangos__rutas__fila__valor">
+                            &lt;TextoNumerico
+                              aceptaDecimales={true}
+                              aceptaNegativos={false}
+                              label='Valor'
+                              cols={12}
+                              value={ruta.valor}
+                              onChange={this.controlarCambioRangoRuta}
+                              name={'valor'}
+                              extra={{ 'data-rango': rango.idRangoConRuta, 'data-ruta': ruta.idRutaRango }}
+                            />
+                          &lt;/div>
+                          &lt;div className="lst-canasta-rangos__rutas__fila__porcentaje">
+                            &lt;TextoNumerico
+                              aceptaDecimales={true}
+                              aceptaNegativos={false}
+                              label='Valor'
+                              cols={12}
+                              value={ruta.porcentaje}
+                              onChange={this.controlarCambioRangoRuta}
+                              name={'porcentaje'}
+                              extra={{ 'data-rango': rango.idRangoConRuta, 'data-ruta': ruta.idRutaRango }}
+                            />
+                          &lt;/div>
+                        &lt;/div>
+                      );
+                    })
+                  }
+                  &lt;div className='text-right pr-3 font-weight-bold'>
+                    {this.obtenerPorcentajeRango(rango)}
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+            );
+          })
+        }
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método obtener los porcentajes dado un rango
+   * @param {Object} rango Datos del rango
+   * @returns {Object}
+   */
+  obtenerPorcentajeRango = (rango) => {
+    let porcentaje = rango.rutas.reduce((c, r) => (c + parseFloat(r.porcentaje)), 0);
+    if (isNaN(porcentaje)) {
+      porcentaje = 0;
+    }
+    let estilo = porcentaje !== 100 ? 'red' : 'green';
+    let icono = porcentaje !== 100 ? &lt;i className='fa fa-fw fa-warning'>&lt;/i> : &lt;i className='fa fa-fw fa-check'>&lt;/i>;
+    return (&lt;span className="linea-alerta" style={{ color: estilo }}>{icono} Porcentaje de Comercialización del Rango: {porcentaje}%&lt;/span>);
+  }
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+
+    let deshabilitarComboHoras = (this.state.ultimaHora > 24);
+
+    return (
+      &lt;div>
+        &lt;div className='row'>
+          {!this.props.intervalos &amp;&amp; this.renderBuscadorRutas()}
+          {
+            !this.props.intervalos &amp;&amp; (
+              &lt;Fragment>
+                &lt;ComboHoras
+                  valor={this.state.horaFin}
+                  onChange={this.actualizarState}
+                  disabled={deshabilitarComboHoras}
+                  ultimaHora={this.state.ultimaHora}
+                />
+                &lt;div className="form-group col-3 m-t-24">
+                  &lt;button className='ml-3 btn btn-primary' onClick={this.agregarRango}>&lt;i className="fa fa-fw fa-plus">&lt;/i> Agregar&lt;/button>
+                &lt;/div>
+              &lt;/Fragment>
+            )
+          }
+
+        &lt;/div>
+        &lt;div>
+          {this.renderTablaRangos()}
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+}
+
+SuministroConRuta.propTypes = {
+  listaUnidadesMedida: PropTypes.array,
+  rutasGNC: PropTypes.array,
+  actualizarListaContratos: PropTypes.func,
+  canastaHorariaSuministro: PropTypes.object,
+  actualizarCabeceraRedux: PropTypes.func,
+  intervalos: PropTypes.any
+};
+
+SuministroConRuta.defaultProps = {
+  canastaHorariaSuministro: {}
+};
+
+export { SuministroConRuta };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

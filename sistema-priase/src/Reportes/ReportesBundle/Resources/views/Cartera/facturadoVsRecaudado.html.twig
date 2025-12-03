@@ -1,0 +1,144 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte -{{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="FacturadoVsRecaudadoControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Facturado Vs Recaudado</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12" > 
+                                    <div class="form-group col-md-4" show-errors>
+                                        <label>Año</label>
+                                        <select required="true" id="anos"  name="anos" ng-model="info.anos" class="form-control" ng-change="cargarPeriodosAno()">
+                                            <option ng-repeat="ano in anos" ng-value="ano.anos">{[{ano.anos}]}</option>
+                                        </select>   
+                                        <p class="help-block" ng-if="reporte.anos.$error.required">
+                                            * El años es obligatorio
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-4" show-errors >
+                                        <label>Periodo</label>
+                                        <select required="true" id="periodo"  name="periodo" ng-change="cargarLiquidaciones()" ng-model="info.idordenperiodo"  class="form-control">
+                                            <option ng-repeat="periodo in periodos" ng-value="periodo.idorden">{[{periodo.nombre}]}</option>
+                                        </select> 
+                                        <p class="help-block" ng-if="reporte.anos.$error.required">
+                                            * El periodo es obligatorio
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-4" show-errors>
+                                        <label>Tipo Agrupacion</label>
+                                        <select required="true" id="tipoagrupacion" name="tipoagrupacion" ng-model="info.tipoagrupacion" class="form-control">
+                                            <option value="TU" >Tipo de uso</option>
+                                            <option value="C" >Concepto</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipoagrupacion.$error.required">
+                                            * El tipo de agrupacion es requerido
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group col-md-4" show-errors>
+                                        <label>Tipo de vista</label>
+                                        <select required="true" id="tipovista" name="tipovista" ng-model="info.tipovista" class="form-control">
+                                            <option value="F" >Financiados</option>
+                                            <option value="NF" >No Financiados</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipovista.$error.required">
+                                            * El tipo de vista es requerido
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-4" >
+                                        <div class="col-md-4 form-group" >
+                                            <button class="btn btn-primary" style="margin-top: 25px" ng-click="abrirDialogoCiclos()">Seleccionar Ciclos</button>
+                                        </div>  
+                                    </div>
+                                    <div class="form-group col-md-4" >
+                                        <label>Municipio</label>
+                                        <select  id="municipio" name="municipio" ng-model="info.municipio" class="form-control">
+                                            <option ng-repeat="municipio in municipios" ng-value="municipio.idmunicipio">
+                                                {[{municipio.municipio}]}
+                                            </option>
+                                        </select>                                        
+                                    </div>                                     
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group col-md-4" >
+                                        <label>Tipo de uso</label>
+                                        <select  id="tipouso" name="tipouso" ng-model="info.tipouso" class="form-control">
+                                            <option ng-repeat="tipouso in tipousos" ng-value="tipouso.idunidad">
+                                                {[{tipouso.nombre}]}
+                                            </option>
+                                        </select>
+                                    </div>   
+                                    <div class="form-group col-md-4" >
+                                        <label>Tipo liquidacion</label>
+                                        <select id="liquidacion" name="liquidacion" ng-model="info.liquidacion" class="form-control">
+                                            <option ng-repeat="liquidacion in liquidaciones" ng-value="liquidacion.idliquidacion">
+                                                {[{liquidacion.nombre}]}
+                                            </option>
+                                        </select>
+                                    </div> 
+                                </div>
+                            </div>    
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+          <script type="text/ng-template" id="ciclos.html">
+        <div class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Selecione los municipios a consiltar</h4>
+                    </div>
+                    <div class="modal-body" style="max-height:200px; overflow-y:auto;">
+                        <div ng-repeat="ciclo in modelo.ciclos" class="standard" flex="50">
+                             <label>
+                               <input type="checkbox" ng-click="onCicloSeleccionado($event, ciclo.idciclo)" ng-checked="exists(ciclo.idciclo)"/>
+                               {[{ciclo.ciclo}]}
+                             </label>
+                           </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" ng-click="close(false)" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" ng-click="close(true)" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </script>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/facturadoVsRecaudado.angular.js')}}"></script>
+{% endblock %}

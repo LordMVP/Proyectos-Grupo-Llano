@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/TablaCanastaGenerica.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/TablaCanastaGenerica.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { get as getProp } from 'object-path';
+
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico } from 'appfuture-react';
+
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+
+import './TablaCanastaGenerica.scss';
+
+class TablaCanastaGenerica extends Component {
+
+  state = {
+
+  };
+
+  /**
+   * Método encargado de calcular el precio del contrato dado un rango
+   * @param {Object} rango Datos del rango
+   */
+  calcularPrecioContrato = (rango) => {
+    const valores = this.obtenerPrecioContrato(rango);
+    this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, precioCanasta: valores.precioContrato, porcentajeComercializacion: valores.valorPorcentaje });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de obtener el precio del contrato dependiendo del rango
+   * @param {Object} rango Datos del rango
+   */
+  obtenerPrecioContrato = (rango) => {
+    let valores = {
+      precioContrato: 0,
+      valorCargos: {
+        variable: 0,
+        fijo: 0,
+        aom: 0
+      },
+      valorPorcentaje: 0,
+    };
+    if (!Util.validarArreglo(rango.subRangos)) {
+      return valores;
+    }
+
+    const tramo = (Util.validarArreglo(rango.subRangos[0].tramos)) ? rango.subRangos[0].tramos[0] : rango.subRangos[0].rutas[0].tramos[0];
+    valores.precioContrato = tramo.cargoVariable ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V');
+    valores.valorPorcentaje = tramo.valorPorcentaje;
+    return valores;
+  };
+
+  /**
+   * Método encargado de controlar el cambio en los rangos de la ruta
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioRangoRuta = (evento) => {
+    // Controlar cambio
+    const control = evento.target;
+    const valor = control.value;
+    const nombrePropiedad = control.name;
+    const idRango = control.attributes['data-rango'].value;
+    const idSubRango = control.attributes['data-subrango'].value;
+    const idRuta = control.attributes['data-ruta'].value;
+    const idTramo = control.attributes['data-tramo'].value;
+    const canastaTransporte = this.props[this.props.nombrePropiedadCanasta];
+    const nuevosRangos = canastaTransporte.canastasConRutas.map((r) => {
+      const rango = { ...r };
+      //Buscamos el rango...
+      if (rango.idRangoConRuta === idRango) {
+        //Buscamos el subrango.
+        rango.subRangos = rango.subRangos.map((sr) => {
+          const subRango = { ...sr };
+          if (subRango.idSubRango == idSubRango) {
+            //Buscamos la ruta...
+            subRango.rutas = subRango.rutas.map((rt) => {
+              const ruta = { ...rt };
+              if (ruta.idRuta == idRuta) {
+                //Buscamos los tramos del rango.
+                ruta.tramos = ruta.tramos.map((t) => {
+                  const tramo = { ...t };
+                  if (tramo.idTramoRango === idTramo) {
+                    tramo[nombrePropiedad] = valor;
+                  }
+                  return tramo;
+                });
+              }
+              return ruta;
+            });
+          }
+          return subRango;
+        });
+      }
+      return rango;
+    });
+
+    const rango = { ...nuevosRangos[0] };
+    const valores = this.obtenerPrecioContrato(rango);
+    const valorPorcentaje = valores.valorPorcentaje;
+    this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, precioCanasta: valores.precioContrato, valorCargos: valores.valorCargos, porcentajeComercializacion: valorPorcentaje });
+    this.actualizarEstadoRedux({ canastasConRutas: nuevosRangos });
+  };
+
+  /**
+   * Método encargado de controlar el cambio en los rangos del tramo
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioRangoTramo = (evento) => {
+    // Controlar cambio
+    const control = evento.target;
+    const valor = control.value;
+    const nombrePropiedad = control.name;
+    const idRango = control.attributes['data-rango'].value;
+    const idSubRango = control.attributes['data-subrango'].value;
+    const idTramo = control.attributes['data-tramo'].value;
+    const canastaTransporte = this.props[this.props.nombrePropiedadCanasta];
+    const nuevosRangos = canastaTransporte.canastasSinRutas.map((r) => {
+      const rango = { ...r };
+      //Buscamos el rango...
+      if (rango.idRangoConRuta === idRango) {
+        //Buscamos el subrango.
+        rango.subRangos.map((subRango) => {
+          if (subRango.idSubRango == idSubRango) {
+            //Buscamos los tramos del rango.
+            subRango.tramos = subRango.tramos.map((t) => {
+              const tramo = { ...t };
+              if (tramo.idTramoRango === idTramo) {
+                tramo[nombrePropiedad] = valor;
+              }
+              return tramo;
+            });
+          }
+          return subRango;
+        });
+      }
+      return rango;
+    });
+
+    const rango = { ...nuevosRangos[0] };
+    const valores = this.obtenerPrecioContrato(rango);
+    const valorPorcentaje = valores.valorPorcentaje;
+    this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, precioCanasta: valores.precioContrato, valorCargos: valores.valorCargos, porcentajeComercializacion: valorPorcentaje });
+    this.actualizarEstadoRedux({ canastasSinRutas: nuevosRangos });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del objeto redux
+   * @param {Object} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    const cambioTemporal = {};
+    cambioTemporal[this.props.nombrePropiedadCanasta] = { ...this.props[this.props.nombrePropiedadCanasta], ...cambio };
+    this.props.actualizarTipoCalculoContrato(cambioTemporal);
+  };
+
+  /**
+   * Obtiene el valor cargo de un tramo.
+   * @param {Object} tramo Datos del tramo
+   * @param {String} tipo Tipo de cargo
+   * @return {Number}
+   */
+  obtenerValorCargo = (tramo, tipo) => {
+    //Verificamos el cargo seleccionado...
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.trcaCargovariable;
+      case 'F':
+        return cargoSeleccionado.trcaCargofijo;
+      case 'A':
+        return cargoSeleccionado.trcaCargoaoym;
+    }
+  };
+
+  /**
+   * Obtiene el valor de la unidad de medida del cargo
+   * @param {Object} tramo Datos del tramo
+   * @param {String} tipo Tipo de cargo
+   * @return {String}
+   */
+  obtenerUnidadMedidaCargo = (tramo, tipo) => {
+    //Verificamos el cargo seleccionado...
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.uniIdemedidavariable.uniIderegistro;
+      case 'F':
+        return cargoSeleccionado.uniIdemedidafijo.uniIderegistro;
+      case 'A':
+        return cargoSeleccionado.uniIdemedidaoym.uniIderegistro;
+    }
+  };
+
+  /**
+   * Método encargado de mostrar la tabla de la canasta duplex con rutas
+   * @returns {JSX}
+   */
+  renderTBodyDuplexConRutas = () => {
+    const listaCanasta = getProp(this.props, this.props.nombrePropiedadCanasta, { canastasConRutas: [] }).canastasConRutas;
+    var rangos = listaCanasta.length;
+    var subRangos = listaCanasta[0].subRangos.length;
+    var rutas = listaCanasta[0].subRangos[0].rutas.length;
+    var tramos = listaCanasta[0].subRangos[0].rutas[0].tramos.length;
+
+    //filas a generar
+    var rowsNumber = ((rangos === 0) ? 1 : rangos)
+      * ((subRangos === 0) ? 1 : subRangos)
+      * ((rutas === 0) ? 1 : rutas)
+      * ((tramos === 0) ? 1 : tramos);
+
+
+    var rowsRangos = ((subRangos === 0) ? 1 : subRangos)
+      * ((rutas === 0) ? 1 : rutas)
+      * ((tramos === 0) ? 1 : tramos);
+
+
+    var rowsSubRangos = ((rutas === 0) ? 1 : rutas)
+      * ((tramos === 0) ? 1 : tramos);
+
+
+    var rowsRutas = ((tramos === 0) ? 1 : tramos);
+
+    var objSelected = listaCanasta[0];
+    var numRango = -1;
+    var numSubRango = -1;
+    var numRuta = -1;
+    var numTramo = -1;
+
+    let array = [];
+    for (let index = 0; index &lt; rowsNumber; index++) {
+      array.push(index);
+    }
+
+    let cols = 0;
+    let inputs = 0;
+    let tramo = null;
+
+    return (
+      &lt;tbody>
+        {
+          array.map((dato, index) => {
+            return (
+              &lt;Fragment>
+                &lt;tr key={index}>
+                  {
+                    (index % rowsRangos === 0) &amp;&amp; (() => {
+                      numRango++;
+                      numSubRango = -1;
+                      numRuta = -1;
+                      objSelected = listaCanasta[numRango];
+                      if (numRango === 0) {
+                        this.calcularPrecioContrato(objSelected);
+                      }
+                      numTramo = -1;
+                      return &lt;td rowSpan={rowsRangos}>{objSelected.rango.horaInicio + '-' + objSelected.rango.horaFin}&lt;/td>
+                    })()
+                  }
+                  {
+                    (index % rowsSubRangos === 0) &amp;&amp; (() => {
+                      numSubRango++;
+                      numRuta = -1;
+                      const subRango = objSelected.subRangos[numSubRango];
+                      return &lt;td rowSpan={rowsSubRangos}>{subRango.horaInicio + '-' + subRango.horaFin}&lt;/td>
+                    })()
+                  }
+                  {
+                    ((index % rowsRutas === 0)) &amp;&amp; (() => {
+                      numRuta++;
+                      numTramo = -1;
+                      return &lt;td rowSpan={rowsRutas}>{objSelected.subRangos[numSubRango].rutas[numRuta].uniNombre1}&lt;/td>
+                    })()
+                  }
+                  {
+                    (() => {
+                      const subRango = objSelected.subRangos[numSubRango];
+                      const ruta = subRango.rutas[numRuta];
+                      numTramo++;
+                      tramo = ruta.tramos[numTramo];
+                      inputs = 5;
+                      const style = { width: 'calc(60%/' + inputs + ')' };
+                      return (
+                        &lt;Fragment>
+                          &lt;td>{tramo.trmNombre}&lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={(tramo.cargoVariable) ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V')}
+                              onChange={this.controlarCambioRangoRuta}
+                              name='cargoVariable'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-subrango': subRango.idSubRango, 'data-ruta': ruta.idRuta, 'data-tramo': tramo.idTramoRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Combo
+                              opciones={this.props.listaUnidadesMedida}
+                              propTexto='uniNombre1'
+                              propValor='uniIderegistro'
+                              name='unidadMedida'
+                              cols={12}
+                              value={(tramo.unidadMedida) ? tramo.unidadMedida : this.obtenerUnidadMedidaCargo(tramo, 'V')}
+                              onChange={this.controlarCambioRangoRuta}
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-subrango': subRango.idSubRango, 'data-ruta': ruta.idRuta, 'data-tramo': tramo.idTramoRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={this.obtenerValorCargo(tramo, 'F')}
+                              onChange={this.controlarCambioRangoRuta}
+                              name='cargoFijo'
+                              extra={{ disabled: true, 'data-rango': objSelected.idRangoConRuta, 'data-subrango': subRango.idSubRango, 'data-ruta': ruta.idRuta, 'data-tramo': tramo.idTramoRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={this.obtenerValorCargo(tramo, 'A')}
+                              onChange={this.controlarCambioRangoRuta}
+                              name='cargoAOM'
+                              extra={{ disabled: true, 'data-rango': objSelected.idRangoConRuta, 'data-subrango': subRango.idSubRango, 'data-ruta': ruta.idRuta, 'data-tramo': tramo.idTramoRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;TextoNumerico
+                              aceptaDecimales={false}
+                              aceptaNegativos={false}
+                              label='Valor'
+                              cols={12}
+                              value={tramo.valorPorcentaje}
+                              onChange={this.controlarCambioRangoRuta}
+                              name='valorPorcentaje'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-subrango': subRango.idSubRango, 'data-ruta': ruta.idRuta, 'data-tramo': tramo.idTramoRango }}
+                            />
+                          &lt;/td>
+                        &lt;/Fragment>
+                      );
+                    })()
+                  }
+                &lt;/tr>
+              &lt;/Fragment>
+            );
+          })
+        }
+      &lt;/tbody>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla de la canasta duplex sin rutas
+   * @returns {JSX}
+   */
+  renderTBodyDuplexSinRutas = () => {
+    const listaCanasta = getProp(this.props, this.props.nombrePropiedadCanasta, { canastasSinRutas: [] }).canastasSinRutas;
+    var rangos = listaCanasta.length;
+    var rangosHorarios = listaCanasta[0].subRangos.length;
+    var tramos = listaCanasta[0].subRangos[0].tramos.length;
+    //filas a generar
+    var rowsNumber = ((rangos === 0) ? 1 : rangos)
+      * ((rangosHorarios === 0) ? 1 : rangosHorarios)
+      * ((tramos === 0) ? 1 : tramos);
+
+    var rowsRangos = ((rangosHorarios === 0) ? 1 : rangosHorarios)
+      * ((tramos === 0) ? 1 : tramos);
+
+    var rowsRangosHorarios = ((tramos === 0) ? 1 : tramos);
+    var objSelected = listaCanasta[0];
+    var numRango = -1;
+    var numRangoHorario = -1;
+    var numTramo = -1;
+
+    let array = [];
+    for (var index = 0; index &lt; rowsNumber; index++) {
+      array.push(index);
+    }
+
+    let cols = 0;
+    let inputs = 0;
+
+    return (
+      &lt;tbody>
+        {
+          array.map((dato, index) => {
+            return (
+              &lt;Fragment>
+                &lt;tr key={index}>
+                  {
+                    (index % rowsRangos === 0) &amp;&amp; (() => {
+                      numRango++;
+                      numRangoHorario = -1;
+                      numTramo = -1;
+                      objSelected = listaCanasta[numRango];
+                      if (numRango == 0) {
+                        this.calcularPrecioContrato(objSelected);
+                      }
+                      return &lt;td rowSpan={rowsRangos}>{`${objSelected.rango.horaInicio} - ${objSelected.rango.horaFin}`}&lt;/td>
+                    })()
+                  }
+                  {
+                    (index % rowsRangosHorarios === 0) &amp;&amp; (() => {
+                      numRangoHorario++;
+                      numTramo = -1;
+                      const subRango = objSelected.subRangos[numRangoHorario];
+                      return &lt;td rowSpan={rowsRangosHorarios}>{`${subRango.horaInicio} - ${subRango.horaFin}`}&lt;/td>
+                    })()
+                  }
+                  {
+                    (() => {
+                      numTramo++;
+                      const subRango = objSelected.subRangos[numRangoHorario];
+                      const tramo = subRango.tramos[numTramo];
+                      inputs = 5;
+                      const style = { width: 'calc(60%/' + inputs + ')' };
+                      return (
+                        &lt;Fragment>
+                          &lt;td>{tramo.trmNombre}&lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={(tramo.cargoVariable) ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V')}
+                              onChange={this.controlarCambioRangoTramo}
+                              name='cargoVariable'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-tramo': tramo.idTramoRango, 'data-subrango': subRango.idSubRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Combo
+                              opciones={this.props.listaUnidadesMedida}
+                              propTexto='uniNombre1'
+                              propValor='uniIderegistro'
+                              name='unidadMedida'
+                              cols={12}
+                              value={(tramo.unidadMedida) ? tramo.unidadMedida : this.obtenerUnidadMedidaCargo(tramo, 'V')}
+                              onChange={this.controlarCambioRangoTramo}
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-tramo': tramo.idTramoRango, 'data-subrango': subRango.idSubRango }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={this.obtenerValorCargo(tramo, 'F')}
+                              onChange={this.controlarCambioRangoTramo}
+                              name='cargoFijo'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-tramo': tramo.idTramoRango, 'data-subrango': subRango.idSubRango, disabled: true }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;Input
+                              label='Valor'
+                              cols={12}
+                              value={this.obtenerValorCargo(tramo, 'A')}
+                              onChange={this.controlarCambioRangoTramo}
+                              name='cargoAOM'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-tramo': tramo.idTramoRango, 'data-subrango': subRango.idSubRango, disabled: true }}
+                            />
+                          &lt;/td>
+                          &lt;td className='input' style={style}>
+                            &lt;TextoNumerico
+                              aceptaDecimales={false}
+                              aceptaNegativos={false}
+                              label='Valor'
+                              cols={12}
+                              value={tramo.valorPorcentaje}
+                              onChange={this.controlarCambioRangoTramo}
+                              name='valorPorcentaje'
+                              extra={{ 'data-rango': objSelected.idRangoConRuta, 'data-tramo': tramo.idTramoRango, 'data-subrango': subRango.idSubRango }}
+                            />
+                          &lt;/td>
+                        &lt;/Fragment>
+                      );
+                    })()
+                  }
+                &lt;/tr>
+              &lt;/Fragment>
+            );
+          })
+        }
+      &lt;/tbody>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el body de la tabla
+   * @returns {JSX}
+   */
+  renderTBody = () => {
+    //Verificamos como vamos a procesar los datos.
+    if (this.props.usaRangoIntervalos &amp;&amp; this.props.usaRangoHorario &amp;&amp; this.props.usaTramos &amp;&amp; !this.props.usaRutas) {
+      return this.renderTBodyDuplexSinRutas();
+    } else if (this.props.usaRangoIntervalos &amp;&amp; this.props.usaRangoHorario &amp;&amp; this.props.usaTramos &amp;&amp; this.props.usaRutas) {
+      return this.renderTBodyDuplexConRutas();
+    }
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;table className='table table-condensed table-striped label-nodisplay'>
+        &lt;thead className='bg-dark color-white'>
+          &lt;tr>
+            {(this.props.usaRangoIntervalos) &amp;&amp; (&lt;th>Rango&lt;/th>)}
+            {(this.props.usaRangoHorario) &amp;&amp; (&lt;th>Rango Horario&lt;/th>)}
+            {(this.props.usaRutas) &amp;&amp; (&lt;th>Ruta&lt;/th>)}
+            {(this.props.usaTramos) &amp;&amp; (&lt;th>Tramo&lt;/th>)}
+            &lt;th>C.Variable&lt;/th>
+            &lt;th>U.Medida&lt;/th>
+            &lt;th>C.Fijo&lt;/th>
+            &lt;th>C.AO&amp;M&lt;/th>
+            &lt;th>%&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        {this.renderTBody()}
+      &lt;/table>
+    );
+  }
+}
+
+TablaCanastaGenerica.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(TablaCanastaGenerica);
+
+export { VistaRedux as RTablaCanastaGenerica };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

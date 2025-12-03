@@ -1,0 +1,80 @@
+<!-- TEMPLATE PARA MOSTRAR LA INFORMACIÓN DE LA CARTERA NORMAL : ESTADO DE CUENTA -->
+<div id="templateCarteraNormal">
+    {{#carteranormal}}
+    <h2>Factura  {{idfactura}}</h2>
+    <div class="divFinanciacion">
+        <div class="campoCorto">
+            <label for="txtidfactura_{{idfactura}}">ID Factura:</label>
+            <input type="text" id="txtidfactura_{{idfactura}}" value="{{idfactura}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        <div class="campoCorto">
+            <label for="txtNumFactura_{{idfactura}}">Núm. Factura:</label>
+            <input type="text" id="txtNumFactura_{{idfactura}}" value="{{numero}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFactura_{{idfactura}}">Fecha:</label>
+            <input type="text" id="txtFechaFactura_{{idfactura}}" value="{{fecha}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        
+        <div class="campo">
+            <label for="txtDocumentoFactura_{{idfactura}}">Documento:</label>
+            <input type="text" id="txtDocumentoFactura_{{idfactura}}" value="{{documento}}" data-id="{{iddocumento}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        
+        <div class="campo">
+            <label for="txtTipoDocFactura_{{idfactura}}">Tipo Documento:</label>
+            <input type="text" id="txtTipoDocFactura_{{idfactura}}" value="{{tipodocumento}}" data-id="{{idtipodocumento}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        
+        <div class="campoCorto">
+            <label for="txtValorTotal_{{idfactura}}">Valor Total:</label>
+            <input type="text" id="txtValorTotal_{{idfactura}}" value="{{valortotal}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+        
+        <div class="campo">
+            <label for="txtCicloPeriodo_{{idfactura}}">Ciclo - Periodo:</label>
+            <input type="text" id="txtCicloPeriodo_{{idfactura}}" value="{{cicloperiodo}}" disabled="disabled" class="inputImpresion" />
+        </div>
+        
+        <div class="campoCorto">
+            <label for="txtSaldo_{{idfactura}}">Saldo:</label>
+            <input type="text" id="txtSaldo_{{idfactura}}" value="{{saldofactura}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+        
+        <div class="detallesFinanciacion">
+            <h2>Detalles de la Factura {{idfactura}}</h2>  
+            
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th id="thConcepto">Concepto</th>
+                        <th id="thDocumentoFin">Documento</th>
+                        <th id="thTipoDocFin">Tipo de Documento</th>
+                        <th id="thValorFactura">Valor</th>
+                        <th id="thValorPagado">Valor Pagado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#detalle}}
+                    <tr>
+                        <td headers="thConcepto">{{concepto}}</td>
+                        <td headers="thDocumentoFin" data-id="{{iddocumento}}">{{documento}}</td>
+                        <td headers="thTipoDocFin" data-id="{{idtipodocumento}}">{{tipodocumento}}</td>
+                        <td headers="thValorFactura" class="td-currency">{{valorreal}}</td>
+                        <td headers="thValorPagado" class="td-currency">{{valorpagado}}</td>
+
+                    </tr>
+                    {{/detalle}}
+                    {{^detalle}}
+                    <tr>
+                        <td colspan="5" style="text-align:center">No se encontraron detalles</td>
+                    </tr>
+                    {{/detalle}}
+                </tbody>
+            </table>
+        </div>
+        
+        
+    </div>
+    {{/carteranormal}}
+</div>

@@ -1,0 +1,474 @@
+import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+import { CLASES_UNIDADES } from '../../../global/constantes';
+import { formatearArray } from '../../../global/util_nominaciones';
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+
+class GestionCrearPeriodos extends Component {
+
+  state = {
+    // Datos de la aplicación
+    listaAnios: [],
+    listaRegimenTarifas: [],
+    listaSemestre: [],
+    listaMesesAgregados: [],
+    listaMeses: [],
+    semestre: '',
+    regimen: '',
+    anio: '',
+    mes: '',
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history && this.props.history.location;
+    if (state && state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.AREAS_PRESTACION.CONSULTAR_REGIMEN_TARIFARIO, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.CREAR_PERIODOS.CONSULTAR_ANIO),
+      axios.post(RUTAS_API.PARAMETRIZACION.CREAR_PERIODOS.CONSULTAR_SEMESTRE),
+    ];
+    axios.all(peticiones)
+
+      .then(axios.spread((regimen, anios, semestres) => {
+        const datosAplicacion = {
+          listaRegimenTarifas: [],
+          listaAnios: [],
+          listaSemestre: [],
+        };
+        if (regimen.data.codigo > 0) {
+          datosAplicacion.listaRegimenTarifas = regimen.data.datos;
+        }
+        if (anios.data.codigo > 0) {
+          datosAplicacion.listaAnios = this.construirObjetoAnios(anios.data.datos);
+        }
+        if (semestres.data.codigo > 0) {
+          datosAplicacion.listaSemestre = formatearArray(semestres.data.datos);
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado de construir un objeto con los años consultados
+   * @param {Object} anios Años consultados
+   * @returns {Array}
+   */
+  construirObjetoAnios = (anios) => {
+    return anios.map((dato, index) => {
+      return {
+        titulo: `${dato.cicIderegistro.cicNombre}-${dato.info}`,
+        perIderegistro: dato.perIderegistro,
+        perIdeorden: dato.perIdeorden,
+        perNombre: dato.perNombre,
+        cicIderegistro: {
+          cicIderegistro: dato.cicIderegistro.cicIderegistro,
+          cicNombre: dato.cicIderegistro.cicNombre
+        },
+        info: dato.info
+      }
+    });
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la aplicación
+      semestre: '',
+      regimen: '',
+      anio: '',
+      mes: '',
+      listaMesesAgregados: [],
+      listaMeses: []
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir.
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario.
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario.
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { regimen, anio, semestre, listaMesesAgregados } = this.state;
+    // Validaciones
+    if (regimen <= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un régimen tarifario' } };
+    }
+    if (anio <= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el año' } };
+    }
+    if (semestre <= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el semestre' } };
+    }
+    if (!Util.validarArreglo(listaMesesAgregados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe agregar al menos un mes al periodo ' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener los datos para guardar.
+   * @returns {Object}
+   */
+  obtenerObjeto = () => {
+    const { regimen, semestre, listaMesesAgregados } = this.state;
+    const lista = listaMesesAgregados.map((dato) => {
+      return {
+        smperIderegistro: (dato.smperIderegistro) ? dato.smperIderegistro : null,
+        rgtaIderegistro: {
+          rgtaIderegistro: regimen
+        },
+        perIdepadre: {
+          perIderegistro: semestre
+        },
+        perIderegistro: {
+          perIderegistro: dato.perIderegistro
+        },
+        smperDescripcion: dato.perNombre,
+        smperSwtact: 'A',
+        smperNumero: dato.perIdeorden,
+        accion: dato.accion
+      };
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad.
+   * @returns {bool}
+   */
+  guardarEntidad = async () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerObjeto();
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.CREAR_PERIODOS.GUARDAR, entidadGuardar)
+    if (respuesta.data.codigo > 0) {
+      this.limpiarFormulario();
+    }
+
+  };
+
+  /**
+   * Método encargado de consultar el periodo.
+   * @returns {bool}
+   */
+  consultarEntidad = () => {
+    const { regimen, anio, semestre } = this.state;
+    if (regimen <= 0) {
+      this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar el régimen tarifario');
+      return false;
+    }
+    if (anio <= 0) {
+      this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar el año');
+      return false;
+    }
+    if (semestre <= 0) {
+      this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar el semestre');
+      return false;
+    }
+    const parametros = {
+      regimen: regimen,
+      semestre: semestre,
+      anio: anio,
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.CREAR_PERIODOS.CONSULTAR_PERIODO, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          const datos = respuesta.data.datos[0];
+          this.setState({
+            listaMesesAgregados: this.obtenerMesesConsultados(datos),
+          })
+        }
+      });
+  };
+
+  /**
+   * Método encargado de construir un objeto con los meses consultados
+   * @param {Object} meses Meses consultados
+   * @returns {Object}
+   */
+  construirObjeto = (meses) => {
+    return meses.map((dato, index) => {
+      return {
+        titulo: `${dato.perNombre}-${dato.info}`,
+        perIderegistro: dato.perIderegistro,
+        perIdeorden: dato.perIdeorden,
+        perNombre: dato.perNombre,
+        cicIderegistro: {
+          cicIderegistro: dato.cicIderegistro.cicIderegistro,
+          cicNombre: dato.cicIderegistro.cicNombre
+        }
+      }
+    });
+  };
+
+  /**
+   * Método encargado de consultar los meses por semestre
+   * @param {number}
+   */
+  consultarMeses = async (semestre) => {
+    if (semestre != '' && semestre != '-1') {
+      const semestreSeleccionado = this.state.listaSemestre.find(p => p.perIderegistro == semestre);
+      const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.CREAR_PERIODOS.CONSULTAR_PERIODOS_MESES, { cicSemestre: semestreSeleccionado.perIdeorden });
+      if (respuesta.data.codigo >= 0) {
+        this.setState({
+          listaMeses: this.construirObjeto(formatearArray(respuesta.data.datos)),
+          listaMesesAgregados: []
+        });
+      }
+    }
+    return;
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario.
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    change[evento.target.name] = evento.target.value;
+    if (name == 'semestre') {
+      this.consultarMeses(value);
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cargar los datos de la ventana modal de consulta.
+   * @param {Object} entidad Datos seleccionados de la consulta.
+   */
+  obtenerMesesConsultados = (entidad) => {
+    const meses = JSON.parse(entidad.info);
+    return meses.map(mes => {
+      return {
+        accion: 'I',
+        perIderegistro: mes.per_ideregistro,
+        perNombre: mes.per_nombre,
+        smperIderegistro: mes.smper_ideregistro,
+        perIdeorden: mes.smper_numero,
+        varcIderegistro: mes.varc_ideregistro,
+        varprIderegistro: mes.varpr_ideregistro,
+        vrtaIderegistro: mes.vrta_ideregistro,
+      }
+    });
+  };
+
+  /**
+   * Método encargado de validar que no se agreguen meses repetidos.
+   * @returns {number}
+   */
+  validarMesRepetido = (mes) => {
+    const lista = [...this.state.listaMesesAgregados];
+    const index = lista.findIndex(p => p.perNombre == mes && p.accion == 'I');
+    return index >= 0
+  };
+
+  /**
+   * Método encargado de agregar el mes seleccionado a la lista.
+   * @returns {bool}
+   */
+  agregarMes = () => {
+    const { mes, listaMeses, listaMesesAgregados } = this.state;
+    const mesSeleccionado = listaMeses.find(p => p.perIderegistro == mes);
+    if (mes <= 0) {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el mes que desea agregar');
+      return false;
+    }
+    if (this.validarMesRepetido(mesSeleccionado.perNombre)) {
+      this.props.mostrarAlerta('Atención', 'El mes que esta intentado agregar ya se encuentra en la lista');
+      return false;
+    }
+    mesSeleccionado.accion = 'I';
+    listaMesesAgregados.push(mesSeleccionado);
+    this.setState({
+      mes: '',
+      listaMesesAgregados: listaMesesAgregados,
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario para agregar meses.
+   * @returns {Object}
+   */
+  renderMeses = () => {
+    return (
+      <Fragment>
+        <Combo
+          opciones={this.state.listaMeses}
+          propTexto='titulo'
+          propValor='perIderegistro'
+          label='Mes:'
+          name='mes'
+          value={this.state.mes}
+          onChange={this.controlarCambio}
+          cols={4}
+        />
+        <div className='col-4 mt-25'>
+          <button className='btn btn-primary' onClick={this.agregarMes}>Agregar Mes</button>
+        </div>
+      </Fragment>
+    );
+  };
+
+  /**
+   * Método encargado de eliminar el mes seleccionado.
+   * @param {Event} evento Evento ejecutado en el control de usuario.
+   * @param {number} posicion Posicion de la lista que se desea eliminar.
+   * @returns {bool}
+   */
+  eliminarMes = (posicion) => {
+    let listaMesesAgregados = this.state.listaMesesAgregados.filter(dato => dato.accion == 'I');
+    if (!listaMesesAgregados[posicion].smperIderegistro) {
+      listaMesesAgregados.splice(posicion, 1);
+      this.setState({ listaMesesAgregados: listaMesesAgregados });
+      return;
+    }
+    listaMesesAgregados[posicion].accion = 'E';
+    this.setState(listaMesesAgregados);
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los meses agregados.
+   * @returns {Array}
+   */
+  renderTablaMeses = () => {
+    return (
+      <table className='table table-striped mt-25'>
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.listaMesesAgregados.filter(dato => dato.accion == 'I').map((dato, index) => {
+            return (
+              <tr key={Util.generarIdControl(dato.perNombre)}>
+                <td>{dato.perNombre}</td>
+                {(!dato.varprIderegistro && !dato.varcIderegistro && !dato.varprIderegistro) &&
+                  <td>
+                    <button className='btnEliminar' onClick={() => {
+                      this.eliminarMes(index);
+                    }}>X</button>
+                  </td>
+                }
+                {(dato.varprIderegistro || dato.varcIderegistro || dato.varprIderegistro) && (<tr><td colSpan='6'><i className='fa fa-fw fa-warning'></i>El periodo se encuentra asociado a una variable</td></tr>)}
+              </tr>
+            );
+          })
+          }
+        </tbody>
+      </table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario.
+   * @returns {Object}
+   */
+  render() {
+    return (
+      <Fragment>
+        <Botonera funciones={this.obtenerFunciones()} />
+        <div className='conf-general row mt-5'>
+          <Combo
+            opciones={this.state.listaRegimenTarifas}
+            propTexto='rgtaNombre'
+            propValor='rgtaIderegistro'
+            label='Régimen Tarifario:'
+            name='regimen'
+            value={this.state.regimen}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={this.state.listaAnios}
+            propTexto='titulo'
+            propValor='info'
+            label='Año:'
+            name='anio'
+            value={this.state.anio}
+            onChange={this.controlarCambio}
+          />
+          <Combo
+            opciones={this.state.listaSemestre}
+            propTexto='perNombre'
+            propValor='perIderegistro'
+            label='Semestre:'
+            name='semestre'
+            value={this.state.semestre}
+            onChange={this.controlarCambio}
+          />
+          {
+            this.renderMeses()
+          }
+          {this.state.listaMesesAgregados.length > 0 &&
+            this.renderTablaMeses()
+          }
+        </div>
+
+      </Fragment>
+    );
+  };
+}
+
+GestionCrearPeriodos.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCrearPeriodos);
+
+export { VistaRedux as RGestionCrearPeriodos };

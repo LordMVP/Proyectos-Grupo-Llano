@@ -1,0 +1,16 @@
+div#divFiltro,
+div#divMotivos,
+div#divFormasPago{
+    display: none;
+    width:650px;
+}
+
+div#divResultadoFiltro{
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.campoMitad{
+    width: 45%;
+    display: inline-block;
+}

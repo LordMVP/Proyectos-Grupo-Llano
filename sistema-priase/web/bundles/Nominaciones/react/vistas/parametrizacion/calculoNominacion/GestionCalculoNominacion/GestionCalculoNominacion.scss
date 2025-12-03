@@ -1,0 +1,48 @@
+.group-section {
+  display: block;
+  border: 1px solid #76a8dd;
+  border-radius: 3px;
+  padding: 25px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.group-section .legend-section {
+  position: absolute;
+  top: -15px;
+  background: #ffffff;
+  padding: 3px 10px;
+  font-size: 13px;
+  color: #5d96d1;
+  font-weight: bold;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.centrado {
+  display: block;
+  margin: 0 auto;
+}
+
+.modal-dialog {
+  z-index: 99999;
+}
+.table-normaliced * {
+  font-size: 2em;
+}
+
+.no-label label {
+  display: none;
+}
+
+.input-table {
+  font-size: 15px;
+}
+
+.div-responsive {
+  overflow-x: auto;
+}

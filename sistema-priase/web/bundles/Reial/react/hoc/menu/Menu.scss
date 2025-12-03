@@ -1,0 +1,142 @@
+.menu {
+  width: 25%;
+  height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #dedede;
+  box-shadow: 0 .2rem 1rem rgba(0,0,0,.1);
+  background: white;
+  transition: all ease .25s;
+  position: fixed;
+  left: 0;
+  z-index: 20;
+
+  &.oculto {
+    left: -25%;
+
+    .menu__solapa i {
+      transform: rotate(180deg);
+    }
+  }
+
+  @media (max-width: 1000px) {
+    width: 45%;
+
+    &.oculto { left: -45% }
+  }
+
+  @media (max-width: 500px) {
+    width: 70%;
+
+    &.oculto { left: -70% }
+  }
+
+  &__solapa {
+    $tamaño: 2rem;
+
+    width: $tamaño;
+    height: $tamaño;
+    color: #DDD;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0 0 .2rem 0;
+    border: 1px solid #DEDEDE;
+    border-left: none;
+    border-top: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    z-index: 20;
+    cursor: pointer;
+
+    &:hover { color: #000 }
+  }
+
+  &__info-usuario {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  &__filtro {
+    margin-bottom: 15px;
+  }
+
+  &__arbol {
+    overflow: auto;
+    height: calc(100% - 172px);
+
+    &__opciones {
+      font-size: 13px;
+      font-weight: bold;
+    }
+  }
+
+  &__titulo-opcion {
+    color: #777777;
+    margin-bottom: 5px;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+
+    &:hover {
+      color: #000 !important;
+    }
+  }
+
+  &__subitem {
+    padding-left: 12px;
+    display: none;
+  }
+
+  &__subitem.open{
+    display: block;
+  }
+
+  &__link-opcion {
+    margin: 5px 0px;
+
+    a { text-decoration: none; }
+  }
+}
+
+.ul-oculto {
+  display: none;
+}
+
+.ul-visible {
+  display: block;
+}
+
+.layout__contenedor-menu{
+  border-right: 1px solid #dedede !important;
+}
+
+.layout__contenedor-general{
+  margin: 0 !important;
+}
+
+.menu__info-usuario{
+  padding: 15px;
+}
+
+.menu__arbol{
+  padding: 0px 15px;
+}
+
+.menu__filtro{
+  padding: 10px;
+  border-top: 1px solid #dedede;
+  border-bottom: 1px solid #dedede;
+}
+.menu__filtro input {
+  width: 100%;
+}
+
+.menu__arbol__opciones{
+  padding-left: 15px;
+}

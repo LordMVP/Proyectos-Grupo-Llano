@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/lecturasContratos/ConsultaLecturasContratos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/lecturasContratos/ConsultaLecturasContratos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Fecha, Combo, Util, Tabla } from 'appfuture-react';
+import RUTAS_API from '../../../global/rutas_api';
+import { CLASES_UNIDADES } from '../../../global/constantes';
+import RUTAS_VISTA from '../../../global/rutas_vista';
+import { TECLAS } from '../../../global/constantes';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+import axios from 'axios';
+
+class ConsultaLecturasContratos extends Component {
+
+  state = {
+    criterio: '',
+    fechaInicial: '',
+    fechaFinal: '',
+    tipoContrato: '',
+    tercero: '',
+    listaTipo: [],
+    listadoEntidad: [],
+    listaTercero: [],
+  };
+
+  /**
+   * Método encargado de ejecutar una acción al momento de cargar la interfaz
+   */
+  componentDidMount() {
+    axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPO_CONTRATO })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaTipo: respuesta.data.datos
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar las columnas del componente tabla
+   * @returns {Array}
+   */
+  obtenerColumnas = () => {
+    const contexto = this;
+    return [
+      {
+        Header: 'Consulta Lecturas',
+        columns: [
+          {
+            Header: 'Contrato',
+            accessor: 'info.contrato'
+          },
+          {
+            Header: 'Fecha ',
+            accessor: 'lcdFechalectura',
+          },
+          {
+            Header: 'Lectura ',
+            accessor: 'lcdLectura',
+          },
+          {
+            Header: 'Unidad de Medida ',
+            accessor: 'uniIdemedida.uniNombre1',
+          }
+        ]
+      }
+    ];
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    let funciones = [{ texto: 'Consultar', callback: this.onBuscar }];
+    funciones.push({ texto: 'Generar Documento', callback: this.generarDocumento });
+    funciones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return funciones;
+  };
+
+  /**
+   * Método encargado de generar el excel con los datos seleccionados
+   * @returns {bool}
+   */
+  generarDocumento = () => {
+    const { fechaInicial, fechaFinal, tipoContrato, tercero } = this.state;
+    const validarFechas = this.validarFechas();
+    if (!validarFechas.respuesta) {
+      this.props.mostrarAlerta(validarFechas.mensaje.titulo, validarFechas.mensaje.mensaje);
+      return false;
+    }
+    const parametros = {
+      tipoContrato: (tipoContrato === '-1') ? '' : tipoContrato,
+      fechaInicial: fechaInicial,
+      fechaFinal: fechaFinal,
+      cliente: tercero
+    };
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.GENERAR_LECTURA_CONTRATO, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let a = document.createElement('a');
+          a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+          a.download = "Reporte.xls";
+          a.target = '_blank';
+          a.click();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de validar las fechas para las peticiones
+   * @returns {Object}
+   */
+  validarFechas = () => {
+    const { fechaInicial, fechaFinal, tercero, tipoContrato } = this.state;
+    if (tipoContrato === '' || tipoContrato === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar el tipo de contrato' } }
+    };
+
+    if (tercero === '' || tercero === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar el tercero' } }
+    };
+
+    if (fechaInicial.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar la fecha inicial' } }
+    }
+
+    if (fechaFinal.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: 'Debe seleccionar la fecha final' } }
+    };
+
+    return { respuesta: true }
+  };
+
+  /**
+   * Metodo encargado de realizar la consulta
+   * @returns {bool}
+   */
+  onBuscar = () => {
+    const { fechaInicial, fechaFinal, tipoContrato, tercero } = this.state;
+    const validarFechas = this.validarFechas();
+    if (!validarFechas.respuesta) {
+      this.props.mostrarAlerta(validarFechas.mensaje.titulo, validarFechas.mensaje.mensaje);
+      return false;
+    }
+    const parametros = {
+      tipoContrato: (tipoContrato === '-1') ? '' : tipoContrato,
+      fechaInicial: fechaInicial,
+      fechaFinal: fechaFinal,
+      idCliente: tercero,
+    };
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.CONSULTAR_LECTURA_CONTRATO, parametros)
+      .then(respuesta => {
+        this.setState({ listadoEntidad: respuesta.data.datos });
+      });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      tipoContrato: '',
+      fechaFinal: '',
+      fechaInicial: '',
+      tercero: '',
+      listadoEntidad: [],
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    if (name == 'tipoContrato') {
+      this.consultarTerceros(value);
+    }
+    change[name] = value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar los terceros por tipo de contrato.
+   * @param {Integer} tipoContrato Tipo de contrato seleccionado.
+   */
+  consultarTerceros = (tipoContrato) => {
+    if (tipoContrato == '' || tipoContrato == '-1') {
+      this.setState({
+        listaTercero: [],
+        tercero: ''
+      });
+      return;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LECTURAS_CONTRATOS.CONSULTAR_TERCERO_CONTRATOS, { tipoContrato: tipoContrato })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let { tercero } = this.state;
+          if (respuesta.data.datos.length > 0) {
+            tercero = '';
+          }
+          this.setState({
+            listaTercero: (respuesta.data.codigo == 0) ? [] : respuesta.data.datos,
+            tercero: tercero
+          });
+        }
+        if (respuesta.data.codigo == 0) {
+          this.setState({
+            listaTercero: [],
+            tercero: ''
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de generar el componente Tabla
+   * @returns {Component}
+   */
+  renderTabla = () => {
+    if (!Util.validarArreglo(this.state.listadoEntidad)) {
+      return &lt;div className='text-center'>Sin resultados&lt;/div>;
+    }
+    return (
+      &lt;Tabla
+        datos={this.state.listadoEntidad}
+        columnas={this.obtenerColumnas()}
+      />
+    );
+  };
+
+  /**
+   * Metodo encargado de realizar la consulta cuando se preciona la tecla enter
+   * @returns {bool}
+   */
+  onKeyPress = (evento) => {
+    if (evento.charCode === TECLAS.ENTER) {
+      this.onBuscar()
+    }
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='consulta-tramos'>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaTipo}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de Contrato:'
+            name='tipoContrato'
+            value={this.state.tipoContrato}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.listaTercero}
+            propTexto='terNomcompleto'
+            propValor='terIderegistro'
+            label='Cliente:'
+            name='tercero'
+            value={this.state.tercero}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha Inicial:'
+            name='fechaInicial'
+            fecha={this.state.fechaInicial}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha Final:'
+            name='fechaFinal'
+            fecha={this.state.fechaFinal}
+            onChange={this.controlarCambio}
+          />
+          &lt;div className='mt-5 col-12'>
+            {this.renderTabla()}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+}
+
+ConsultaLecturasContratos.propTypes = {
+  history: PropTypes.object,
+  esModal: PropTypes.bool,
+  seleccionMultiple: PropTypes.bool,
+  seleccionarEntidad: PropTypes.func,
+  seleccionarEntidades: PropTypes.func,
+  entidadesSeleccionadas: PropTypes.array,
+  mostrarAlerta: PropTypes.func,
+};
+
+ConsultaLecturasContratos.defaultProps = {
+  esModal: false
+};
+
+const mapStateToProps = state => {
+  return {
+
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConsultaLecturasContratos);
+
+export { VistaRedux as RConsultaLecturasContratos };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+.tab{
+  &__titulo{
+    background: #efefef;
+    color: #797878;
+  }
+  &__seleccionado{
+    font-weight: bold;
+  }
+}
+
+.input-group-autocomplete{
+  position: relative;
+
+  .input-group-btn-autocomplete {
+    position: absolute;
+    top: 29px;
+    right: 0;
+  }
+}

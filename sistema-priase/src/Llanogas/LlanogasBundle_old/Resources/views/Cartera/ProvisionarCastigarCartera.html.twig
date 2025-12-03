@@ -1,0 +1,51 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <style type="text/css">
+
+        div#divFiltro, div#divFiltroFacturas{
+            display:none;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Proceso de Provisión y Castigo {% endblock %}
+
+{% block body %}
+
+
+    <fieldset id="fsInfoSuscripcion">
+        <legend> Criterios  </legend>
+        <div class="campoMitad"  >
+            <label>Ciclo</label>
+            <select id="cboCiclo">
+                <option value="-1"> Seleccione una opción</option>
+                {% for ciclo in ciclos %}
+                    <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="campoMitad">
+            <input type="button" id="btnFacturarInteresMora" value="Provisionar y Castigar" class="btnSimple"/>
+        </div>
+        <div id="divCargando" style="margin-bottom: 25px"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Contabilizando información, <br>esto puede tardar unos minutos...</p>        		
+        </div>
+        <table id="tblMovimiento" class="tabla"></table>
+    </fieldset>
+
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/provisionarcartera/provisionar.castigar.cartera.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/provisionarcartera/provisionar.castigar.cartera.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/provisionarcartera/provisionar.castigar.cartera.vista.js')}}"></script>
+{% endblock %}

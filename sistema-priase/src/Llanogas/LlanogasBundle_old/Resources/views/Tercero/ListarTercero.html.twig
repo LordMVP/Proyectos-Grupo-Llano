@@ -1,0 +1,25 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} 
+    Listado de terceros encontrados 
+    
+{% endblock %}
+{% block body %}   
+    <div>
+       {% for tercero in terceros %}
+                <li>{{tercero.ter_nomcompleto|upper}}</li>
+            {% endfor %}
+    </div>
+            
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/tercero/create/crearTercero.vista.js')}}"></script>
+{% endblock %}

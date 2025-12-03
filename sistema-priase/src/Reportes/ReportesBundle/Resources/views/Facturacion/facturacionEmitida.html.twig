@@ -1,0 +1,119 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de facturacion emitida  - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="FacturacionController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Ingrese los datos necesarios para la generacion del reporte de facturacion emitida.</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="form-group col-md-6" show-errors>
+                                    <label>Periodo a consultar </label>
+                                    <select required="true" id="mes" name="mes" ng-model="info.mes" class="form-control">
+                                        <option value="01">Enero</option>
+                                        <option value="02">Febrero</option>
+                                        <option value="03">Marzo</option>
+                                        <option value="04">Abril</option>
+                                        <option value="05">Mayo</option>
+                                        <option value="06">Junio</option>
+                                        <option value="07">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="09">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.mes.$error.required">
+                                        El mes a consultar es requerido.
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-6" show-errors>
+                                    <label>Año de consulta</label>
+                                    <input type="number" ng-model="info.anno" id="anno" name="anno" class="form-control input-sm"/>
+                                    <p class="help-block" ng-if="reporte.anno.$error.required">
+                                        El año de consulta es requerido.
+                                    </p>
+                                </div>                                                                      
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12" show-errors>
+                                    <label>Ciclo</label>
+                                    <select required="true" id="ciclo" name="ciclo" ng-model="info.ciclo" class="form-control">
+                                        <option value="-1">Todos los ciclos</option>
+                                        <option value="9999">Consolidado por municipio</option>
+                                        {% for ciclo in ciclos %}
+                                            <option value="{{ ciclo.idciclo }}">{{ciclo.ciclo}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.tipo.$error.required">
+                                        El tipo de facturacion es requerido.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12" show-errors>
+                                    <label>Tipo de facturacion</label>
+                                    <select required="true" id="tipo" name="tipo" ng-model="info.tipo" class="form-control">
+                                        <option value="1">Residencial y comercial</option>
+                                        <option value="2">Industrial, ATR y GNV</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.tipo.$error.required">
+                                        El tipo de facturacion es requerido.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="alert-box info">
+                                        La generacion de este repore abarca toda la facturacion emitida de un mes y año seleccionados.                                        
+                                    </div>  
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-gears fa-lg"></i> Generar el reporte <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a ng-click="download=true;generarReporte('pdf')">
+                                                    <i class="fa fa-file-pdf-o fa-lg"></i> Formato Pdf
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a ng-click="download=true;generarReporte('xlsx')">
+                                                    <i class="fa fa-file-excel-o fa-lg"></i> Formato Xlsx
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>                            
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/facturacionEmitida.control.angular.js')}}"></script>
+{% endblock %}

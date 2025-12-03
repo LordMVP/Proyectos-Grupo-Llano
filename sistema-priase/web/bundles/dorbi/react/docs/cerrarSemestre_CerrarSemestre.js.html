@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: cerrarSemestre/CerrarSemestre.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: cerrarSemestre/CerrarSemestre.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha } from 'appfuture-react';
+import axios from 'axios';
+import { formatearArray } from '../../global/util_nominaciones';
+import RUTAS_API from '../../global/rutas_api';
+import { mostrarAlerta } from '../../store/actions/AplicacionAcciones';
+import './CerrarSemestre.scss';
+
+class GestionCerrarSemestre extends Component {
+
+  state = {
+    // Datos de la entidad
+    regimen: '',
+    semestre: '',
+    listaRegimen: [],
+    listaSemestre: []
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    this.consultarRegimen();
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  };
+
+  /**
+   * Método encargado de consultar los regimenes tarifarios.
+   */
+  consultarRegimen = () => {
+    axios.post(RUTAS_API.PARAMETRIZACION.AREAS_PRESTACION.CONSULTAR_REGIMEN_TARIFARIO, { criterio: '' })
+      .then(respuesta => {
+        this.setState({ listaRegimen: respuesta.data.datos });
+      });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      regimen: '',
+      semestre: '',
+      listaSemestre: [],
+    });
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario al momento de cambiar de interfaz.
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Cerrar Semestre', callback: this.cerrarSemestre },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { regimen, semestre } = this.state;
+    if (regimen &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un régimen tarifario.' } };
+    }
+    if (semestre &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un semestre.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  cerrarSemestre = () => {
+    const { regimen, semestre } = this.state;
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const parametros = {
+      idRegimen: regimen,
+      idPeriodo: semestre
+    }
+
+    axios.post(RUTAS_API.CALCULO_TARIFAS.CERRAR_SEMESTRE.CERRAR_PERIODO_SEMESTRAL, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    let { name, value } = evento.target;
+    change[name] = value;
+    if (name == 'regimen') {
+      this.consultarPeriodos(value);
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar los periodos semestrales por régimen tarifario
+   * @param {Number} idRegimen Identificador del régimen tarifario.
+   * @returns {boolean}
+   */
+  consultarPeriodos = async (idRegimen) => {
+    if (idRegimen == '' || idRegimen == null) {
+      this.setState({ listaSemestre: [] });
+      return;
+    }
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS.CONSULTAR_PERIODOS_SEMESTRALES_REGIMEN, { idRegimen: idRegimen });
+    if (respuesta.data.codigo > 0) {
+      this.setState({ listaSemestre: formatearArray(this.construirObjetoPeriodos(respuesta.data.datos)) });
+    }
+  };
+
+  /**
+   * Método encargado de contruir un objeto con los periodos consultados.
+   * @param {Object} periodos Datos de los periodos consultados.
+   * @returns {Object}
+   */
+  construirObjetoPeriodos = (periodos) => {
+    let anio;
+    const lista = periodos.map((dato) => {
+      anio = new Date(dato.perIdepadre.perFecinicial).getFullYear();
+      return {
+        idRegistro: dato.perIdepadre.perIderegistro,
+        titulo: `${dato.perIdepadre.perNombre}-${anio}`
+      }
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaRegimen}
+            propTexto='rgtaNombre'
+            propValor='rgtaIderegistro'
+            label='Régimen Tarifario'
+            name='regimen'
+            value={this.state.regimen}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.listaSemestre}
+            propTexto='titulo'
+            propValor='idRegistro'
+            label='Semestre:'
+            name='semestre'
+            value={this.state.semestre}
+            onChange={this.controlarCambio}
+          />
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCerrarSemestre.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCerrarSemestre);
+
+export { VistaRedux as RGestionCerrarSemestre };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#estadoConsulta">estadoConsulta</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:43:08 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

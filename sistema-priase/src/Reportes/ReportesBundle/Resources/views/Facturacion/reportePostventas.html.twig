@@ -1,0 +1,70 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Postventas facturacion -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="GeneralPostventasController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Postventas</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        
+                        <div class="panel-body">                          
+                                   
+                                    <div class="form-group col-md-3" show-errors>
+                                        <label>Emitido</label>
+                                        <select type="text" name="tipoEmitido" id="tipoEmitido" ng-model="info.tipoEmitido" required="true" class="form-control input-sm">
+                                            <option ng-value="1">Si</option>
+                                            <option ng-value="2">No</option>                                            
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipoEmitido.$error.required">
+                                            La seleccion de emitido es requerido.
+                                        </p>
+                                    </div>
+                            
+                                    <div class="form-group col-md-3" show-errors ng-hide="info.tipoEmitido == 2 || info.tipoEmitido == null">
+                                        <label for="fechaConsulta1">Fecha Inicial Consulta:</label>
+                                        <input class="form-control datepicker input-sm"  ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    </div>
+                                    <div class="form-group col-md-3" show-errors ng-hide="info.tipoEmitido == 2 || info.tipoEmitido == null">
+                                        <label for="fechaConsulta2">Fecha Final Consulta:</label>
+                                        <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    </div>
+                                                                       
+                                                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Importante: este archivo puede tomar tiempo en ser generado
+                                </div>  
+                            </div>
+                              
+                                <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar el reporte
+                                </button>
+                                </div>                               
+                            
+                                                       
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/general.postventas.angular.js')}}"></script>
+{% endblock %}

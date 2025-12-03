@@ -1,0 +1,72 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de facturacion industrial emitida  - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="FacturacionController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Ingrese los datos necesarios para la generacion del reporte de facturacion industrial emitida.</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label>Ciclo</label>
+                                    <select required="true" id="ciclo" ng-change="actualizarPeriodos()" name="ciclo" ng-model="info.ciclo" class="form-control">
+                                        <option ng-repeat="ciclo in ciclos" ng-value="ciclo.idciclo">{[{ciclo.ciclo}]}</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.ciclo.$error.required">
+                                        El ciclo es requerido
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                    <label>Periodo</label>
+                                    <select required="true" id="periodo" name="periodo" ng-model="info.periodo" class="form-control">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.id_periodo">
+                                            {[{periodo.periodo_nombre}]}
+                                        </option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                        El periodo es requerido.
+                                    </p>
+                                </div>                                                                      
+                            </div>    
+
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="alert-box info">
+                                       La generacion de este repore abarca toda la facturacion industrial emitida de un ciclo y periodo.                                        
+                                    </div>  
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm" ng-click="generarReporte()">
+                                        <i class="fa fa-file-excel-o fa-lg"></i> Generar Reporte
+                                    </button>
+                                </div>
+                            </div>                            
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/facturacionIndustrial.control.angular.js')}}"></script>
+{% endblock %}

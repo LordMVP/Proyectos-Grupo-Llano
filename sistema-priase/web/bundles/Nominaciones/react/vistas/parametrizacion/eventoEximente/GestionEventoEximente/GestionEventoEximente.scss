@@ -1,0 +1,59 @@
+.hidden {
+  display: none;
+}
+.mt28 {
+  margin-top: 28px;
+}
+
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+.btn-buscador {
+  border-radius: 0 5px 5px 0 !important;
+}
+
+.btnSuma {
+  margin-top: 7px;
+  border: 1px solid gray;
+  border-radius: 5px;
+  height: 40px;
+  width: 40px;
+  background-color: #007bff;
+  color: white;
+  font-size: 20px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  padding-top: 9px;
+}
+
+.grupo{
+  display: flex;
+  align-items: center;
+}
+
+.btnAdjuntar {
+  border: 2px solid gray;
+  color: white;
+  background-color: #007bff;
+  border-radius: 8px;
+  width: 250px;
+  height: 50px;
+  font-weight: bold;
+}
+
+.adjunto {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+}

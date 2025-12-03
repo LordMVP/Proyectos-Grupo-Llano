@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: RutasSectores/RutasSectores.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: RutasSectores/RutasSectores.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Captcha, Combo, Tabla, Botonera, TextoNumerico } from 'appfuture-react'
+
+import connect from 'react-redux/es/connect/connect'
+import { bindActionCreators } from 'redux'
+
+import Peticion from '../Assets/util/peticion'
+import URL from '../../global/rutas_api'
+
+import { Util } from '../Assets/util/Util'
+import Modal from '../Assets/componentes/Modal'
+
+/**
+ *
+ *
+ * @class RutasSectores
+ * @extends {Component}
+ */
+class RutasSectores extends Component {
+  /**
+   *Define estados iniciales
+   * @memberof SolicitudAgendamiento
+   */
+  state = {
+    lista: [],
+    listaEliminar: [],
+    mostrar: false,
+    ruta: '-1',
+    sector: '-1',
+  }
+
+  peticion = new Peticion(this)
+
+  /**
+   * Realiza las consultas previas para listar los elementos que irán en los combobox
+   * @method
+   * @async
+   */
+
+  async componentDidMount() {
+    await this.peticion.get({
+      url: URL.RUTAS_SECTORES.LISTAR_SECTORES,
+      config: ['secIderegistro', 'secDescripcion'],
+      json: 'sectorJson',
+      value: 'sector',
+    })
+    await this.peticion.get({
+      url: URL.RUTAS_SECTORES.LISTAR_RUTAS,
+      config: ['rutIderegistro', 'rutNombre'],
+      json: 'rutaJson',
+      value: 'ruta',
+    })
+  }
+
+  //Arreglo con los id y nombre de columnas para el componente Tabla
+
+  columnas = [
+    {
+      Header: 'Sectores relacionados',
+
+      columns: [
+        { Header: 'Orden', accessor: 'seruOrderruta' },
+        { Header: 'Ruta', accessor: 'ruta' },
+
+        {
+          Header: 'Acción',
+          accessor: 'id',
+          Cell: (props) => (
+            &lt;button onClick={(e) => this.remover(props.index)}>
+              eliminar
+                        &lt;/button>
+          ),
+        },
+      ],
+    },
+  ]
+
+  /**
+   * Cambia el valor del estado asociado a cada componente
+   * @method
+   * @async
+   * @param {int} id al nombre del estado que se desea modificar
+   * @param {(int|string)} value del componente correspondiente al dato
+   * que se visualizará en el componente
+   */
+
+  change = ({ target: { id, value } }) => {
+    this.setState({ [id]: value })
+    if (id === 'sector') {
+      this.peticion
+        .post({
+          url: URL.RUTAS_SECTORES.CONSULTAR_RELACIONES_SECTORES_RUTAS,
+          parametros: { idSector: Util.obtenerId(value) },
+        })
+        .then((data) => {
+          if (data != null) {
+            const lista = data.map((fila) => {
+              return {
+                editarBoton: true,
+                sector: value,
+                seruOrderruta: fila.seruOrderruta,
+                ruta: `${fila.seruIderegistro} - ${fila.rutIderegistro.rutNombre}`,
+              }
+            })
+            this.setState({ lista })
+          } else {
+            this.setState({
+              lista: [],
+              municipio: '',
+              idRegistro: '',
+              editar: false,
+            })
+          }
+        })
+    }
+  }
+
+
+  /**
+   *
+   *Habilita el botón agregar
+   *@method
+   *@param {Object} props
+   *@return {JSX} Componente - Button
+   */
+  BotonAgregar = (props) => {
+    const { ruta, sector, orden } = this.state
+
+    return ruta === '-1' || sector === '-1' || orden &lt;= 0 ? (
+      &lt;button disabled={true}>agregar&lt;/button>
+    ) : (
+        &lt;button onClick={this.agregar}>agregar&lt;/button>
+      )
+  }
+
+  /**
+   * Cierra el modal de la consulta
+   * @method
+   */
+
+  cerrarModal = () => { }
+
+  //Arreglo para emplearlo en el componente Modal, con sus respectivas funciones
+
+  botones = [{ texto: 'Cerrar', callback: this.cerrarModal, index: 2 }]
+
+  /**
+   * Agrega una nueva fila a la tabla. Evaluando previamente que la información no este repetida.
+   * @method
+   */
+
+  agregar = () => {
+    const { ruta, sector, orden } = this.state
+
+    const filtrar = this.state.lista.map((fila) => {
+      return fila.sector === sector &amp;&amp;
+        Util.obtenerId(fila.ruta) === Util.obtenerId(ruta)
+        ? true
+        : false
+    })
+
+    if (filtrar.includes(true)) {
+      //Modal
+      this.setState({
+        titulo: '¡ELEMENTOS ASOCIADOS!',
+        texto: 'La ruta ya esta asociado a un sector.',
+      })
+      //Elimina si existe un segundo botón
+      this.botones.length === 2 ? this.botones.shift() : null
+      //despliega modal
+      this.setState({ mostrar: true })
+    } else {
+      const lista = [
+        ...this.state.lista,
+        { sector, ruta, seruOrderruta: orden},
+      ]
+
+      this.setState({ lista }, () => {
+        this.setState({ ruta: '-1', orden: '' })
+      })
+    }
+  }
+  /**
+   * Elimina la fila seleccionada en la tabla
+   * @method
+   * @param {int} index -Índice que corresponde al número de la fila que se desea eliminar
+   */
+
+  remover = (index) => {
+    const fila = this.state.lista.filter((a, b) => {
+      return index == b
+    })
+
+    if (fila[0].hasOwnProperty('editarBoton')) {
+      const id = Util.obtenerId(fila[0].ruta)
+      const listaEliminar = [...this.state.listaEliminar, { id }]
+      this.setState({ listaEliminar })
+    }
+    const lista = this.state.lista.filter((a, b) => index !== b)
+    this.setState({ lista })
+  }
+
+  /**
+   * Se ejecuta al momento de pulsar sobre el botón Guardar
+   * @method
+   */
+
+  guardar = () => {
+    if (
+      this.state.lista.length &lt;= 0 &amp;&amp;
+      this.state.listaEliminar.length &lt;= 0
+    ) {
+      //Modal
+      this.setState({
+        titulo: '¡FALTA INFORMACIÓN!',
+        texto: 'Falta escoger: Una ruta y asociarla a un sector',
+      })
+      //Elimina si existe un segundo botón
+      this.botones.length === 2 ? this.botones.shift() : null
+      //despliega modal
+      this.setState({ mostrar: true })
+    } else {
+      this.setState({
+        titulo: '¡ENVIAR INFORMACIÓN!',
+        texto: '¿Confirma Transacción?',
+      })
+      //Agrega botón
+      this.botones.length === 1
+        ? this.botones.unshift({
+          texto: 'Aceptar',
+          callback: this.guardarModal,
+          index: 1,
+        })
+        : null
+      //despliega modal
+      this.setState({ mostrar: true })
+    }
+  }
+
+  /**
+   * Restablece los valores a las condiciones iniciales
+   * @method
+   */
+
+  nuevo = () => {
+    //limpiar formulario
+    this.setState({
+      lista: [],
+      listaEliminar: [],
+      sector: '-1',
+      ruta: '-1',
+    })
+  }
+
+
+
+  //Arreglo para emplearlo en el componente botonera, con sus respectivas funciones
+
+  funciones = [{ texto: 'guardar', callback: this.guardar }, { texto: 'nuevo', callback: this.nuevo }]
+
+  /**
+   * Se ejecuta al momento de pulsar en  'aceptar' del modal, desplegado en la función 'guardar'.
+   * Y solo ocurre al validar los campos necesarios para registrar o actualizar la información
+   * @method
+   * @async
+   */
+
+  guardarModal = async () => {
+    const filtrarLista = this.state.lista.filter((a) => {
+      return a.hasOwnProperty('editarBoton') === false
+    })
+
+    if (filtrarLista.length &lt;= 0 &amp;&amp; this.state.listaEliminar.length &lt;= 0) {
+      //Modal
+      this.setState({
+        titulo: '¡SIN INFORMACIÓN NUEVA!',
+        texto: 'No está ingresando información nueva al sector.',
+      })
+      //Elimina si existe un segundo botón
+      this.botones.length === 2 ? this.botones.shift() : null
+      //despliega modal
+      this.setState({ mostrar: true })
+      return false
+    } else if (
+      filtrarLista.length > 0 &amp;&amp;
+      this.state.listaEliminar.length &lt;= 0
+    ) {
+      const listaFinal = filtrarLista.map((fila) => {
+        return {
+          secIderegistro: {
+            secIderegistro: Util.obtenerId(fila.sector),
+          },
+          rutIderegistro: {
+            rutIderegistro: Util.obtenerId(fila.ruta),
+          },
+          seruOrderruta: fila.seruOrderruta
+        }
+      })
+      this.peticion.post({
+        url: URL.RUTAS_SECTORES.REGISTRAR_RELACIONES_SECTORES,
+        parametros: listaFinal,
+      })
+    } else if (
+      filtrarLista.length > 0 &amp;&amp;
+      this.state.listaEliminar.length >= 0
+    ) {
+      //Eliminar información rutas
+      if (this.state.listaEliminar.length > 0) {
+        await this.state.listaEliminar.map((elemento) => {
+          this.peticion.post({
+            url: URL.RUTAS_SECTORES.ELIMINAR_RELACIONES_SECTORES,
+            parametros: { idSecRuta: elemento.id },
+          })
+        })
+      }
+      const listaFinal = filtrarLista.map((fila) => {
+        return {
+          secIderegistro: {
+            secIderegistro: Util.obtenerId(fila.sector),
+          },
+          rutIderegistro: {
+            rutIderegistro: Util.obtenerId(fila.ruta),
+          },
+        }
+      })
+      await this.peticion.post({
+        url: URL.RUTAS_SECTORES.REGISTRAR_RELACIONES_SECTORES,
+        parametros: listaFinal,
+      })
+    } else {
+      //Eliminar información rutas
+      if (this.state.listaEliminar.length > 0) {
+        this.state.listaEliminar.map((elemento) => {
+          this.peticion.post({
+            url: URL.RUTAS_SECTORES.ELIMINAR_RELACIONES_SECTORES,
+            parametros: { idSecRuta: elemento.id },
+          })
+        })
+      }
+    }
+
+    //limpiar formulario
+    this.setState({
+      lista: [],
+      listaEliminar: [],
+      sector: '-1',
+      ruta: '-1',
+    })
+  }
+
+  /**
+   *Renderiza la vista
+   * @return {JSX} Componente - returna vista jsx
+   */
+
+  render() {
+    return (
+      &lt;React.Fragment>
+        &lt;h1>Empresa - Relación Sectores y Rutas&lt;/h1>
+
+        &lt;Botonera funciones={this.funciones} />
+        &lt;Modal
+          titulo={this.state.titulo}
+          texto={this.state.texto}
+          mostrar={this.state.mostrar}
+          ocultarAlerta={this.change}
+          botones={this.botones}
+        />
+        &lt;div className="caja contenedor">
+          &lt;label className="tag">Información Sectores&lt;/label>
+
+          &lt;div className="formulario">
+            &lt;Combo
+              propTexto="texto"
+              propValor="id"
+              id="sector"
+              label="Sectores"
+              value={this.state.sector}
+              opciones={this.state.sectorJson}
+              onChange={this.change}
+            />
+            &lt;Combo
+              propTexto="texto"
+              propValor="id"
+              id="ruta"
+              label="Rutas"
+              value={this.state.ruta}
+              opciones={this.state.rutaJson}
+              onChange={this.change}
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Orden:'
+              cols={4}
+              value={this.state.orden}
+              onChange={this.change}
+              id='orden'
+              name='orden'
+            />
+          &lt;/div>
+
+          &lt;div className="contenedor">
+            &lt;this.BotonAgregar />
+          &lt;/div>
+
+          &lt;div className="contenedor">
+            &lt;Tabla
+              datos={this.state.lista}
+              columnas={this.columnas}
+            />
+          &lt;/div>
+        &lt;/div>
+        &lt;Captcha />
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+RutasSectores.propTypes = {}
+
+const mapStateToProps =
+  //inicialización de variables
+
+  (state) => {
+    return {}
+  }
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({}, dispatch)
+}
+
+const VistaRedux = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RutasSectores)
+
+export { VistaRedux as RRutasSectores }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/liquidacionFacturas/GestionLiquidarFacturas/GestionLiquidarFacturas.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/liquidacionFacturas/GestionLiquidarFacturas/GestionLiquidarFacturas.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { limpiarHistorico } from '../../../../global/util_nominaciones';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import './GestionLiquidarFacturas.scss';
+import { toast } from 'react-toastify';
+
+const listaSiNo = [
+  { texto: 'Aprobado', valor: 'A' },
+  { texto: 'Pendiente', valor: 'P' },
+];
+
+const EVENTO_EXIMENTE = 'Evento Eximente';
+const NORMAL = 'Normal';
+const PENDIENTE = 'P';
+const APROBADO = 'A';
+
+class GestionLiquidarFacturas extends Component {
+
+  state = {
+    // Datos de la entidad
+    fechaInicio: '',
+    fechaFin: '',
+    aprobado: '',
+    tercero: '',
+    subtotal: '',
+    contratoDetalle: '',
+    listaContratos: [],
+    objetoOriginal: {},
+    listaCargos: [],
+    // Estado de la aplicacion
+    mostrarModalConsulta: false,
+    estado: false,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo.
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      const tercero = state.entidadEditar;
+      this.setState({ tercero: tercero });
+    }
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente.
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario.
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      fechaInicio: '',
+      fechaFin: '',
+      aprobado: '',
+      tercero: '',
+      subtotal: '',
+      contratoDetalle: '',
+      listaContratos: [],
+      objetoOriginal: '',
+      listaCargos: [],
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+      estado: false,
+    });
+    limpiarHistorico(this.props);
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir.
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario.
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar Detalle', callback: this.consultarDetalle },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario.
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { aprobado, listaContratos, fechaInicio, fechaFin } = this.state;
+    const listaFiltrada = listaContratos.filter(p => p.seleccionado == true);
+    // Ejemplo Validacion
+    if (aprobado == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe de especificar si se ha aprobado o no el cruce' } };
+    }
+    if (fechaInicio == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial.' } };
+    }
+
+    if (fechaFin == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final.' } };
+    }
+    if (!Util.validarArreglo(listaFiltrada)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un contrato' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de consultar la liquidacion.
+   * @returns {bool}
+   */
+  consultarEntidad = async () => {
+    const tercero = { ...this.state.tercero };
+    const verificar = (Object.keys(tercero).length === 0) ? false : true;
+    if (!verificar) {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar un tercero');
+      return false;
+    }
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LIQUIDACION_FACTURAS_TRANSPORTE_KPC.CONSULTAR_LIQUIDACION, { idtercero: tercero.terIderegistro });
+    if (respuesta.data.codigo > 0) {
+      const datos = JSON.parse(respuesta.data.datos);
+      const contratos = datos.detalleFactura;
+      this.setState({
+        listaContratos: contratos,
+        objetoOriginal: datos,
+        estado: true,
+        fechaInicio: this.obtenerFecha(datos.detalleFactura[0].fechaInicio),
+        fechaFin: this.obtenerFecha(datos.detalleFactura[0].fechaFinal)
+      }, this.consultarCargos);
+    }
+  };
+
+  /**
+   * Método encargado de procesar el detalle para validar las fechas.
+   * @returns {bool}
+   */
+  validarValorEventoEximente = (contrato) => {
+    if (!contrato.listaFecha) {
+      return true;
+    }
+    for (let index = 0; index &lt; contrato.listaFecha.length; index++) {
+      const fecha = contrato.listaFecha[index];
+      if (!fecha.eveCantidad || fecha.eveCantidad === '') {
+        this.props.mostrarAlerta('Datos incompletos', 'Debe ingresar un valor para todos los eventos eximentes');
+        return false;
+      }
+    }
+  };
+
+  /**
+   * Método encargado de validar los valores de la tabla detalle.
+   * @return {bool}
+   */
+  validarTablaDetalle = () => {
+    const listaCompuestos = this.state.listaContratos.filter(c => c.seleccionado);
+    for (let i = 0; i &lt; listaCompuestos.length; i++) {
+      const contrato = listaCompuestos[i];
+      this.validarValorEventoEximente(contrato);
+    };
+    return true;
+  };
+
+  /**
+   * Método encargado de validar los datos necesarios para consultar el detalle.
+   * @returns {Object}
+   */
+  validarDetalle = () => {
+    const { tercero, fechaFin, fechaInicio } = this.state;
+    if (typeof tercero == 'undefined' || tercero == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe consultar un tercero.' } };
+    }
+
+    if (fechaInicio == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial.' } };
+    }
+
+    if (fechaFin == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de consultar el detalle.
+   * @returns {boolean}
+   */
+  consultarDetalle = async () => {
+    const { fechaFin, fechaInicio, tercero } = this.state;
+    const validacion = this.validarDetalle();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return;
+    }
+    const parametros = {
+      fechainicio: fechaInicio,
+      fechafinal: fechaFin,
+      idtercero: tercero.terIderegistro
+    };
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LIQUIDACION_FACTURAS_TRANSPORTE_KPC.CONSULTAR_DETALLE_LIQUIDACION, parametros);
+    if (respuesta.data.codigo > 0) {
+      const datos = JSON.parse(respuesta.data.datos);
+      const contratos = datos[0].detalleFactura;
+      if (contratos == null) {
+        toast.error('No se encontrarón datos del detalle');
+        return;
+      }
+      this.setState({
+        listaContratos: contratos,
+        objetoOriginal: datos[0]
+      }, this.consultarCargos);
+    }
+  };
+
+  /**
+   * Método encargado de obtener el objeto para guardar.
+   * @returns {Array}
+   */
+  obtenerObjetoGuardar = () => {
+    const { listaContratos, aprobado, fechaFin, fechaInicio, tercero } = this.state;
+    const objeto = {
+      fechaInicio: fechaInicio,
+      fechaFinal: fechaFin,
+      terIderegistro: tercero.terIderegistro,
+      terNomcompleto: tercero.terNomcompleto,
+      verificarAprobacion: aprobado,
+    }
+    const lista = listaContratos.filter(dato => dato.seleccionado == true).map((dato) => {
+      return {
+        contrato: dato.contrato,
+        ultimotrm: dato.ultimotrm,
+        nominacionMbtu: dato.nominacionMbtu,
+        nominacionKpc: dato.nominacionKpc,
+        listaFecha: (!dato.listaFecha) ? [] : dato.listaFecha,
+        cantidadNominadambtu: dato.cantidadNominadambtu,
+        cantidadNominadakpc: dato.cantidadNominadakpc,
+        podercalorifico: dato.podercalorifico,
+        cantidadSuperior: dato.cantidadSuperior,
+        cargoContratos: {
+          contrato: dato.cargo.contrato,
+          cargoFjio: dato.cargo.cargoFjio,
+          cargoVarible: dato.cargo.cargoVarible,
+          cargoAom: dato.cargo.cargoAom,
+          impuestoFomento: dato.cargo.impuestoFomento,
+          subtotal: dato.cargo.subtotal,
+          totalCruce: (dato.cruce) ? dato.cruce[0].total : null
+        },
+      }
+    });
+    objeto.detalleFactura = lista;
+    return objeto;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad.
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    const validarTablaDetalle = this.validarTablaDetalle();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    if (!validarTablaDetalle) {
+      return false;
+    }
+    const entidadGuardar = this.obtenerObjetoGuardar();
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LIQUIDACION_FACTURAS_TRANSPORTE_KPC.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la interfaz de consulta de terceros.
+   */
+  consultarTercero = () => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_TERCEROS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_LIQUIDACION_FACTURAS_TRANSPORTE_KPC.url,
+      }
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario.
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Controla el evento change de los checks de la tabla usuarios.
+   */
+  controlarCambioCheck = (evento) => {
+    const contratos = [...this.state.listaContratos];
+    const value = evento.target.value;
+    const index = contratos.findIndex(c => c.contrato.cntNumero == value);
+    const contrato = { ...contratos[index] };
+    contrato.seleccionado = evento.target.checked;
+    contratos[index] = contrato;
+    this.setState({ listaContratos: contratos });
+  };
+
+  /**
+   * Método encargado de consultas las listas del contrato seleccionado.
+   */
+  consultarCargos = async () => {
+    let { subtotal } = this.state;
+    const listaContratos = [...this.state.listaContratos];
+    const lista = { ...this.state.objetoOriginal };
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LIQUIDACION_FACTURAS_TRANSPORTE_KPC.CONSULTAR_CARGOS_CONTRATO, lista);
+    if (respuesta.data.codigo > 0) {
+      const cargos = respuesta.data.datos;
+      subtotal = cargos[0].subtotal;
+      cargos.forEach((cargo, index) => {
+        listaContratos[index].cargo = cargo;
+        listaContratos[index].cruce = (cargo.info) ? JSON.parse(cargo.info) : '';
+      });
+    }
+    this.setState({
+      listaContratos: listaContratos,
+      subtotal: subtotal
+    });
+  };
+
+  /**
+   * Método encargado de controlar los cambios en los valores de la tabla.
+   */
+  controlarCambioTabla = (evento) => {
+    const control = evento.target;
+    const nombrePropiedad = control.name;
+    const indexContrato = control.attributes['data-indexcontrato'].value;
+    const indexFecha = control.attributes['data-indexfecha'].value;
+    if (nombrePropiedad === 'eveCantidad') {
+      const listaContratos = [...this.state.listaContratos];
+      listaContratos[indexContrato].listaFecha[indexFecha].eveCantidad = control.value;
+      this.setState({ listaContratos: listaContratos }, () => {
+        control.focus();
+      });
+    }
+  };
+
+  /**
+   * Método encargado de mostrar la lista detalle de la cantidad contratada del contrato seleccionado
+   * @returns {JSX}
+   */
+  renderListaDetalle = () => {
+    const { contratoDetalle, listaContratos } = this.state;
+    const detalleRender = listaContratos.find(c => c.contrato.cntNumero == contratoDetalle);
+    return (
+      &lt;table className='table-normaliced table table-condensed table-bordered'>
+        &lt;thead>
+          &lt;tr className='bg-dark text-white'>
+            &lt;th>Fecha&lt;/th>
+            &lt;th>Cantidad Contratada&lt;/th>
+            &lt;th>Unidad Medida&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            detalleRender.listaDetalle.map((dato, index) => {
+              return (
+                &lt;tr key={dato.fecha}>
+                  &lt;td>{dato.fecha}&lt;/td>
+                  &lt;td>
+                    &lt;TextoNumerico
+                      aceptaDecimales={false}
+                      aceptaNegativos={false}
+                      cols={12}
+                      value={dato.cantidadContratada}
+                      onChange={this.controlarCambioCantidadContratada}
+                      name='cantidadContratada'
+                      extra={{ 'data-index': index, disabled: true }}
+                    />
+                  &lt;/td>
+                  &lt;td>{dato.unidad.uniNombre1}&lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de consultar el detalle día a día del contrato seleccionado
+   * @param {Event} evento
+   */
+  verDetalle = (evento) => {
+    const { fechaFin, fechaInicio, listaContratos } = this.state;
+    const idContrato = evento.target.attributes['data-id'].value;
+    const obj = {
+      fechaInicial: fechaInicio,
+      fechaFinal: fechaFin,
+      idContrato: idContrato
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_LIQUIDACION_FACTURAS_SUMINISTRO_NEGOCIACION_DIRECTA.CONSULTAR_DIA_DIA, obj)
+      .then(respuesta => {
+        const index = listaContratos.findIndex(c => c.contrato.cntNumero == idContrato);
+        const data = respuesta.data.datos;
+        listaContratos[index].listaDetalle = data;
+        this.setState({
+          contratoDetalle: idContrato,
+          listaContratos: listaContratos
+        });
+      });
+  };
+
+  /**
+   * Método encargado de generar la tabla de los contratos.
+   * @returns {Object}
+   */
+  renderTablaTercero = () => {
+    const lista = this.state.listaContratos;
+    if (!Util.validarArreglo(lista)) {
+      return null;
+    }
+    return (
+      &lt;table className='table-normaliced table table-condensed table-bordered'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th className='text-center'>Acciones&lt;/th>
+            &lt;th className='text-center'>Seleccion&lt;/th>
+            &lt;th className='text-center'>Contrato&lt;/th>
+            &lt;th className='text-center'>Modalidad de Contrato&lt;/th>
+            &lt;th className='text-center'>Fecha de Liquidación de Contrato&lt;/th>
+            &lt;th className='text-center'>TRM&lt;/th>
+            &lt;th className='text-center'>Nominación en MBTU&lt;/th>
+            &lt;th className='text-center'>Nominación en KPC&lt;/th>
+            &lt;th className='text-center'>Capacidad Contratada MBTU&lt;/th>
+            &lt;th className='text-center'>Capacidad Contratada KPC&lt;/th>
+            &lt;th className='text-center'>Poder Calorifico&lt;/th>
+            &lt;th className='text-center'>Cantidad Superior a la Contratada&lt;/th>
+            &lt;th className='text-center'>Novedad&lt;/th>
+            &lt;th colSpan={2} className='text-center'>Modificación Firmeza por Día&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {Util.validarArreglo(lista) &amp;&amp; (
+            lista.map((dato, index) => {
+              let tamanioFilas = 1;
+              if (Util.validarArreglo(dato.listaFecha)) {
+                dato.listaFecha.forEach(fecha => {
+                  tamanioFilas++;
+                });
+              }
+              return (
+                &lt;Fragment key={(dato.contrato.cntNumero)}>
+                  &lt;tr key={(dato.contrato.cntNumero)}>
+                    &lt;td rowSpan={tamanioFilas}>
+                      &lt;a href='javascript:;' onClick={this.verDetalle} data-id={dato.contrato.cntNumero}>Ver Detalle&lt;/a>
+                    &lt;/td>
+                    {(!dato.verificarAprobacion || dato.verificarAprobacion == PENDIENTE) &amp;&amp;
+                      &lt;td rowSpan={tamanioFilas}>
+                        &lt;label>
+                          &lt;input
+                            type="checkbox"
+                            name={Util.generarIdControl('check_' + index)} checked={dato.seleccionado || false}
+                            value={dato.contrato.cntNumero}
+                            onChange={this.controlarCambioCheck} />
+                          Seleccionar&lt;/label>
+                      &lt;/td>
+                    }
+                    {dato.verificarAprobacion == APROBADO &amp;&amp;
+                      &lt;td rowSpan={tamanioFilas}>&lt;i className='fa fa-fw fa-warning'>&lt;/i>La liquidación se encuentra aprobada&lt;/td>
+                    }
+                    &lt;td rowSpan={tamanioFilas}>{dato.contrato.cntNumero}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.contrato.uniIdemodalidadcontrato.uniNombre1}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{`2019-08-20`}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.ultimotrm}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.nominacionMbtu}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.nominacionKpc}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.cantidadNominadambtu}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.cantidadNominadakpc}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.podercalorifico}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.cantidadSuperior}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{(dato.listaFecha &amp;&amp; dato.listaFecha.length > 0) ? EVENTO_EXIMENTE : NORMAL}&lt;/td>
+                    {(!dato.listaFecha) &amp;&amp;
+                      &lt;td colSpan='2'>&lt;i className='fa fa-fw fa-warning'>&lt;/i>No presenta evento eximente&lt;/td>
+                    }
+                    {(dato.listaFecha &amp;&amp; dato.listaFecha.length > 0) &amp;&amp;
+                      (
+                        &lt;Fragment>
+                          &lt;td className='th-sub bg-dark text-white'>Fecha&lt;/td>
+                          &lt;td className='th-sub bg-dark text-white'>Valor&lt;/td>
+                        &lt;/Fragment>
+                      )
+                    }
+                  &lt;/tr>
+                  {
+                    Util.validarArreglo(dato.listaFecha) &amp;&amp; (
+                      dato.listaFecha.map((fecha, indexFecha) => {
+                        return (
+                          &lt;Fragment key={(fecha.eveFechainicio + indexFecha)}>
+                            &lt;tr key={(fecha.eveFechainicio + indexFecha + 'TR')}>
+                              &lt;td>{fecha.eveFechainicio}&lt;/td>
+                              &lt;td>
+                                &lt;div className='form-group col-12 no-label input-table'>
+                                  &lt;TextoNumerico
+                                    aceptaDecimales={false}
+                                    aceptaNegativos={false}
+                                    cols={12}
+                                    value={fecha.eveCantidad}
+                                    onChange={this.controlarCambioTabla}
+                                    name='eveCantidad'
+                                    extra={{ 'data-indexfecha': indexFecha, 'data-indexcontrato': index }}
+                                  />
+                                &lt;/div>
+                              &lt;/td>
+                            &lt;/tr>
+                          &lt;/Fragment>
+                        );
+                      })
+                    )
+                  }
+                &lt;/Fragment>
+              );
+            })
+          )}
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de generar la tabla de cargos.
+   * @returns {Object}
+   */
+  renderTablaCargos = () => {
+    let lista = [...this.state.listaContratos];
+    lista = lista.filter(p => p.seleccionado == true);
+    if (lista.length &lt;= 0) {
+      return;
+    }
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Cargo Fijo&lt;/th>
+            &lt;th>Cargo Variable&lt;/th>
+            &lt;th>Cargo AOM&lt;/th>
+            &lt;th>Impuesto Fomento Y transporte&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {lista.map((dato, index) => {
+            return (
+              &lt;tr>
+                &lt;td>{dato.cargo.contrato.cntNumero}&lt;/td>
+                &lt;td>{dato.cargo.cargoFjio}&lt;/td>
+                &lt;td>{dato.cargo.cargoVarible}&lt;/td>
+                &lt;td>{dato.cargo.cargoAom}&lt;/td>
+                &lt;td>{dato.cargo.impuestoFomento}&lt;/td>
+              &lt;/tr>
+            )
+          })}
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de para obtener la fecha y retornar en formato String.
+   * @param {String} fecha fecha a convertir.
+   * @returns {String}
+   */
+  obtenerFecha = (fecha) => {
+    if (!fecha || fecha == null) {
+      return '';
+    }
+    fecha = new Date(fecha);
+    fecha = (fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate());
+    return fecha;
+  };
+
+  /**
+   * Método encargado de generar la tabla de los contratos para cruce.
+   * @returns {Object}
+   */
+  renderTablaSeleccionarContrato = () => {
+    let lista = [...this.state.listaContratos];
+    lista = lista.filter(p => p.seleccionado == true &amp;&amp; p.cruce &amp;&amp; p.cruce.length > 0);
+    if (lista.length &lt;= 0) {
+      return;
+    }
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th className='text-center'>Contrato&lt;/th>
+            &lt;th colSpan={3} className='text-center'>Datos Cruce&lt;/th>
+            &lt;th className='text-center'>Total&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {lista.map((dato, index) => {
+            return (
+              dato.cruce.map((listaFecha, indexFecha) => {
+                return (
+                  &lt;Fragment key={Util.generarIdControl(indexFecha)}>
+                    &lt;tr key={Util.generarIdControl(indexFecha + '_tr')}>
+                      &lt;td rowSpan={listaFecha.fecha.length + 1}>{dato.contrato.cntNumero}&lt;/td>
+                      &lt;td>Fecha Inicio Cobertura&lt;/td>
+                      &lt;td>Fecha Fin Cobertura&lt;/td>
+                      &lt;td>Saldo&lt;/td>
+                      &lt;td rowSpan={listaFecha.fecha.length + 1}>{((dato.cargo.totalCruce &amp;&amp; dato.cargo.totalCruce != '') ? dato.cargo.totalCruce : listaFecha.total)}&lt;/td>
+                    &lt;/tr>
+                    {
+                      listaFecha.fecha.map((cruce) => {
+                        return (
+                          &lt;Fragment key={cruce.cntgIderegistro}>
+                            &lt;tr key={'tr_' + cruce.cntgIderegistro}>
+                              &lt;td>{this.obtenerFecha(cruce.cntgFechainicio)}&lt;/td>
+                              &lt;td>{this.obtenerFecha(cruce.cntgFechafin)}&lt;/td>
+                              &lt;td>{cruce.cntgValorcontrato}&lt;/td>
+                            &lt;/tr>
+                          &lt;/Fragment>
+                        );
+                      })
+                    }
+                  &lt;/Fragment>
+                );
+              })
+            );
+          })}
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario.
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='group-section'>
+          &lt;label className='legend-section'>Periodo a Liquidar&lt;/label>
+          &lt;div className='body-section'>
+            &lt;div className='row'>
+              &lt;div className='form-group col-4'>
+                &lt;label>Tercero:&lt;/label>
+                &lt;div className='input-group'>
+                  &lt;input
+                    type="text"
+                    disabled={true}
+                    className='form-control'
+                    onChange={this.controlarCambio}
+                    name='tercero'
+                    placeholder='Seleccionar Tercero'
+                    value={(this.state.tercero.terNomcompleto) ? this.state.tercero.terNomcompleto : ''}
+                  />
+                  &lt;div className='input-group-btn'>
+                    &lt;button className='btn btn-primary' onClick={this.consultarTercero}>&lt;i className='fa fa-fw fa-search'>&lt;/i>&lt;/button>
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+              &lt;Fecha
+                label='Fecha Inicial:'
+                name='fechaInicio'
+                fecha={this.state.fechaInicio}
+                onChange={this.controlarCambio}
+                extra={{ disabled: this.state.estado, readOnly: this.state.estado }}
+              />
+              &lt;Fecha
+                label='Fecha Final:'
+                name='fechaFin'
+                fecha={this.state.fechaFin}
+                onChange={this.controlarCambio}
+                extra={{ disabled: this.state.estado, readOnly: this.state.estado }}
+              />
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='conf-general row mt-5'>
+          {this.state.listaContratos.length > 0 &amp;&amp;
+            this.renderTablaTercero()
+          }
+          {this.state.contratoDetalle != '' &amp;&amp;
+            this.renderListaDetalle()
+          }
+          &lt;div className='col-6'>
+            {this.state.listaContratos.length > 0 &amp;&amp;
+              this.renderTablaCargos()
+            }
+          &lt;/div>
+          &lt;div className='col-6'>
+            {this.state.listaContratos.length > 0 &amp;&amp;
+              this.renderTablaSeleccionarContrato()
+            }
+          &lt;/div>
+          &lt;Combo
+            opciones={listaSiNo}
+            propTexto='texto'
+            propValor='valor'
+            label='Aprobar:'
+            name='aprobado'
+            value={this.state.aprobado}
+            onChange={this.controlarCambio}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Subtotal en Pesos:'
+            value={this.state.subtotal}
+            onChange={this.controlarCambio}
+            name='subtotal'
+            extra={{ disable: true, readOnly: true }}
+          />
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionLiquidarFacturas.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionLiquidarFacturas);
+
+export { VistaRedux as RGestionLiquidarFacturas };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

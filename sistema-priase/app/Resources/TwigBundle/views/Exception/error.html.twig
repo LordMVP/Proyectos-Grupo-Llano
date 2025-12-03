@@ -1,0 +1,71 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+	<style>
+		.divMensaje{
+			margin: 0 auto;
+			text-align: center;
+			width: 70%;
+		    font-size: 14px;
+    		text-align: center;
+		}
+
+		i.fa-chain-broken.fa.fa-2x {
+		    top: 10px;
+		    position: relative;
+		    margin-right: 10px;
+		}
+
+		.divMensaje .btnSimple{
+			margin-top: 10px;
+		}
+
+	</style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}{{ exception.message }}{% endblock %}
+
+{% block body %}
+
+	<h1>
+        {{ exception.message|nl2br|format_file_from_text }}
+    </h1>
+
+    <div>
+        <strong>{{ status_code }}</strong> {{ status_text }}
+    </div>
+
+    {% set previous_count = exception.allPrevious|length %}
+    {% if previous_count %}
+        <div class="linked"><span><strong>{{ previous_count }}</strong> linked Exception{{ previous_count > 1 ? 's' : '' }}:</span>
+            <ul>
+                {% for i, previous in exception.allPrevious %}
+                    <li>
+                        {{ previous.class|abbr_class }} <a href="#traces-link-{{ i + 1 }}" onclick="toggle('traces-{{ i + 1 }}', 'traces'); switchIcons('icon-traces-{{ i + 1 }}-open', 'icon-traces-{{ i + 1 }}-close');">&#187;</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="divMensaje">
+		<p class="pMensaje"><i class="fa-chain-broken fa fa-2x"></i>Prueba.</p>
+		<button class="btnSimple" id="btnRegresar">Regresar</button>
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	<script type="text/javascript">
+		(function(){
+			$('#h1_base_titulo_app').text('');
+
+			$('#btnRegresar').on('click', function(){
+				window.history.back();
+			});
+		})();
+	</script>
+{% endblock %}

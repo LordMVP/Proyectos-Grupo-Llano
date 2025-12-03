@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: PreliquidacionFacturacion/subcomponentes/Consulta.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: PreliquidacionFacturacion/subcomponentes/Consulta.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import { Combo, Input, Tabla, Fecha, VentanaDialogo } from 'appfuture-react';
+import Autocompletado from '../../Assets/componentes/Autocompletado';
+
+import API from '../../../global/rutas_api';
+import { get as getProp } from 'object-path';
+import Peticion from '../../../global/peticion';
+import Util from '../../../global/util';
+import './Consulta.scss';
+import axios from 'axios';
+import RUTAS_API from '../../../global/rutas_api';
+import { toast } from 'react-toastify';
+
+const ESTADOS = {
+  PRELIQUIDADO: 'P',
+  LIQUIDACION_CONFIRMADA: 'L',
+  EXPORTADO_SEVEN: 'E',
+  EXPORTADO_CON_ERROR: 'ER',
+};
+
+const ACCIONES = {
+  ELIMINAR: 'ELIMINAR',
+  CONFIRMAR: 'CONFIRMAR',
+  EXPORTAR: 'EXPORTAR',
+  REPORTE: ''
+};
+
+const opciones = {
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+};
+
+class Consulta extends Component {
+  state = {
+    lista: [
+      {
+        liquidacion: 1,
+        descripcion: 'Ejemplo en memoria',
+        estado: 'liquidado',
+        fecha: '22/09/2019',
+        observacion: 'esto es un ejemplo de consulta'
+      }
+    ],
+    marcado: -1,
+    dialogoModal: false,
+
+    // elementos
+
+    desde: '',
+    hasta: '',
+    municipio: '',
+    empresa: '-1',
+    estado: '-1',
+    estadoJson: [
+      { valor: ESTADOS.PRELIQUIDADO, texto: 'preliquidado' },
+      { valor: ESTADOS.LIQUIDACION_CONFIRMADA, texto: 'liquidado' },
+      { valor: ESTADOS.EXPORTADO_SEVEN, texto: 'exportado' },
+      { valor: ESTADOS.EXPORTADO_CON_ERROR, texto: 'exportado con error' },
+      { valor: ESTADOS.DESCARTADO, texto: 'descartado' },
+    ]
+  }
+
+  columnas = [{
+    Header: 'Preliquidacion facturacion',
+    columns: [
+      {
+        Header: 'Liquidacion',
+        accessor: 'liquidacion',
+      },
+
+      {
+        Header: 'Descripcion',
+        accessor: 'descripcion',
+      },
+
+      {
+        Header: 'Estado',
+        accessor: 'estado',
+      },
+
+      {
+        Header: 'Fecha',
+        accessor: 'fecha',
+      },
+
+      {
+        Header: 'Observacion',
+        accessor: 'observacion',
+      },
+
+      {
+        Header: 'Acción',
+        accessor: 'id',
+        Cell: props => (
+          &lt;button className="btn" onClick={() => this.marcar(props)}>
+            &lt;span>eliminar&lt;/span>
+          &lt;/button>
+        )
+      },
+    ]
+  }]
+
+  // componentes
+
+  BotonConsultar = () => {
+    return false
+      ? &lt;button className="btn" onClick={this.consultar}>consultar&lt;/button>
+      : &lt;button className="btn" disabled={true}>consultar&lt;/button>
+  };
+
+  BotonEjecutarConsulta = () => {
+    return (&lt;button className='btn' onClick={this.ejecutarConsulta}>Consultar&lt;/button>)
+  };
+
+  BotonLimpiarFiltro = () => {
+    return null;
+    // return (&lt;button className="btn">limpiar filtro&lt;/button>);
+  };
+
+  change = async ({ target: { id, value } }) => {
+    await this.setState({ [id]: value });
+    if (id == 'empresa') {
+      this.consultarMunicipios();
+    }
+  };
+
+  /**
+   * Consultar empresas...
+   */
+  consultarEmpresas = () => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.LISTAR_EMPRESAS)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            empresaJson: Util.validarArreglo(respuesta.data.datos) ? respuesta.data.datos : []
+          });
+        }
+      });
+  };
+
+  obtenerIdMunicipio = (texto) => {
+    const { municipioJson } = this.state;
+    const municipio = municipioJson.find(m => m.texto.trim() == texto.trim());
+    if (!municipio) {
+      return null;
+    }
+    return municipio.valor;
+  };
+
+  obtenerObjetoConsultaLiquidacion = () => {
+    const { desde, hasta, empresa, municipio, ordenTrabajo, estado } = this.state;
+    const obj = {
+      "fechaInicio": desde,
+      "fechaFin": hasta,
+      "codigoEmpresa": (empresa > 0) ? empresa : null,
+      "proyectoIderegistro": this.obtenerIdMunicipio(municipio),
+      "ordenTrabajo": (ordenTrabajo ? ordenTrabajo : null),
+      "estado": (!!estado &amp;&amp; estado.trim() != '' &amp;&amp; estado != '-1') ? estado : null,
+    };
+    return obj;
+  };
+
+  /**
+   * Ejecuta la consulta de liquidaciòn servicio.
+   */
+  ejecutarConsulta = () => {
+    if (!this.state.municipioJson || this.state.municipioJson.length == 0) {
+      toast.error('Debe seleccionar una empresa', opciones);
+      return false;
+    }
+    const obj = this.obtenerObjetoConsultaLiquidacion();
+    axios.post(API.PRELIQUIDACION_FACTURACION.CONSULTAR_LIQUIDACIONES_APLICAR, obj)
+      .then(respuesta => {
+        let lista = respuesta.data.datos;
+        if (respuesta.data.codigo > 0) {
+          lista = respuesta.data.datos;
+        } else {
+          lista = [];
+        }
+        this.setState({ listaConsultaLiquidacion: lista });
+      });
+  };
+
+  componentDidMount() {
+    this.consultarEmpresas();
+  }
+
+  obtenerEmpresaSeven = () => {
+    const { empresaJson } = this.state;
+    const empresa = empresaJson.find(empresa => empresa.empresaCod == this.state.empresa);
+    return (empresa) ? empresa.empresaSevemp : null;
+  };
+
+  /**
+   * Consultar municipios...
+   */
+  consultarMunicipios = () => {
+    Peticion.postCustom({
+      url: API.PRELIQUIDACION_FACTURACION.LISTAR_MUNICIPIOS,
+      config: {
+        valor: 'proyectoIderegistro',
+        texto: 'proyectoNom',
+        autocompletado: true,
+      },
+      parametros: {
+        idEmpresaContratante: this.obtenerEmpresaSeven()
+      },
+      callback: municipioJson => {
+        this.setState({ municipioJson: Util.validarArreglo(municipioJson) ? municipioJson : [] })
+      }
+    });
+  };
+
+  consultar = () => {
+
+  }
+
+  descartarEliminacion = () => {
+    // limpieza
+
+    this.setState({ marcado: -1 })
+    this.handleDialogo(false)
+  }
+
+  eliminar = () => {
+    const { marcado } = this.state
+
+    if (marcado !== -1) {
+      // TODO
+    }
+
+    else {
+      // MOSTRAR TOAST
+    }
+
+    this.handleDialogo(false)
+  }
+
+  handleDialogo = (valor) => {
+    if (valor == undefined) valor = !this.state.dialogoModal
+    return this.setState({ dialogoModal: valor })
+  }
+
+  marcar = async ({ index }) => {
+    await this.setState({ marcado: index })
+    this.handleDialogo(true)
+  }
+
+  volver = () => this.props.onChange(false)
+
+
+  /**
+   * Render Confirmar...
+   * @return {Component}
+   */
+  renderConfirmar = () => {
+    const botones = [
+      { texto: 'si, eliminar', callback: this.eliminar },
+      { texto: 'descartar', callback: this.descartarEliminacion },
+    ];
+    &lt;VentanaDialogo
+      titulo="Confirmación"
+      texto="¿Desea eliminar la liquidación?"
+      mostrar={this.state.dialogoModal}
+      botones={botones}
+    />
+  };
+
+  /**
+   * Valida el estado del registro liquidado y retorna la acción permitida.
+   * @return {Component}
+   */
+  obtenerBtnAccion = (registro, index) => {
+    const estado = getProp(registro, 'estado', '-');
+    switch (estado) {
+      case ESTADOS.PRELIQUIDADO:
+        return (&lt;button className='btn btn-xs btn-success' onClick={this.ejecutarAccionTabla} data-index={index} data-accion={ACCIONES.CONFIRMAR} >Confirmación&lt;/button>);
+      case ESTADOS.LIQUIDACION_CONFIRMADA:
+      case ESTADOS.EXPORTADO_CON_ERROR:
+        return (&lt;button className='btn btn-xs btn-success' onClick={this.ejecutarAccionTabla} data-index={index} data-accion={ACCIONES.EXPORTAR}>Exportar&lt;/button>);
+    }
+  };
+
+  /**
+   * Recibe el código de un estado y devuelve el nombre.
+   * @param {string}
+   * @return {string}
+   */
+  obtenerNombreEstado = (codigoEstado) => {
+    let estado = 'Indefinido';
+    for (const key in ESTADOS) {
+      if (ESTADOS.hasOwnProperty(key) &amp;&amp; codigoEstado == ESTADOS[key]) {
+        estado = key;
+        break;
+      }
+    }
+    return estado;
+  };
+
+  /**
+   * Ejecuta el proceso de confirmación de una liquidación...
+   * @param {string}
+   */
+  confirmarLiquidacion = (idsLiquidaciones) => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.CONFIRMAR, JSON.parse(idsLiquidaciones))
+      .then(respuesta => {
+        this.ejecutarConsulta();
+      });
+  };
+
+  /**
+   * Ejecuta el proceso de eliminación de una liquidación...
+   * @param {string}
+   */
+  eliminarLiquidacion = (idsLiquidaciones) => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.ELIMINAR, JSON.parse(idsLiquidaciones))
+      .then(respuesta => {
+        this.ejecutarConsulta();
+      });
+  };
+
+  /**
+   * Método encargado de generar el reporte
+   * @param {Array} idsLiquidaciones Identificadores de liquidación.
+   */
+  generarReporte = (idsLiquidaciones) => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.GENERAR_REPORTE, JSON.parse(idsLiquidaciones))
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.forzarDescarga(respuesta.data.datos);
+        }
+      })
+  };
+
+  /**
+   * Método encargado de descargar el reporte
+   * @param datos Datos necesarios para descargar el reporte.
+   */
+  forzarDescarga = (datos) => {
+    let a = document.createElement('a');
+    a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + datos;
+    a.download = "Reporte.xls";
+    a.target = '_blank';
+    a.click();
+  };
+
+  /**
+   * Ejecuta el proceso de exportar una liquidación...
+   * @param {string}
+   */
+  exportarLiquidacion = (idsLiquidaciones) => {
+    axios.post(API.PRELIQUIDACION_FACTURACION.EXPORTAR, JSON.parse(idsLiquidaciones))
+      .then(respuesta => {
+        this.ejecutarConsulta();
+      });
+  };
+
+  ejecutarAccionTabla = (evento) => {
+    const control = evento.target;
+    const accion = control.attributes['data-accion'].value;
+    const index = control.attributes['data-index'].value;
+    const listaConsultaLiquidacion = this.state.listaConsultaLiquidacion;
+    const registro = listaConsultaLiquidacion[index];
+    if (!registro) {
+      return;
+    }
+    const idsLiquidacion = registro.idsLiquidaciones;
+    switch (accion) {
+      case ACCIONES.CONFIRMAR:
+        this.confirmarLiquidacion(idsLiquidacion);
+        break;
+      case ACCIONES.ELIMINAR:
+        this.eliminarLiquidacion(idsLiquidacion);
+        break;
+      case ACCIONES.EXPORTAR:
+        this.exportarLiquidacion(idsLiquidacion);
+        break;
+      case ACCIONES.REPORTE:
+        this.generarReporte(idsLiquidacion);
+        break;
+    }
+  };
+
+  /**
+   * Renderiza la tabla de consulta de liquidaciones...
+   * @return {Component}
+   */
+  renderTablaConsultaLiquidaciones = () => {
+    if (!Util.validarArreglo(this.state.listaConsultaLiquidacion)) {
+      return;
+    }
+    return (
+      &lt;Fragment>
+        &lt;table className='table table-condensed table-bordered table-striped'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>ID Movimiento Seven&lt;/th>
+              &lt;th>Código Producto&lt;/th>
+              &lt;th>Descripción Liq.&lt;/th>
+              &lt;th>Acción&lt;/th>
+              &lt;th>Estado&lt;/th>
+              &lt;th>Descartar&lt;/th>
+              &lt;th>Fecha Liquidación&lt;/th>
+              &lt;th>Usuario Liquidador&lt;/th>
+              &lt;th>Mensaje&lt;/th>
+              &lt;th>Reporte&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {
+              this.state.listaConsultaLiquidacion.map((registro, index) => {
+                return (
+                  &lt;tr key={getProp(registro, 'idExportadoSeven', '0') + index}>
+                    &lt;td>{getProp(registro, 'idExportadoSeven', '-')}&lt;/td>
+                    &lt;td>{getProp(registro, 'codigoProductoSeven', '-')}&lt;/td>
+                    &lt;td>{getProp(registro, 'observacion', '-')}&lt;/td>
+                    &lt;td>
+                      {this.obtenerBtnAccion(registro, index)}
+                    &lt;/td>
+                    &lt;td>{this.obtenerNombreEstado(getProp(registro, 'estado', ''))}&lt;/td>
+                    &lt;td>{getProp(registro, 'estado', '') === ESTADOS.PRELIQUIDADO ? (&lt;button className='btn btn-danger btn-xs' onClick={this.ejecutarAccionTabla} data-index={index} data-accion={ACCIONES.ELIMINAR}>Eliminar&lt;/button>) : ''}&lt;/td>
+                    &lt;td>{getProp(registro, 'fechaLiquidacion', '-')}&lt;/td>
+                    &lt;td>{getProp(registro, 'nombreUsuario', '-')}&lt;/td>
+                    &lt;td>{getProp(registro, 'mensajeExportacionSeven', '-')}&lt;/td>
+                    &lt;td>&lt;button className='btn btn-primary btn-xs' onClick={this.ejecutarAccionTabla} data-index={index} data-accion={ACCIONES.REPORTE} >Reporte&lt;/button>&lt;/td>
+                  &lt;/tr>
+                );
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/Fragment>
+    );
+  };
+
+  render() {
+    const { BotonConsultar, BotonLimpiarFiltro } = this;
+
+    return (
+      &lt;React.Fragment>
+        {this.renderConfirmar()}
+
+        &lt;h1>Consulta de liquidaciones&lt;/h1>
+
+        &lt;div className="d-flex justify-content-center btn-group">
+          &lt;BotonConsultar />
+          &lt;button className="btn" onClick={this.volver}>
+            &lt;span>volver&lt;/span>
+          &lt;/button>
+        &lt;/div>
+
+        &lt;div className="contenedor formulario">
+          &lt;Combo
+            id="empresa"
+            label="empresa"
+            propValor='empresaCod'
+            propTexto='empresaNom'
+            name='empresa'
+            value={this.state.empresa}
+            onChange={this.change}
+            opciones={this.state.empresaJson}
+            required={true}
+          />
+
+          &lt;Autocompletado
+            id="municipio"
+            label="municipio"
+            value={this.state.municipio}
+            onChange={this.change}
+            opciones={this.state.municipioJson}
+            required={true}
+          />
+        &lt;/div>
+
+        &lt;fieldset className="contenedor">
+          &lt;legend>filtros&lt;/legend>
+
+          &lt;div className="formulario">
+            &lt;Fecha
+              label='Desde*'
+              id="desde"
+              label="desde"
+              type="date"
+              value={this.state.desde}
+              onChange={this.change}
+            />
+
+            &lt;Fecha
+              id="hasta"
+              label="Hasta*"
+              type="date"
+              value={this.state.hasta}
+              onChange={this.change}
+            />
+
+            &lt;Combo
+              id="estado"
+              label="estado"
+              value={this.state.estado}
+              onChange={this.change}
+              opciones={this.state.estadoJson}
+            />
+
+            &lt;div>
+              {this.BotonEjecutarConsulta()}
+              &lt;BotonLimpiarFiltro />
+            &lt;/div>
+          &lt;/div>
+        &lt;/fieldset>
+
+        &lt;div className="contenedor">
+          &lt;div className='row'>
+            &lt;div className='col-12'>
+              {this.renderTablaConsultaLiquidaciones()}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+export default Consulta;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

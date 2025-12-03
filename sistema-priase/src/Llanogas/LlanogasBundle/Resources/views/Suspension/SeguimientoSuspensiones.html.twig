@@ -1,0 +1,91 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+    <style>
+        #map {
+            height: 100%;
+        }      
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Lbt7XdnOsyK9Qnf0sUDgMR6XxnRMa20&callback=initMap&libraries=&v=weekly"
+      defer
+    ></script>
+    
+    <script>
+      "use strict";
+
+      let map;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: {
+            lat: -34.397,
+            lng: 150.644
+          },
+          zoom: 8
+        });
+      }
+    </script>
+{% endblock %}
+
+{% block titulo %}Seguimiento Suspensiones y Reconexiones - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divPanelContenedor">
+                
+        <fieldset id="fieldCabecera" style="margin: 0 auto">
+            <legend>Ubicación Geografica</legend>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="form-group col-md-9" id="map"  style="height:400px"> 
+                    </div>
+
+                    <div class="form-group col-md-3" show-errors>
+                        <label>Fecha</label>
+                        <input type="text" id="fechaConsulta" name="fechaInicial" value="{{fechaactual}}" required="true" class="input-sm form-control datepicker"/>
+                        
+                        <label>Localizar</label>
+                        <select required="true" id="tipoLocalizacion" class="form-control input-sm">
+                            <option value="1">Actividades</option>
+                            <option value="2">Cuadrilla</option>
+                        </select>
+                        
+                        <label>Actividad</label>
+                        <select required="true" id="tipoActividad" class="form-control input-sm">
+                            <option value="-1">Todo</option>
+                            <option value="1">Reconexiones</option>
+                            <option value="2">Suspensiones</option>
+                        </select>
+                        
+                        <label>Cuadrilla</label>
+                        <select required="true" id="cuadrilla" class="form-control input-sm">
+                            {% for cuadrilla in cuadrillas %}
+                                <option value="{{cuadrilla.id}}">{{cuadrilla.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                        <div></div>
+                        <button class="btn btn-primary btn-sm pull-right" id="btnConsultar">
+                            <i class="fa fa-gears fa-1x"></i> Ver Localización
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+{% endblock %}
+
+{% block javascripts %}   
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <!--script type="text/javascript" src="{{asset('bundles/Llanogas/js/localizacion/suspensionreconexion/localizacion.model.js')}}"></script-->
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/localizacion/suspensionreconexion/localizacion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/localizacion/suspensionreconexion/localizacion.vista.js')}}"></script>
+{% endblock %}

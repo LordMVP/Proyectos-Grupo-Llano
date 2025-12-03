@@ -1,0 +1,14 @@
+{% extends 'base.react.html.twig' %}
+
+{% block stylesheets %}
+<link href="{{ asset('nominaciones.bundle.css') }}?v={{version}}" stylesheets="stylesheets" type="text/css" />
+
+{% endblock %}
+
+{% block body %}
+    <div id="root"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('nominaciones.bundle.js') }}?v={{version}}" type="text/javascript"></script>
+{% endblock %}

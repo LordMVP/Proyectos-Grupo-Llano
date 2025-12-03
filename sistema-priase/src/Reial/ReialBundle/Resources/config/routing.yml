@@ -1,0 +1,13 @@
+reial_reial_homepage:
+    pattern:  /
+    defaults: { _controller: ReialReialBundle:Default:index }
+reial_reial_ruta:
+    pattern:  /{ruta}
+    defaults: { _controller: ReialReialBundle:Default:index }
+reial_reial_api_ruta:
+    pattern:  /api/{ruta}
+    defaults: { _controller: ReialReialBundle:Default:api}
+
+reial_reial_api_ruta_v2:
+    pattern:  /api/v2/{ruta}
+    defaults: { _controller: ReialReialBundle:Default:apiv2}

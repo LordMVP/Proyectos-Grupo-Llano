@@ -1,0 +1,86 @@
+.obj-formula {
+
+  display: inline-block;
+  border-radius: 5px;
+  text-align: center;
+  margin: 5px 1px 3px 0;
+  height: 21px;
+  padding: 2px 5px;
+  font-size: 13px;
+  position: relative;
+
+  &__variable {
+    background-color: #d8f3fd;
+    color: #333;
+  }
+
+  &__funcion {
+    background-color: #c1e8fc;
+    color: #333;
+    font-style: italic;
+  }
+
+  &__valor {
+    background-color: #bdffec;
+    color: #333;
+  }
+
+  &__operador {
+    background-color: #ffdaa4;
+    color: #333;
+    padding: 0;
+    position: relative;
+    top: 2px;
+    width: 17px;
+
+    span {
+      font-size: 17px;
+      height: 100%;
+      position: relative;
+      top: -2px;
+      font-weight: bold;
+    }
+  }
+
+  &__parentesis {
+    background-color: rgba(223, 119, 249, 0.4);
+    color: #81089e;
+    border-radius: 9px;
+    width: 13px;
+    padding: 0;
+    font-weight: bold;
+    top: -2px;
+  }
+
+  &__eliminar-btn {
+    position: absolute;
+    top: -9px;
+    right: 1px;
+    border-radius: 50%;
+    height: 13px;
+    width: 13px;
+    background-color: rgba(230, 5, 5, 0.2);
+    color: #FFF;
+    border: unset;
+    padding: 0px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(230, 5, 5, 1);
+    }
+
+    &:focus {
+      outline: unset;
+    }
+    
+    span {
+      position: relative;
+      left: -0.1px;
+      top: -4px;
+      font-size: 13px;
+      line-height: 0px;
+      font-weight: bold;
+    }
+  }
+
+}

@@ -1,0 +1,71 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Administracion de reportes registrados - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ReportesController">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Nombre del archivo</th>
+                            <th>Ver</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="reporte in reportes">
+                            <td>{[{reporte.name}]}</td>
+                            <td>{[{reporte.file_name}]}</td>
+                            <td>
+                                <a ng-click="seleccionarReporte(reporte)">
+                                    <i class="fa fa-eye"></i> Ver
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>   
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Datos del reporte seleccionado</div>
+                    <ul class="list-group">
+                        <li class="list-group-item">Nombre del reporte: {[{reporte.name}]}</li>
+                        <li class="list-group-item">nombre del archivo: {[{reporte.file_name}]}</li>                        
+                    </ul>
+                    <div class="panel-heading">Parametros del reporte</div>
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Requerido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="parametro in reporte.parameters">
+                                <td>{[{parametro.name}]}</td>
+                                <td>{[{parametro.type}]}</td>
+                                <td>{[{parametro.required}]}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/admin/admin.reportes.angular.js')}}"></script>
+{% endblock %}

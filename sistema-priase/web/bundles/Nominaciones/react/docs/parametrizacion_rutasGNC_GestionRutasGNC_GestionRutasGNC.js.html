@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/rutasGNC/GestionRutasGNC/GestionRutasGNC.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/rutasGNC/GestionRutasGNC/GestionRutasGNC.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+
+import { RConsultaRutasGNC } from '../ConsultaRutasGNC';
+
+const tiposRuta = [
+  { valor: 'G', texto: 'GNC' },
+  { valor: 'C', texto: 'Conexión' },
+];
+class GestionRutasGNC extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+
+    idRuta: null,
+    nombreRuta: '',
+    tipoRuta: ''
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  };
+
+  /**
+   * Método encargado de limpiar el formulario editar al momento de salir
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      idRuta: null,
+      nombreRuta: '',
+      tipoRuta: ''
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const {
+      nombreRuta,
+      tipoRuta
+    } = this.state;
+    if (!Util.validarStringsRequeridos([nombreRuta]) || tipoRuta === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Todos los datos son requeridos.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const { idRuta, nombreRuta, tipoRuta } = this.state;
+    const strTipoRuta = JSON.stringify({ tipo: tipoRuta });
+    const entidadGuardar = {
+      uniIderegistro: idRuta,
+      uniNombre1: nombreRuta,
+      uniPropiedad: strTipoRuta
+    }
+
+    axios.post(RUTAS_API.CONFIGURACION.RUTAS_GNC.GUARDAR_RUTAS_GNC, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventada modal del botón de consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cerrar la ventada modal del botón de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de llenar el formulario con la ruta GNC seleccionada
+   * @param {Object} entidad Datos de la ruta seleccionada
+   */
+  cargarDatos = (entidad) => {
+    let tipoRuta = entidad.uniPropiedad;
+    tipoRuta = tipoRuta === null || tipoRuta.length &lt;= 0 ? '' : JSON.parse(tipoRuta).tipo;
+    this.setState({
+      mostrarModalConsulta: false,
+
+      idRuta: entidad.uniIderegistro,
+      nombreRuta: entidad.uniNombre1,
+      tipoRuta: tipoRuta
+    });
+  };
+
+  /**
+  * Método encargado de mostrar el formulario
+  * @returns {Object}
+  */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Input
+            label='Nombre Ruta:'
+            value={this.state.nombreRuta}
+            onChange={this.controlarCambio}
+            name='nombreRuta'
+          />
+          &lt;Combo
+            opciones={tiposRuta}
+            propTexto='texto'
+            propValor='valor'
+            label='Tipo Ruta:'
+            name='tipoRuta'
+            value={this.state.tipoRuta}
+            onChange={this.controlarCambio}
+          />
+        &lt;/div>
+
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consulta de Rutas GNC'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaRutasGNC esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionRutasGNC.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionRutasGNC);
+
+export { VistaRedux as RGestionRutasGNC };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

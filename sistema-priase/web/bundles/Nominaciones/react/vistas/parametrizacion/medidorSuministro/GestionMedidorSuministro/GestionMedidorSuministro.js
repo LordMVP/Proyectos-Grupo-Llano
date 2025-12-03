@@ -1,0 +1,375 @@
+import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { formatearArray, TIPOS_UNIDADES_MEDIDA } from '../../../../global/util_nominaciones';
+import { Input, Botonera, Combo, TextoNumerico, VentanaModal, Util } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { RConsultaMedidorSuministro } from '../ConsultaMedidorSuministro';
+
+class GestionMedidoresSuministro extends Component {
+
+  state = {
+    //Datos de la entidad
+    mostrarModalConsulta: false,
+    nombreMedidor: '',
+    idUnidadMedida: '',
+    capacidad: '',
+    idContrato: '',
+    fechaInicio: '',
+    fechaFin: '',
+    tipoUso: '',
+    agente: '',
+    datosContrato: false,
+    noContrato: '',
+    mesuIderegistro: '',
+    //Listas de la entidad
+    unidadesMedida: [],
+    unidadesMedidaMoneda: []
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    // const { state } = this.props.history && this.props.history.location;
+    // if (state && state.entidadEditar) {
+    //   this.cargarDatos(state.entidadEditar);
+    // }
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.MONEDA }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPO_CONSUMO }),
+    ];
+    axios.all(peticiones)
+      .then(axios.spread((unidadesMedida, unidadesMedidaMoneda, listaTiposConsumo) => {
+        const datosAplicacion = {
+          unidadesMedida: [],
+          unidadesMedidaMoneda: [],
+          listaTipoDeConsumo: [],
+        };
+
+        if (unidadesMedida.data.codigo > 0) {
+          datosAplicacion.unidadesMedida = formatearArray(unidadesMedida.data.datos);
+          datosAplicacion.unidadesMedidaMoneda = formatearArray(unidadesMedidaMoneda.data.datos);
+          datosAplicacion.listaTipoDeConsumo = formatearArray(listaTiposConsumo.data.datos);
+        }
+
+        this.setState({ ...datosAplicacion });
+      }));
+
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      nombreMedidor: '',
+      idUnidadMedida: '-1',
+      capacidad: '',
+      idContrato: '-1',
+      fechaInicio: '',
+      fechaFin: '',
+      tipoUso: '',
+      agente: '',
+      mesuIderegistro: '',
+      datosContrato: false,
+      precio: '',
+      idUnidadMedidaPrecio: '',
+      tipoDeConsumo: '',
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    const botones = [{ texto: 'Guardar', callback: this.guardarEntidad }];
+    if (!this.props.onGuardar) {
+      botones.push({ texto: 'Consultar', callback: this.consultarEntidad });
+    }
+    botones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return botones;
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const {
+      idUnidadMedida,
+      nombreMedidor
+    } = this.state;
+    const capacidad = parseInt(this.state.capacidad);
+
+    if (nombreMedidor.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe digitar el nombre del medidor' } };
+    }
+
+    if (capacidad === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la capacidad máxima del medidor' } };
+    }
+
+    if (isNaN(capacidad)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La capacidad máxima del medidor debe ser un valor númerico' } };
+    }
+    if (capacidad <= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos erróneos', mensaje: 'La capacidad máxima debe de ser mayor a 0' } };
+    }
+
+    if (idUnidadMedida === '-1' || idUnidadMedida === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la unidad de medida de la capacidad del medidor' } };
+    }
+
+    return { respuesta: true };
+  };
+
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const {
+      idUnidadMedida,
+      nombreMedidor,
+      capacidad,
+      precio,
+      idUnidadMedidaPrecio,
+      tipoDeConsumo,
+      mesuIderegistro
+    } = this.state;
+
+    const entidadGuardar = {
+      'mesuNombre': nombreMedidor.trim(),
+      'mesuCapacidadmaxima': capacidad,
+      'uniIdemedida': {
+        'uniIderegistro': idUnidadMedida
+      },
+      'mesuPrecio': precio,
+      'mesuIderegistro': mesuIderegistro,
+      'uniIdemedidaprecio': { uniIderegistro: idUnidadMedidaPrecio },
+      uniIdetipoconsumo: { uniIderegistro: tipoDeConsumo }
+    };
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_MEDIDOR_SUMINISTRO.GUARDAR_MEDIDOR_SUMINISTRO, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          if (this.props.onGuardar && typeof this.props.onGuardar === 'function') {
+            this.props.onGuardar(entidadGuardar);
+          }
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del boton consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos seleccionados en la ventana modal
+   * @param {Object} entidad Datos seleccionados de la consulta
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mesuIderegistro: entidad.mesuIderegistro,
+      idUnidadMedidaPrecio: entidad.uniIdemedidaprecio.uniIderegistro,
+      tipoDeConsumo: entidad.uniIdetipoconsumo.uniIderegistro,
+      mostrarModalConsulta: false,
+      nombreMedidor: entidad.mesuNombre,
+      capacidad: entidad.mesuCapacidadmaxima,
+      idUnidadMedida: entidad.uniIdemedida.uniIderegistro,
+      precio: entidad.mesuPrecio,
+      fechaInicio: (entidad.cntIdecontrato) ? entidad.cntIdecontrato.cntFechainicio : '',
+      fechaFin: (entidad.cntIdecontrato) ? entidad.cntIdecontrato.cntFechafin : '',
+      tipoUso: (entidad.cntIdecontrato) ? entidad.cntIdecontrato.uniIdetipouso.uniNombre1 : '',
+      agente: (entidad.cntIdecontrato) ? entidad.cntIdecontrato.terIdeagente.terNomcompleto : '',
+      datosContrato: (entidad.cntIdecontrato) ? true : false,
+      noContrato: (entidad.cntIdecontrato) ? entidad.cntIdecontrato.cntNumero : '',
+    });
+  };
+
+  /**
+   * Método encargado de mostrar los datos del contrato al momento de consultar un medidor que ya tiene un contrato asignado
+   * @returns {JSX}
+   */
+  renderFormularioContrato = () => {
+    return (
+      <div className='conf-general row mt-5'>
+        <Input
+          label='Agente:'
+          value={this.state.agente}
+          extra={{ disabled: true, readOnly: true }}
+          name='agente'
+        />
+        <Input
+          label='Fecha inicio:'
+          value={this.state.fechaInicio}
+          extra={{ disabled: true, readOnly: true }}
+          name='fechaInicio'
+        />
+        <Input
+          label='Fecha fin:'
+          value={this.state.fechaFin}
+          extra={{ disabled: true, readOnly: true }}
+          name='fechaFin'
+        />
+        <Input
+          label='Tipo de uso:'
+          value={this.state.tipoUso}
+          extra={{ disabled: true, readOnly: true }}
+          name='tipoUso'
+        />
+        <Input
+          label='Número de Contrato:'
+          value={this.state.noContrato}
+          extra={{ disabled: true, readOnly: true }}
+          name='noContrato'
+        />
+      </div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      <Fragment>
+        <Botonera funciones={this.obtenerFunciones()} />
+
+        <div className='conf-general row mt-5'>
+          <Input
+            label='Nombre Medidor:'
+            value={this.state.nombreMedidor}
+            onChange={this.controlarCambio}
+            name='nombreMedidor'
+            maxLength='255'
+          />
+
+          <TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Capacidad Máxima:'
+            value={this.state.capacidad}
+            onChange={this.controlarCambio}
+            name='capacidad'
+          />
+
+          <Combo
+            opciones={this.state.listaTipoDeConsumo}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de Consumo:'
+            name='tipoDeConsumo'
+            value={this.state.tipoDeConsumo}
+            onChange={this.controlarCambio}
+          />
+
+          <Combo
+            opciones={this.state.unidadesMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Unidad de Medida Capacidad:'
+            name='idUnidadMedida'
+            value={this.state.idUnidadMedida}
+            onChange={this.controlarCambio}
+          />
+
+          <TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Precio:'
+            value={this.state.precio}
+            onChange={this.controlarCambio}
+            name='precio'
+          />
+
+          <Combo
+            opciones={this.state.unidadesMedidaMoneda}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Unidad de Medida Precio:'
+            name='idUnidadMedidaPrecio'
+            value={this.state.idUnidadMedidaPrecio}
+            onChange={this.controlarCambio}
+          />
+        </div>
+        {this.state.datosContrato &&
+          this.renderFormularioContrato()
+        }
+        <VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Consultar medidores de suministro'
+          cerrarModal={this.abrirCerrarModal}>
+          <RConsultaMedidorSuministro esModal seleccionarEntidad={this.cargarDatos} />
+        </VentanaModal>
+      </Fragment>
+    );
+  };
+}
+
+GestionMedidoresSuministro.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func,
+  onGuardar: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionMedidoresSuministro);
+
+export { VistaRedux as RGestionMedidoresSuministro };

@@ -1,0 +1,7 @@
+parameters:
+#    servicio_recaudos.class: Llanogas\LlanogasBundle\ServiciosWeb\ServicioRecaudo
+#
+#services:
+#     servicio_recaudos:
+#        class: %servicio_recaudos.class%
+#        #arguments: [@service_id, "plain_value", %parameter%]

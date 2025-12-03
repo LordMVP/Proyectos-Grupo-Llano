@@ -1,0 +1,302 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <!-- Latest compiled and minified CSS -->
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/recaudos/consignaciones.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="{{asset('bundles/Llanogas/css/recaudos/fileinput.min.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Consignaciones - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnEditar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <div class="divRecaudos">
+            <fieldset>
+                <legend>Recaudos</legend>
+                <input type="text" style="display: none;" id="txtIdConsignacion" data-id=""/>
+                <div class="campoCorto">
+                    <label for="cmbMedioPago">Medio de pago:</label>
+                    <select id="cmbMedioPago">
+                        <option value="-1">Seleccione una opción</option>
+                        {% for medio in listamediospagos %}
+                            <option value="{{medio.id}}" data-tipo="{{medio.tipo}}">{{medio.nombre}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="cmbSucursal">Sucursal:</label>
+                    <select id="cmbSucursal">
+                        <option value="-1">Seleccione una opción</option>
+                        {% for sucursal in listasucursales %}
+                            <option value="{{sucursal.idsucursal}}">{{sucursal.sucursal}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="cmbDocumento">Documento:</label>
+                    <select id="cmbDocumento">
+                        {% for documento in listadocumentos %}
+                            <option value="{{documento.iddocumento}}">{{documento.documento}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campoCorto">
+                    <label for="txtFecha">Fecha:</label>
+                    <input type="text" id="txtFecha" disabled="disabled" value="{{fecha}}" />
+                </div>
+                <p id="pMensaje" class="pMensaje"></p>
+                <div class="divCabecera" id="divCabecera">
+                    <div class="divIzquierda">
+                        <div id="divFechasRecaudo" style="display: none;">
+                            <table id="tblFechaRecaudo" class="tabla">
+
+                            </table>
+                            <button id="btnVerRecaudos" class="btnSimple">Cargar recaudos</button>
+                        </div>
+                    </div>
+                    <div class="divDerecha" >
+                        <div id="divRecaudoEmpresa" style="display: none;">
+                            <table id="tblRecaudoEmpresa" class="tabla"></table>
+                            <div class="campo">
+                                <label for="txtTotalRecaudoEmpresa">Total:</label>
+                                <input type="text" id="txtTotalRecaudoEmpresa" class="campo" disabled="disabled"/>
+                                <button id="btnVerRecaudoEmpresa" class="btnSimple">Ver recaudo</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="divConsignacion" style="display: none;">
+            <fieldset>
+                <legend>Consignación</legend>
+
+
+                <div id="divConsignaciones" >
+
+                    <div id="controlesFormasPago">
+                        <div id="divEfectivo" data-forma="Efectivo" class="contenedorFormaPago">
+                            <div class="cabeceraForma">
+                                <div class="title" id="titleEfectivo">
+                                    <h3>Forma pago <strong>Efectivo, Cheque, Tarjeta</strong> <span></span></h3>
+                                </div>
+                            </div>
+
+                            <div class="divCabecera" id="contenidoEfectivo">
+                                <div class="divIzquierda" style="width: 20%">
+                                    <div id="divValorFormaPagoEfectivo" class="campo" style="width: 50%">
+                                        <label>Valor: </label>
+                                        <input type="text" id="txtValorFormaPagoEfectivo"/>
+                                    </div>
+                                    <button id="btnAgregarBancoEfectivo" class="btnSimple">Agregar banco</button>
+                                </div>
+
+                                <div class="divDerecha" style="width: 80%">
+                                    <table id="tblBancosEfectivo" class="tabla" style="display: none;">
+                                        <thead>
+                                            <tr>
+                                                <th id="thEmpresaEfectivo">Empresa</th>
+                                                <th id="thBancoEfectivo">Banco</th>
+                                                <th id="thTipoCuentaEfectivo">Tipo cuenta</th>
+                                                <th id="thCuentaEfectivo">Cuenta</th>
+                                                <th id="thValorEfectivo">Valor</th>
+                                                <th id="thFechaEfectivo">Fecha</th>
+                                                <th id="thEliminarEfectivo">Eliminar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                    <table id="tblEfectivo" class="tabla" style="display: none"></table>
+                                    <div class="campo" style="display: none" id="divTotalEfectivo">
+                                        <label for="txtTotalEfectivo">Total: </label>
+                                        <input type="text" disabled="disabled" id="txtTotalEfectivo"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div id="divCheque" data-forma="Cheque" class="contenedorFormaPago">
+                            <div class="cabeceraForma">
+                                <div class="title" id="titleCheque">
+                                    <h3>Forma pago <strong>Cheque</strong><span></span></h3>
+                                </div>
+                            </div>
+
+                            <div class="divCabecera" id="contenidoCheque">
+                                <div class="divIzquierda" style="width: 20%">
+                                    <div id="divValorFormaPagoCheque" class="campo" style="width: 50%">
+                                        <label>Valor: </label>
+                                        <input type="text" id="txtValorFormaPagoCheque"/>
+                                    </div>
+                                    <button id="btnAgregarBancoCheque" class="btnSimple">Agregar banco</button>
+                                </div>
+
+                                <div class="divDerecha" style="width: 80%">
+                                    <table id="tblBancosCheque" class="tabla" style="display: none;">
+                                        <thead>
+                                            <tr>
+                                                <th id="thEmpresaCheque">Empresa</th>
+                                                <th id="thBancoCheque">Banco</th>
+                                                <th id="thTipoCuentaCheque">Tipo cuenta</th>
+                                                <th id="thCuentaCheque">Cuenta</th>
+                                                <th id="thValorCheque">Valor</th>
+                                                <th id="thFechaCheque">Fecha</th>
+                                                <th id="thInformacionCheque">Información adicional</th>
+                                                <th id="thEliminarCheque">Eliminar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                    <table id="tblCheque" class="tabla" style="display: none"></table>
+                                    <div class="campo" style="display: none" id="divTotalCheque">
+                                        <label for="txtTotalCheque">Total: </label>
+                                        <input type="text" disabled="disabled" id="txtTotalCheque"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset>
+                <legend>Resumen</legend>
+                <div id="divOpciones">
+                    <div class="campoCorto">
+                        <label for="txtTotal">Total Recaudado: </label>
+                        <input type="text" id="txtTotalRecaudado" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtTotalConsignado">Total Consignado: </label>
+                        <input type="text" id="txtTotalConsignado" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtFaltante">Faltante: (CxCobrar)</label>
+                        <input type="text" id="txtFaltante" disabled="disabled" value="0"/>
+                    </div>
+
+                    <div class="campoCorto">
+                        <label for="txtSobrante">Sobrante: (Aprovechamiento)</label>
+                        <input type="text" id="txtSobrante" disabled="disabled" value="0"/>
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtGasto">Gasto: </label>
+                        <input type="text" id="txtGasto" disabled="disabled" value="0"/>
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtCuentaPorPagar">Cuenta por Pagar: </label>
+                        <input type="text" id="txtCuentaPorPagar" disabled="disabled" value="0"/>
+                    </div>
+
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Soportes</legend>
+                <div>
+                    <button id="btnAdjuntarArchivo" class="btnSimple">Adjuntar archivo</button>
+                </div>
+                <div id="archivoAdjunto" style="display: none;">
+                    <input type="file" id="txtArchivo" multiple/>
+                </div>
+                <div id="divArchivos">
+
+                </div>
+                <p id="pMensajeArchivo" class="pMensaje"></p>
+            </fieldset>
+        </div>
+    </div>
+
+
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtNroConsignacion">Número consignación:</label>
+            <input type="text" id="txtNroConsignacion" data-attr="nroConsignacion" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="cmbMedioPagoFiltro">Medio de pago:</label>
+            <select id="cmbMedioPagoFiltro">
+                <option value="-1">Seleccione una opción</option>
+                {% for medio in listamediospagos %}
+                    <option value="{{medio.id}}">{{medio.nombre}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtFecha">Fecha inicial:</label>
+            <input type="text" id="txtFechaIFiltro" data-attr="fecha" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFecha">Fecha final:</label>
+            <input type="text" id="txtFechaFFiltro" data-attr="fecha" maxlength="15" />
+        </div>
+        <button id="btnBuscarFiltro" class="btnSimple">Buscar</button>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <div id="divListaSelección"></div>
+
+    </div>
+
+    <div id="divErrores">
+        <p id="pErrorGlobal"></p>
+    </div>
+    <!-- Division de Formas de pago -->
+    <div id="divFormasPago" style="display: none;">
+        <div id="controlesFormasPago" style="max-height: 350px;overflow-y: scroll;"></div>
+        <div style="margin-top: 15px;">
+            <button id="btnAgregarForma" class="btnSimple">Agregar cheque</button>
+            <label for="txtSumatoria" style="display:inline !important;">Total:</label>
+            <input type="text" id="txtSumatoria" disabled="disabled" />
+        </div>
+        <hr/>
+        <div style="text-align: right">
+            <button id="btnAceptarFormasPago" class="btnSimple">Aceptar</button>
+            <button id="btnCancelarFormasPago" class="btnSimple">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="divRecaudos" style="display: none;">
+    </div>
+    <div id="divCheques" style="display: none;">
+        <table id="tblCheques" class="tabla"></table>
+    </div>
+
+
+    <!-- Confirmación de cancelación -->
+    <div id="divConfirmCancelar" style="display: none;">
+        <p>Se eliminará la consignación ¿Desea continuar?</p>
+    </div>
+
+    <div id="divEliminarArchivo" style="display: none">
+        <p>Se eliminará el archivo ¿Desea continuar?</p>
+    </div>
+    <div id="divEliminarConsignacion" style="display: none">
+        <p>Se eliminará la información de la consignación, ¿Desea continuar?</p>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/fileinput.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/consignaciones.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/consignaciones.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/consignaciones.vista.js')}}"></script>
+{% endblock %}

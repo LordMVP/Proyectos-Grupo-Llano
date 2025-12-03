@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ProgramacionManual/ProgramacionManual.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ProgramacionManual/ProgramacionManual.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Captcha, Combo, Input, Tabla, Botonera } from 'appfuture-react'
+
+import Pendientes from './subcomponentes/Pendientes'
+
+import axios from 'axios'
+import URL from '../../global/rutas_api'
+import Peticion from '../Assets/util/peticion'
+import Autocompletado from '../Assets/componentes/Autocompletado'
+import { Util } from '../Assets/util/Util'
+import Modal from '../Assets/componentes/Modal'
+
+
+/**
+ *
+ *
+ * @class ProgramacionManual
+ * @extends {Component}
+ */
+class ProgramacionManual extends Component {
+    //inicialización de variables
+   /**
+     *Define estados iniciales
+     * @memberof SolicitudAgendamiento
+     */
+
+    state = {
+        lista: [],
+        listaFinal: [],
+        mostrar: false,
+        limpiar: false,
+
+        // defecto
+        proceso: '-1',
+        contratista: '-1',
+        contratante: '-1',
+        unidadResponsable: '-1',
+        programacion: '',
+        idCont: { idContratante: '-1', idContratista: '-1' },
+        prueba: [
+            { a: 1, b: 5, c: '' },
+            { a: 2, b: 6, c: '' },
+            { a: 3, b: 7, c: '' },
+        ],
+    }
+
+    //Arreglo con los id y nombre de columnas para el componente Tabla
+
+    columnas = [
+        {
+            Header: 'Programacion manual',
+
+            columns: [
+                { Header: 'Agenda', accessor: 'agenda' },
+                { Header: 'Servicio', accessor: 'servicio' },
+                { Header: 'Observaciones', accessor: 'observacion' },
+                { Header: 'Cliente', accessor: 'cliente' },
+                { Header: 'Direccion', accessor: 'direccion' },
+                { Header: 'Municipio', accessor: 'municipio' },
+                { Header: 'Telefono', accessor: 'telefono' },
+                { Header: 'Cuadrilla', accessor: 'cuadrilla' },
+                { Header: 'Fecha Prog.', accessor: 'fechaProg' },
+                {
+                    Header: 'Selección',
+                    accessor: 'sigueIde',
+                    Cell: (props) => (
+                        &lt;input
+                            type="radio"
+                            unchecked
+                            name="disponibilidad"
+                            onChange={(e) => this.asignar(e, props.index)}
+                        />
+                    ),
+                },
+            ],
+        },
+    ]
+
+    /**
+     *Asigna la fila seleccionada para procesarla más adelante
+     *@method
+     *@param {int} index - número de la fila
+     */
+    asignar = (e, index) => {
+        this.setState({ listaFinal: this.state.lista[index] })
+    }
+    peticion = new Peticion(this)
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+
+    async componentDidMount() {
+        await this.peticion.get({
+            url: URL.PROGRAMACION_MANUAL.LISTAR_EMPRESAS_CONTRATANTES,
+            config: ['empresaSevemp', 'empresaCod', 'empresaNom'],
+            json: 'contratanteJson',
+            value: 'contratante',
+        })
+    }
+
+    /**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+    change = async ({ target: { id, value } }) => {
+        await this.setState({ [id]: value })
+        switch (id) {
+            case 'proceso':
+                if (value === '-1' || this.state.contratista === '-1') {
+                    this.setState({
+                        unidadResponsableJson: [],
+                        unidadResponsable: '-1'
+                    })
+                    return false
+                }
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_CUADRILLAS,
+                    parametros: {
+                        idContratista: Util.obtenerId(this.state.contratista, 1),
+                        proceso: Util.obtenerId(value)
+                    },
+                    config: ['ureIderegistro', 'cuadrillaCod', 'cuadrillaNom'],
+                    json: 'unidadResponsableJson',
+                    value: 'unidadResponsable',
+                })
+                break
+            case 'contratante':
+                this.setState({
+                    idCont: {
+                        idContratante: value,
+                        idContratista: this.state.contratista,
+                    },
+                })
+                if (value === '-1'){
+                    this.setState({
+                        contratanteJson:[],
+                        contratistaJson:[]
+                    })
+                    return false
+                }else{
+                    this.peticion
+                    .post({
+                        url: URL.PROGRAMACION_MANUAL.LISTAR_CONTRATISTAS,
+                        parametros: {
+                            empresaContratante: Util.obtenerId(value),
+                        },
+                        config: ['empresaSevemp', 'empresaCod', 'empresaNom'],
+                        json: 'contratistaJson',
+                        value: 'contratista',
+                    })
+                    .then((data) => { })
+                } 
+                
+                break
+            case 'contratista':
+                this.setState({
+                    idCont: {
+                        idContratante: this.state.contratante,
+                        idContratista: value,
+                    },
+                })
+                if (value === '-1' || this.state.proceso === '-1') {
+                    this.setState({
+                        unidadResponsableJson: [],
+                        unidadResponsable: '-1'
+                    })
+                    return false
+                }
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_CUADRILLAS,
+                    parametros: {
+                        idContratista: Util.obtenerId(value, 1),
+                        proceso: Util.obtenerId(this.state.proceso)
+                    },
+                    config: ['ureIderegistro', 'cuadrillaCod', 'cuadrillaNom'],
+                    json: 'unidadResponsableJson',
+                    value: 'unidadResponsable',
+                })
+                break
+            case 'lista':
+                //restablecer valores
+                this.setState({
+                    listaFinal: [],
+                })
+                if (
+                    (this.state.unidadResponsable !== '-1' ||
+                        this.state.programacion !== '') &amp;&amp;
+                    value.length > 0
+                ) {
+                    const lista = this.state.lista.map((fila) => {
+                        ; (fila.cuadrilla =
+                            this.state.unidadResponsable !== '-1'
+                                ? this.state.unidadResponsable
+                                : ''),
+                            (fila.fechaProg =
+                                this.state.programacion !== ''
+                                    ? this.state.programacion
+                                    : '')
+                        return fila
+                    })
+                    await this.setState({ lista })
+                }
+                break
+            case 'unidadResponsable':
+                if (value !== '-1' &amp;&amp; this.state.lista.length > 0) {
+                    const lista = this.state.lista.map((fila) => {
+                        fila.cuadrilla = value
+                        return fila
+                    })
+                    this.setState({ lista })
+                }
+                break
+            case 'programacion':
+                if (value !== '-1' &amp;&amp; this.state.lista.length > 0) {
+                    const lista = this.state.lista.map((fila) => {
+                        fila.fechaProg = value
+                        return fila
+                    })
+                    this.setState({ lista })
+                }
+                break
+        }
+    }
+
+    /**
+     * Se ejecuta al momento de pulsar sobre el botón Guardar
+     * @method
+     * @async
+     */
+
+    guardar = async () => {
+        //cambiar el estado del modal
+
+        if (
+            this.state.listaFinal.length &lt;= 0 ||
+            this.state.programacion === '' ||
+            this.state.unidadResponsable === '-1'
+        ) {
+            await this.setState({ mensaje: [] })
+            this.state.listaFinal.length &lt;= 0
+                ? this.state.mensaje.push('Lista programación Manual')
+                : ''
+            this.state.programacion === ''
+                ? this.state.mensaje.push('Programación')
+                : ''
+            this.state.unidadResponsable === '-1'
+                ? this.state.mensaje.push('Unidad Responsable')
+                : ''
+
+            //Modal
+            this.setState({
+                titulo: '¡FALTA INFORMACIÓN!',
+                texto: `Falta escoger:\n ${this.state.mensaje.join(', ')}`,
+            })
+            //Elimina si existe un segundo botón
+            this.botones.length === 2 ? this.botones.shift() : null
+            //despliega modal
+            this.setState({ mostrar: true })
+        } else {
+            this.setState({
+                titulo: '¡ENVIAR INFORMACIÓN!',
+                texto: '¿Confirma Transacción?',
+            })
+            //Agrega botón
+            this.botones.length === 1
+                ? this.botones.unshift({
+                    texto: 'Aceptar',
+                    callback: this.guardarModal,
+                    index: 1,
+                })
+                : null
+            //despliega modal
+            this.setState({ mostrar: true })
+
+        }
+    }
+
+    /**
+     * Se ejecuta al momento de pulsar en  'aceptar' del modal, desplegado en la función 'guardar'.
+     * Y solo ocurre al validar los campos necesarios para registrar o actualizar la información
+     * @method
+     */
+
+    guardarModal = () => {
+        const listaFinal = this.state.listaFinal
+        const datoGuardar = {
+            idProceso: Util.obtenerId(listaFinal.proceso),
+            suscripcion: listaFinal.suscripcion, //cliente_codsus  código largo
+            idsuscripcion: listaFinal.terIderegistro,//teridregistro
+            unidadResponsable: Util.obtenerId(listaFinal.cuadrilla),
+            fechaProgramacion: listaFinal.fechaProg,
+            idActividad: listaFinal.sigueIde,
+            duracion: listaFinal.duracion,
+            idprocesoActividad: listaFinal.idprocesoactividad,
+            tipo: 'M',
+            correoCliente:
+                typeof listaFinal.correo != 'undefined'
+                    ? listaFinal.correo
+                    : '',
+            direccionCliente: listaFinal.direccion,
+            telefonoCliente: listaFinal.telefono,
+            nombreCliente: listaFinal.cliente,
+            actividad: listaFinal.actividad,
+            observaciones: listaFinal.observacion,
+        }
+
+        this.peticion.post({
+            url: URL.PROGRAMACION_MANUAL.EDITAR_ACTIVIDADES_AGENDAMIENTO_MANUAL,
+            parametros: [datoGuardar],
+        })
+
+        this.nuevo()
+    }
+
+    /**
+     * Restablece los valores a las condiciones iniciales
+     * @method
+     */
+
+    nuevo = () => {
+        //reiniciar variables
+        this.setState({
+            proceso: '-1',
+            contratante: '-1',
+            contratista: '-1',
+            unidadResponsable: '-1',
+            programacion: '-1',
+            listaFinal: [],
+            lista: [],
+            mostrar: false,
+            idCont: { idContratante: '-1', idContratista: '-1' },
+            limpiar: true,
+        })
+    }
+
+    /**
+     * Cierra el modal de la consulta
+     * @method
+     */
+
+    cerrarModal = () => { }
+
+    //Arreglo para emplearlo en el componente Modal, con sus respectivas funciones
+
+    botones = [{ texto: 'Cerrar', callback: this.cerrarModal, index: 2 }]
+
+    //Arreglo para emplearlo en el componente botonera, con sus respectivas funciones
+
+    funciones = [
+        { texto: 'guardar', callback: this.guardar },
+        { texto: 'nuevo', callback: this.nuevo },
+    ]
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+
+    render() {
+        return (
+            &lt;React.Fragment>
+                &lt;Modal
+                    titulo={this.state.titulo}
+                    texto={this.state.texto}
+                    mostrar={this.state.mostrar}
+                    ocultarAlerta={this.change}
+                    botones={this.botones}
+                />
+
+                &lt;h1>Empresa - Programación manual&lt;/h1>
+
+                &lt;Botonera funciones={this.funciones} />
+
+                &lt;div className="caja contenedor">
+                    &lt;Pendientes
+                        contratanteJson={this.state.contratanteJson}
+                        value={this.state.pendientes}
+                        idCont={this.state.idCont}
+                        limpiar={this.state.limpiar}
+                        onChange={this.change}
+                    />
+                &lt;/div>
+                &lt;div className="caja contenedor">
+                    &lt;label className="tag">Unidad Responsable&lt;/label>
+
+                    &lt;div className="formulario">
+                        &lt;Combo
+                            propTexto="texto"
+                            propValor="id"
+                            id="contratista"
+                            label="contratista"
+                            value={this.state.contratista}
+                            opciones={this.state.contratistaJson}
+                            onChange={this.change}
+                        />
+
+                        &lt;Combo
+                            propTexto="texto"
+                            propValor="id"
+                            id="unidadResponsable"
+                            label="unidad responsable"
+                            value={this.state.unidadResponsable}
+                            opciones={this.state.unidadResponsableJson}
+                            onChange={this.change}
+                        />
+
+                        &lt;Input
+                            id="programacion"
+                            label="programacion"
+                            type="date"
+                            value={this.state.programacion}
+                            onChange={this.change}
+                        />
+                    &lt;/div>
+
+                    &lt;div className="contenedor">
+                        &lt;Tabla
+                            datos={this.state.lista}
+                            columnas={this.columnas}
+                        />
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;Captcha />
+            &lt;/React.Fragment>
+        )
+    }
+}
+export { ProgramacionManual as RProgramacionManual }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

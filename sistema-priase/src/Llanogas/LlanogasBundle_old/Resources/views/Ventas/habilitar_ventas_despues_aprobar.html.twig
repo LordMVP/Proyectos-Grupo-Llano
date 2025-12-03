@@ -1,0 +1,102 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            display: none;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+{% block titulo %}Habilitar Ventas - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divCabecera" style="margin: 0 auto; width: 60%;">
+
+            <div id="divCargando" style="margin-bottom: 25px"> 
+                <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                <p>Habilitando información, <br>esto puede tardar unos minutos...</p>        		
+            </div>
+            
+        <fieldset>
+            <legend>Selección Venta</legend>
+            <div id="divControles">
+                <div class="campo" style="margin-bottom: 10px;">
+                    <label for="cmbIdVenta">Seleccione Número de Venta: </label>
+                    <select id="cmbIdVenta">
+                        <option value="-1"> Seleccione opción</option>
+                        {% for venta in ventas %}
+                            <option value="{{venta.idventa}}" >{{venta.idventa}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                 <fieldset>
+                    <legend>Información del Cliente</legend>
+                    <div class="campoCorto">
+                        <label for="txtpcodigo">Codigo Anterior:</label>
+                        <input type="text" id="txtpcodigo" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtIdSuscriptor">Suscriptor:</label>
+                        <input type="text" id="txtIdSuscriptor" disabled="disabled" />
+                    </div>
+                    <div class="campoCorto">
+                        <label for="txtIdSuscripcion">Suscripción:</label>
+                        <input type="text" id="txtIdSuscripcion" disabled="disabled" />
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="txtConvenio">Convenio:</label>
+                        <input type="text" id="txtConvenio" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtNombre">Nombre:</label>
+                        <input type="text" id="txtNombre" disabled="disabled" />
+                    </div>
+
+                    <div class="campoCorto">
+                        <label for="txtDocumento">NIT/CC:</label>
+                        <input type="text" id="txtDocumento" disabled="disabled" />
+                    </div>
+                    
+                </fieldset>    
+                <div class="medio" style="display: none;"  id="obsComentario">
+                    <label for="txtObservacionesVesiones">Comentario Cambios Anteriores: </label>
+                    <textarea id="txtObservacionesVesiones" disabled="disabled"></textarea>
+                </div>
+                <div class="medio">
+                    <label for="txtObservacionesActual">Comentario: </label>
+                    <textarea id="txtObservacionesActual" ></textarea>
+                </div>
+                <button class="btnSimple" id="btnHabilitarVenta"  disabled="disabled" >Habilitar Venta...</button>
+            </div>
+                   
+            
+        </fieldset>
+    </div>
+
+    <div id="divConfirmar" style="display: none;">
+        <p>Se Habilitará la venta, ¿Desea Habilitar?</p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Habilitar/habilitaventa.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Habilitar/habilitaventa.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Habilitar/habilitaventa.vista.js')}}"></script>
+{% endblock %}

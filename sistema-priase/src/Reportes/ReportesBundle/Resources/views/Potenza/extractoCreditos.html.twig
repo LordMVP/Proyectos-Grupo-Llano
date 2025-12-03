@@ -1,0 +1,63 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Extracto de crédtios {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="extractoCreditosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Búsqueda de Financiaciones </legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtciclo">Ciclo: </label>
+                                    <select id="txtciclo" name="ciclo" ng-model="idciclo" class="form-control">
+                                        <option ng-repeat="ciclo in ciclos" ng-value="ciclo.idciclo">{[{ciclo.ciclo}]}</option>
+                                    </select>                                  
+                                </div>
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaInicio">Fecha de Corte:</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechacorte" id="fechaCorte" name="fechaCorte"/>
+                                    <p class="help-block" >
+                                        Debe seleccionar fecha de Corte para el reporte
+                                    </p>
+                                </div> 
+                                <div class="form-group col-md-4">
+                                    <label for="cmbConvenio">Id Financiació: </label>
+                                    <input type="number" id="txtid_financiacion" ng-model="idfinanciacion" class="form-control" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">                               
+                                    Toda la informacion será generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Extracto Creditos
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/potenza/extractoCreditos.angular.js')}}"></script>
+{% endblock %}

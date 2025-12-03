@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ProgramacionManual/subcomponentes/Pendientes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ProgramacionManual/subcomponentes/Pendientes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input } from 'appfuture-react'
+
+import axios from 'axios'
+import URL from '../../../global/rutas_api'
+import Peticion from '../../Assets/util/peticion'
+import Autocompletado from '../../Assets/componentes/Autocompletado'
+import { Util } from '../../Assets/util/Util'
+import Modal from '../../Assets/componentes/Modal'
+
+
+/**
+ *
+ *
+ * @class Pendientes
+ * @extends {Component}
+ */
+class Pendientes extends Component {
+    //inicialización de variables
+   /**
+     *Define estados iniciales
+     * @memberof SolicitudAgendamiento
+     */
+    state = {
+        mostrar: false,
+        contratista: '-1',
+        contratante: '-1',
+        contratanteJson:[],
+        proceso: '-1',
+        cliente: '',
+        agenda: '-1',
+        servicio: '-1',
+        municipio: '-1',
+    }
+
+    peticion = new Peticion(this)
+
+    // interno
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+
+    async componentDidMount() {
+        this.peticion.get({
+            url: URL.PROGRAMACION_MANUAL.LISTAR_PROCESOS,
+            config: ['uniProceso', 'prcDescripcion'],
+            json: 'procesoJson',
+            value: 'proceso',
+        })
+        this.peticion.get({
+            url: URL.PROGRAMACION_MANUAL.LISTAR_MUNICIPIOS,
+            config: ['ciudadCod', 'ciudadNom'],
+            json: 'municipioJson',
+            value: 'municipio',
+        })
+    }
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} prepProps - Cargar atributos del componente
+     * @async
+     */
+
+    componentDidUpdate(prepProps) {
+        if (this.props.contratanteJson !== prepProps.contratanteJson) {
+                this.setState({
+                    contratanteJson: this.props.contratanteJson
+                })
+        }
+        if (this.props.limpiar !== prepProps.limpiar) {
+            if (this.props.limpiar) {
+                this.setState({
+                    agenda: '-1',
+                    proceso: '-1',
+                    autocompletadoMunicipio: undefined,
+                    servicio: '-1',
+                    actividad: '-1',
+                    cliente: '',
+                    venta: '',
+                })
+                this.props.onChange({ target: { id: 'limpiar', value: false } })
+            }
+        }
+        if (this.props.idCont !== prepProps.idCont) {
+            this.setState({
+                contratante: this.props.idCont.idContratante,
+                contratista: this.props.idCont.idContratista,
+            })
+            this.peticion.post({
+                url: URL.PROGRAMACION_MANUAL.LISTAR_SERVICIOS,
+                parametros: {
+                    empresaContratante: Util.obtenerId(
+                        this.props.idCont.idContratante
+                    ),
+                    agenda: this.state.agenda,
+                },
+                config: ['servicioCod', 'servicioNom'],
+                json: 'servicioJson',
+                value: 'servicio',
+            })
+
+            if (this.props.idCont.idContratante === '-1' || this.state.proceso==='-1') {
+                this.setState({
+                    agendaJson: [],
+                    agenda: '-1'
+                })
+            } else {
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_AGENDAS,
+                    parametros: {
+                        proceso: Util.obtenerId(this.state.proceso),
+                        empresa: Util.obtenerId(this.props.idCont.idContratante, 1)
+                    },
+                    config: ['agendaCod', 'agendaNom'],
+                    json: 'agendaJson',
+                    value: 'agenda',
+                })
+            }
+        }
+    }
+
+    /**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+    change = ({ target: { id, value } }) => {
+        this.setState({ [id]: value })
+
+        switch (id) {
+            case 'contratante':
+                this.props.onChange({ target: { id: 'contratante', value } })
+                break;
+            case 'proceso':
+                this.props.onChange({ target: { id: 'proceso', value } })
+                if (value === '-1' || this.props.idCont.idContratante === '-1') {
+                    this.setState({
+                        agendaJson: [],
+                        agenda: '-1'
+                    })
+                } else {
+                    this.peticion.post({
+                        url: URL.PROGRAMACION_MANUAL.LISTAR_AGENDAS,
+                        parametros: {
+                            proceso: Util.obtenerId(value),
+                            empresa: Util.obtenerId(this.props.idCont.idContratante, 1)
+                        },
+                        config: ['agendaCod', 'agendaNom'],
+                        json: 'agendaJson',
+                        value: 'agenda',
+                    })
+                }
+                break;
+            case 'agenda':
+                if (value === '-1') return false
+                //Crear lista servicios
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_SERVICIOS,
+                    parametros: {
+                        empresaContratante: Util.obtenerId(
+                            this.props.idCont.idContratante
+                        ),
+                        agenda: Util.obtenerId(value),
+                    },
+                    config: ['servicioCod', 'servicioNom'],
+                    json: 'servicioJson',
+                    value: 'servicio',
+                })
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_ACTIVIDADES,
+                    parametros: {
+                        agenda: Util.obtenerId(value),
+                        servicio: Util.obtenerId(this.state.servicio),
+                    },
+                    config: ['servicioCod', 'servicioNom'],
+                    json: 'actividadJson',
+                    value: 'actividad',
+                })
+
+                break
+            case 'servicio':
+                if (this.state.agenda === '-1') return false
+                this.peticion.post({
+                    url: URL.PROGRAMACION_MANUAL.LISTAR_ACTIVIDADES,
+                    parametros: {
+                        agenda: Util.obtenerId(this.state.agenda),
+                        servicio: Util.obtenerId(value),
+                    },
+                    config: ['servicioCod', 'servicioNom'],
+                    json: 'actividadJson',
+                })
+
+                break
+        }
+    }
+
+    /**
+     *
+     *Buscar filtrando información, previa selección de varios campos para listarlos en una tabla
+     *@method
+     */
+
+    buscar = async () => {
+        const { contratista, contratante, proceso, cliente } = this.state
+        if (
+            proceso === '-1'
+        ) {
+            await this.setState({ mensaje: [] })
+            proceso === '-1' ? this.state.mensaje.push('Proceso') : ''
+            //Modal
+            this.setState({
+                titulo: '¡FALTA INFORMACIÓN!',
+                texto: `Para la búsqueda como mínimo debe escoger: ${this.state.mensaje.join(
+                    ', '
+                )}`,
+            })
+            //despliega modal
+            this.setState({ mostrar: true })
+            return false
+        }
+        const datos = await this.peticion.post({
+            url: URL.PROGRAMACION_MANUAL.CONSULTAR_ACTIVIDADES_PENDIENTES,
+            parametros: {
+                //empContratista: '321',
+                empContratista:
+                    this.state.contratista === '-1' || this.state.contratista === ''
+                        ? ''
+                        : Util.obtenerId(this.state.contratista),
+                empContratante:
+                    this.state.contratante === '-1' || this.state.contrante === ''
+                        ? ''
+                        : Util.obtenerId(this.state.contratante),
+                idProceso:
+                    this.state.proceso === '-1' || this.state.proceso === ''
+                        ? ''
+                        : Util.obtenerId(this.state.proceso),
+                suscripcion:
+                    this.state.cliente === '' ? '' : this.state.cliente,
+                agenda:
+                    this.state.agenda === '-1'
+                        ? ''
+                        : Util.obtenerId(this.state.agenda),
+                servicio:
+                    this.state.servicio === '-1'
+                        ? ''
+                        : Util.obtenerId(this.state.servicio),
+                ciudad:
+                    this.state.municipio === '-1'
+                        ? ''
+                        : Util.obtenerId(this.state.municipio),
+            },
+        })
+
+        if (datos === null) {
+            const lista = []
+            this.props.onChange({ target: { id: 'lista', value: lista } })
+        } else {
+            const lista = datos.map((fila) => {
+                return {
+                    sigueIde: fila.sigueIde,
+                    agenda: `${fila.agendas.agendaCod} - ${fila.agendas.agendaNom}`,
+                    servicio: `${fila.servicios.servicioCod} - ${fila.servicios.servicioNom}`,
+                    observacion: fila.venVenta.venObservacion,
+                    cliente: fila.tercero.terNomcompleto,
+                    direccion: fila.propiedad.proDireccion,
+                    municipio: `${fila.ciudades.ciudadCod} - ${fila.ciudades.ciudadNom}`,
+                    telefono: `${fila.tercero.terTelcelular}${
+                        fila.tercero.terTelfijo != '.'
+                            ? -fila.tercero.terTelcelular
+                            : ''
+                        }`,
+                    cuadrilla: '',
+                    fechaProg: '',
+                    idprocesoactividad:
+                        fila.proaProcesoactividades.proaIderegistro,
+                    duracion: fila.proaProcesoactividades.proaTiempopromedio,
+                    correo: fila.tercero.terCorreo,
+                    proceso: this.state.proceso,
+                    idsuscripcion: this.state.cliente,
+                    actividad: fila.servicios.servicioNom,
+                    terIderegistro: fila.tercero.terIderegistro,
+                    suscripcion: fila.suscriptores.clienteCodsus
+                }
+            })
+            this.props.onChange({ target: { id: 'lista', value: lista } })
+        }
+    }
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+    render() {
+        return (
+            &lt;div className="contenedor">
+                &lt;Modal
+                    titulo={this.state.titulo}
+                    texto={this.state.texto}
+                    mostrar={this.state.mostrar}
+                    ocultarAlerta={this.change}
+                    botones={this.botones}
+                />
+
+                &lt;label className="tag">actividades pendientes&lt;/label>
+
+                &lt;div className="formulario">
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="contratante"
+                        label="contratante*"
+                        value={this.state.contratante}
+                        opciones={this.state.contratanteJson}
+                        onChange={this.change}
+                    />
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="proceso"
+                        label="proceso*"
+                        value={this.state.proceso}
+                        opciones={this.state.procesoJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="agenda"
+                        label="agenda"
+                        value={this.state.agenda}
+                        opciones={this.state.agendaJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Autocompletado
+                        id="municipio"
+                        label="municipio"
+                        marcaAgua={'Escriba el código o el municipio'}
+                        opciones={this.state.municipioJson}
+                        onChange={this.change}
+                        value={this.state.autocompletadoMunicipio}
+                    />
+
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="servicio"
+                        label="Etapa Servicio"
+                        value={this.state.servicio}
+                        opciones={this.state.servicioJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Combo
+                        propTexto="texto"
+                        propValor="id"
+                        id="actividad"
+                        label="actividad"
+                        value={this.state.actividad}
+                        opciones={this.state.actividadJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Input
+                        id="cliente"
+                        label="Referencia Cliente*"
+                        type="number"
+                        value={this.state.cliente}
+                        onChange={this.change}
+                    />
+
+                    &lt;Input
+                        id="fechaVenta"
+                        label="fecha de venta"
+                        type="date"
+                        value={this.state.venta}
+                        onChange={this.change}
+                    />
+                &lt;/div>
+
+                &lt;div className="contenedor" >
+                    &lt;div>
+                        &lt;button onClick={this.buscar}>buscar&lt;/button>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        )
+    }
+}
+
+export default Pendientes
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

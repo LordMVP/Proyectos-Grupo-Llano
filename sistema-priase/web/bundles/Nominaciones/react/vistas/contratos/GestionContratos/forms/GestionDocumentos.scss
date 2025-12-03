@@ -1,0 +1,41 @@
+.contratos-documentos {
+
+  &__input-file {
+    display: none;
+  }
+
+  &__btn-archivo{
+    margin-top: 28px;
+  }
+
+  &__tabla-archivos {
+    margin-top: 20px;
+  }
+}
+.grupo-campos{
+  border: 1px solid #478cff;
+  border-radius: 3px;
+  padding: 15px;
+  position: relative;
+}
+
+legend.title{
+  position: absolute;
+  top: -11px;
+  background: #478cff;
+  color: #FFF;
+  font-size: 14px;
+  padding: 1px 6px;
+  left: 5px;
+  border-radius: 5px;
+  display: block;
+  width: min-content;
+}
+
+.grupo-campos .form-group{
+  margin: 0px;
+}
+
+.grupo-campos .form-group label{
+  font-size: 12px;
+}

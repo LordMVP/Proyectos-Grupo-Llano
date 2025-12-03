@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ListarAgendas/subcomponentes/Gestion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ListarAgendas/subcomponentes/Gestion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input, VentanaDialogo } from 'appfuture-react'
+
+import API from '../../../global/rutas_api'
+import Peticion from '../../../global/peticion'
+import Util from '../../../global/util'
+
+
+/**
+ *
+ *
+ * @class Gestion
+ * @extends {Component}
+ */
+class Gestion extends Component {
+	/**
+     *Define estados iniciales
+     * @memberof Gestion
+     */
+	state = {
+		dialogoModal: false,
+
+		// defecto
+
+		identificador: '',
+		codigo: '',
+		descripcion: '',
+		alias: '',
+
+		dependencia: '-1',
+	}
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+
+	BotonGuardar = () => {
+		const { dialogoModal, identificador, codigo, ...estado } = this.state
+
+		/* prettier-ignore */
+
+		return Util.validarObjeto(estado)
+			? &lt;button className="btn" onClick={this.handleDialogo}>Guardar&lt;/button>
+			: &lt;button className="btn" disabled={true}>Guardar&lt;/button>
+	}
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     */
+	async componentDidMount() {
+		// defecto
+
+		if (this.props.value.empresa) {
+			const {
+				agendaLlacom,
+				agendaAlias,
+				agendaCod,
+				agendaNom,
+				agendaCodemp,
+				agendaCoddepemp
+
+			} = this.props.value
+
+			await this.obtenerDependencias(agendaCodemp)
+
+			await this.setState({
+				identificador: agendaLlacom,
+				codigo: agendaCod,
+				descripcion: agendaNom,
+				alias: agendaAlias,
+				dependencia: Util.obtenerId(agendaCoddepemp)
+			})
+		} else {
+			Peticion.post({
+				url: API.LISTAR_AGENDAS.LISTAR_DEPENDENCIAS_SIN_PARAMETROS,
+				parametros: {},
+				config: {
+					valor: 'depempresaCod',
+					texto: 'depempresaNom',
+				},
+				callback: dependenciaJson => this.setState({ dependenciaJson })
+			})
+		}
+	}
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+	/**
+	 *
+	 * Cierra el componente gestión y actualiza estados del componente padre
+	 * @method
+	 */
+	cerrar = () => this.props.onChange(null)
+
+	/**
+	 *
+	 * Permite guardar la gestión
+	 * @method
+	 * 
+	 */
+	guardar = () => {
+		const parametros = {
+			agendaNom: this.state.descripcion,
+			agendaAlias: this.state.alias,
+			agendaCoddepemp: Util.obtenerId(this.state.dependencia),
+		}
+
+		if (this.props.value.agendaLlacom) {
+			// editar
+
+			parametros.agendaCod = this.state.codigo
+			parametros.agendaLlacom = this.state.identificador
+		}
+
+		Peticion.post({
+			url: API.LISTAR_AGENDAS.CREAR_EDITAR,
+			parametros,
+		})
+
+		// final
+
+		this.cerrar()
+	}
+
+	/**
+	 *
+	 * Despliega modal
+	 * @method
+	 */
+	handleDialogo = () => {
+		this.setState({ dialogoModal: !this.state.dialogoModal })
+	}
+
+	/**
+	 *
+	 * Obtener dependencias y listarlas en el componente combobox
+	 * @method
+	 */
+	obtenerDependencias = (empresa) => {
+		return Peticion.post({
+			url: API.LISTAR_AGENDAS.LISTAR_DEPENDENCIAS,
+			parametros: {
+				depempresaCodemp: Util.obtenerId(empresa)
+			},
+			config: {
+				valor: 'depempresaCod',
+				texto: 'depempresaNom',
+			},
+			callback: dependenciaJson => this.setState({ dependenciaJson })
+		})
+	}
+
+	botones = [
+		{ texto: 'guardar', callback: this.guardar },
+		{ texto: 'cancelar', callback: this.handleDialogo },
+	]
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+	render() {
+		const { BotonGuardar } = this
+
+		return (
+			&lt;React.Fragment>
+				&lt;h1>Crear/Editar agenda&lt;/h1>
+
+				&lt;VentanaDialogo
+					titulo="Confirmación"
+					texto="¿Confirma transacción?"
+					mostrar={this.state.dialogoModal}
+					botones={this.botones}
+				/>
+
+				&lt;div className="contenedor d-flex justify-content-center btn-group">
+					&lt;BotonGuardar />
+					&lt;button className="btn" onClick={this.cerrar}>
+						&lt;span>cancelar&lt;/span>
+					&lt;/button>
+				&lt;/div>
+
+				&lt;div className="contenedor formulario">
+					&lt;Input
+						id="identificador"
+						label="identificador"
+						value={this.state.identificador || 'Autogenerado'}
+						extra={{ disabled: true }}
+					/>
+
+					&lt;Input
+						id="codigo"
+						label="código"
+						value={this.state.codigo || 'Autogenerado'}
+						extra={{ disabled: true }}
+					/>
+
+					&lt;Input
+						id="descripcion"
+						label="descripcion"
+						value={this.state.descripcion}
+						onChange={this.change}
+					/>
+
+					&lt;Input
+						id="alias"
+						label="alias"
+						type="number"
+						value={this.state.alias}
+						onChange={this.change}
+						extra={{ maxLength: 3 }}
+					/>
+
+					&lt;Combo
+						id="dependencia"
+						label="dependencia"
+						opciones={this.state.dependenciaJson}
+						value={this.state.dependencia}
+						onChange={this.change}
+						extra={{ disabled: !this.state.dependenciaJson }}
+					/>
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+export default Gestion
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

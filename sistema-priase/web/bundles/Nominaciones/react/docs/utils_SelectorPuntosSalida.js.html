@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/SelectorPuntosSalida.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/SelectorPuntosSalida.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Util } from 'appfuture-react';
+import { Combo, Input, TextoNumerico } from 'appfuture-react';
+import Modal from 'react-bootstrap4-modal';
+
+class SelectorPuntosSalida extends Component {
+
+  state = {
+    mostrarModal: false,
+    puntosSalidaTemp: [],
+    puntosSalida: [],
+  };
+
+  /**
+   * Controla el cambio de estado de la propiedad mostrarModal que se usa para mostrar o ocultar el modal de selección.
+   */
+  abrirCerrarModal = (estado) => {
+    this.setState({
+      mostrarModal: estado
+    });
+  };
+
+  /**
+   * Confirma la selección de los puntos de salida, es decir invoca el método del componente padre para actualizar su lista de puntos de salida.
+   */
+  confirmarSeleccionPuntosSalida = (estado) => {
+    this.abrirCerrarModal(estado);
+    const v = this.validarSeleccion();
+    if (v) {
+      this.props.seleccionarItem(this.state.puntosSalida);
+    }
+  };
+
+  /**
+   * Valida la selección de los puntos de salida y sus campos respectivos.
+   * @return {boolean}
+   */
+  validarSeleccion = () => {
+    let respuesta = 0;
+    this.state.puntosSalida.forEach(puntoSalida => {
+      //Verificamos si el puntoSalida seleccionado tiene cargo seleccionado.
+      if (!this.verificarCamposSeleccion(puntoSalida)) {
+        respuesta--;
+      }
+    });
+    return respuesta === 0;
+  };
+
+  /**
+   * Verifica que el usuario haya seleccionado correctamente los campos correspondientes a los puntos de salida que ha configurado.
+   * @return {boolean}
+   */
+  verificarCamposSeleccion = (puntoSalida) => {
+    if (!puntoSalida.seleccionado) {
+      return true;
+    }
+    let respuesta = true;
+    if (!puntoSalida.cntsCantidadcontratada || puntoSalida.cntsCantidadcontratada &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe ingresar una cantidad contratada para el punto de salida: "' + puntoSalida[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    if (!puntoSalida.uniIdemedidacantidad || puntoSalida.uniIdemedidacantidad &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe seleccionar una unidad de medida para el punto de salida: "' + puntoSalida[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    return respuesta;
+  };
+
+  /**
+   * Elimina la selección de un punto de salida especifico.
+   */
+  quitarSeleccionItem = (puntoSalida) => {
+    const puntosSalida = this.state.puntosSalida.map(ps => {
+      if (ps.idPuntoSalida === puntoSalida.idPuntoSalida) {
+        ps.seleccionado = false;
+      }
+      return ps;
+    });
+    this.setState({ puntosSalida: puntosSalida, mostrarModal: true });
+  };
+
+  componentDidMount() {
+    this.setState({ puntosSalida: this.obtenerListaPuntosSalida(), puntosSalidaTemp: this.obtenerListaPuntosSalida() });
+  };
+
+  /**
+   * Devuelve la lista de puntos de salida Actualizada con algunos valores necesarios para que el componente funcione correctamente.
+   * @return {array}
+   */
+  obtenerListaPuntosSalida = () => {
+    const lista = this.props.lista.map(puntoSalida => {
+      puntoSalida.idPuntoSalida = Util.generarIdControl('_idPuntoSalida_' + puntoSalida[this.props.propValor]);
+      puntoSalida.cntsCantidadcontratada = puntoSalida.cntsCantidadcontratada ? puntoSalida.cntsCantidadcontratada : puntoSalida.pstaCapacidad;
+      puntoSalida.uniIdemedidacantidad = (puntoSalida.uniIdemedida.uniIderegistro) ? puntoSalida.uniIdemedida.uniIderegistro : puntoSalida.uniIdemedidacantidad
+      return puntoSalida;
+    });
+    return lista;
+  };
+
+  actualizarPuntosSalida = () => {
+    this.setState({ puntosSalida: this.obtenerListaPuntosSalida() });
+  };
+
+  /**
+   * Rendierizará el componente selector.
+   * @return {Component}
+   */
+  renderSelector = () => {
+    const texto = '';
+    const seleccionados = this.state.puntosSalida.reduce((total, registro) => { return total + (registro.seleccionado ? 1 : 0) }, 0);
+    const placeholder = `(${seleccionados}) Seleccionados`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>{this.props.titulo}&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={texto} disabled={true} type="text" className="form-control" placeholder={placeholder} />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador input-group-btn"
+              title={`Seleccionar ` + this.props.titulo}
+              onClick={() => this.abrirCerrarModal(true)}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Controla el cambio de los componentes...
+   */
+  controlarCambio = (evento) => {
+    let { puntosSalida, puntosSalidaTemp } = this.state;
+
+    puntosSalida = puntosSalida.map(registro => {
+      const puntoSalida = { ...registro };
+      return puntoSalida;
+    });
+
+    const control = evento.target;
+    const idPuntoSalida = control.attributes['data-idpuntosalida'].value;
+    const index = puntosSalida.findIndex(ps => ps[this.props.propValor] == idPuntoSalida);
+    const indexTemp = puntosSalidaTemp.findIndex(ps => ps[this.props.propValor] == idPuntoSalida);
+    if (indexTemp &lt; 0 || index &lt; 0) {
+      return;
+    }
+    puntosSalida[index].seleccionado = ((evento.target.name !== 'check_idpuntosalida')) ? true : evento.target.checked;
+    if ((evento.target.name !== 'check_idpuntosalida')) {
+      if (evento.target.name == 'cntsCantidadcontratada') {
+        if (puntosSalidaTemp[index].pstaCapacidad &lt; control.value &amp;&amp; control.value >= 0) {
+          return;
+        }
+      } else {
+        puntosSalida[index][evento.target.name] = evento.target.value;
+      }
+    }
+    puntosSalida[index][evento.target.name] = evento.target.value;
+    this.setState({ puntosSalida: puntosSalida });
+  };
+
+  /**
+   * Renderizará el componente modal del selector.
+   * @return {Component}
+   */
+  renderModalSelector = () => {
+    const listaPuntosSalida = this.state.puntosSalida;
+    return (
+      &lt;Modal visible={this.state.mostrarModal}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>{this.props.titulo}&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los {this.props.titulo}&lt;/p>
+            &lt;table className='table table-hover table-striped table-bordered table-condensed label-nodisplay'>
+              &lt;thead className='bg-dark text-white'>
+                &lt;tr>&lt;th>Punto Salida&lt;/th>&lt;th>C.Contratada&lt;/th>&lt;th>Unidad Medida&lt;/th>&lt;/tr>
+              &lt;/thead>
+              &lt;tbody>
+                {
+                  listaPuntosSalida.map(registro => {
+                    return (
+                      &lt;tr key={`item_selector_${registro[this.props.propValor]}`}>
+                        &lt;td className='text-left' style={{ width: '40%' }}>
+                          &lt;label className='text-left display'>
+                            &lt;input name='check_idpuntosalida' key={Util.generarIdControl('_check_' + registro[this.props.propValor])} data-idpuntosalida={registro[this.props.propValor]} type="checkbox" checked={registro.seleccionado || false} onChange={this.controlarCambio} />
+                            &lt;span> {registro[this.props.propTexto]}&lt;/span>
+                          &lt;/label>
+                        &lt;/td>
+                        &lt;td>
+                          &lt;TextoNumerico
+                            aceptaDecimales={true}
+                            aceptaNegativos={false}
+                            cols={12}
+                            value={(registro.cntsCantidadcontratada)}
+                            onChange={this.controlarCambio}
+                            name='cntsCantidadcontratada'
+                            extra={{ 'data-idpuntosalida': registro[this.props.propValor] }}
+                          />
+                        &lt;/td>
+                        &lt;td>
+                          &lt;Combo
+                            opciones={this.props.unidadesMedida}
+                            propTexto='uniNombre1'
+                            propValor='uniIderegistro'
+                            label=''
+                            name='uniIdemedidacantidad'
+                            cols={12}
+                            value={registro.uniIdemedidacantidad}
+                            onChange={this.controlarCambio}
+                            extra={{ 'data-idpuntosalida': registro[this.props.propValor] }}
+                          />
+                        &lt;/td>
+                      &lt;/tr>
+                    );
+                  })
+                }
+              &lt;/tbody>
+            &lt;/table>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.confirmarSeleccionPuntosSalida(false) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        {this.renderSelector()}
+        {this.renderModalSelector()}
+      &lt;/Fragment>
+    );
+  }
+}
+
+SelectorPuntosSalida.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func,
+  titulo: PropTypes.string,
+  propValor: PropTypes.string,
+  propTexto: PropTypes.string,
+  seleccionarItem: PropTypes.func,
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+export { SelectorPuntosSalida };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

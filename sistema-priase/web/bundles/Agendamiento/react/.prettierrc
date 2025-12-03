@@ -1,0 +1,12 @@
+{
+    "tabWidth": 4,
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "insertPragma": false,
+    "semi": false,
+    "useTabs": false,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "jsxBracketSameLine": true
+}

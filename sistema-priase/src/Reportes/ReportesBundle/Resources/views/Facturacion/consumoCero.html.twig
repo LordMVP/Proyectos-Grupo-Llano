@@ -1,0 +1,64 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Informacion Usuarios Consumo Cero-{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ConsumoCeroController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Informacion Usuarios Consumo Cero</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">                                 
+                                <div class="row">
+                                     <div class="col-md-4 form-group" show-errors>
+                                        <label for="fechaConsulta">Fecha Periodo Consulta (yyyy-mm-dd):</label>
+                                        <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta" id="fechaConsulta" name="fechaConsulta" />
+                                    </div>
+                                </div>  
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-3">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Reporte Semestral
+                                </button>
+                            </div>               
+                            
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Reporte Mensual
+                                </button>
+                            </div> 
+                               
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte3()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Informacion Comite
+                                </button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/consumoCero.angular.js')}}"></script>
+{% endblock %}

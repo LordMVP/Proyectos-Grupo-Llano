@@ -1,0 +1,194 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/liquidaciones/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta_impresion.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+    <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            margin-left: 370px;
+            display: inline-block;
+            width: 40%;
+            position: relative;
+            top: 16px;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Importar facturas- {{empresa}}  {% endblock %}
+
+{% block body %}
+
+           
+            <div id="divComandos">
+                <div class="divBotones">
+                    <input type="button" value="cargar" id="btnCargar" class="btn" />
+                    <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+                </div>
+            </div>
+        
+
+        <div id="divPanelContenedor">
+            <fieldset id="fieldsetLiquidacion">
+                <legend>Informacion de la Importación</legend>
+                {% if opcion == 0 %}
+                    <input type="hidden" id="txtOperacion" name="operacion"/>
+<div id="tabs" style="margin: 10px;">
+                <ul>
+                    {% for tipo in tipoimportacion %} 
+                        {% if tipo.idunidad == 1123 %}
+                            <li><a id="aCiclo" data="C" href="#divCiclo">Masiva por Ciclo</a></li>
+                        {% elseif tipo.idunidad == 1125 %}
+                            <li><a id="aSuscripcion" data="S" href="#divCabecera">Suscripción</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+        {% for tipo in tipoimportacion %} 
+                {% if tipo.idunidad == 1123 %}
+                    <div id="divCiclo">
+                       <div class="campoMitad" id="divComboCiclo" >
+                                       <label>Ciclo: </label>
+                                       <select id="cboCiclo"  name="cboCiclo">
+                                           <option value="-1"> Seleccione una opción</option>
+                                           {% for ciclo in ciclos %}
+                                               <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                                           {% endfor %}
+                                       </select>
+                       </div>                                                   
+                                       
+                   </div>
+        {% endif %}
+                    {% endfor %}
+{% for tipo in tipoimportacion %} 
+                {% if tipo.idunidad == 1125 %}
+                        <div id="divCabecera">
+
+                        </div>
+                {% endif %}
+                    {% endfor %}
+                     <div id="divArchivo" class="campo">
+                                   <input type="file" multiple id="txtArchivo" accept=".xml" name="txtArchivo"/>
+                               </div>
+        <div id="divConfirmaEliminar" style="display: none;">
+             <p>Se eliminaran las facturas del ciclo seleccionado</p>
+        </div>  
+</div>
+                   
+                {% elseif respuesta.codigoRespuesta==-3  %}
+
+                    <table class="tabla">
+                        <caption> Listado de errores </caption>
+                        <thead>
+                            <tr>
+                                <th>Línea</th>
+                                <th>Código Anterior</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for error in respuesta.errorlineas %}
+                                <tr>
+                                    <td>{{error.linea}}</td>
+                                    <td>{{error.codigoanterior}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>  
+                    <h4>
+                        {{respuesta.mensaje}}
+                    </h4>
+                    <div>
+                        <a href="./">Regresar</a>      
+                    </div>
+                {% elseif respuesta.codigoRespuesta==-1 %}
+                    <h2 style="color:#F90;font-weight: bold;">
+                        {{respuesta.mensaje}}
+                    </h2>
+                    <div>
+                        <a href="./">Regresar</a>      
+                    </div> 
+                {% elseif respuesta.codigoRespuesta == 1 %}
+                    <h2 style="color:#F90; font-weight: bold;"> {{respuesta.mensaje}} </h2>
+                    <span data="1" id="spanCodigo"></span>
+                    <p>
+                        <strong>Facturas procesadas: </strong> {{ respuesta.datos.facturascargadas }}<br>
+                        <strong>Total Facturación Cargada: </strong> {{totalfacturado}}<br>
+                        <strong>Facturas con problemas: </strong> {{ respuesta.datos.facturasnocargadas|length }}
+                    </p>
+                    <div>
+                        {% if respuesta.datos.facturasnocargadas|length > 0 %}
+                            
+                            <table class="tabla" style="margin: 15px;" id="tblResultado">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3">Suscripciones que no se pudieron cargar</th>
+                                    </tr>
+                                    <tr>
+                                    <th>Suscripción Gas</th><th>Suscripción {{empresa}}</th><th>Mensaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   
+                                    {% for factura in respuesta.datos.facturasnocargadas %}
+                                    <tr>
+                                        <td> {{factura.suscripcion}} </td><td>{{factura.codigo}}</td><td> {{factura.mensaje}} </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table> 
+
+                            <button id="btnImprimir" class="btnSimple"> Imprimir </button>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="./">Regresar</a>      
+                    </div> 
+                {% endif %}  
+            <div>
+                <div style="width: 50%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumen" class="tabla"></table>
+                </div>
+                <div style="width: 49%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumenConProblemas" class="tabla"></table>
+                </div>
+               
+            </div>
+            </fieldset>
+        </div>
+             
+    <fieldset id="divInfoProceso" style="display:none">
+        <legend> Proceso importar Facturas</legend>
+        <div id="divCargando"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Se está ejecutando el proceso, <br>esto puede tardar unos minutos...</p>                
+        </div>
+        <table id="tblProceso" class="tabla" style="width: 70%; display: inline-table; margin: 20px 20px;"></table>
+    </fieldset>
+
+    <div id="divConfirmarCancelar" style="display: none;">
+        <p>Se cancelará la operación actual ¿Desea continuar?</p>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/importarFacturas/importarFacturas.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/importarFacturas/importarFacturas.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/importarFacturas/importarFacturas.vista.js')}}"></script>
+{% endblock %}

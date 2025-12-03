@@ -1,0 +1,33 @@
+.ReporteFacturasCastigadas {
+
+  .TercerosSeleccionados {
+    display: flex;
+    flex-direction: column;
+
+    .TerceroSeleccionado {
+      background: rgba(0, 161, 255, 0.5);
+      display: flex;
+      flex-direction: row;
+      width: 60%;
+      border-radius: 12px;
+      margin-bottom: 8px;
+
+      .TerceroName {
+        width: 65%;
+        padding-left: 20px;
+      }
+
+      .TerceroNit {
+        width: 30%;
+      }
+
+      .RemoveTercero {
+        width: 5%;
+        background: transparent;
+        border: none;
+        padding-right: 20px;
+        cursor: pointer;
+      }
+    }
+  }
+}

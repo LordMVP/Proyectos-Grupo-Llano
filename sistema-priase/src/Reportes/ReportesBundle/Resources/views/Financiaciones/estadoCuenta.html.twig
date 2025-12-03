@@ -1,0 +1,121 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/ng-table.min.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" /> 
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}   
+{% block titulo %}Generación del estado de cuenta o Saldo de financiación - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="FinanciacionController">
+        <form name="reporte" novalidate >
+            <fieldset>  
+                <legend>Reporte Estado de Cuenta o Saldo Financiación</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Ingrese alguno de los parámetros para realizar la búsqueda de financiaciones, la fecha es obligatoria para generar el saldo</h3>
+                        </div>
+                        <div class="panel-body" id="panelBody">
+                            <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label># Financiacion</label>
+                                    <input min="0" type="number" placeholder="# Financiacion" name="numero_financiacion" id="numero_financiacion" ng-model="info.numero_financiacion" class="form-control input-sm"/>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Id suscripcion</label>
+                                    <input type="number" min="0" placeholder="Identificacion suscripcion" name="suscripcion" id="suscripcion" ng-model="info.suscripcion" class="form-control input-sm"/>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Codigo anterior</label>
+                                    <input type="text" placeholder="Codigo Anterior" name="codigo_anterior" id="codigo_anterior" ng-model="info.codigo_anterior" class="form-control input-sm"/>
+                                </div>
+                                <div class="col-md-3 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Corte (yyyy-mm-dd):</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechaCorte" id="fechaCorte" name="fechaCorte" />
+                                </div>
+                            </div> 
+                            <div class="row">
+                                <div class="col-md-4 col-md-offset-8">
+                                    <button ng-click="reload()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-search fa-1x"></i> Buscar Financiaciones
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                            <hr/>  
+                            <h3 style="font-size: 15px;">Resultados de la busquedad</h3>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-12">                                        
+                                    <table ng-table-dynamic="ngTable with columnas" class="table table-condensed">                                    
+                                        <colgroup>
+                                            <col ng-repeat="col in $columns" width="{[{col.width}]}%"/>
+                                        </colgroup>
+                                        <tr ng-repeat="row in $data" ng-click="seleccionarFila(row)" id="tr_{[{row.numero_financiacion}]}">
+                                            <td ng-repeat="col in $columns">{[{row[col.field] | uppercase }]}</td>                                                
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>                            
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div ng-show="total!=0" class="alert-box info">
+                                    Seleccione un registro haciendo clic sobre la fila correspondiente de la financiacion.
+                                </div>
+                                <div ng-show="total==0" class="alert-box error">
+                                    No se encontraron resultados para el numero de orden o documento [ {[{info.numero_orden}]} {[{info.numeroDocumento}]} ]
+                                </div>
+                            </div>                                
+                            <div class="col-md-3">
+                                <button ng-disabled="selected==null" ng-click="download=true;generarSaldo()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-print fa-1x"></i> Generar Saldo
+                                </button>
+                            </div>   
+                            <div class="col-md-3">
+                                   <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Generar Estado Cuenta <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a ng-click="download=true;generarReporte()">
+                                                <i class="fa fa-file-pdf-o fa-lg"></i> PDF
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="download=true;generarReporte2()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Excel
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </div>  
+                            </div> 
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>            
+        </form> 
+        <script type="text/ng-template" id="auTemplate.html">
+            <a>        
+            <span style="font-size:10px;" ng-bind-html="match.model.label | uibTypeaheadHighlight:query"></span>                
+            </a>
+        </script>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/financiaciones/estadoCuenta.control.angular.js')}}"></script>
+{% endblock %}

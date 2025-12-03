@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="DsusDetsuscrip" table="dsus_detSuscrip">
+    <id name="dsusIderegistr" type="smallint" column="dsus_ideRegistr">
+      <generator strategy="SEQUENCE"/>
+    </id>
+    <field name="dsusEstado" type="string" column="dsus_estado" nullable="false"/>
+    <field name="dsusDescripcion" type="string" column="dsus_descripcion" length="50" nullable="false"/>
+    <field name="dsusPcodigo" type="string" column="dsus_PCodigo" length="15" nullable="false"/>
+    <field name="susIderegistro" type="smallint" column="sus_ideRegistro" nullable="false"/>
+    <field name="terIderegistro" type="smallint" column="ter_ideRegistro" nullable="false"/>
+    <field name="proIderegistro" type="smallint" column="pro_ideRegistro" nullable="false"/>
+    <field name="uniMunicipio" type="smallint" column="uni_municipio" nullable="false"/>
+    <field name="uniBarrio" type="smallint" column="uni_barrio" nullable="false"/>
+    <field name="estTipsuscripc" type="smallint" column="est_tipSuscripc" nullable="false"/>
+    <field name="uniTipsuscripc" type="smallint" column="uni_tipSuscripc" nullable="false"/>
+    <field name="estTipusosuscr" type="smallint" column="est_tipUsoSuscr" nullable="false"/>
+    <field name="uniTipusosuscr" type="smallint" column="uni_tipUsoSuscr" nullable="false"/>
+    <field name="empIderegistro" type="smallint" column="emp_ideRegistro" nullable="false"/>
+    <field name="estLiquidacion" type="smallint" column="est_liquidacion" nullable="false"/>
+    <field name="uniLiquidacion" type="smallint" column="uni_liquidacion" nullable="false"/>
+    <field name="cicIderegistro" type="smallint" column="cic_ideRegistro" nullable="false"/>
+    <field name="dsusFecinicio" type="date" column="dsus_fecInicio" nullable="false"/>
+    <field name="dsusFecexpira" type="date" column="dsus_fecExpira" nullable="true"/>
+    <field name="proCatestrato" type="smallint" column="pro_catEstrato" nullable="false"/>
+    <field name="dsusIniestado" type="date" column="dsus_iniEstado" nullable="false"/>
+    <field name="dsusFinestado" type="date" column="dsus_finEstado" nullable="false"/>
+  </entity>
+</doctrine-mapping>

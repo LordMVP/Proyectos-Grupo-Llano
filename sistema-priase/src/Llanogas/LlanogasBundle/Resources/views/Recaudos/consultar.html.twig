@@ -1,0 +1,155 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/anular.estilo.css')}}" />
+    <!--
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/estilo_imprimir.css')}}" />
+    -->
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Consultas - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+            <input type="button" value="imprimir timbre" id="btnImprimirTimbre" class="btn ocultar" />
+            <input type="button" value="imprimir" id="btnImprimir" class="btn ocultar" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <fieldset id="fieldCabecera">
+            <legend>Información del Recaudo</legend>
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtIdRecaudo">Id Recaudo:</label>
+                <input type="text" id="txtIdRecaudo" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtFecha">Fecha:</label>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtFechaOPago">Fecha Pago:</label>
+                <input type="text" id="txtFechaPago" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtValorPagado">Valor Pagado:</label>
+                <input type="text" id="txtValorPagado" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-10pto">
+                <label for="txtCambio">Cambio:</label>
+                <input type="text" id="txtCambio" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-10pto">
+                <label for="txtAjuste">Ajuste:</label>
+                <input type="text" id="txtAjuste" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-40pto">
+                <label for="txtMedioPago">Medio de Pago:</label>
+                <input type="text" id="txtMedioPago" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-30pto">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtNombreTercero">Nombre del Tercero:</label>
+                <input type="text" id="txtNombreTercero" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtConvenio">Convenio:</label>
+                <input type="text" id="txtConvenio" disabled="disabled" />
+            </div>
+
+            <div class="campo campo-impresion-30pto">
+                <label for="txtClasePago">Clase Pago:</label>
+                <input type="text" id="txtClasePago" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-30pto">
+                <label for="txtSucursal">Sucursal:</label>
+                <input type="text" id="txtSucursal" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtCifrado">Cifrado:</label>
+                <input type="text" id="txtCifrado" disabled="disabled" />
+            </div>
+
+
+            <button id="btnVerFormasPago" class="btnSimple ocultar">Ver Formas de Pago</button>
+        </fieldset>
+
+        <div id="divSuscripciones">
+            <table id="tblSuscripciones" class="tabla"></table>
+        </div>
+
+        <div id="divFacturas">
+            <table id="tblFactura" class="tabla"></table>
+        </div>
+
+        <div id="divConceptos">
+            <table id="tblConceptos" class="tabla"></table>
+        </div>
+    </div>
+
+
+    <div id="divFiltro">
+        <div class="campo">
+            <label for="txtIdRegistroFiltro">Id Recaudo:</label>
+            <input type="text" id="txtIdRegistroFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscripcionFiltro">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcionFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha de Inicio:</label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha de Fin:</label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+        <div class="campo">
+            <label for="$txtCodigoAnterior">Código Anterior</label>
+            <input type="text" id="txtCodigoAnterior" />
+        </div>
+        <p class="pMensaje"></p>
+        <div id="divResultadoFiltro" class="listaSeleccion"></div>
+    </div>
+
+    <div id="divFormasPago"></div>
+    <div id="divFormaPImprimir" align="center" style="display:none">
+        <table id="tblFormaPago" class="tabla">
+            <caption>Formas de pago</caption>
+            <thead><tr>
+                    <th>Forma</th>
+                    <th>Valor</th>
+                </tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+<!-- Iframe para el timbre -->
+    <div id="divTimbre" style="display:none;">
+        <iframe id="iFrameTimbre" frameborder="0" src="{{asset('bundles/Llanogas/templates/frametimbre.html')}}"></iframe>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consultar/consultar.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consultar/consultar.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consultar/consultar.vista.js')}}"></script>
+{% endblock %}

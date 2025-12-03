@@ -1,0 +1,54 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de arqueo de caja - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <form action="arqueoReporte" name="reporte" id="reporte" method="post">
+        <div id="divPanelContenedor">
+            <div id="divCabecera">
+                <fieldset>
+                    <legend>Parametros del reporte</legend>
+                    <div class="campo" >
+                        <label for="txtFechaConsulta">Fecha Consulta (yyyy-mm-dd):</label>
+                        <input type="text" id="txtFechaConsulta" name="PR_STR_FECHA_CONSULTA" required="true" />
+                    </div>
+                    <div class="campo">
+                        <label for="codigoProyecto">Proyecto</label>
+                        <select id="codigoProyecto" required="required" name="PR_INT_CODIGO_PROYECTO">
+                            <option value="" disabled selected>Seleccione Proyecto</option>
+                            {% for municipio in municipios %}
+                                <option value="{{ municipio.idmunicipio }}">{{municipio.municipio}}</option>
+                            {% endfor %}                        
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="medioPago">Medio Pago</label>
+                        <select id="medioPago" required="required" name="PR_INT_MEDIO_PAGO">
+                            <option value="" disabled selected>Seleccione medio de pago</option>
+                            <option value="80">CAJA</option>                        
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="medioPago">Formato</label>
+                        <select id="formato" required="required" name="FORMATO">
+                            <option value="pdf">PDF</option>
+                            <option value="xlsx">XLSX</option>                        
+                        </select>
+                    </div>
+                    <div class="campo" id="boton">
+                        <input type="button" id="btnGenerarReporte" value="Generar Reporte" class="btnSimple" />
+                    </div>                    
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/arqueo/arqueo.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/arqueo/arqueo.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/arqueo/arqueo.vista.js')}}"></script>
+{% endblock %}

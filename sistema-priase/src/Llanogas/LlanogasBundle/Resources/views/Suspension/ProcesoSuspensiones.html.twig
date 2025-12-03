@@ -1,0 +1,97 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <style>
+        .campoMitad{
+            width: 49%;
+            display: inline-table;
+        }
+        .tblmunicipio{
+            display: block;
+            height: 200px;
+            overflow: scroll;
+            overflow-x:hidden;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+
+{% block titulo %}Proceso Suspensiones - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divCabecera">
+        <fieldset id="fieldCabecera" style="margin: 0 auto; width: 90%;">
+            <legend>Información Suscripción</legend>
+                <div class="campoMitad campos">
+                    <table id="tblTiposuso" class="tabla"></table>
+                    <!--<input type="text" id="txtTipoUsoSuscripcion" />-->
+                </div>
+            <div class="campoMitad campos">
+                <div class="tblmunicipio">
+                    <table id="tblmunicipios" class="tabla"></table>
+                    <!--<input type="text" id="txtTipoUsoSuscripcion" />-->
+                </div>
+            </div>
+          
+                <div class="campoMitad campos">
+                    <label>Cantidad de facturas vencidas:</label>
+                    <div class="campoMitad">
+                        <input type="number" id="facVencidasDesde" placeholder="de" min="0" value="1">
+                    </div>
+                    <div class="campoMitad">
+                        <input type="number" id="facVencidasHasta" placeholder="hasta" min="0" max="24">
+                    </div>
+
+                    <div class="campoMitad">
+                        <label>Fecha inicio de suspensión:</label>
+                        <input type="text" id="fecIniSuspension" placeholder="Fecha de inicio">
+                    </div>
+                    <div class="campoMitad">
+                        <label>Fecha fin de suspensión:</label>
+                        <input type="text" id="fecFinSuspension" placeholder="Fecha de fin">
+                    </div>
+                    <div style="float: right; margin-right: 25px;">
+                        <input type="button" id="btnSuspension" value="Ejecutar Proceso" class="btnSimple"/>
+                    </div>
+
+                </div>
+                {% if procesoActivo != 0  %}
+                    <div id="divInfoProgreso">
+                        <legend>Progreso de la aplicación del Recaudo</legend>
+                        <div id="divProgreso">
+                            <p>Fecha de Inicio: {{proceso.fechaInicio}}</p>
+                            <p>Usuario: {{proceso.usuario}}</p>
+                            <p>Número de Registros Procesados: <span id="numeroRegistrosProcesados" >{{proceso.numeroRegistrosProcesados}}</span></p>
+                            <progress id="progress"/>
+                        </div>
+                    </div>
+                {% endif %}
+        </fieldset>
+
+        <fieldset id="fsResultados"  style="margin: 0 auto; width: 90%; display: none;">
+            <legend> Resumen del proceso </legend>
+            <div style="display: inline-block; width: 90%">
+                <table class="tabla" id="tblResumen"></table>
+            </div>
+            <div style="display: inline-block; width: 90%">
+                <table class="tabla" id="tblErrores"></table>  
+            </div>
+        </fieldset>
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/proceso.suspension.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/proceso.suspension.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/proceso.suspension.vista.js')}}"></script>
+    <script type="text/javascript">
+                    procesoSuspensionVista.init({{procesoActivo}}, {{tiposUsoSuscripcion|json_encode|raw}},{{municipios|json_encode|raw}});
+    </script>
+{% endblock %}

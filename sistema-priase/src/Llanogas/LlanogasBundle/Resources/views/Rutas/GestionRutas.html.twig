@@ -1,0 +1,154 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/rutas/gestion_rutas.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="{{asset('bundles/Llanogas/css/recaudos/fileinput.min.css')}}" />
+    <style>
+        .campoMitad{
+            width: 49%;
+            display: inline-table;
+        }
+        .tblRutas{
+            display: block;
+            height: 400px;
+            overflow: scroll;
+            overflow-x:hidden;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block titulo %}Gestion Rutas - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <!-- Division Mostrar Botones Gestion Ruta -->
+        <div class="divBotones">
+            <input type="button" value="Nuevo" id="btnNuevo" class="btn" />
+            <input type="button" value="Buscar" id="btnFiltrar" class="btn" />
+            <input type="button" value="Grabar" id="btnGrabar" class="btn" />
+        </div>
+    </div>
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <!-- Div Constructora --> 
+            <div id="divConstructora">
+                <fieldset>
+                    <legend>Informacion Ruta</legend>
+                    <!-- Division Mostrar Información Ruta -->
+                    <div class="campo" >
+                        <label for="txtidRuta">Codigo:</label>
+                        <input type="text" id="txtidRuta" disabled="disabled" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtNombreRuta">Nombre:</label>
+                        <input type="text" id="txtNombreRuta" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtAliasRuta">Alias Ruta:</label>
+                        <input type="text" id="txtAliasRuta" maxlength="3" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="cboTipoRuta">Tipo:</label>
+                        <select id="cboTipoRuta" >
+                            {% for tipo in tiporutas  %}
+                                <option value="{{tipo.idtipo}}">{{tipo.tiporuta}}</option>
+                            {% endfor %}     
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+        </div >
+        <!-- Division Adicionar Parametrizacion Rutas -->   
+        <div id="divRuta">  
+            <div id="municipioBarrio" style="display:none;">
+                <fieldset class="subfieldset" >
+                    <legend>Municipo - Barrio</legend>
+                    <table class="tabla" id="tblMunicipioBarrio">           
+                    </table>
+                </fieldset>
+            </div>
+            <fieldset class="subfieldset">
+                <legend>Parametrización Ruta - Ciclo</legend>
+                <div class="campo" style="margin: 0px 10px 10px 0px;">
+                    <label for="cboCiclo">Ciclo:</label>
+                    <select id="cboCiclo" required="required" disabled="disabled">
+                        <option value="-1"> Seleccione una opción</option>
+                        {% for ciclo in listaciclos  %}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.nombre}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="divAno" class="campo" style="margin: 0px 10px 10px 0px; display:none;">
+                    <label for="cboAno">Año:</label>
+                    <select id="cboAno"  required="required" >
+
+                    </select>
+                </div>
+                <table class="tabla" id="tblRutaPeriodos">           
+                </table>
+                <input type ="button" id="btnVencimientoSuspension" class="btnSimple" value="Replicar Vencimiento & Suspensión"/>
+            </fieldset>
+            <fieldset id="fieldCabecera" style="margin: 0 auto; width: 98%; display:none;" >
+                <legend >Información Periodos y Rutas</legend>
+                <div class="campoMitad campos">
+                    <table id="tblPeriodos" class="tabla"></table>
+                </div>
+                <div class="campoMitad campos">
+                    <div class="tblRutas">
+                        <table id="tblRutas" class="tabla"></table>
+                    </div>
+                </div>
+
+            </fieldset>
+
+        </div>         
+        <div id="divBuscarRuta" style="display: none;">
+
+            <div class="campo" style="margin: 0px 10px 10px 0px;">
+                <label for="cboCicloBuscar">Ciclo:</label>
+                <select id="cboCicloBuscar" >
+                    <option value="-1"> Seleccione una opción</option>
+                    {% for ciclo in listaciclos  %}
+                        <option value="{{ciclo.idciclo}}">{{ciclo.nombre}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="campo">
+                <label for="txtNombreRutaD">Nombre Ruta:</label>
+                <input type="text" id="txtNombreRutaD" maxlength="20" />
+            </div>
+            <div class="campo">
+                <label for="txtCodRutaD">Código Ruta:</label>
+                <input type="text" id="txtCodRutaD" maxlength="15" />
+            </div>
+
+            <input type ="button" id="btnBuscarRuta" class="btnSimple" value="Buscar"/>
+
+            <div id="divResultadosFiltro" style="display:none;">
+                <table id="tblResultadoFiltro" class="tabla"></table>    
+            </div>
+
+            <span id="mensajeAlertaDialogo" class="pMensaje"></span>
+        </div>
+        <div id="divConfirma" style="display: none;">
+            <p>Hay campos de fechas sin diligenciar que no se guardarán</p>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ruta/gestionruta.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ruta/gestionruta.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ruta/gestionruta.vista.js')}}"></script>
+
+{% endblock %}

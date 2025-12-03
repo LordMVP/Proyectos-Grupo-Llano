@@ -1,0 +1,14 @@
+{% extends 'base.react.html.twig' %}
+
+{% block stylesheets %}
+<link href="{{ asset('suscriptor_react.bundle.css') }}?v={{version}}" stylesheets="stylesheets" type="text/css" />
+{% endblock %}
+
+{% block body %}
+    Edición Suscriptor
+    <div id="root"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('suscriptor_react.bundle.js') }}?v={{version}}" type="text/javascript"></script>
+{% endblock %}

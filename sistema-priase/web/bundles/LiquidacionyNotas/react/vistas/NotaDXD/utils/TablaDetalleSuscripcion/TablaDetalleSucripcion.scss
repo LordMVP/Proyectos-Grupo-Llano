@@ -1,0 +1,18 @@
+.headerTableTextStyle{
+  font-weight: bold;
+}
+
+.-btn {
+  color: white !important;
+  background: #007bff !important;
+}
+
+.-btn:not([disabled]):hover{
+  color: white;
+  background: #0069d9 !important;
+}
+
+.-btn[disabled]{
+  color: white !important;
+  background: #007bff !important;
+}

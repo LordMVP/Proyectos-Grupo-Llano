@@ -1,0 +1,88 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Consulta de estado de cuenta - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="EstadoCuentaController">
+        <form name="reporte"  novalidate id="formBuscarDevoluciones">
+            <fieldset>
+                <legend>Parametros de consulta</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3>Ingrese los parametros necesarios para la genrracion del reporte de arqueo de caja.</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label>Id de suscripcion o codigo anterior</label>
+                                    <input ng-pattern="/^\-?\d+$/" ng-model="info.codigoSuscripcion" name="codigoSuscripcion" required="true" type="text" class="form-control">
+                                    <p class="help-block" ng-if="reporte.codigoSuscripcion.$error.pattern">
+                                        El dato debe ser numerico
+                                    </p>
+                                    <p class="help-block" ng-if="reporte.codigoSuscripcion.$error.required" >
+                                        El codigo de suscripcion o codigo anterior es requerido.
+                                    </p>
+                                </div>
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaInicio">Fecha de Inicio</label>
+                                    <input class="form-control datepicker input-sm" name="fechaInicio" required="true" type="text" id="fechaInicio" ng-model="info.fechaInicio" />
+                                    <p class="help-block" ng-if="reporte.fechaInicio.$error.required" >
+                                        La fecha inicial es requerida.
+                                    </p>
+                                </div>
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaFinal">Fecha de Fin</label>
+                                    <input class="form-control datepicker input-sm" name="fechaFinal" required="true" type="text" id="fechaFinal" ng-model="info.fechaFinal"/>
+                                    <p class="help-block" ng-if="reporte.fechaFinal.$error.required" >
+                                        La fecha final es requerida.
+                                    </p>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Al ingresar y validar todos los parametros necesarios y correctos, de clic en el boton Generar Reporte.
+                                </div>                                
+                            </div>                                
+                            <div class="col-md-3">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Generar el reporte <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a ng-click="download=true;procesarBusquedad('pdf')">
+                                                <i class="fa fa-file-pdf-o fa-lg"></i> Formato Pdf
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="download=true;procesarBusquedad('xlsx')">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Formato Xlsx
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>                                
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/pdfjs/build/pdf.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/estadoCuenta.control.angular.js')}}"></script>
+{% endblock %}

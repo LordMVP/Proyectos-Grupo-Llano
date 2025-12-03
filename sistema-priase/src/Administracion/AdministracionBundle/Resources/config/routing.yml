@@ -1,0 +1,142 @@
+administracion_administracion_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller: AdministracionAdministracionBundle:Default:index }
+
+#Migración Administracion 
+#Caso Cambio propiedad de Terceros 
+administracion_terceros:
+  pattern:  /terceros/cambio_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:CambioPropiedadTercero:index}
+
+administracion_terceros_autocompletar_tercero:
+  pattern:  /terceros/cambio_propiedad/autocompletar_tercero/
+  defaults: { _controller: AdministracionAdministracionBundle:CambioPropiedadTercero:AutocompletarTercero}
+
+administracion_terceros_consultar_terceropropiedad:
+  pattern:  /terceros/cambio_propiedad/consultar_terceropropiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:CambioPropiedadTercero:consultarTerceropropiedad }
+
+administracion_terceros_consultar_propiedad:
+  pattern:  /terceros/cambio_propiedad/consultar_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:CambioPropiedadTercero:consultarPropiedad}
+
+administracion_terceros_grabar_propiedad:
+  pattern:  /terceros/cambio_propiedad/grabar_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:CambioPropiedadTercero:grabar}
+
+administracion_terceros_eliminar_propiedad:
+  pattern:  /terceros/eliminar_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:EliminarPropiedadTercero:index}
+
+administracion_terceros_eliminar_propiedad_consultar_terceropropiedad:
+  pattern:  /terceros/eliminar_propiedad/consultar_terceropropiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:EliminarPropiedadTercero:consultarTerceropropiedad }
+
+administracion_terceros_eliminar_propiedad_consultar_propiedad:
+  pattern:  /terceros/eliminar_propiedad/consultar_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:EliminarPropiedadTercero:consultarPropiedad}
+
+administracion_terceros_eliminar_propiedad_grabar_propiedad:
+  pattern:  /terceros/eliminar_propiedad/grabar_propiedad/
+  defaults: { _controller: AdministracionAdministracionBundle:EliminarPropiedadTercero:grabar}
+
+# Author Oscar Baquero
+# Registrar Usuarios
+administracion_usuarios:
+  pattern:  /parametrizacion/registro_usuarios/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:index}
+
+administracion_consultar_usuario:
+  pattern: /parametrizacion/consulta_usuario/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:consultarUsuario}  
+
+administracion_registrar_perfilAutoriza:
+  pattern: /parametrizacion/registrar_perfilAutoriza/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:insertaPerfilEmpresa} 
+  
+administracion_programa_usuarioAsignar:
+  pattern: /parametrizacion/programa_usuarioAsignar/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaProgramasUsuarioAsignar} 
+  
+administracion_programa_usuarioAsignarProyecto:
+  pattern: /parametrizacion/programa_usuarioAsignarProyecto/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaProgramasUsuarioAsignarProyecto} 
+  
+administracion_proyecto_usuarioPrograma:
+  pattern: /parametrizacion/proyecto_usuarioPrograma/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaProyectoUsuarioPrograma}  
+  
+administracion_estructura_usuarioLogin:
+  pattern: /parametrizacion/estructura_usuarioLogin/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaEstructuraUsuarioLogin}  
+
+administracion_busca_unidadesUsuario:
+  pattern: /parametrizacion/busca_unidadesUsuario/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaUnidadesUsuarioxProgramaEstructura} 
+ 
+administracion_busca_medios_pagos:
+  pattern: /parametrizacion/busca_mediospagos/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaMediosPagos}
+  
+administracion_busca_rutas:
+  pattern: /parametrizacion/busca_rutas/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaRutas}
+  
+administracion_validacion_login:
+  pattern: /parametrizacion/validacion_login/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:validacionLogin}
+  
+administracion_grabar_permisoUsuario:
+  pattern: /parametrizacion/grabar_permisoUsuario/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:grabarPermisoUsuario}
+  
+administracion_busca_allunidades:
+  pattern: /parametrizacion/busca_allUnidades/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:buscaAllUnidades}
+  
+administracion_get_usuarioall:
+  pattern: /parametrizacion/get_usuarioall/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:getUsuariosAll}  
+  
+administracion_grabar_permisoUsuarioCompleto:
+  pattern: /parametrizacion/grabar_permisoUsuarioCompleto/
+  defaults: { _controller: AdministracionAdministracionBundle:administracionRegistroUsuarios:grabarPermisosUsuariosCompleto}  
+
+
+# Author Oscar Baquero
+# Autoriza Programas Usuario
+autorizacion_programa_usuarios:
+  pattern:  /parametrizacion/autoriza_programaUsuarios/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:index}  
+  
+autorizacion_programa_usuarios_busca_menu:
+  pattern: /parametrizacion/busca_menu/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:getMenu}
+  
+autorizacion_programa_usuarios_opciones_menu:
+  pattern: /parametrizacion/opciones_menu/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:getOpcionesMenu}
+  
+autorizacion_programa_usuarios_busca_programasUsuarios:
+  pattern: /parametrizacion/busca_programasUsuarios/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:buscaProgramasUsuarios}
+  
+autorizacion_programa_usuarios_busca_todosprogramasUsuarios:
+  pattern: /parametrizacion/busca_todosprogramasUsuarios/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:buscaTodosprogramasUsuarios}
+  
+autorizacion_programa_usuarios_grabar_permisoUsuarios:
+  pattern: /parametrizacion/grabar_permisoProgramaUsuario/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:grabarPermisoUsuario}
+  
+autorizacion_programa_usuarios_actualiza_permisoProgramaUsuario:
+  pattern: /parametrizacion/actualiza_permisoProgramaUsuario/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:actualizaPermisoProgramaUsuario}
+  
+autorizacion_programa_usuarios_busca_perfiles:
+  pattern: /parametrizacion/busca_perfiles/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:buscaPerfiles}
+  
+autorizacion_programa_usuarios_guarda_NuevoPerfil:
+  pattern: /parametrizacion/guarda_NuevoPerfil/
+  defaults: { _controller: AdministracionAdministracionBundle:RegistroProgramasUsuarios:guardaNuevoPerfil}

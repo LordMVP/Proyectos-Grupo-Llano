@@ -1,0 +1,112 @@
+.btn-pqr {
+  width: fit-content;
+  height: fit-content;
+}
+
+.inline-form * {
+  margin: 0 6px;
+}
+
+.select-form {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.joint-billing-box {
+  border: 1px solid rgb(0, 123, 255);
+  padding: 6px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.box-title {
+  margin-top: -18px;
+  background-color: white;
+  padding-left: 6px;
+}
+
+.button_group {
+  width: 200px;
+  margin-bottom: 15px;
+}
+
+.button {
+  width: 90px;
+  height: 40px;
+}
+
+.button_end {
+  margin-top: 22px;
+  width: 90px;
+  height: 40px;
+}
+
+.flex_center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.form-container {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border: rgb(0, 123, 255) 1px solid;
+}
+
+.blue-separator {
+  background-color: rgb(0, 123, 255);
+  height: 8px;
+  margin: 0% 3% 0% 3%;
+  width: 94%;
+}
+
+.custom-dialog {
+  width: 60% !important;
+  //top: 20%;
+}
+.margin-text {
+  padding-right: 10px;
+  width: 100%;
+  //text-align: right;
+}
+
+.box_check {
+  width: 100%;
+}
+
+.margin-space {
+  margin-right: 8px;
+}
+
+.margitn-left {
+  margin-left: 12px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  //margin-left: 3%;
+  flex-direction: column;
+}
+
+.autosugest-style {
+  display: flex;
+  width: 100%;
+  height: 38px;
+  border: 1px solid #ced4da;
+}
+
+.center-vertical-items {
+  align-items: center;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0 !important;
+}

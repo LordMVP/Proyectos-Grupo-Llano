@@ -1,0 +1,10 @@
+{% extends "::base.html.twig" %}
+{% block titulo %}Test{% endblock %}
+{% block body %}
+
+    <form action="cargar/" method="post" enctype="multipart/form-data">
+        <input type="file" name="txtArchivo"/>
+        <input type="submit" name="btnSubir" name="subir"/>
+    </form>
+
+{% endblock %}

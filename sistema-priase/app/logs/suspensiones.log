@@ -1,0 +1,558 @@
+ 322 2194427 COD_PROCESO_SUSPENSIONES 5,6 1 1 2021/11/08 2021/11/17 1571  proceso iniciado 
+consultar suscripciones 
+Array
+(
+    [idempresa] => 322
+    [tipouso] => 5,6
+    [desde] => 1
+    [hasta] => 1
+    [fechaini] => 2021/11/08
+    [fechafin] => 2021/11/17
+    [municipios] => 1
+)
+Array
+(
+    [0] => Array
+        (
+            [saldoconceptos] => 42168.0000000
+            [idsuscripcion] => 8109
+        )
+
+    [1] => Array
+        (
+            [saldoconceptos] => 28538.0000000
+            [idsuscripcion] => 25073
+        )
+
+    [2] => Array
+        (
+            [saldoconceptos] => 16462.0000000
+            [idsuscripcion] => 27002
+        )
+
+    [3] => Array
+        (
+            [saldoconceptos] => 680760.0000000
+            [idsuscripcion] => 32127
+        )
+
+    [4] => Array
+        (
+            [saldoconceptos] => 40421.0000000
+            [idsuscripcion] => 36165
+        )
+
+    [5] => Array
+        (
+            [saldoconceptos] => 18897.0000000
+            [idsuscripcion] => 38892
+        )
+
+    [6] => Array
+        (
+            [saldoconceptos] => 368062.0000000
+            [idsuscripcion] => 48301
+        )
+
+    [7] => Array
+        (
+            [saldoconceptos] => 40554.0000000
+            [idsuscripcion] => 62344
+        )
+
+    [8] => Array
+        (
+            [saldoconceptos] => 120160.0000000
+            [idsuscripcion] => 65302
+        )
+
+    [9] => Array
+        (
+            [saldoconceptos] => 791703.0000000
+            [idsuscripcion] => 71826
+        )
+
+    [10] => Array
+        (
+            [saldoconceptos] => 72180.0000000
+            [idsuscripcion] => 92747
+        )
+
+    [11] => Array
+        (
+            [saldoconceptos] => 54072.0000000
+            [idsuscripcion] => 93891
+        )
+
+    [12] => Array
+        (
+            [saldoconceptos] => 148698.0000000
+            [idsuscripcion] => 125644
+        )
+
+    [13] => Array
+        (
+            [saldoconceptos] => 52270.0000000
+            [idsuscripcion] => 129729
+        )
+
+    [14] => Array
+        (
+            [saldoconceptos] => 217546.0000000
+            [idsuscripcion] => 131350
+        )
+
+    [15] => Array
+        (
+            [saldoconceptos] => 150482.0000000
+            [idsuscripcion] => 133354
+        )
+
+    [16] => Array
+        (
+            [saldoconceptos] => 61281.0000000
+            [idsuscripcion] => 134771
+        )
+
+    [17] => Array
+        (
+            [saldoconceptos] => 63084.0000000
+            [idsuscripcion] => 140207
+        )
+
+    [18] => Array
+        (
+            [saldoconceptos] => 30040.0000000
+            [idsuscripcion] => 140233
+        )
+
+    [19] => Array
+        (
+            [saldoconceptos] => 268252.0000000
+            [idsuscripcion] => 141931
+        )
+
+    [20] => Array
+        (
+            [saldoconceptos] => 30942.0000000
+            [idsuscripcion] => 143968
+        )
+
+    [21] => Array
+        (
+            [saldoconceptos] => 19315.0000000
+            [idsuscripcion] => 150944
+        )
+
+    [22] => Array
+        (
+            [saldoconceptos] => 15687.0000000
+            [idsuscripcion] => 160328
+        )
+
+    [23] => Array
+        (
+            [saldoconceptos] => 21461.0000000
+            [idsuscripcion] => 163622
+        )
+
+    [24] => Array
+        (
+            [saldoconceptos] => 36048.0000000
+            [idsuscripcion] => 165933
+        )
+
+    [25] => Array
+        (
+            [saldoconceptos] => 20147.0000000
+            [idsuscripcion] => 171102
+        )
+
+    [26] => Array
+        (
+            [saldoconceptos] => 132176.0000000
+            [idsuscripcion] => 181827
+        )
+
+    [27] => Array
+        (
+            [saldoconceptos] => 145575.0000000
+            [idsuscripcion] => 321732
+        )
+
+    [28] => Array
+        (
+            [saldoconceptos] => 17906.0000000
+            [idsuscripcion] => 479984
+        )
+
+    [29] => Array
+        (
+            [saldoconceptos] => 17798.0000000
+            [idsuscripcion] => 489845
+        )
+
+)
+ 
+ ====================================== SE INICIA PROCESO PARA CADA SUSCRIPCIÓN ========================================= 
+ ------------------------------------------1---------------------------------------- 
+valida que la suscripción esté activa 
+ 8109genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 8109la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------2---------------------------------------- 
+valida que la suscripción esté activa 
+ 25073genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 25073la suscripcion tiene encabezado 
+el id del encabezado es: 1377785 \ntiene fecha de ejecucion 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------3---------------------------------------- 
+valida que la suscripción esté activa 
+ 27002genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 27002la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------4---------------------------------------- 
+valida que la suscripción esté activa 
+ 32127genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 32127la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------5---------------------------------------- 
+valida que la suscripción esté activa 
+ 36165genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 36165la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 118
+    [idperiodo] => 4723
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------6---------------------------------------- 
+valida que la suscripción esté activa 
+ 38892genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 38892la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------7---------------------------------------- 
+valida que la suscripción esté activa 
+ 48301genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 48301la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------8---------------------------------------- 
+valida que la suscripción esté activa 
+ 62344genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 62344la suscripcion tiene encabezado 
+el id del encabezado es: 1375744 \ntiene fecha de ejecucion 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------9---------------------------------------- 
+valida que la suscripción esté activa 
+ 65302genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 65302la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 118
+    [idperiodo] => 4723
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------10---------------------------------------- 
+valida que la suscripción esté activa 
+ 71826genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 71826la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------11---------------------------------------- 
+valida que la suscripción esté activa 
+ 92747genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 92747la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 42
+    [idperiodo] => 4747
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------12---------------------------------------- 
+valida que la suscripción esté activa 
+ 93891genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 93891la suscripcion tiene encabezado 
+el id del encabezado es: 1375463 \ntiene fecha de ejecucion 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------13---------------------------------------- 
+valida que la suscripción esté activa 
+ 125644genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 125644la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------14---------------------------------------- 
+valida que la suscripción esté activa 
+ 129729genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 129729la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------15---------------------------------------- 
+valida que la suscripción esté activa 
+ 131350genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 131350la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------16---------------------------------------- 
+valida que la suscripción esté activa 
+ 133354genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 133354la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------17---------------------------------------- 
+valida que la suscripción esté activa 
+ 134771genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 134771la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------18---------------------------------------- 
+valida que la suscripción esté activa 
+ 140207genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 140207la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------19---------------------------------------- 
+valida que la suscripción esté activa 
+ 140233genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 140233la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------20---------------------------------------- 
+valida que la suscripción esté activa 
+ 141931genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 141931la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 46
+    [idperiodo] => 4586
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------21---------------------------------------- 
+valida que la suscripción esté activa 
+ 143968genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 143968la suscripcion tiene encabezado 
+el id del encabezado es: 1404789 \ntiene fecha de ejecucion 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------22---------------------------------------- 
+valida que la suscripción esté activa 
+ 150944genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 150944la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 67
+    [idperiodo] => 4735
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------23---------------------------------------- 
+valida que la suscripción esté activa 
+ 160328genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 160328la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------24---------------------------------------- 
+valida que la suscripción esté activa 
+ 163622genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 163622la suscripcion tiene encabezado 
+el id del encabezado es: 1405265 \ntiene fecha de ejecucion 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------25---------------------------------------- 
+valida que la suscripción esté activa 
+ 165933genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 165933la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------26---------------------------------------- 
+valida que la suscripción esté activa 
+ 171102genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 171102la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------27---------------------------------------- 
+valida que la suscripción esté activa 
+ 181827genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 181827la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 118
+    [idperiodo] => 4723
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------28---------------------------------------- 
+valida que la suscripción esté activa 
+ 321732genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 321732la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 120
+    [idperiodo] => 4711
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------29---------------------------------------- 
+valida que la suscripción esté activa 
+ 479984genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 479984la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+------------------------------------------30---------------------------------------- 
+valida que la suscripción esté activa 
+ 489845genera suspension por pago 
+inicia transaccion 
+Id de la suscripcion a procesar: 489845la suscripcion no tiene encabezado 
+Array
+(
+    [idciclo] => 119
+    [idperiodo] => 4669
+    [cicloanio] => 2021
+)
+encabezado creado 
+valor de Empresa 322Fin de la generacion de suspension por pago 
+proceso finalizado 

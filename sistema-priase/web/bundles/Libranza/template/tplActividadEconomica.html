@@ -1,0 +1,77 @@
+<script type="x-tmpl-mustache" id="tplActividadEconomica">
+<div class="divContenedorColapsable">
+    <div class="divColapsable">
+        <h4 class="tituloColapsable"><span> Nueva actividad </span></h4>
+        <div class="btnColapsable">
+            <a href="" class="fa fa-minus" tabindex="-1"></a>
+            <a href="" class="fa fa-times" tabindex="-1" style="margin-left: 8px;"></a>
+        </div>
+    </div>
+    <div class="contenidoColapsable">
+        <div class="campo">
+            <label for="cmbActividad{{indice}}">Ocupación:</label>
+            <select id="cmbActividad{{indice}}" data-reference-actividad="actividadeconomica" obligatory="required">
+                {{#actividadeseconomicas}}
+                    <option value="{{idunidad}}">{{nombre}}</option>
+                {{/actividadeseconomicas}}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbEmpresa{{indice}}">Empresa:</label>
+            <select obligatory="required" id="cmbEmpresa{{indice}}" data-reference-actividad="empresaempleado">
+                {{#empresas}}
+                    <option value="{{idtercero}}" data-id="{{documento}}">{{nombretercero}}</option>
+                {{/empresas}}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtNIT{{indice}}">NIT:</label>
+            <input type="text" class="number" id="txtNIT{{indice}}" data-reference-actividad="nitempresaempleado" disabled="disabled">
+        </div>
+
+        <div class="campo">
+            <label for="fechaIngreso{{indice}}">Fecha Ingreso:</label>
+            <input type="text" id="fechaIngreso{{indice}}" obligatory="required" data-reference-actividad="fechaingresoempleado">
+        </div>
+
+        <div class="campo">
+            <label for="txtTelefono{{indice}}">Teléfono:</label>
+            <input type="text" id="txtTelefono{{indice}}" class="number" data-reference-actividad="telefonoempleado" maxlength="20">
+        </div>
+
+        <div class="campo">
+            <label for="tipoCargo{{indice}}">Tipo Cargo:</label>
+            <select id="tipoCargo{{indice}}" data-reference-actividad="tipocargoempleado">
+                {{#tipocargo}}
+                    <option value="{{idunidad}}">{{nombre}}</option>
+                {{/tipocargo}}
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbTipoContrato{{indice}}">Tipo Contrato:</label>
+            <select id="cmbTipoContrato{{indice}}" data-reference-actividad="tipocontratoempleado">
+                {{#tipocontrato}}
+                    <option value="{{idunidad}}">{{nombre}}</option>
+                {{/tipocontrato}}
+            </select>
+        </div>
+
+        <div class="campo" >
+            <div style="on-focus" style="position: relative; padding: 0px; display: table;">
+                <label for="txtSalarioBasico{{indice}}"  style="display:inline-block;">Salario: (Salario + Aux transp. + horas extras) </label>
+                <input type="text" class="number-float" obligatory="required" id="txtSalarioBasico{{indice}}" data-reference-actividad="salariobasicoempleado" data-currency="true" />
+            </div>
+        </div>
+        <div class="campo">
+            <label for="txtDeduccionesNomina{{indice}}" style="display:inline-block;">Deducciones: (Parafiscales, crédito y otros)</label>
+            <input type="text" id="txtDeduccionesNomina{{indice}}" data-reference-actividad="deduccionesnominaempleado" data-currency="true">
+        </div>
+
+        <div class="campo">
+            <label for="txtSalarioNeto{{indice}}">Salario Neto:</label>
+            <input type="text" id="txtSalarioNeto{{indice}}" data-reference-actividad="salarionetoempleado" data-currency="true" disabled="disabled">
+        </div>
+    </div>
+</div>
+</script>

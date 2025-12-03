@@ -1,0 +1,21 @@
+.container-conceptos-constantes-module {
+    
+    .group-section {
+        border: #ced4da solid 1px;
+        border-radius: 1rem;
+    }
+
+    .input-valor-concepto {
+        max-width: 20rem;
+        margin: auto;
+    }
+
+    .tabla-conceptos-constantes {
+        text-align: center;
+        
+        .ReactTable .rt-tbody .rt-td {
+            border: 1px solid #ced4da;
+        }
+    }
+}
+

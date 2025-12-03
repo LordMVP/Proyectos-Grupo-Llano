@@ -1,0 +1,75 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="/achagua/css/appload.css" />
+    <style>
+        .label-enlinea{
+            display: inline !important;
+            margin-right: 15px;
+        }
+        .file-item-desc{
+            width: 50%;
+        }
+        .file-item-btns {
+            width: 43%;
+        }
+
+        .file-item:nth-child(2n+1) {
+            background-color: inherit !important; 
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Desembolsar Créditos Aprobados - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divComandos">
+        <div class="divBotones" style="margin-bottom:15px;">
+            <button id="btnDesembolsar" class="btn">desembolsar</button>
+            <button id="btnAprobar" class="btn">aprobar sin desembolsar </button>
+        </div>
+    </div>
+
+    <div>
+        <table class="tabla" id="tblSolicitudes"></table>
+        <span id="spanMensaje" class="pMensaje" style="font-size: 12px; padding-left: 20px;"></span>
+    </div>
+    <div id="divAprobarSolicitud" style="display:none;">
+        <label for="cmbMotivoAprobar">Motivo:</label>
+        <select id="cmbMotivoAprobar">
+            <option value="-1">Seleccione una opción</option>
+            {% for motivo in motivorechazo %}
+                <option value="{{motivo.idunidad}}">{{motivo.nombre}}</option>
+            {% endfor %}
+        </select>
+        <label for="txtObservacion">Observaciones: </label>
+        <textarea name="" id="txtObservacion" cols="30" rows="10"></textarea>
+        <span class="pMensaje"></span>
+    </div>
+
+    <div id="divCicloDesembolsar" style="display: none;">
+        <p style="margin-bottom: 10px;">Se desembolsarán <span></span> créditos ¿Desea continuar?</p>
+        <div>
+            <label for="cmbCiclo">Ciclo: </label>
+            <select id="cmbCiclo">
+                {% for ciclo in ciclos %}
+                    <option value="{{ciclo.idciclo}}" >{{ciclo.ciclo}}</option>
+                {% endfor %}
+            </select>
+        </div>
+            <p class="pMensaje"></p>
+    </div>
+                
+                <div style="display: none;" id="divDialogoFinanciaciones">
+                    <p style="font-weight: bold;"></p>
+                    <table id="tblFinanciacionesGeneradas" class="tabla"></table>
+                </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="/achagua/js/Appload.js"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/creditosaprobados/creditosaprobados.vista.js')}}"></script>
+{% endblock %}

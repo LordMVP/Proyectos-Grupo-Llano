@@ -1,0 +1,6 @@
+parameters:
+#   bioagricola_bioagricola.example.class:Bioagricola\BioagricolaBundle\Example
+services:
+#   bioagricola_bioagricola.example:
+#        class: %bioagricola_bioagricola.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

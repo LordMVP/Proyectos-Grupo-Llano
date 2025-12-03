@@ -1,0 +1,2502 @@
+
+llanogas_actualizar_todas_facturas:
+    pattern:  /proceso/actualizar_saldos/
+    defaults: { _controller: LlanogasLlanogasBundle:Default:actualizarSaldoFacturas }
+
+
+llanogas_actualizar_todas_facturas_notas:
+    pattern:  /proceso/actualizar_saldos_notas/
+    defaults: { _controller: LlanogasLlanogasBundle:Default:actualizarSaldoFacturasNotas }
+    
+llanogas_actualizar_una_facturas:
+    pattern:  /test/factura/saldo
+    defaults: { _controller: LlanogasLlanogasBundle:Default:actualizarFactura }
+
+llanogas_eliminar_recaudos_masivo:
+    pattern:  /test/recaudo/eliminar
+    defaults: { _controller: LlanogasLlanogasBundle:Default:eliminarRecaudo1}
+
+llanogas_llas_menu:
+    pattern:  /menu/
+    defaults: { _controller: LlanogasLlanogasBundle:Default:getMenu }
+
+llanogas_llanogalcome:
+    pattern:  /
+    defaults: { _controller: LlanogasLlanogasBundle:Default:welcome }
+
+llanogas_llanogas_proceso:
+    pattern:  /proceso
+    defaults: { _controller: LlanogasLlanogasBundle:Default:proceso }
+
+llanogas_llanogas_scripts:
+    pattern:  /scripts
+    defaults: { _controller: LlanogasLlanogasBundle:Default:ejecutarFuncion}
+
+llanogas_llanogas_tepattern:
+    pattern: /test
+    defaults: { _controller: LlanogasLlanogasBundle:Default:test}
+
+#Rutas
+rutas_gestionrutas:
+    pattern:  /rutas/gestionrutas/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:index}
+
+rutas_busca_municipios_nuevo:
+    pattern:  /rutas/gestionrutas/busca_municipios_nuevo/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:buscaMunicipiosNuevo}
+    
+rutas_consulta_periodoVencimiento:
+    pattern:  /rutas/gestionrutas/consulta_periodoVencimiento/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:consultaPeriodoVencimiento}
+    
+rutas_actualiza_ruta_periodos_fechas:
+    pattern:  /rutas/gestionrutas/actualiza_ruta_periodos_fechas/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:actualizaRutaPeriodosFechas}
+
+rutas_grabar_rutas_gestion:
+    pattern:  /rutas/gestionrutas/grabar_rutas_gestion/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:grabarRutasGestion}
+
+rutas_buscar_rutas:
+    pattern:  /rutas/gestionrutas/buscar_rutas/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:buscarRutas}
+
+rutas_busca_Municipios_Barrios:
+    pattern:  /rutas/gestionrutas/busca_MunicipiosBarrios/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionRutas:buscaMunicipiosBarrios}
+
+rutas_grabar_rutas:
+    pattern:  /rutas/suscripciones_rutas/
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:index}
+
+filtrar_rutas_consultar_susrr:
+    pattern:  /rutas/suscripciones_rutas/filtrar/consultar_suscriptores
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:consultarSuscriptores}
+
+filtrar_rutas_consultar_rutassin:
+    pattern:  /rutas/suscripciones_rutas/filtrar/consultar_sinrutas
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:consultarRutasSin}
+
+filtrar_rutas_consultar_rutasasi:
+    pattern:  /rutas/suscripciones_rutas/filtrar/consultar_asirutas
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:consultarRutasAsi}
+
+rutas_grabar_rutassin:
+    pattern:  /rutas/suscripciones_rutas/rutas/grabar_rutassin
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:grabarRutasSin}
+
+rutas_grabarbd_rutassin:
+    pattern:  /rutas/suscripciones_rutas/rutas/grabarbd_rutassin
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:grabarBDRutasSin}
+
+rutas_grabarbd_rutasasi:
+    pattern:  /rutas/suscripciones_rutas/rutas/grabarbd_rutasasi
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:grabarBDRutasAsi}
+
+rutas_grabar_trasladarutas:
+    pattern:  /rutas/suscripciones_rutas/rutas/grabarTrasladaRutas
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:grabarTrasladaRutas}
+    
+rutas_actualizar:
+    pattern:  /rutas/suscripciones_rutas/rutas/actualizaconsecutivoruta
+    defaults: { _controller: LlanogasLlanogasBundle:Rutas:actualizaConsecutivoRuta}    
+
+#Suspensiones
+suspensiones:
+    pattern: /operaciones/suspensiones/
+    defaults: {_controller: LlanogasLlanogasBundle:Suspension:index}
+
+###Pagina de cargue de mapa gps
+suspensiones_seguimiento:
+    pattern: /operaciones/suspensiones/seguimiento
+    defaults: {_controller: LlanogasLlanogasBundle:Suspension:seguimiento}
+
+###Consulta de ubicación dela cuadrilla
+suspensiones_seguimiento_cuadrilla:
+    pattern: /operaciones/suspensiones/seguimiento/cuadrilla
+    defaults: {_controller: LlanogasLlanogasBundle:Suspension:localizacionCuadrilla}
+
+
+suspensiones_filtrar:
+    pattern: /operaciones/suspensiones/consultar
+    defaults: {_controller: LlanogasLlanogasBundle:Suspension:filtrarDocumento}
+
+suspensiones_cons_sin_suscrip:
+    pattern: /operaciones/suspensiones/crear/
+    defaults: {_controller: LlanogasLlanogasBundle:Suspension:crearSuscripcion}
+
+suspension_listar:
+    pattern:  /listarsuspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:listarSuspension }
+
+suspension_buscar:
+    pattern:  /buscarsuspension/{buscar}
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:buscarSuspension }
+
+suspension_cargar:
+    pattern:  /cargar
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:cargarCombo }
+
+suspension_nueva:
+    pattern:  /operaciones/suspensiones/nueva_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:nuevaSuspension }
+
+suspension_editar:
+    pattern:  /editar_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:editarSuspension }
+
+suspension_detalle_crear:
+    pattern:  /operaciones/suspensiones/nuevo_detalle
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:crearDetalleSuspension }
+
+suspension_detalle_editar:
+    pattern:  /operaciones/suspensiones/editar_detalle
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:editarDetalleSuspension }
+
+suspension_eliminar_detalle_suspension:
+    pattern:  /operaciones/suspensiones/eliminar_detalle_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:eliminarDetalleSuspension}
+
+suspension_eliminar_detalle_reconexion:
+    pattern:  /operaciones/suspensiones/eliminar_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:eliminarReconexion}
+
+suspension_obtener_suspension_reconexiones:
+    pattern:  /operaciones/suspensiones/ultima_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getSuspensionParaReconexion}
+
+suspension_obtener_valor_novedad_suspension:
+    pattern:  /operaciones/suspensiones/valor_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getValorNovedadSuspension}
+
+suspension_obtener_valor_novedad_reconexion:
+    pattern:  /operaciones/suspensiones/valor_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getValorNovedadReconexion}
+#fin suspensiones y reconexiones
+
+suscripcion_filtrar:
+    pattern:  /operaciones/suspensiones/consultar_suscripcion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarSuscripcion }
+
+suscripcion_ciclo_periodo_actual:
+    pattern:  /operaciones/suspensiones/consultar_ciclo_periodo
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getCicloPeriodo }
+
+consultar_detalles_suspension:
+    pattern:  /operaciones/suspensiones/consultar_detalles_suspension/{idSuspension}
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarDetallesSuspension }
+
+suscripcion_filtar_detalle:
+    pattern:  /operaciones/suspensiones/detalles_suscripcion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:detalleSuscripcion }
+
+insertar_nueva_reconexion:
+    pattern:  /operaciones/suspensiones/insertar_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:insertaReconexion }
+
+suscripcion_filtar:
+    pattern:  /operaciones/suspensiones/actualizar_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:actualizarReconexion }
+
+consultar_suspensiones:
+    pattern:  /operaciones/suspensiones/consultar_suspensiones
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarSuspension }
+
+consultar_reconexiones:
+    pattern:  /operaciones/suspensiones/consultar_reconexiones
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarReconexion }
+
+suspension_eliminar:
+    pattern:  /operaciones/suspensiones/eliminar_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:eliminarSuspension }
+
+cabecera_actualizar:
+    pattern:  /operaciones/suspensiones/actualizar_cabecera
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:actualizarCabecera }
+
+consultar_estados_suspension:
+    pattern:  /operaciones/suspensiones/consultar_estados_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarEstadosSuspension}
+
+consultar_motivos:
+    pattern:  /operaciones/suspensiones/consultar_motivos_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarMotivos}
+
+
+
+consultar_conceptos:
+    pattern:  /operaciones/suspensiones/consultar_conceptos_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarConceptos}
+
+consultar_novedades:
+    pattern:  /operaciones/suspensiones/consultar_novedades_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarNovedadesSuspension}
+
+consultar_novedades_reconexion:
+    pattern:  /operaciones/suspensiones/consultar_novedades_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarNovedadesReconexion}
+
+consultar_tipos_suspension:
+    pattern:  /operaciones/suspensiones/consultar_tipos_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarTiposSuspension}
+
+consultar_terceros:
+    pattern:  /operaciones/suspensiones/consultar_terceros
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:consultarTerceros}
+
+consultar_suspension_terceros:
+    pattern:  /operaciones/suspensiones/consultar_terceros_suspension
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getTerceros}
+
+consultar_municipios:
+    pattern:  /operaciones/suspensiones/consultar_municipios
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getMunicipios}
+
+consultar_motivos_reconexion:
+    pattern:  /operaciones/suspensiones/consultar_motivos_reconexion
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getMotivosReconexion}
+
+consultar_valor_concepto:
+    pattern:  /operaciones/suspensiones/consultar_valor_concepto
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getValorConcepto}
+
+consultar_usuario_puede_habilitar:
+    pattern:  /operaciones/suspensiones/habilitar_ssp_rco
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:habilitarSspRco}
+
+consulta_financiacion_factura:
+    pattern: /operaciones/suspensiones/getinfofacturafinancia
+    defaults: { _controller: LlanogasLlanogasBundle:Suspension:getInformacionFacturaFinanaciacion}
+    
+ #recaudos pagos
+pagos:
+    pattern:  /recaudos/pagos/
+    defaults: { _controller: LlanogasLlanogasBundle:Pagos:index }
+
+pagos_suscripciones:
+    pattern:  /recaudos/pagos/suscripciones/
+    defaults: { _controller: LlanogasLlanogasBundle:Pagos:getSuscripcionesPago }
+
+abonos:
+    pattern:  /recaudos/abonos/
+    defaults: { _controller: LlanogasLlanogasBundle:Abonos:index }
+
+abonos_consultar_suscripcion:
+    pattern:  /recaudos/consultar_suscriptor/
+    defaults: { _controller: LlanogasLlanogasBundle:Abonos:consultarSuscripcion }
+
+abonos_cargar_factura_suscripcion:
+  pattern:  /recaudos/abonos/factura_suscripcion/
+  defaults: { _controller: LlanogasLlanogasBundle:Abonos:cargarFacturaSuscripcion }
+
+consultar_recaudo:
+    pattern:  /recaudos/consultar_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarRecaudo:index }
+
+consultar_recaudos:
+    pattern:  /recaudos/consultar_recaudo/consultar_recaudos
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarRecaudo:consultarRecaudos }
+
+obtener_informacion_recaudo:
+    pattern:  /recaudos/consultar_recaudo/obtener_informacion_recaudo
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarRecaudo:obtenerInformacionRecaudo }
+
+#recaudos anticipos
+anticipos:
+    pattern:  /recaudos/anticipos/
+    defaults: { _controller: LlanogasLlanogasBundle:Anticipos:index }
+registrar_recaudo_anticipos:
+    pattern:  /recaudos/registrar_recaudo_anticipos
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:registrarAnticipo}
+registrar_recaudo_anticipos_liquidaciones:
+    pattern:  /recaudos/obtener/liquidaciones/
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarTiposLiquidacion}
+registrar_recaudo_anticipos_documentos:
+    pattern:  /recaudos/obtener/documentos/
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarDocumentos}
+registrar_recaudo_anticipos_tipos_documento:
+    pattern:  /recaudos/obtener/tipos_documento/
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarTiposDocumentoPorTipoUso}
+
+#Cartera castigada
+cartera_castigada:
+    pattern:  /recaudos/cartera_castigada/
+    defaults: {_controller: LlanogasLlanogasBundle:CarteraCastigada:index }
+
+consultar_suscrip_cartera_castigada:
+    pattern:  /recaudos/suscripciones_cartera_castigada
+    defaults: {_controller: LlanogasLlanogasBundle:CarteraCastigada:consultarSuscripcionesCartera}
+
+consultar_facturas_cartera_castigada:
+    pattern:  /recaudos/factura_cartera_castigada
+    defaults: {_controller: LlanogasLlanogasBundle:CarteraCastigada:consultarFacturasCartera}
+
+consultar_bancos:
+    pattern:  /recaudos/lista_bancos
+    defaults: {_controller: LlanogasLlanogasBundle:Abonos:consultarBancos}
+recaudos_consultar_bancos:
+    pattern:  /recaudos/consultar_bancos/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarBancos}
+consultar_tipos_liquidacion:
+    pattern:  /recaudos/lista_tipo_liquidacion
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarTiposLiquidacion}
+
+consultar_conceptos_anticipos:
+    pattern:  /recaudos/lista_conceptos_anticipos
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarConceptosAnticipos}
+
+consultar_tipos_documentos:
+    pattern:  /recaudos/lista_tiposdocumentos_anticipos
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarDocumentosTiposAnticipos}
+
+registrar_recaudo_abono:
+    pattern:  /recaudos/registrar_recaudo_abono
+    defaults: {_controller: LlanogasLlanogasBundle:Abonos:registrarAbono}
+
+consultar_tipos_documentos_documentos_por_liquidacion:
+    pattern:  /recaudos/lista_tiposdocumentos_por_liquidacion_anticipos
+    defaults: {_controller: LlanogasLlanogasBundle:Anticipos:consultarDocumentosTiposPorLiquidacion}
+
+registrar_recaudo_pago:
+    pattern:  /recaudos/registrar_recaudo_pago
+    defaults: {_controller: LlanogasLlanogasBundle:Pagos:registrarPago}
+
+
+#Anular recaudo
+anular_recaudo:
+    pattern:  /recaudos/anular_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:Anular:index }
+
+anular_recaudo_buscar_recaudos:
+    pattern:  /recaudos/anular_recaudo/buscar_recaudos
+    defaults: { _controller: LlanogasLlanogasBundle:Anular:buscarRecaudos }
+
+anular_recaudo_buscar_motivos:
+    pattern:  /recaudos/anular_recaudo/buscar_recaudos
+    defaults: { _controller: LlanogasLlanogasBundle:Anular:buscarRecaudos }
+
+anular_recaudo_buscar_info_recaudos:
+    pattern:  /recaudos/anular_recaudo/informacion_recaudos
+    defaults: { _controller: LlanogasLlanogasBundle:Anular:obtenerResultadosRecaudo }
+
+anular_recaudo_registrar_anulacion:
+    pattern:  /recaudos/anular_recaudo/registrar_anulacion
+    defaults: { _controller: LlanogasLlanogasBundle:Anular:registrarAnular }
+
+#importar recaudo
+importar_recaudo:
+  pattern: /recaudos/importacion/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:index}  
+importar_recaudo_progreso:
+  pattern: /recaudos/importacion/progreso/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:consultarProgreso}
+importar_recaudo_resumen:
+  pattern: /recaudos/importacion/resumen/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:consultarResumen}
+importar_recaudo_consultarsucursales:
+  pattern: /recaudos/importacion/consultarsucursalmediopago/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:consultarSucursalesPorMedioPago}
+importar_recaudo_eliminar_resumen:
+  pattern: /recaudos/importacion/eliminar_tabla/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:eliminarResumen}  
+ 
+importar_recaudo_cargar:
+  pattern: /recaudos/importacion/cargar/
+  defaults: { _controller: LlanogasLlanogasBundle:CargarRecaudos:cargar}
+
+#Reestrucutrar financiacion
+cartera_consultar_dias_periodo:
+    pattern: /cartera/consultas_dias/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarDiasPeriodo}
+    
+reestructurar_financiacion:
+    pattern:  /cartera/reestructurar
+    defaults: { _controller: LlanogasLlanogasBundle:ReestructurarFinanciacion:index}
+
+reestructurar_financiacion_consultar_suscripcion:
+    pattern:  /cartera/reestructurar/suscripcion
+    defaults: { _controller: LlanogasLlanogasBundle:ReestructurarFinanciacion:consultarSuscripcion}
+
+reestructurar_financiacion_tabla_financiacion:
+    pattern:  /cartera/reestructurar/tabla_financiacion
+    defaults: { _controller: LlanogasLlanogasBundle:ReestructurarFinanciacion:consultarTablaFinanciacion}
+
+reestructurar_financiacion_consultar_conceptos:
+    pattern:  /cartera/reestructurar/consultar_conceptos
+    defaults: { _controller: LlanogasLlanogasBundle:ReestructurarFinanciacion:consultarConceptos}
+
+reestructurar_financiacion_guardar:
+    pattern:  /cartera/reestructurar/guardar
+    defaults: { _controller: LlanogasLlanogasBundle:ReestructurarFinanciacion:guardarReestructuracion}
+
+
+#Generar  Financiacion
+generar_financiacion:
+    pattern:  /cartera/financiacion
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:index}
+
+generar_financiacion_filtrar_suscripciones:
+    pattern:  /cartera/generarfinanciacion/filtrar
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:filtrarSuscripcionesFinanciacion}
+
+# verificar restricción monto
+generar_financiacion_consultar_restriccion:
+    pattern:  /cartera/generarfinanciacion/consultar_restriccion
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarRestriccion}
+
+generar_financiacion_obtener_interes:
+    pattern:  /cartera/generarfinanciacion/obtener/interes
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarInteresLiquidaciones}
+
+generar_financiacion_filtrar_tiposdocumentos:
+    pattern:  /cartera/generarfinanciacion/consultar_tiposdocumentos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:filtrarTiposDocumentos}
+
+generar_financiacion_filtrar_documentos:
+    pattern:  /cartera/generarfinanciacion/consultar_documentos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:filtrarDocumentos}
+
+generar_financiacion_eddconsultar_facturas_suscripcion_documento:
+    pattern:  /cartera/generarfinanciacion/consultar_facturas
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarFacturasSuscripcionDocumento}
+    
+generar_financiacion_eddconsultar_facturas_descarte_suscripcion_documento:
+    pattern:  /cartera/generarfinanciacion/consultar_facturasDescarte
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarFacturasDescarteSuscripcionDocumento}
+
+generar_financiacion_guardar:
+    pattern:  /cartera/generarfinanciacion/guardar
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:insertarFinanciacion}
+generar_financiacion_generar_pagare:
+    pattern:  /cartera/generarfinanciacion/generarnumeropagare/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:generarNumeroPagare}
+
+generar_financiacion_generar_pagare_postventa:
+    pattern:  /ventas/financiacion/generarfinanciacion/generarnumeropagare/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:generarNumeroPagare}
+
+generar_financiacion_validar:
+    pattern:  /cartera/generarfinanciacion/validar_conceptos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:validarConceptosFinanciacion}
+
+generar_financiacion_consultar_liquidaciones:
+    pattern:  /cartera/generarfinanciacion/consultar_liquidaciones
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarLiquidacionesDocumento}
+
+generar_financiacion_consultar_bancos:
+    pattern:  /cartera/generarfinanciacion/consultar_bancos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarBancos}
+
+generar_financiacion_subir_adjuntos:
+    pattern:  /cartera/generarfinanciacion/subir_archivo
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:subirFinanciacionAdjunta}
+
+generar_financiacion_eliminar_adjuntos:
+    pattern:  /cartera/generarfinanciacion/eliminar_adjunto
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:eliminarFinanciacionAdjunta}
+    
+generar_financiacion_actualizar_adjuntos:
+    pattern: /cartera/generarfinanciacion/actualizar_adjuntos/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:actualizarAdjuntoFinanciacion}
+
+# generar documento de pago
+generar_financiacion_obtener_conceptos:
+    pattern:  /cartera/financiacion/obtener/conceptos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:obtenerConceptosFinanciacion}
+
+generar_financiacion_obtener_financiaciones:
+    pattern:  /cartera/financiacion/obtener/suscripciones/ 
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:consultarSuscripciones}
+generar_financiacion_obtener_informacion_adjuntos:
+    pattern: /cartera/informacion_autorizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:cargarInformacionFormato}
+
+generar_documento_pago:
+    pattern:  /cartera/generar_documento_pago
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:index}
+    
+generar_documento_pago_tabla_financiacion:
+    pattern:  /cartera/tabla_financiacion
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:consultarTablaFinanciacion}
+
+guardar_documento_pago:
+    pattern:  /cartera/guardar_documento_pago
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:guardarDocumentoPago}
+    
+generar_interes_pago:
+    pattern:  /cartera/Gen_int_documento_pago
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarDocumentoPago:GenIntDocumentoPago}
+
+#recaudos
+recaudos_proceso_aplicar:
+    pattern:  /recaudos/aplicar/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:index }
+
+recaudos_consultar_motivos_suspension:
+    pattern:  /recaudos/aplicar/consultar_motivos_suspension/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:consultarMotivosSuspension }
+
+recaudos_aplicar_recaudos:
+    pattern:  /recaudos/aplicar/ejecutar_proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:aplicarRecaudos}
+
+recaudos_aplicar_recaudos_progreso:
+    pattern:  /recaudos/aplicar/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:consultarProgreso}
+
+recaudos_aplicar_recaudos_resumen:
+    pattern:  /recaudos/aplicar/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:resumen}
+
+cartera_gestionar_cartera:
+    pattern:  /cartera/gestionar_cartera/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:index}
+
+#proceso suspensiones
+proceso_suspension_reconexion:
+    pattern:  /operaciones/generar_suspension/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoSuspensiones:index }
+proceso_suspension_tipo_uso:
+    pattern:  /operaciones/generar_suspension/consultar_tipo_uso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoSuspensiones:consultarTipoUsoSuscripcion}
+
+proceso_suspension_ejecutar:
+    pattern:  /operaciones/generar_suspension/ejecutar_proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoSuspensiones:procesarSuspensiones}
+
+proceso_suspension_consultar_progreso:
+    pattern:  /operaciones/generar_suspension/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoSuspensiones:consultarProgreso}
+
+proceso_suspension_consultar_resumen:
+    pattern:  /operaciones/generar_suspension/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoSuspensiones:consultarResumenExitoso}
+
+#fin proceso suspensiones
+
+#proceso reconexiones
+proceso_reconexion:
+    pattern:  /operaciones/generar_reconexion/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoReconexion:index }
+
+proceso_reconexion_ejecutar:
+    pattern:  /operaciones/generar_reconexion/ejecutar_proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoReconexion:procesarSuspensiones}
+
+wsproceso_reconexion_ejecutar:
+    pattern: /operaciones/generar_reconexion/ws_ejecutar_proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoReconexion:wsProcesarSuspensiones}  
+    
+proceso_reconexion_consultar_progreso:
+    pattern:  /operaciones/generar_reconexion/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoReconexion:consultarProgreso}
+
+proceso_reconexion_consultar_resumen:
+    pattern:  /operaciones/generar_reconexion/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoReconexion:consultarResumenExitoso}
+
+
+#fin proceso reconexiones
+
+#proceso cierre
+proceso_cierre:
+    pattern:  /operaciones/generar_cierre/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCierreSuspensionesReconexiones:index }
+
+proceso_cierre_ejecutar:
+    pattern:  /operaciones/generar_cierre/ejecutar_proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCierreSuspensionesReconexiones:procesarSuspensiones}
+
+proceso_cierre_consultar_progreso:
+    pattern:  /operaciones/generar_cierre/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCierreSuspensionesReconexiones:consultarProgreso}
+
+proceso_cierre_consultar_resumen:
+    pattern:  /operaciones/generar_cierre/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCierreSuspensionesReconexiones:consultarResumenExitoso}
+#fin proceso cierre
+
+recaudos_proceso_cerrar:
+    pattern:  /recaudos/cerrar_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCerrarRecaudos:index }
+
+recaudos_proceso_cerrar_recaudos:
+    pattern:  /recaudos/cerrar_recaudo/cerrar/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCerrarRecaudos:cerrarRecaudos}
+
+recaudos_proceso_cerrar_recaudos_progreso:
+    pattern:  /recaudos/cerrar_recaudo/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoCerrarRecaudos:consultarProgreso}
+    
+recaudos_proceso_cerrar_recaudos_resumen:
+    pattern:  /recaudos/cerrar_recaudo/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:AplicarRecaudos:resumen}
+
+generar_gestion_cartera:
+    pattern:  /cartera/generar_gestion_cartera/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarGestionCartera:index }
+
+generar_gestion_cartera_consultar_documentos:
+    pattern:  /cartera/generar_gestion_cartera/consultar_documentos
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarGestionCartera:consultarDocumentosPorTipoDocumentos }
+
+generar_gestion_cartera_consultar_suscripciones:
+    pattern:  /cartera/generar_gestion_cartera/consultar_suscripciones
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarGestionCartera:consultarSuscripciones }
+
+generar_gestion_cartera_grabar:
+    pattern:  /cartera/generar_gestion_cartera/grabar_gestion
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarGestionCartera:generarGestion }
+
+generar_gestion_cartera_municipios:
+    pattern:  /cartera/generar_gestion_cartera/consultar_municipios
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarGestionCartera:getMunicipios }
+
+recaudos_trasladar_recaudos:
+    pattern: /recaudos/trasladar_recaudo/
+    defaults: {_controller: LlanogasLlanogasBundle:TrasladarRecaudo:index }
+
+recaudos_trasladar_recaudos_consultar:
+    pattern: /recaudos/trasladar_recaudo/consultar/
+    defaults: {_controller: LlanogasLlanogasBundle:TrasladarRecaudo:consultarRecaudo }
+
+cartera_gestion_cartera_buscar:
+    pattern:  /cartera/gestionar_cartera/filtrar
+    defaults: {_controller: LlanogasLlanogasBundle:GestionarCartera:buscarSuscripciones }
+
+cartera_gestion_cartera_facturas:
+    pattern:  /cartera/gestionar_cartera/facturas
+    defaults: {_controller: LlanogasLlanogasBundle:GestionarCartera:consultarFacturasPorSuscripcion }
+
+recaudos_trasladar_recaudos_facturas:
+    pattern: /recaudos/trasladar_recaudo/facturas
+    defaults: {_controller: LlanogasLlanogasBundle:TrasladarRecaudo:consultarFacturasRecaudo }
+
+cartera_gestionar_cartera_primero_ultimo:
+    pattern:  /cartera/gestionar_cartera/primero_ultimo
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:consultarPrimeroUltimo}
+
+cartera_gestionar_cartera_siguente_anterior:
+    pattern:  /cartera/gestionar_cartera/siguiente_anterior
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:consultarSiguienteAnterior}
+
+# adjuntar archivos gestionar la cartera
+cartera_gestionar_cartera_adjuntar_archivo:
+    pattern:  /cartera/gestionar_cartera/adjuntar_archivo
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:subirAdjuntoDetalle}
+
+recaudos_trasladar_recaudos_grabar:
+    pattern: /recaudos/trasladar_recaudo/grabar
+    defaults: {_controller: LlanogasLlanogasBundle:TrasladarRecaudo:trasladarRecaudo }
+
+cartera_gestionar_cartera_grabar:
+    pattern:  /cartera/gestionar_cartera/grabar
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:grabarGestionarCartera}
+
+cartera_gestionar_cartera_historico:
+    pattern:  /cartera/gestionar_cartera/historico
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:consultarHistorico}
+    
+cartera_gestionar_cartera_historico_detalle:
+    pattern:  /cartera/gestionar_cartera/historico_detalle
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarCartera:getDetalleHistoricoSeguimiento}
+    
+#Proceso facturar financiacón 
+cartera_facturar_finaciacion:
+    pattern:  /cartera/facturar_financiacion/
+    defaults: { _controller: LlanogasLlanogasBundle:FacturarFinanciacion:index}
+
+cartera_facturar_finaciacion_generar:
+    pattern:  /cartera/facturar_financiacion/generar/
+    defaults: { _controller: LlanogasLlanogasBundle:FacturarFinanciacion:facturarFinanciacion}
+
+cartera_facturar_finaciacion_progreso:
+    pattern:  /cartera/facturar_financiacion/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:FacturarFinanciacion:getProgresoProceso}
+
+cartera_facturar_finaciacion_resultado:
+    pattern:  /cartera/facturar_financiacion/resultado/
+    defaults: { _controller: LlanogasLlanogasBundle:FacturarFinanciacion:getResultado}
+
+cartera_facturar_finaciacion_aprobar:
+    pattern:  /cartera/facturar_financiacion/aprobar/
+    defaults: { _controller: LlanogasLlanogasBundle:FacturarFinanciacion:aprobarFacturacion}
+
+#fin proceso facturar financiacón
+cartera_reunificar_financiacion:
+    pattern:  /cartera/reunificar_financiacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:index}
+
+cartera_reunificar_financiacion_documentos:
+    pattern:  /cartera/reunificar_financiacion/documentos/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:ConsultarDocumentos}
+
+cartera_reunificar_financiacion_tipo_documentos:
+    pattern:  /cartera/reunificar_financiacion/tipodocumentos/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:ConsultarTipoDocumentos}
+
+cartera_consultar_financiacion:
+    pattern:  /cartera/consultar_financiacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:index}
+
+cartera_consultar_financiacion_filtrar:
+    pattern:  /cartera/consultar_financiacion/filtrar/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:filtrarFinanciaciones}
+
+cartera_consultar_financiacion_facturas:
+    pattern:  /cartera/consultar_financiacion/facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarFacturas}
+
+cartera_consultar_financiacion_facturas_detalles:
+    pattern:  /cartera/consultar_financiacion/facturas/detalle_factura/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarDetalleFacturas}
+
+cartera_consultar_financiacion_amortizacion:
+    pattern:  /cartera/consultar_financiacion/amortizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarAmortizaciones}
+
+cartera_consultar_financiacion_amortizacion_detalle:
+    pattern:  /cartera/consultar_financiacion/amortizacion/detalle/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarDetalleAmortizaciones}
+
+cartera_consultar_financiacion_amortizacion_adjuntos:
+    pattern:  /cartera/consultar_financiacion/amortizacion/adjuntos
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarAdjuntosPorFinanciacion }
+
+cartera_consultar_financiacion_amortizacion_facturas:
+    pattern:  /cartera/consultar_financiacion/amortizacion/facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultarFacturasPorAmortizacion}
+    
+cartera_consultar_financiacion_permisos_adjuntos:
+    pattern:  /cartera/consultar_financiacion/consultapermisosadjuntar/
+    defaults: { _controller: LlanogasLlanogasBundle:ConsultarFinanciacion:consultaPermisosAdjuntos}
+
+cartera_consultar_financiacion_consultar_liquidaciones:
+    pattern:  /cartera/consultar_financiacion/generarfinanciacion/consultar_liquidaciones
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarLiquidacionesDocumento}
+
+cartera_consultar_financiacion_consultar_dias:
+    pattern:  /cartera/consultar_financiacion/consultas_dias/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarDiasPeriodo}
+        
+cartera_reunificar_financiacion_suscripciones:
+    pattern:  /cartera/reunificar_financiacion/suscripciones/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:filtrarSuscripcionesFinanciacion}
+
+cartera_reunificar_financiacion_suscripciones_informacion:
+    pattern:  /cartera/reunificar_financiacion/suscripciones/informacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:consultarInformacionPorSuscripcion}
+
+cartera_reunificar_financiacion_grabar:
+    pattern:  /cartera/reunificar_financiacion/grabar/
+    defaults: { _controller: LlanogasLlanogasBundle:ReunificarFinanciacion:grabarReunificacion}
+
+#liquidacion de interes por mora
+cartera_facturar_interes_mora:
+    pattern:  /cartera/facturar_intereses_mora/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:index}
+
+cartera_facturar_interes_mora_municipios:
+    pattern:  /cartera/facturar_intereses_mora/municipios/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:getMunicipios}
+
+cartera_facturar_interes_mora_suscripcion:
+    pattern:  /cartera/facturar_intereses_mora/suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:getSuscripcion}
+
+cartera_facturar_interes_mora_documentos:
+    pattern:  /cartera/facturar_intereses_mora/documentos/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:getDocumentosInteresMora}
+
+cartera_facturar_interes_mora_generar:
+    pattern:  /cartera/facturar_intereses_mora/generar/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:generarInteresMora}
+
+cartera_facturar_interes_mora_progreso:
+    pattern:  /cartera/facturar_intereses_mora/progreso/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:consultarProgreso}
+
+cartera_facturar_interes_mora_aprobar:
+    pattern:  /cartera/facturar_intereses_mora/aprobar/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:setAprobacionInteresMora}
+
+cartera_facturar_interes_mora_resumen:
+    pattern:  /cartera/facturar_intereses_mora/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:InteresMora:consultarResumenExitoso}
+
+#fin interes por mora
+
+cartera_estado_cuenta:
+    pattern:  /cartera/estado_cuenta/
+    defaults: { _controller: LlanogasLlanogasBundle:EstadoCuenta:index}
+
+cartera_estado_cuenta_suscripciones:
+    pattern:  /cartera/estado_cuenta/consultar/suscripciones/
+    defaults: { _controller: LlanogasLlanogasBundle:EstadoCuenta:consultarSuscripciones}
+
+cartera_estado_cuenta_informacion:
+    pattern:  /cartera/estado_cuenta/consultar/informacion/
+    defaults: { _controller: LlanogasLlanogasBundle:EstadoCuenta:consultarEstadoCuenta}
+
+generar_financiacion_consultar_detalles_facturas:
+    pattern:  /cartera/generarfinanciacion/consultar_facturas_detalles
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarDetallesFactura}
+cartera_consultar_iva_interes:
+    pattern:  /cartera/consultar_interes_liquidacion/
+    defaults: { _controller: LlanogasLlanogasBundle:GenerarFinanciacion:consultarInteresIvaLiquidacion}
+
+provisiones:
+    pattern:  /cartera/provisionar_castigar/
+    defaults: { _controller: LlanogasLlanogasBundle:Provisiones:index}
+
+#registrar Lecturas
+registrar_lecturas:
+    pattern:  /lectura/registrar_lectura/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:index }
+
+registrar_lecturas_consultar_terceros:
+    pattern:  /lectura/consultar_terceros/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:consultarTerceros }
+
+registrar_lecturas_filtrar:
+    pattern:  /lectura/registrar_lectura/filtrar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:filtrarLecturas}
+
+registrar_lecturas_detalle_medidor:
+    pattern:  /lectura/registrar_lectura/detallemedidor/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:detallePropiedad}
+
+registrar_lecturas_encabezado_historico:
+    pattern:  /lectura/registrar_lectura/encabezadohistorico/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:detalleHistorico}
+
+registrar_lecturas_obtener_novedad:
+    pattern:  /lectura/registrar_lectura/obtenernovedad/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:obtenerNovedad}
+
+registrar_lecturas_obtener_anomalia:
+    pattern:  /lectura/registrar_lectura/obteneranomalia/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:obtenerAnomalia}
+
+registrar_lecturas_obtener_encabezado_lectura:
+    pattern:  /lectura/registrar_lectura/obtenerencabezadolectura/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:obtenerEncabezadoLectura}
+
+registrar_lecturas_insertar_lectura:
+    pattern:  /lectura/registrar_lectura/insertarlectura/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarLectura:insertarLectura}
+
+#Cerrar lecturas
+lectura_cargar_lecturas:
+    pattern:  /lectura/cargarlecturas/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarLecturas:index }
+
+lectura_cargar_lecturas_subir:
+    pattern:  /lectura/cargarlecturas/subir/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarLecturas:cargarLecturas }
+    
+lectura_cargar_lecturas_resumen:
+    pattern:  /lectura/cargarlecturas/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarLecturas:cargarProceso }
+
+lectura_cerrar_lecturas:
+    pattern:  /lectura/cerrarlectura/
+    defaults: { _controller: LlanogasLlanogasBundle:CerrarLectura:index }
+
+lectura_cerrar_lecturas_ciclos_activos_procesar:
+    pattern:  /lectura/cerrarlectura/procesar/
+    defaults: { _controller: LlanogasLlanogasBundle:CerrarLectura:procesarCiclos }
+
+lectura_cerrar_lecturas_ciclos_activos_validar:
+    pattern:  /lectura/cerrarlectura/validar/
+    defaults: { _controller: LlanogasLlanogasBundle:CerrarLectura:evaluarCiclos }
+
+lectura_cerrar_lecturas_resumen:
+    pattern:  /lectura/cerrarlectura/obtener/resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:CerrarLectura:obtenerResumen }
+
+lectura_cerrar_lecturas_resumen_estado_programa:
+    pattern:  /lectura/cerrarlectura/obtener/estado/
+    defaults: { _controller: LlanogasLlanogasBundle:CerrarLectura:obtenerEstadoPrograma }
+
+#Suscripciones
+suscripcion:
+    pattern:  /suscripcion/gestionar_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:index }
+
+suscripcion_filtrar_suscriptor:
+    pattern:  /suscripcion/gestionar_suscripcion/filtrar_suscriptor/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:filtrarSuscriptor }
+
+suscripcion_buscar_propiedad:
+    pattern:  /suscripcion/gestionar_suscripcion/buscar_propiedad/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:buscarPropiedad }
+
+suscripcion_tipos_suscripcion:
+    pattern:  /suscripcion/gestionar_suscripcion/tipos_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getTiposSuscripcion }
+
+suscripcion_tipos_uso_suscripcion:
+    pattern:  /suscripcion/gestionar_suscripcion/tipos_uso_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getTiposUsoSuscripcion }
+    
+suscripcion_tipos_uso_ciclo:
+    pattern: /suscripcion/gestionar_suscripcion/tipos_uso_ciclo/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getTiposUsoCiclo }
+
+suscripcion_terceros:
+    pattern:  /suscripcion/gestionar_suscripcion/terceros/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getTerceros }
+
+suscripcion_liquidaciones:
+    pattern:  /suscripcion/gestionar_suscripcion/liquidaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getLiquidaciones }
+
+suscripcion_ciclo_ruta:
+    pattern:  /suscripcion/gestionar_suscripcion/cicloruta/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getRutaCiclo }
+
+suscripcion_conceptos_liquidacion:
+    pattern:  /suscripcion/gestionar_suscripcion/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getConceptos }
+
+suscripcion_conceptos_info:
+    pattern:  /suscripcion/gestionar_suscripcion/conceptos/info/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getInfoConceptos }
+
+suscripcion_grabar:
+    pattern:  /suscripcion/gestionar_suscripcion/grabar/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:grabarSuscripcion }
+
+suscripcion_conceptos_barrios:
+    pattern:  /suscripcion/gestionar_suscripcion/barrios/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getBarrios }
+
+suscripcion_buscar:
+    pattern:  /suscripcion/gestionar_suscripcion/buscar/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:buscarSuscripcion }
+
+suscripcion_buscar_detalle:
+    pattern:  /suscripcion/gestionar_suscripcion/detalle/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:detalleSuscripcion }
+
+suscripcion_concepto_eliminar_registro:
+    pattern:  /suscripcion/gestionar_suscripcion/concepto/eliminar/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:validarEliminacionConcepto }
+
+suscripcion_consultar_actividad_economica:
+    pattern:  /suscripcion/gestionar_suscripcion/actividadeconomica/
+    defaults: { _controller: LlanogasLlanogasBundle:Suscripciones:getActividadEconomica }
+
+cargar_estrato_catastral:
+    pattern:  /facturacion/cargar_estrato_catastral/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarEstratoCatastral:index }
+
+cargar_estrato_catastral_subir:
+    pattern:  /facturacion/cargar_estrato_catastral/subir/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarEstratoCatastral:cargarEstratoCatastral}
+
+cargar_estrato_catastral_resultado:
+    pattern:  /facturacion/cargar_estrato_catastral/subir/consultar_temp_estratocatastral/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarEstratoCatastral:consultartempestratocatastral}
+    
+consultar_resumen_temp_estratocatastral:
+    pattern:  /facturacion/cargar_estrato_catastral/subir/consultar_resumen_temp_estratocatastral/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarEstratoCatastral:consultarresumentempestratocatastral}
+   
+descargaArchivoReporte:
+    pattern:  /facturacion/cargar_estrato_catastral/admin/download/{id}
+    defaults: { _controller: ReportesBundle:Admin:downloadReport}
+   
+    #resource: "@ReportesBundle/Controller/AdminController.php"
+    #prefix:   /facturacion/cargar_estrato_catastral/admin/download/
+    #type:     annotation    
+   
+#Consignaciones
+consignaciones:
+    pattern: /recaudos/consignaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:index }
+
+consignaciones_consolidado:
+    pattern: /recaudos/consignaciones/consolidado/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getRecaudosConsignaciones}
+
+consignaciones_consolidado_empresa:
+    pattern: /recaudos/consignaciones/consolidadoempresa/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getRecaudosConsolidadoEmpresa}
+
+consignaciones_recaudos_detalles:
+    pattern: /recaudos/consignaciones/recaudosdetalles/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getRecaudosConsignacionesDetalles}
+
+consignaciones_recaudos_cheques:
+    pattern: /recaudos/consignaciones/recaudoscheques/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getChequesRecaudosSinConsignar}
+
+consignaciones_recaudos_bancos:
+    pattern: /recaudos/consignaciones/bancos/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getBancos}
+
+consignaciones_recaudos_tipo_cuentas:
+    pattern: /recaudos/consignaciones/tipocuentas/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getTipoCuentas}
+
+consignaciones_recaudos_cuentas:
+    pattern: /recaudos/consignaciones/cuentas/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:getCuentas}
+
+consignaciones_recaudos_grabar:
+    pattern: /recaudos/consignaciones/grabar/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:grabarConsignacion}
+
+consignaciones_recaudos_subir_archvo:
+    pattern: /recaudos/consignaciones/subirarchivo/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:subirAdjunto}
+
+consignaciones_recaudos_eliminar_archvo:
+    pattern: /recaudos/consignaciones/eliminararchivo/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:eliminarAdjunto}
+
+consignaciones_recaudos_buscar:
+    pattern: /recaudos/consignaciones/buscar/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:buscarConsignacion}
+
+consignaciones_recaudos_consultar_informacion:
+    pattern: /recaudos/consignaciones/informacionconsolidado/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:consultarInformacion}
+consignaciones_recaudos_consultar_empresa:
+    pattern: /recaudos/consignaciones/consultar_empresa/
+    defaults: { _controller: LlanogasLlanogasBundle:Consignaciones:consultarEmpresa}
+
+#ventas
+registro_ventas:
+    pattern: /ventas/registrar_ventas/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:index}
+registro_ventas_guardar_informacion_autorizacion:
+    pattern: /ventas/registrar_ventas/informacion_autorizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:cargarInformacionFormato}
+registro_ventas_exportar_autorizacion_exportar:
+    pattern: /ventas/registrar_ventas/exportar_autorizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:exportarAutorizacion}
+
+registro_ventas_exportar_autorizacion:
+    pattern: /ventas/registrar_ventas/validar_resolucion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:validarResolucionFacturacion}
+
+registro_ventas_firmas_instaladoras:
+    pattern: /ventas/firmasinstaldoras
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getFirmasInstaladoras}
+
+registro_ventas_firmas_instaladoras_funcionarios:
+    pattern: /ventas/firmasinstaldoras/funcionarios/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getFuncionariosFirma}
+
+registro_ventas_asesores:
+    pattern: /ventas/registrar_ventas/asesores/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getAsesores}
+
+registro_ventas_organismos:
+    pattern: /ventas/registrar_ventas/organismos/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getOrganismos}
+
+registro_ventas_documentos:
+    pattern: /ventas/registrar_ventas/documentos/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getDocumentos}
+
+registro_ventas__tipos_documentos:
+    pattern: /ventas/registrar_ventas/tiposdocumentos/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getTiposDocumentos}
+
+registro_ventas_liquidaciones:
+    pattern: /ventas/registrar_ventas/liquidaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getLiquidaciones}
+
+registro_ventas_suscripcion_buscar:
+    pattern: /ventas/registrar_ventas/suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:buscarSuscripcion}
+
+registro_ventas_conceptos:
+    pattern: /ventas/registrar_ventas/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getConceptos}
+
+registro_ventas_buscar:
+    pattern: /ventas/buscar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getVentas}
+    
+registro_ventas_buscar_suscripcion:
+    pattern: /ventas/buscar/venta_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getVentasPorSuscripcion}
+    
+registro_ventas_eliminar_adjunto:
+    pattern: /ventas/eliminar_adjunto/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:eliminarArchivoVenta}
+
+registro_ventas_liquidarventa:
+    pattern: /ventas/registrar_ventas/liquidar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:liquidarVenta}
+
+wsregistro_ventas_liquidarventa:
+    pattern: /ventas/registrar_ventas/wsliquidar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:wsLiquidarVenta}   
+    
+registro_ventas_registrar:
+    pattern: /ventas/registrar_ventas/registrar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:registrarVenta}
+    
+registro_ventas_actualizar:
+    pattern: /ventas/registrar_ventas/actualizar_adjuntos/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:actualizarAdjuntoVenta}
+
+registro_ventas_validar_cocnepto:
+    pattern: /ventas/registrar_ventas/conceptos/validar/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:validarEliminacionConcepto}
+
+registro_ventas_numero:
+    pattern: /ventas/registrar_ventas/numero/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarVentas:getNumeroVenta}
+
+#Caso de uso de aprobación de una venta
+aprobacion_ventas:
+    pattern: /ventas/flujoaprobacion/
+    defaults: { _controller: LlanogasLlanogasBundle:AprobacionVenta:index}
+
+aprobacion_ventas_agendas:
+    pattern: /ventas/flujoaprobacion/agendas/
+    defaults: { _controller: LlanogasLlanogasBundle:AprobacionVenta:getListaAgendas}
+
+aprobacion_ventas_aprobar:
+    pattern: /ventas/flujoaprobacion/aprobar/
+    defaults: { _controller: LlanogasLlanogasBundle:AprobacionVenta:aprobar}
+    
+    
+    
+aprobacion_ventas_consulta_historico:
+    pattern: /ventas/flujoaprobacion/consulta_historico_venta/
+    defaults: { _controller: LlanogasLlanogasBundle:AprobacionVenta:consultaHistoricoVenta}
+    
+    
+habilitar_ventas_despues_aprobar:
+    pattern: /ventas/habilitar_ventas/
+    defaults: { _controller: LlanogasLlanogasBundle:HabilitarVentaDespuesAprobar:index}
+
+habilitar_ventas_busca_comentarios:    
+     pattern: /ventas/habilitar_ventas/busca_comentarios/
+     defaults: { _controller: LlanogasLlanogasBundle:HabilitarVentaDespuesAprobar:buscaComentarios}
+    
+habilitar_ventas_graba_venta_historica:
+    pattern: /ventas/habilitar_ventas/graba_venta_historica/
+    defaults: { _controller: LlanogasLlanogasBundle:HabilitarVentaDespuesAprobar:grabaVentaHistorica}
+ 
+     
+#Suscripcion autor:Angelica Gomez
+seguimiento_suscripcion:
+    pattern: /suscripcion/seguimiento/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:index }
+
+seguimiento_suscripcion_facturas:
+    pattern: /suscripcion/seguimiento/facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturas }
+
+seguimiento_suscripcion_facturas_PQR:
+    pattern: /suscripcion/seguimiento/PQR/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getPQR }
+
+seguimiento_suscripcion_facturas_Certificaciones:
+    pattern: /suscripcion/seguimiento/Certificaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getCertificaciones }
+
+seguimiento_suscripcion_facturas_conceptos:
+    pattern: /suscripcion/seguimiento/facturas/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasConceptos }
+
+seguimiento_suscripcion_facturas_conceptosP:
+    pattern: /suscripcion/seguimiento/facturas/conceptosP/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasConceptosP }
+    
+seguimiento_suscripcion_facturas_allconceptos:
+    pattern: /suscripcion/seguimiento/facturas/allconceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasAllConceptos }
+    
+seguimiento_suscripcion_facturas_conceptos_notas:
+    pattern: /suscripcion/seguimiento/facturas/notas/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasNotasConceptos }
+
+seguimiento_suscripcion_recaudos_conceptos:
+    pattern: /suscripcion/seguimiento/recaudos/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getRecaudosConceptos }
+
+seguimiento_suscripcion_facturas_recaudos:
+    pattern: /suscripcion/seguimiento/facturas/recaudos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getRecaudosFactura }
+
+seguimiento_suscripcion_recaudos:
+    pattern: /suscripcion/seguimiento/recaudos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getRecaudosSuscripcion }
+
+seguimiento_facturas_recaudo:
+    pattern: /suscripcion/seguimiento/recaudos/facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasRecaudo }
+
+seguimiento_financiaciones:
+    pattern: /suscripcion/seguimiento/financiaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFinanciacionesSuscripcion }
+
+seguimiento_financiaciones_facturas:
+    pattern: /suscripcion/seguimiento/financiaciones/facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasFinanciaciones }
+
+seguimiento_financiaciones_amortizacion:
+    pattern: /suscripcion/seguimiento/financiaciones/amortizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturaAmortizaciones }
+
+seguimiento_financiaciones_cartera:
+    pattern: /suscripcion/seguimiento/cartera/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getCartera }
+
+seguimiento_otrasempresas:
+    pattern: /suscripcion/seguimiento/otrasempresas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasOtrasEmpresas }
+
+seguimiento_datossuspensiones:
+    pattern: /suscripcion/seguimiento/datossuspension/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getDatosSuspension  }
+
+seguimiento_suspensiones:
+    pattern: /suscripcion/seguimiento/suspension/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getSuspension  }
+
+seguimiento_reconexiones:
+    pattern: /suscripcion/seguimiento/reconexion/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getReconexiones  }
+
+seguimiento_lecturas:
+    pattern: /suscripcion/seguimiento/lecturas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getLecturas  }
+seguimiento_detalle_lecturas:
+    pattern: /suscripcion/seguimiento/detallelectura/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getDetalleLectura  }
+
+seguimiento_detalle_vista:
+    pattern: /suscripcion/seguimiento/detallevista/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getLecturaVista  }
+
+seguimiento_notas:
+    pattern: /suscripcion/seguimiento/notasfacturas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getNotasFacturas  }
+
+seguimiento_recaudos:
+    pattern: /suscripcion/seguimiento/notasrecaudos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getNotasRecaudo  }
+
+seguimiento_recaudos_reclamos:
+    pattern: /suscripcion/seguimiento/reclamos/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getReclamos  }
+
+seguimiento_tarifas_consulta_tarifas:
+    pattern: /suscripcion/seguimiento/consultatarifas/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getTarifas  }
+
+seguimiento_suscripcion_facturasProvision:
+    pattern: /suscripcion/seguimiento/facturasProvision/
+    defaults: { _controller: LlanogasLlanogasBundle:SeguimientoSuscripcion:getFacturasProvision }
+#registro rápido de suspensiones y reconexiones
+registro_rapido_operaciones:
+    pattern: /operaciones/rapido_suspensiones/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:index}
+
+registro_rapido_operaciones_municipios:
+    pattern: /operaciones/rapido_suspensiones/obtener_municipios/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:obtenerMunicipios}
+
+registro_rapido_operaciones_novedades_suspension:
+     pattern: /operaciones/rapido_suspensiones/novedades_suspension/
+     defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:getNovedadesSuspension}
+
+registro_rapido_operaciones_novedades_reconexion:
+    pattern: /operaciones/rapido_suspensiones/novedades_reconexion/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:getNovedadesReconexion}
+
+registro_rapido_operaciones_tipos_suspension:
+    pattern: /operaciones/rapido_suspensiones/tipos_suspension/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:getTiposSuspension}
+
+registro_rapido_operaciones_tabla_suspensiones:
+    pattern: /operaciones/rapido_suspensiones/tabla_suspensiones/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:getSuspensionesTabla}
+
+registro_rapido_operaciones_tabla_reconexiones:
+    pattern: /operaciones/rapido_suspensiones/tabla_reconexiones/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:getReconexionesTabla}
+
+registro_rapido_operaciones_info_suspensiones:
+    pattern: /operaciones/rapido_suspensiones/info_suspensiones/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:setSuspensiones}
+
+registro_rapido_operaciones_info_reconexiones:
+    pattern: /operaciones/rapido_suspensiones/info_reconexiones/
+    defaults: {_controller: LlanogasLlanogasBundle:RegistroRapidoOperaciones:setReconexiones}
+
+#registro rápido de suspensiones y reconexiones
+
+# Liquidaciones Autor: Manuel Bonilla
+liquidacion_gestionar:
+    pattern: /liquidacion/gestionar_liquidacion/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:index }
+
+liquidacion_documentos:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_documentos/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getDocumentos}
+
+liquidacion_tipo_documentos:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_tipos_documentos/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getTiposDocumentos}
+
+liquidacion_liquidaciones:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_liquidaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getLiquidaciones}
+
+liquidacion_conceptos:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getConceptos}
+
+liquidacion_municipios:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_municipios/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getMunicipios}
+
+liquidacion_municipios_usuario:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_municipios_usuario/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getMunicipiosPorUsuario}
+
+liquidacion_tipos_usos:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_tipos_usos/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getTiposUsos}
+
+liquidacion_barrios:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_barrios/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getBarrios}
+
+liquidacion_suscripciones:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_suscripciones/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getSuscripciones}
+
+liquidacion_liquidacion:
+    pattern: /liquidacion/gestionar_liquidacion/obtener_liquidacion/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getLiquidacion}
+
+liquidacion_guardar:
+    pattern: /liquidacion/gestionar_liquidacion/guardar_liquidacion/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:guardarLiquidacion}
+
+liquidacion_concepto_eliminar:
+    pattern: /liquidacion/gestionar_liquidacion/concepto_eliminar/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getConceptosEliminar}
+
+liquidacion_municipio_eliminar:
+    pattern: /liquidacion/gestionar_liquidacion/municipio_eliminar/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getMunicipiosEliminar}
+
+liquidacion_tipouso_eliminar:
+    pattern: /liquidacion/gestionar_liquidacion/tipouso_eliminar/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getTipoUsosEliminar}
+
+liquidacion_liquidaciones_parametrizadas:
+    pattern: /liquidacion/gestionar_liquidacion/liquidaciones_parametrizadas/
+    defaults: { _controller: LlanogasLlanogasBundle:GestionarLiquidacion:getLiquidacionesParametrizadas}
+# Fin agregado por manuel para liquidacion
+
+# Inicio recaudos devoluciones
+
+recaudos_devoluciones:
+    pattern: /recaudos/devoluciones/
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:index}
+
+recaudos_devoluciones_suscripciones:
+    pattern: /recaudos/devoluciones/suscripciones/
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:consultarSuscripciones}
+
+recaudos_devoluciones_cargar_devoluciones:
+    pattern: /recaudos/devoluciones/cargar/devoluciones
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:consultarDevoluciones}
+
+recaudos_devoluciones_motivos:
+    pattern: /recaudos/devoluciones/motivos
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:consultarMotivos}
+
+recaudos_devoluciones_grabar:
+    pattern: /recaudos/devoluciones/grabar/
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:grabar}
+
+recaudos_devoluciones_detalle:
+    pattern: /recaudos/devoluciones/detallerecaudofactura/
+    defaults: { _controller: LlanogasLlanogasBundle:Devoluciones:consultarDetalleRecaudoFactura}
+
+
+# Fin
+
+
+# Inicio caso constructuras Lmrubio 2015/07/13
+ventas:
+    pattern:  /ventas/
+    defaults: { _controller: LlanogasLlanogasBundle:Ventas:index}
+
+ventas_constructoras:
+    pattern:  /ventas/constructoras/
+    defaults: { _controller: LlanogasLlanogasBundle:Constructoras:index}
+
+ventas_constructoras_terceros:
+    pattern:  /ventas/constructoras/terceros/
+    defaults: { _controller: LlanogasLlanogasBundle:Constructoras:ConsultarConstructoras}
+
+ventas_filtrar_contratos_consultar_municipios:
+  pattern:  /ventas/constructoras/filtrar/consultar_municipios/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:consultarMunicipios}
+
+ventas_filtrar_contratos_consultar_barrios:
+  pattern:  /ventas/constructoras/filtrar/consultar_barrios/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:consultarBarrios}
+
+ventas_filtrar_contratos_consultar_contratos:
+  pattern:  /ventas/constructoras/filtrar/consultar_contratos/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:consultarContratos}
+
+ventas_filtrar_contratos_consultar_contactos:
+  pattern:  /ventas/constructoras/filtrar/consultar_contactos/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:consultarContactos}
+
+ventas_filtrar_contratos_consultar_tercero_aseguradora:
+  pattern:  /ventas/constructoras/filtrar/consultar_tercero_aseguradora/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:ConsultarTerceroAseguradora}
+
+ventas_filtrar_contratos_consultar_tercero_suscriptor:
+  pattern:  /ventas/constructoras/filtrar/consultar_tercero_suscriptor/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:ConsultarTerceroSuscriptor}
+
+ventas_filtrar_consultar_suscripciones_suscriptor:
+  pattern:  /ventas/constructoras/filtrar/consultar_suscripciones_suscriptor/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:ConsultarSuscripcionesSuscriptor}
+
+ventas_filtrar_consultar_consultar_liquidaciones:
+  pattern:  /ventas/constructoras/filtrar/consultar_liquidaciones/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:AutoCompletarLiquidacion}
+
+ventas_filtrar_consultar_parametros_adicionar_servicios:
+  pattern:  /ventas/constructoras/filtrar/consultar_parametros_servicios_contratados/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:ParametrosAdicionarServicios}
+
+ventas_filtrar_actualizar_informacion_contrato/:
+  pattern:  /ventas/constructoras/filtrar/actualizar_informacion_contrato/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:actualizarInformacionContrato}
+  
+ventas_grabar:
+  pattern:  /ventas/constructoras/grabar/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:grabar}
+
+ventas_subir_archivo:
+  pattern:  /ventas/constructoras/subir_archivo/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:subirarchivo}
+
+ventas_eliminar_archivo:
+  pattern:  /ventas/constructoras/eliminar_Archivo/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:eliminarArchivo}
+
+ventas_procesar_agendas:
+  pattern:  /ventas/constructoras/agendas/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:Agendas}
+
+ventas_procesar_agendas_procesar:
+  pattern:  /ventas/constructoras/agendas/procesar_Agenda/
+  defaults: { _controller: LlanogasLlanogasBundle:Constructoras:procesarAgendas}
+# Fin caso Constructuras Lmrubio
+# Inicio Caso Firmas Instaladoras Lmrubio
+    
+ventas_firmas_instaladoras : 
+  pattern:  /ventas/firmasinstaladoras/
+  defaults: { _controller: LlanogasLlanogasBundle:FirmasInstaladoras:index}
+
+ventas_firmas_instaladoras_terceros : 
+  pattern:  /ventas/firmasinstaladoras/terceros/
+  defaults: { _controller: LlanogasLlanogasBundle:FirmasInstaladoras:autoCompletarTercero}
+
+ventas_firmas_instaladoras_empleadoscertificaciones: 
+  pattern:  /ventas/firmasinstaladoras/empleadoscertificaciones/
+  defaults: { _controller: LlanogasLlanogasBundle:FirmasInstaladoras:consultaempleadoscertificaciones}
+
+ventas_firmas_instaladoras_competencias: 
+  pattern:  /ventas/firmasinstaladoras/consultacompetencias/
+  defaults: { _controller: LlanogasLlanogasBundle:FirmasInstaladoras:consultaCompetencias}
+  
+ventas_firmas_instaladoras_consultapermisosgrabar:
+      pattern: /ventas/firmasinstaladoras/consultapermisosgrabar/
+      defaults: {_controller: LlanogasLlanogasBundle:FirmasInstaladoras:consultaPermisosGrabar }
+      
+ventas_firmas_instaladoras_grabar : 
+  pattern:  /ventas/firmasinstaladoras/grabar/
+  defaults: { _controller: LlanogasLlanogasBundle:FirmasInstaladoras:grabar}
+  
+  
+# Fin Caso Firmas Instaladoras lmrubio
+
+# definicion de conceptos
+
+definicion_conceptos:
+    pattern: /facturacion/conceptos/definicion/
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:index}
+
+definicion_conceptos_parametros:
+    pattern: /facturacion/conceptos/parametros/
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:cargarParametrosConceptos}
+
+definicion_actualizar_conceptos:
+    pattern: /facturacion/crear/conceptos
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:actualizarConcepto}
+
+definicion_consultar_conceptos_nombres:
+    pattern: /facturacion/consultar/concepto/nombre
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarConceptosNombre }
+
+definicion_consultar_conceptos_validar:
+    pattern: /facturacion/validar/concepto/alias
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:validaAliasConcepto }
+
+definicion_consultar_documentos:
+    pattern: /facturacion/conceptos/documentos
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarDocumentos}
+
+definicion_consultar_TipoDocumento:
+    pattern: /facturacion/consultar/tipoDocumento
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarTipoDocumento}
+
+definicion_conceptos_obtener:
+    pattern: /facturacion/conceptos/obtener
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarConceptos}
+
+definicion_conceptos_obtener_liquidacion:
+    pattern: /facturacion/consultar/documentoliquidacion
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarDocumentoLiquidacion}
+
+definicion_consultar_conceptos_cuentas_contabilizacion:
+    pattern: /facturacion/consultar/cuentas
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:consultarCuentas}
+
+definicion_consultar_conceptos_lista_banco_medio_pago:
+    pattern: /facturacion/consultar/bancos/mediospago
+    defaults: { _controller: LlanogasLlanogasBundle:DefinicionesConceptos:obtenerListarBancosConsignacion}
+
+#fin
+
+#Inicio Modificar recaudo
+modificar_recaudos:
+    pattern:  /recaudos/modificar_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:index }
+
+modificar_recaudos_buscar_recaudos:
+    pattern:  /recaudos/modificar_recaudo/buscar_recaudos/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:getRecaudos }
+
+modificar_recaudos_informacion_recaudos:
+    pattern:  /recaudos/modificar_recaudo/informacion_recaudos/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:getInformacionRecaudo }
+
+modificar_recaudos_guardar_modificacion:
+    pattern:  /recaudos/modificar_recaudo/guardar_modificacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:modificarRecaudo }
+
+modificar_recaudos_municipios:
+    pattern:  /recaudos/modificar_recaudo/obtener_municipios/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:getMunicipios }
+    
+modificar_recaudos_buscar_tipos_documentos:
+    pattern:  /recaudos/modificar_recaudo/buscar/tipos_documento/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:consultarTiposDocumentoPorTipoUso }
+    
+modificar_recaudos_set_distribucion_recaudo:
+    pattern:  /recaudos/modificar_recaudo/set/distribucion_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:setDistribucionRecaudo }
+    
+modificar_recaudos_set_valida_recaudo:
+    pattern:  /recaudos/modificar_recaudo/set/valida_recaudo/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarRecaudo:validaRecaudoSet }
+#Fin Modificar recaudo
+
+#Inicio Cargar factor de corrección autor: Jeisson Barriga
+cargar_factor_correccion:
+    pattern:  /facturacion/cargar_factor_correccion/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarFactorCorreccion:index }
+
+cargar_factor_correccion_subir:
+    pattern:  /facturacion/cargar_factor_correccion/subir/
+    defaults: { _controller: LlanogasLlanogasBundle:CargarFactorCorreccion:cargarFactorCorreccion}
+#Fin Cargar factor de corrección
+
+#Flujo de aprobación autor:Angelica Gomez
+flujo_aprobacion:
+    pattern: /recaudos/consignaciones/aprobacion/
+    defaults: {_controller: LlanogasLlanogasBundle:ConsignacionAprobacion:index}
+
+flujo_aprobacion_terceros:
+    pattern: /recaudos/consignaciones/aprobacion/terceros/
+    defaults: {_controller: LlanogasLlanogasBundle:ConsignacionAprobacion:getTercerosResponsables}
+
+flujo_aprobacion_tipo_documento:
+    pattern: /recaudos/consignaciones/aprobacion/tipo_documento/
+    defaults: {_controller: LlanogasLlanogasBundle:ConsignacionAprobacion:getTiposDocumentos}
+
+flujo_aprobacion_aprobar:
+    pattern: /recaudos/consignaciones/aprobacion/aprobar/
+    defaults: {_controller: LlanogasLlanogasBundle:ConsignacionAprobacion:aprobar}
+
+
+#Caso de uso de financiación de una venta
+
+financiacion_ventas:
+    pattern: /ventas/financiacion/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:index}
+
+financiacion_ventas_bancos:
+    pattern: /ventas/financiacion/obtener/parentescos/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:obtenerParentescos}
+
+financiacion_ventas_conceptos:
+    pattern: /ventas/financiacion/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:getConceptos}
+financiacion_ventas_conceptos_liquidacion:
+    pattern: /ventas/financiacion/conceptos_liquidacion/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:getConceptosPorLiquidacion}
+
+financiacion_ventas_liquidaciones:
+    pattern: /ventas/financiacion/liquidaciones/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:getLiquidaciones}
+
+financiacion_ventas_adjuntos:
+    pattern: /ventas/adjuntos/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:subirAdjunto}
+
+financiacion_ventas_grabar:
+    pattern: /ventas/financiacion/grabar/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:grabar}
+financiacion_ventas_actualizar_adjuntos:
+    pattern: /ventas/financiacion/actualizar_adjuntos/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:actualizarAdjunto}
+    
+financiacion_ventas_guardar_informacion_autorizacion:
+    pattern: /ventas/financiacion/informacion_autorizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVenta:cargarInformacionFormato}
+financiacion_ventas_exportar_autorizacion:
+    pattern: /ventas/financiacion/exportar_autorizacion/
+    defaults: { _controller: LlanogasLlanogasBundle:ExportarFormatoExcel:exportarFormato}
+
+#Inicio Modificar Suscripción autor: Jeisson Barriga
+modificar_suscripcion:
+    pattern:  /suscripcion/modificar_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:index }
+
+modificar_suscripcion_conceptos:
+    pattern:  /suscripcion/modificar_suscripcion/conceptos/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:getConceptos }
+
+modificar_suscripcion_ciclos:
+    pattern:  /suscripcion/modificar_suscripcion/ciclos/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:getCiclos   }
+    
+modificar_suscripcion_clientes_linea_matriz:
+    pattern:  /suscripcion/modificar_suscripcion/clienteslineamatriz/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:getClienteVinculadoLineaMatriz   }
+    
+modificar_suscripcion_clientes_linea_matriz_actualiza:
+    pattern:  /suscripcion/modificar_suscripcion/clienteslineamatrizretira/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:setRetiraClienteVinculado   }
+    
+modificar_suscripcion_clientes_busca_linea_matriz_vincula:
+    pattern:  /suscripcion/modificar_suscripcion/buscaclienteslineamatriz/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:getBuscaClienteLineaMatriz   }
+    
+modificar_suscripcion_insertar_clientes_busca_linea_matriz_vincula:
+    pattern:  /suscripcion/modificar_suscripcion/insertaclientelineamatrizavincular/
+    defaults: { _controller: LlanogasLlanogasBundle:ModificarSuscripcion:clienteParaVincularLineaMatriz   }
+#Fin Modificar Suscripción
+
+
+#Caso de uso de recaudo rápido
+recaudo_rapido:
+    pattern: /recaudos/recaudo/rapido
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:index}
+
+recaudo_rapido_recaudador_externo:
+    pattern: /recaudos/recaudo/rapido/recaudador_externo
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:getRecaudadorExterno}
+
+recaudo_rapido_empresas_recaudo:
+    pattern: /recaudos/recaudo/rapido/empresas_recaudo
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:getEmpresasRecaudo}
+
+recaudo_rapido_informacion_suscripcion:
+    pattern: /recaudos/recaudo/rapido/informacion_suscripcion
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:getInformacionSuscripcion}
+
+recaudo_rapido_informacion_suscripcion_factura:
+    pattern: /recaudos/recaudo/rapido/suscripcion_factura
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:getSuscripcionPorFactura}
+
+recaudo_rapido_facturas_suscripcion:
+    pattern: /recaudos/recaudo/rapido/facturas_suscripcion
+    defaults: { _controller: LlanogasLlanogasBundle:RecaudoRapido:getFacturasPorSuscripcion}
+
+#Fin de recaudo rapido
+
+#Caso de Uso Gestion de Suscriptor autor: Lmrubio
+
+gestionar_suscriptor:
+    pattern: /suscriptor/gestionar_suscriptor
+    defaults: { _controller : LlanogasLlanogasBundle:Suscriptores:index}
+
+gestionar_suscriptor_buscar:
+    pattern: /suscriptor/gestionar_suscriptor/buscar/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscriptores:buscar}
+
+gestionar_suscriptor_grabar:
+    pattern: /suscriptor/gestionar_suscriptor/grabar/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscriptores:grabar}
+
+gestionar_suscriptor_adicionar_suscriptor:
+    pattern: /suscriptor/gestionar_suscriptor/adicionar_suscriptor/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscriptores:adicionarSuscriptor}
+
+gestionar_suscriptor_trasladar_suscripcion:
+    pattern: /suscriptor/gestionar_suscriptor/trasladar_suscripcion/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscriptores:trasladarSuscripcion}
+
+ #movimientos contables
+
+generar_movimientos_contables:
+    pattern: /contabilizacion/movimientos_contables/
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:index}
+
+generar_movimientos_contables_estado:
+    pattern: /contabilizacion/movimientos_contables/estado
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:estadoMovimiento}
+
+generar_movimientos_contables_procesar:
+    pattern: /contabilizacion/movimientos_contables/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:procesarMovimientosContables}
+    
+generar_movimientos_contables_consultaciclos:
+    pattern: /contabilizacion/movimientos_contables/consultaciclos/
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:consultaCiclos}
+
+generar_movimientos_contables_consultaciclogeneral:
+    pattern: /contabilizacion/movimientos_contables/consultaciclogeneral/
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:consultaCicloGeneral}
+
+generar_movimientos_contables_consultaperiodos:
+    pattern: /contabilizacion/movimientos_contables/consultaperiodos/
+    defaults: { _controller : LlanogasLlanogasBundle:MovimientosContables:consultaPeriodos}
+
+
+# begin contabilizacion de conceptos
+contabilizacion_conceptos:
+    pattern: /facturacion/contabilizar_concepto/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:index}
+    
+contabilizacion_conceptos_recaudos:
+    pattern: /facturacion/contabilizar_concepto/obtener/recaudos/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:obtenerRecaudos}
+
+contabilizacion_conceptos_contabilizacion:
+    pattern: /facturacion/contabilizar_concepto/obtenercontabilizacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:obtenerCausionContable}
+
+contabilizacion_conceptos_cuentas_contabilizacion:
+    pattern: /facturacion/contabilizar_concepto/cuentas/
+    defaults: { _controller: LlanogasLlanogasBundle:ContabilizarConceptos:consultarCuentas}
+
+contabilizacion_conceptos_contabilizacion_actualizar:
+    pattern: /facturacion/contabilizar_concepto/actualizar/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:actualizarContabilizacionConcepto}
+
+contabilizacion_conceptos_contabilizacion_documentos:
+    pattern: /facturacion/contabilizar_concepto/obtener/documentos/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:consultarDocumentos}
+
+contabilizacion_conceptos_contabilizacion_empresasconvenio:
+    pattern: /facturacion/contabilizar_concepto/obtener/empresas_convenio/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:consultarEmpresasConvenio}
+
+contabilizacion_conceptos_contabilizacion_tiposdocumentos:
+    pattern: /facturacion/contabilizar_concepto/obtener/tipodocumentos/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:consultarTipoDocumento}
+contabilizacion_conceptos_contabilizacion_medio_pago:
+    pattern: /facturacion/contabilizar_concepto/obtener/medio_pago/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:obtenerMediosPago}
+
+contabilizacion_conceptos_obtener_causion_contable:
+    pattern: /facturacion/contabilizar_concepto/obtener/causioncontable/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:obtenerCausionContable}
+
+contabilizacion_conceptos_obtener_consignacion:
+    pattern: /facturacion/contabilizar_concepto/obtener/consignacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ContabilizarConceptos:obtenerConsignacion}
+
+#end contabilizacion de conceptos
+
+#procesar cartera castigada
+
+facturacion_procesar_cartera_castigada:
+    pattern: /cartera/castigada/proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigada:Index}
+
+facturacion_procesar_cartera_castigada_ejecucion:
+    pattern:    /cartera/castigada/proceso/ejecutar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigada:ProcesarCartera}
+
+facturacion_procesar_cartera_castigada_estado:
+    pattern:    /cartera/castigada/proceso/progreso/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigada:ObtenerEstadoCarteraCastigada}
+
+facturacion_procesar_cartera_castigada_proceso_estado:
+    pattern:    /cartera/castigada/proceso/progreso/programa/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigada:ObtenerProcesoCarteraCastigada}
+    
+# inicio Importar facturas
+facturacion_importar_facturas:
+    pattern: /facturacion/importar_facturas/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturas:Index}
+    
+facturacion_importar_facturas_cargar_archivos:
+    pattern: /facturacion/importar_facturas/cargar_archivos/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturas:subirArchivosImportacion}
+
+facturacion_importar_facturas_progreso:
+    pattern: /facturacion/importar_facturas/progreso/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturas:consultarProgreso}
+
+facturacion_importar_facturas_resumen:
+    pattern: /facturacion/importar_facturas/resumen/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturas:consultarResumen}
+
+facturacion_importar_cancelar_importacion:
+    pattern: /facturacion/importar_facturas/cancelar_importacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturas:cancelarImportacion}
+# fin Importar facturas
+
+
+    
+# inicio Importar facturas Cusiana
+facturacion_importar_facturas_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:Index}
+    
+facturacion_importar_facturas_cargar_archivos_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/cargar_archivos/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:subirArchivosImportacion}
+
+facturacion_importar_facturas_progreso_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/progreso/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:consultarProgreso}
+
+facturacion_importar_facturas_resumen_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/resumen/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:consultarResumen}
+
+facturacion_importar_cancelar_importacion_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/cancelar_importacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:cancelarImportacion}
+    
+facturacion_importar_asigna_numero_facturas_cusiana:
+    pattern: /facturacion/importar_facturas_cusiana/asigna_numerofacturas/
+    defaults: { _controller : LlanogasLlanogasBundle:ImportarFacturasCusiana:asignaNumeroFacturas}
+# fin Importar facturas
+
+
+#Ejecutar proceso facturación
+ejecutar_proceso_facturacion:
+    pattern: /facturacion/ejecutar_proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:index}
+    
+ejecutar_proceso_facturacion_procesar:
+    pattern: /facturacion/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:procesar}
+
+ejecutar_proceso_facturacion_suscripciones:
+    pattern: /facturacion/suscripciones/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:getSuscripciones}
+
+ejecutar_proceso_facturacion_suscripciones_liquidar:
+    pattern: /facturacion/suscripciones/liquidar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:liquidar}
+    
+ejecutar_proceso_facturacion_suscripciones_liquidar_varias_suscripciones:
+    pattern: /facturacion/suscripciones/liquidarvariassuscripciones/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:liquidarVariasSuscripciones}
+
+ejecutar_proceso_facturacion_ejecutar_reporte_pre_liquidacion:
+    pattern: /facturacion/ejecutar_proceso/reporte/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:getReportePreLiquidacion}
+
+ejecutar_proceso_facturacion_progreso:
+    pattern: /facturacion/ejecutar_proceso/progreso
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:getProgresoProceso}
+
+ejecutar_proceso_facturacion_aprobar:
+    pattern: /facturacion/ejecutar_proceso/aprobar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:aprobarFacturacion}
+
+ejecutar_proceso_facturacion_errores:
+    pattern: /facturacion/ejecutar_proceso/resultado/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:getResultado}
+
+ejecutar_proceso_facturacion_eliminar_liquidacion:
+    pattern: /facturacion/ejecutar_proceso/eliminar_liquidacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoFacturacion:eliminarLiquidacion}
+    
+#Procesar cartera castigada por suscripción
+
+facturacion_procesar_cartera_castigada_suscripcion:
+    pattern: /cartera/castigada/suscripcion/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigadaSuscripcion:Index}
+
+facturacion_procesar_cartera_castigada_suscripcion_cargar:
+    pattern: /cartera/castigada/suscripcion/cargar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigadaSuscripcion:FiltrarSuscripcion}
+    
+facturacion_procesar_cartera_castigada_suscripcion_procesar:
+    pattern:    /cartera/castigada/suscripcion/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigadaSuscripcion:Procesar}
+    
+facturacion_procesar_cartera_castigada_suscripcion_validar_usuario:
+    pattern:    /cartera/castigada/suscripcion/validar/usuario/
+    defaults: { _controller : LlanogasLlanogasBundle:ProcesoCarteraCastigadaSuscripcion:ValidarUsuario}
+    
+#Condonar cartera corriente
+cartera_condonar_cartera_corriente:
+    pattern: /cartera/condonar/cartera_corriente/
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:Index}
+    
+cartera_condonar_cartera_corriente_municipios:
+    pattern: /cartera/condonar/cartera_corriente/obtener_municipios
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:getMunicipios}
+    
+cartera_condonar_cartera_corriente_suscripcion:
+    pattern: /cartera/condonar/cartera_corriente/obtener_suscripcion
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:getSuscripcion}
+    
+cartera_condonar_cartera_corriente_facturas:
+    pattern: /cartera/condonar/cartera_corriente/obtener_facturas
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:getFacturasSuscripcion}
+
+cartera_condonar_cartera_corriente_grabar:
+    pattern: /cartera/condonar/cartera_corriente/generar_condonacion
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:generarCondonacion}
+
+cartera_condonar_cartera_corriente_permiso_botones_facturas:
+    pattern: /cartera/condonar/cartera_corriente/consultar_permisos_botones_condonacion
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:consultarPermisosBotonesCondonacion}
+
+cartera_condonar_cartera_corriente_obtener_facturas_IntCorriente:
+    pattern: /cartera/condonar/cartera_corriente/obtener_facturas_IntCorriente
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:getFacturasIntCorrienteSuscripcion}
+
+cartera_condonar_cartera_corriente_obtener_facturas_condonadas:
+    pattern: /cartera/condonar/cartera_corriente/obtener_facturas_condonadas
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:getFacturasCondonadas}
+
+cartera_condonar_cartera_corriente_consultar_restriccion:
+    pattern: /cartera/condonar/cartera_corriente/consultar_restriccion
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCorriente:consultarRestriccion}
+
+#Condonar cartera castigada
+cartera_condonar_cartera_castigada:
+    pattern: /cartera/condonar/cartera_castigada/
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:Index}
+
+cartera_condonar_cartera_castigada_suscripcion:
+    pattern: /cartera/condonar/cartera_castigada/filtrar_suscripcion/
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:FiltrarSuscripcion}
+
+cartera_condonar_cartera_castigada_listar_facturas:
+    pattern: /cartera/condonar/cartera_castigada/verfacturas/
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:cargarFacturasCastigadas}
+
+cartera_condonar_cartera_castigada_listar_concepto_factura:
+    pattern: /cartera/condonar/cartera_castigada/concepto/factura
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:listarConceptosFactura}
+    
+cartera_condonar_cartera_castigada_procesar_facturas:
+    pattern: /cartera/condonar/cartera_castigada/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:procesarCarteraCastigada} 
+
+cartera_condonar_cartera_castigada_permiso_botones_facturas:
+   pattern: /cartera/condonar/cartera_castigada/consultar_castigada_permisos_botones_condonacion
+   defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:consultarPermisosBotonesCondonacion}
+
+cartera_condonar_cartera_castigada_obtener_facturas_castigada_IntCorriente:
+   pattern: /cartera/condonar/cartera_castigada/obtener_facturas_castigada_IntCorriente
+   defaults: { _controller : LlanogasLlanogasBundle:CondonarCarteraCastigada:getFacturasIntCorrienteSuscripcion}
+   
+#Caso de uso de notas automáticas
+facturacion_notas_automaticas:
+    pattern: /facturacion/notas_automaticas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:Index}
+    
+facturacion_notas_automaticas_suscripcion:
+    pattern: /facturacion/notas_automaticas/buscar/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscripciones:buscarSuscripcion}
+    
+facturacion_notas_automaticas_municipios:
+    pattern: /facturacion/notas_automaticas/municipios/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getMunicipios}
+    
+facturacion_notas_automaticas_barrios:
+    pattern: /facturacion/notas_automaticas/barrios/
+    defaults: { _controller : LlanogasLlanogasBundle:GestionarLiquidacion:getBarrios}
+    
+facturacion_notas_automaticas_facturas:
+    pattern: /facturacion/notas_automaticas/facturas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getFacturas}
+    
+facturacion_notas_automaticas_facturas_filtro:
+    pattern: /facturacion/notas_automaticas/facturas/filtrar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getFacturaConFiltro}
+    
+facturacion_notas_automaticas_facturas_detalles:
+    pattern: /facturacion/notas_automaticas/facturas/detalles/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getDetalleFactura}
+    
+facturacion_notas_automaticas_tipo_documento:
+    pattern: /facturacion/notas_automaticas/tiposdocumentos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getTiposDocumentos}
+    
+facturacion_notas_automaticas_documento:
+    pattern: /facturacion/notas_automaticas/documentos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getDocumentos}
+    
+facturacion_notas_automaticas_concepto:
+    pattern: /facturacion/notas_automaticas/conceptos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getConcepto}
+    
+facturacion_notas_automaticas_concepto_complete:
+    pattern: /facturacion/notas_automaticas/conceptos/complete/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getConceptoAutocomplete}
+    
+facturacion_notas_automaticas_liquidacion:
+    pattern: /facturacion/notas_automaticas/liquidacion/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getLiquidacion}
+    
+facturacion_notas_automaticas_procesar:
+    pattern: /facturacion/notas_automaticas/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:procesarFacturas}
+    
+facturacion_notas_automaticas_cargar_archivo:
+    pattern: /facturacion/notas_automaticas/archivo/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarArchivo:index}
+    
+facturacion_notas_automaticas_verificar_cambios:
+    pattern: /facturacion/notas_automaticas/verificar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:verificarCambios} 
+
+facturacion_notas_automaticas_consultar_proceso:
+    pattern: /facturacion/notas_automaticas/consultar_proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:consultarProceso} 
+
+facturacion_notas_automaticas_cargar_archivo_factura:
+    pattern: /facturacion/notas_automaticas/archivofactura/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarArchivo:facturasOriginales}
+    
+facturacion_notas_automaticas_aplicar:
+    pattern: /facturacion/notas_automaticas/aplicar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:aplicarNotas}
+
+facturacion_notas_automaticas_motivos:
+    pattern: /facturacion/notas_automaticas/motivos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:motivosNotas}
+
+facturacion_notas_automaticas_errores:
+    pattern: /facturacion/notas_automaticas/errores/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getListaErrores}
+    
+facturacion_notas_automaticas_directa_tipo_documentos:
+    pattern: /facturacion/notas_automaticas/tiposdocumentos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:getTipoDocumentos}
+
+facturacion_notas_automaticas_directa_eliminar_tablas:
+    pattern: /facturacion/notas_automaticas/eliminartablas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:eliminarTablas}
+
+facturacion_notas_automaticas_directa_concepto_relacionados:
+    pattern: /facturacion/notas_automaticas/conceptosrelacionados/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:consultarConceptosRelacionados}
+    
+facturacion_notas_automaticas_control_combo_contabilizacion:   
+    pattern:  /facturacion/notas_automaticas/controlcombocontabilizacion/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasAutomaticas:controlComboContabilizacion}   
+    
+#Caso de uso para notas automáticas por método "calculada"
+facturacion_notas_automaticas_calculada:
+    pattern: /facturacion/notas_calculada/
+    defaults: {_controller: LlanogasLlanogasBundle:NotasCalculada:index}
+       
+facturacion_notas_automaticas_calculada_tipo_documento:
+    pattern: /facturacion/notas_calculada/tiposdocumentos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getTiposDocumentos}
+    
+facturacion_notas_automaticas_calculada_documento:
+    pattern: /facturacion/notas_calculada/documentos/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getDocumentos}    
+    
+facturacion_notas_automaticas_calculada_liquidacion:
+    pattern: /facturacion/notas_calculada/liquidacion/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getLiquidacion}
+    
+facturacion_notas_automaticas_calculada_municipios:
+    pattern: /facturacion/notas_calculada/municipios/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getMunicipios}
+    
+facturacion_notas_automaticas_calculada_facturas:
+    pattern: /facturacion/notas_calculada/facturas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getFacturas}
+
+facturacion_notas_automaticas_calculada_eliminar:
+    pattern:  /facturacion/notas_calculada/eliminartablas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:eliminar}
+
+facturacion_notas_automaticas_calculada_procesar:
+    pattern:  /facturacion/notas_calculada/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:procesar}
+    
+facturacion_notas_automaticas_calculada_progreso:
+    pattern:  /facturacion/notas_calculada/consultar_proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:consultarProceso}
+    
+facturacion_notas_automaticas_calculada_errores:
+    pattern:  /facturacion/notas_calculada/errores/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:getListaErrores}
+
+facturacion_notas_automaticas_calculada_verificar:
+    pattern:  /facturacion/notas_calculada/verificar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:verificar}
+
+facturacion_notas_automaticas_calculada_exportar_original:
+    pattern:  /facturacion/notas_calculada/exportar/originales/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:exportarOriginal}
+
+facturacion_notas_automaticas_calculada_exportar_notas:
+    pattern:  /facturacion/notas_calculada/exportar/notas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:exportarNotas}
+    
+facturacion_notas_automaticas_calculada_aplicar:
+    pattern:  /facturacion/notas_calculada/aplicar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasCalculada:aplicarNotas}
+    
+#finaliza caso de uso de notas automáticas "Directa".
+facturacion_fes:
+    pattern : /facturacion/fes/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:index}
+
+facturacion_fes_generar_plano:
+    pattern : /facturacion/fes/generar_plano/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:generarPlano}
+
+facturacion_fes_consultar_proceso:
+    pattern : /facturacion/fes/consultar_proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:consultarProceso}
+
+facturacion_fes_consultar_archivo:
+    pattern : /facturacion/fes/consultar_archivos/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:consultarArchivos}
+
+facturacion_fes_cargar:
+    pattern : /facturacion/fes/cargar/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:cargar}
+
+facturacion_fes_cargar_invocarWebservice:
+    pattern : /facturacion/fes/cargar/invocarws/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:invocarWebService}
+
+facturacion_fes_cargar_consultar_proceso:
+    pattern : /facturacion/fes/cargar/consultar_proceso/
+    defaults: { _controller : LlanogasLlanogasBundle:Fes:consultarProcesoCarga}
+
+#Caso de uso de exportar contabilizacion
+facturacion_exportar_contabilizacion:
+    pattern : /contabilizacion/exportar_contablizacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:index}
+    
+facturacion_exportar_contabilizacion_webservice:
+    pattern: /contabilizacion/exportar_contablizacion/aprobar/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:AprobarEncabezadoMovimientoContable}
+facturacion_exportar_contabilizacion_eliminar:
+    pattern: /contabilizacion/exportar_contablizacion/eliminar/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:EliminarEncabezadoMovimientoContable}
+
+facturacion_exportar_contabilizacion_error:
+    pattern: /contabilizacion/exportar_contablizacion/error/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:ObtenerReporteMovimientoError}
+
+facturacion_exportar_contabilizacion_error:
+    pattern: /contabilizacion/exportar_contablizacion/error/excel
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:GenerarReporteReporteExcel}
+
+
+facturacion_exportar_contabilizacion_detalle_movimiento:
+    pattern: /contabilizacion/exportar_contablizacion/detalle/movimiento/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:ObtenerReporteMovimientoError}
+    
+facturacion_exportar_contabilizacion_regenerear:
+    pattern: /contabilizacion/exportar_contablizacion/regenerar/movimiento_contable/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:regenerarMovimientoContable}
+
+facturacion_exportar_contabilizacion_webservice_movimientos:
+    pattern: /contabilizacion/exportar_contablizacion/movimientos/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:ObtenerDetalleMovimiento}
+ 
+facturacion_exportar_contabilizacion_webservice_movimientos_listado:
+    pattern: /contabilizacion/exportar_contablizacion/movimientos/listado/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:ObtenerMovimientoContablePorCiclo}
+    
+#SOLO PARA DEBUG ELIMINAR AL FINALIZAR EL DEBUG SE IRA POR CRON
+facturacion_exportar_contabilizacion_webservice_movimientos_CRON:
+    pattern: /contabilizacion/exportar_contablizacion/movimientos/cron/
+    defaults: { _controller : LlanogasLlanogasBundle:ExportarContabilizacion:ProcesarMovimientosCron}
+ 
+#Caso de uso de notas por tipos de uso
+facturacion_notas_tipo_uso:
+    pattern: /facturacion/notas_tipo/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:index}
+
+facturacion_notas_tipo_uso_suscripcion:
+    pattern: /facturacion/notas_tipo/buscar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:consultarSuscripcion}
+
+facturacion_notas_tipo_uso_municipios:
+    pattern: /facturacion/notas_tipo/municipios/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:getMunicipios}
+
+facturacion_notas_tipo_uso_facturas:
+    pattern: /facturacion/notas_tipo/consultar_facturas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:getFacturas}
+
+facturacion_notas_tipo_uso_procesar:
+    pattern: /facturacion/notas_tipo/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:procesarNota}
+
+facturacion_notas_tipo_uso_eliminar:
+    pattern: /facturacion/notas_tipo/eliminartablas/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:eliminarTablas}
+
+facturacion_notas_tipo_uso_aplicar:
+    pattern: /facturacion/notas_tipo/aplicar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:aplicarNotas}
+
+facturacion_notas_tipo_uso_detalle_factura:
+    pattern: /facturacion/notas_tipo/factura/detalles/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasTipoUso:detallesFacturas}
+
+
+# inicio AutorizarImpresiones
+autorizar_impresiones:
+    pattern: /recaudos/impresiones/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:index}
+    
+autorizar_impresiones_limite_impresiones_recaudo:
+    pattern: /recaudos/impresiones/limite_impresion/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:getLimiteImpresionRecaudo}
+
+autorizar_impresiones_informacion_usuario:
+    pattern: /recaudos/impresiones/informacion_usuario/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:getInfoUsuarios}
+
+autorizar_impresiones_informacion_impresion_usuario:
+    pattern: /recaudos/impresiones/informacion_impresion_usuario/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:getImpresionRecaudoUsuario}
+
+autorizar_impresiones_registrar_impresion:
+    pattern: /recaudos/impresiones/registrar_impresion/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:setImpresionesRecaudoUsuarioAutomatico}
+
+autorizar_impresiones_actualizar_impresion:
+    pattern: /recaudos/impresiones/actualizar_impresion/
+    defaults: { _controller : LlanogasLlanogasBundle:AutorizarImpresiones:setActualizarImpresionRecaudo}
+
+# fin AutorizarImpresiones
+
+# Modificar lectura
+modificar_lecturas:
+    pattern: /lectura/modificar_lectura/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:index}
+    
+modificar_lecturas_filtrar:
+    pattern: /lectura/modificar_lectura/filtrar/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:filtrarSuscripcion}
+
+modificar_lecturas_obtener_informacion:
+    pattern: /lectura/modificar_lectura/obtener_informacion/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:getInfoLectura}
+    
+modificar_lecturas_valida_tipo_uso_factura:
+    pattern: /lectura/modificar_lectura/valida_tipo_uso_factura/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:getInfoFactura}
+    
+modificar_lecturas_cambiar_estado_anterior:
+    pattern: /lectura/modificar_lectura/cambiar_estado_anterior/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:cambiarEstadoLecturaAnterior}
+
+modificar_lecturas_registrar_modificacion_lectura:
+    pattern: /lectura/modificar_lectura/registrar_modificacion_lectura/
+    defaults: { _controller : LlanogasLlanogasBundle:ModificarLectura:registrarModificacionLectura}
+    
+#Caso de Uso Constructoras-> Generar Amortizacion 
+#autor: lmrubio 
+ventas_constructoras_amortizacion:
+  pattern:  /ventas/constructoras/amortizacion/
+  defaults: { _controller: LlanogasLlanogasBundle:ConstructorasGenerarAmortizacion:index}
+
+ventas_constructoras_amortizacion_procesar:
+  pattern:  /ventas/constructoras/amortizacion/procesar/
+  defaults: { _controller: LlanogasLlanogasBundle:ConstructorasGenerarAmortizacion:Procesar}
+
+#Caso de uso de notas en reclamacion 
+
+facturacion_notas_reclamacion:
+   pattern: /facturacion/notas_reclamacion/
+   defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:Index}    
+   
+facturacion_notas_reclamacion_suscripcion:
+    pattern: /facturacion/notas_reclamacion/buscar/
+    defaults: { _controller : LlanogasLlanogasBundle:Suscripciones:buscarSuscripcion}
+
+facturacion_notas_reclamacion_municipios:
+    pattern: /facturacion/notas_reclamacion/municipios/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:getMunicipios}
+
+facturacion_notas_reclamacion_eliminar_sesion:
+    pattern: /facturacion/notas_reclamacion/eliminarsesion/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:eliminarProgramaActivo}
+    
+facturacion_notas_reclamacion_notasr:
+    pattern: /facturacion/notas_reclamacion/notasr/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:getNotasR}
+    
+facturacion_notas_reclamacion_concepto_complete:
+    pattern: /facturacion/notas_reclamacion/conceptos/complete/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:getConceptoAutocomplete}
+     
+facturacion_notas_reclamacion_filtro:
+    pattern: /facturacion/notas_reclamacion/notasr/filtrar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:getNotasRConFiltro}
+  
+facturacion_notas_reclamacion_detalles:
+    pattern: /facturacion/notas_reclamacion/notasr/detalles/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:getDetalleNotasR}
+        
+facturacion_notas_reclamacion_procesar:
+    pattern: /facturacion/notas_reclamacion/procesar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:procesarNotasR}
+    
+facturacion_notas_Reclamacion_verificar_cambios:
+    pattern: /facturacion/notas_reclamacion/verificar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:verificarCambios} 
+    
+facturacion_notas_Reclamacion_aplicar:
+    pattern: /facturacion/notas_reclamacion/aplicar/
+    defaults: { _controller : LlanogasLlanogasBundle:NotasReclamacion:aplicarNotas}  
+
+
+util_controlador:
+    pattern: /util/obtener_fecha/
+    defaults: { _controller: LlanogasLlanogasBundle:Util:obtenerFechaServidor}
+    
+facturacion_reporte_tarifas:
+    pattern: /facturacion/reporte_tarifas/
+    defaults: { _controller : LlanogasLlanogasBundle:Tarifas:index}  
+    
+facturacion_reporte_tarifas_generar:
+    pattern: /facturacion/reporte_tarifas/consultar/
+    defaults: { _controller : LlanogasLlanogasBundle:Tarifas:consultarTarifas}  
+
+facturacion_reporte_tarifas_generar_xls:
+    pattern: /facturacion/reporte_tarifas/consultar_xls/
+    defaults: { _controller : LlanogasLlanogasBundle:Tarifas:consultarTarifasExcel}  
+    
+    
+eliminar_facturas:
+    pattern:  /facturacion/eliminar_facturas/
+    defaults: { _controller: LlanogasLlanogasBundle:EliminarFacturas:index }
+    
+    
+eliminar_facturas_consultar_suscripcion:
+    pattern:  /facturacion/consultar_suscriptor/
+    defaults: { _controller: LlanogasLlanogasBundle:EliminarFacturas:consultarSuscripcion }
+    
+     
+eliminar_facturas_factura_suscripcion:
+    pattern:  /facturacion/eliminar_facturas/factura_suscripcion/
+    defaults: { _controller: LlanogasLlanogasBundle:EliminarFacturas:cargarFacturaSuscripcion }
+    
+registrar_eliminar_factura:
+    pattern:  /facturacion/eliminar_factura_suscripcion/
+    defaults: {_controller: LlanogasLlanogasBundle:EliminarFacturas:eliminarFacturaSuscripcion}
+
+#Caso de uso de financiación para la simulacion de financiaciones de una venta
+
+financiacion_ventas_simulador:
+    pattern: /ventas/financiacion_simulador/
+    defaults: { _controller: LlanogasLlanogasBundle:FinanciarVentaSimulador:index}
+    
+consulta_proyectos_padre_infra:
+    pattern: /ventas/consultar_proyectos_infra/
+    defaults: { _controller: LlanogasLlanogasBundle:Constructoras:consultarProyectosPadre}
+    
+#barrios
+registro_barrios:
+    pattern: /barrios/registrar_barrio/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarBarrios:index}
+    
+consulta_barrios:
+    pattern: /barrios/consulta_barrio/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarBarrios:consultaBarrio}
+    
+    
+consulta_grabar_barrios:
+    pattern: /barrios/grabar_barrio/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarBarrios:grabarBarrio}
+    
+consulta_rutas_Vinculadas:
+    pattern: /barrios/rutas_vinculadas/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarBarrios:rutasVinculadas}
+ 
+ 
+consulta_rutas_municipio:
+    pattern: /barrios/rutas_municipio/
+    defaults: { _controller: LlanogasLlanogasBundle:RegistrarBarrios:rutasMunicipio}    
+
+#proceso de financiacion emergencia
+cartera_proceso_financia_emergencia:
+    pattern:  /cartera/financia_emergencia/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:index}
+    
+cartera_proceso_financia_emergencia_municipio:
+    pattern:  /cartera/financia_emergencia/municipio/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:getMunicipios}
+    
+cartera_proceso_financia_emergencia_generar:
+    pattern:  /cartera/financia_emergencia/generar/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:generaProcesoFinanciaEmergencia}
+    
+cartera_proceso_financia_emergencia_proceso:
+    pattern:  /cartera/financia_emergencia/proceso/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:consultaProceso}
+    
+cartera_proceso_financia_emergencia_resumen:
+    pattern:  /cartera/financia_emergencia/consultar_resumen/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:consultarResumen}
+    
+cartera_proceso_financia_emergencia_subirarchivo:
+    pattern:  /cartera/financia_emergencia/subirarchivo_emergencia/
+    defaults: { _controller: LlanogasLlanogasBundle:ProcesoFinanciaEmergencia:subirArchivosImportacionEmergencia}
+    
+facturacion_contacto:
+    pattern : /facturacion/contacto/
+    defaults: { _controller : LlanogasLlanogasBundle:Contacto:index}
+    
+facturacion_contacto_genera_plano:
+    pattern : /facturacion/contacto/generar_plano_contacto/
+    defaults: { _controller : LlanogasLlanogasBundle:Contacto:generarPlanoContacto}

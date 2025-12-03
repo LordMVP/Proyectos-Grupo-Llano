@@ -1,0 +1,46 @@
+{% block body %}
+    <div>
+        <h4>Cordial Saludo </h4>
+        <br>
+        <p>
+        Esta es una notificación de seguimiento de la suscripciones que se actualizaron en el sistema de información Prisma 
+        </p>
+        <br>
+        <table border="1"  >
+            <caption><h4>TABLA DE RESULTADOS</h4></caption>
+            <thead>
+                <tr style="text-align: center">
+                    <th>Empresa</th>
+                    <th>Suscripcion</th>
+                    <th>Ciclo</th>
+                    <th>IdContrato</th>
+                    <th>Constructora</th>    
+                </tr>    
+            </thead>
+            <tbody>
+                {% for registro in datos %}
+                    <tr>
+                        <td>{{registro.nomempresa}}</td>
+                        <td>{{registro.idsuscripcion}}</td>
+                        <td style="text-align: right">{{registro.cicnombre}}</td>
+                        <td>{{registro.numcontrato}}</td>
+                        <td>{{registro.nomconstructora}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+            <br>
+            <p>
+            Por favor no responda este mensaje .
+            <br>
+            <br>
+            Atentamente 
+            <br>
+            <h4>Proceso Gestión de Tecnología Informática</h4>
+            </p>
+    </div>
+
+
+{% endblock %}
+
+

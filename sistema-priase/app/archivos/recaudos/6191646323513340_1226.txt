@@ -1,0 +1,6 @@
+Id Transacción,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Número De Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+3154793343,2021-12-30 20:38:24,12000,APROBADA,PSE,31904305	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155
+3154793343,2021-12-30 20:38:24,13000,APROBADA,PSE,31725006	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155
+3154793343,2021-12-30 20:38:24,15000,APROBADA,PSE,31724836	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155
+3154793343,2021-12-30 20:38:24,17000,APROBADA,PSE,31689234	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155
+3154793343,2021-12-30 20:38:24,17000,APROBADA,PSE,00000000	Bancolombia,1024755241,1,tesoreria@studiof.com.co,STFGROUP,181.62.52.155

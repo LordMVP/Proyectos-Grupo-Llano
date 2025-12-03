@@ -1,0 +1,33 @@
+.gestion-lecturas-diarias {
+
+  &__ejemplo {
+    width: 100%;
+      background-color: #DEDEDE;
+      color: #0e4c84;
+      border: dashed 1px #999;
+      text-align: center;
+      font-size: 12px;
+      border-radius: 5px;
+      padding: 10px 7px;
+      font-weight: bold;
+
+      .codes-content {
+        margin-top: 5px;
+        display: block;
+        font-weight: normal;
+        font-size: inherit;
+        color: #212529;
+        text-align: justify;
+      }
+    }
+
+
+  table label:not(.display){
+    display: none;
+  }
+
+}
+
+.mt25{
+  margin-top: 25px;
+}

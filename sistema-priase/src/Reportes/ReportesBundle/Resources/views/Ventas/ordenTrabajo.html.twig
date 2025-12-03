@@ -1,0 +1,105 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/ng-table.min.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" /> 
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}   
+{% block titulo %}Generacion de formato de orden de trabajo - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ventasController">
+        <form name="reporte" novalidate >
+            <fieldset>  
+                <legend>Generacion de formato de orden de trabajo</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Ingrese alguno de los parámetros para realizar la búsqueda de órdenes de trabajo</h3>
+                        </div>
+                        <div class="panel-body" id="panelBody">
+                            <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label>Orden de trabajo</label>
+                                    <input min="0" type="number" placeholder="# Orden de trabajo" name="numero_orden" id="numero_orden" ng-model="info.numero_orden" class="form-control input-sm"/>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Contrato</label>
+                                    <input type="text" placeholder="# Contrato" name="contrato" id="contrato" ng-model="info.contrato" class="form-control input-sm"/>
+                                </div>
+                                <div class="form-group col-md-6" show-errors>
+                                    <label>Constructora nombre o id</label>
+                                    <input type="text" ng-model="info.constructora_id" placeholder="Ingrese el nombre de la constructora" uib-typeahead="resultados.id as resultados.label for resultados in buscarAu($viewValue)" typeahead-loading="loadingLocations" typeahead-no-results="noResults" typeahead-template-url="auTemplate.html" typeahead-wait-ms="300" class="form-control input-sm"/>
+                                    <p class="help-block-show" ng-show="loadingLocations" >
+                                        <i class="fa fa-refresh"></i> Cargando resultados
+                                    </p>
+                                    <p class="help-block-show" ng-show="noResults" >
+                                        <i class="fa fa-remove"></i> No se han encontrado resultados 
+                                    </p>
+                                </div> 
+                            </div> 
+                            <div class="row">
+                                <div class="col-md-4 col-md-offset-8">
+                                    <button ng-click="reload()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-search fa-1x"></i> Buscar Ordenes
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                            <hr/>  
+                            <h3 style="font-size: 15px;">Resultados de la busquedad</h3>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-12">                                        
+                                    <table ng-table-dynamic="ngTable with columnas" class="table table-condensed">                                    
+                                        <colgroup>
+                                            <col ng-repeat="col in $columns" width="{[{col.width}]}%"/>
+                                        </colgroup>
+                                        <tr ng-repeat="row in $data" ng-click="seleccionarFila(row)" id="tr_{[{row.numero_orden}]}">
+                                            <td ng-repeat="col in $columns">{[{row[col.field] | uppercase }]}</td>                                                
+                                        </tr>
+                                    </table> 
+
+                                </div>
+                            </div>
+                        </div>                            
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div ng-show="total!=0" class="alert-box info">
+                                    Seleccione una orden de trabajo haciendo clic sobre la fila correspondiente de la orden.
+                                </div>
+                                <div ng-show="total==0" class="alert-box error">
+                                    No se encontraron resultados para el numero de orden o documento [ {[{info.numero_orden}]} {[{info.numeroDocumento}]} ]
+                                </div>
+                            </div>                                
+                            <div class="col-md-3">
+                                <button ng-disabled="selected==null" ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-print fa-1x"></i> Imprimir Orden
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>            
+        </form> 
+        <script type="text/ng-template" id="auTemplate.html">
+            <a>        
+            <span style="font-size:10px;" ng-bind-html="match.model.label | uibTypeaheadHighlight:query"></span>                
+            </a>
+        </script>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/autocomplete/ui-bootstrap-tpls-0.14.3.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/ventas/ordenTrabajo.control.angular.js')}}"></script>
+{% endblock %}

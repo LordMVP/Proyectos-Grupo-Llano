@@ -1,0 +1,73 @@
+:invalid {
+    box-shadow: none;
+}
+:-moz-submit-invalid{
+    box-shadow: none;
+}
+:-moz-ui-invalid{
+    box-shadow: none;
+}
+body{
+	font-size: 10px;
+}
+input[type="text"].form-control{
+	border-radius: 0px !important;
+	border-top: 0px #FFF !important;
+	border-bottom: solid 1px #000 !important;
+	border-right: dotted 1px #333;
+	border-left: dotted 1px #333;
+}
+.bl{
+	border-left: solid 1px #000;
+}
+.br{
+	border-right: solid 1px #000;
+}
+.bi{
+	border-bottom: solid 1px;
+}
+.bs{
+	border-top: solid 1px;
+}
+.linea-separadora{
+	border-bottom: solid 1px;
+	padding: 5px 0px 5px 0px;
+}
+
+.cuadro-firma{
+	max-height: 140px;
+	min-height: 130px;
+	border: solid 1px #000;
+}
+.space-is{
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+#imgLogo{
+	height: 40px;
+    width: 188px;
+    margin: 5px 5px 5px 20px;
+}
+
+.sin-margin{
+	margin: 0px !important;
+}
+.sin-padding{
+	padding-right: 0px !important;
+	padding-left: 0px !important;
+}
+
+/*div.col-md-24, div.col-xs-24{
+	padding-top: 20px;
+}*/
+.subtitle{
+
+	margin-top: 15px;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	text-align: center;
+	height: 27px;
+	background-color: #C00000;
+	font-size: 12px !important;
+	color:#FFF;
+}

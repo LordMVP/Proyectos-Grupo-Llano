@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: EdicionParametros/subcomponentes/ConsultaParametros.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: EdicionParametros/subcomponentes/ConsultaParametros.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Input, Tabla, VentanaModal } from 'appfuture-react'
+
+//Rutas entre la vista Edición Actividades y Symfony-EdicionActividadesController
+import URL from '../../../global/rutas_api'
+//LLamado de la petición por POST o GET empleando AXIOS
+import Peticion from '../../Assets/util/peticion'
+//Carga de funciones
+import { Util } from '../../Assets/util/Util'
+//Usar componente modal
+import Modal from '../../Assets/componentes/Modal'
+import axios from 'axios'
+
+
+/**
+ *
+ *
+ * @class ConsultaEntrada
+ * @extends {Component}
+ */
+class ConsultaEntrada extends Component {
+    //inicialización de variables
+
+    /**
+     *Define estados iniciales
+     * @memberof ConsultaEntrada
+     */
+    state = {
+        lista: [],
+        parametro: '',
+        descripcion: '',
+    }
+
+    //Arreglo con los id y nombre de columnas para el componente Tabla
+
+    columnas = [
+        {
+            Header: 'Parametros de entrada',
+
+            columns: [
+                { Header: 'Id', accessor: 'aparIderegistro' },
+                { Header: 'Descripcion', accessor: 'aparDescripcion' },
+                {
+                    Header: 'Acción',
+                    accesor: 'aparIderegistro',
+                    Cell: (props) => (
+                        &lt;button onClick={(e) => this.asignar(props.index)}>
+                            ver
+                        &lt;/button>
+                    ),
+                },
+            ],
+        },
+    ]
+
+    /**
+     *Asigna la fila seleccionada para procesarla más adelante
+     *@method
+     *@param {int} index - número de la fila
+     */
+    asignar = (index) => {
+        this.props.cerrarModal(this.state.lista[index])
+    }
+
+    peticion = new Peticion(this)
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} prepProps - Cargar atributos del componente
+     * @async
+     */
+
+    componentDidUpdate(prevProps) {
+        if (this.props.mostrar !== prevProps.mostrar) {
+            if (this.props.mostrar) {
+                //restablece valores
+                this.setState({
+                    lista: [],
+                    // defecto
+                    parametro: '',
+                    descripcion: '',
+                })
+            }
+        }
+    }
+
+    /**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+    change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+
+    /**
+     *
+     *Obtener listado de consulta, previa selección de parámetros
+     *@method
+     */
+
+    consultar = () => {
+        this.peticion
+            .post({
+                url: URL.EDICIONPARAMETROS.BUSCAR_PARAMETROS,
+                parametros: {
+                    idParametro: this.state.parametro,
+                    descripcionParametro: this.state.descripcion,
+                },
+            })
+            .then((data) => {
+                const lista = data.map((elemento) => {
+                    return {
+                        aparIderegistro: elemento.aparIderegistro,
+                        aparDescripcion: elemento.aparDescripcion,
+                    }
+                })
+                this.setState({
+                    lista,
+                })
+            })
+    }
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+    
+    render() {
+        return (
+            &lt;VentanaModal
+                titulo="Consulta parametros entrada"
+                mostrar={this.props.mostrar}
+                cerrarModal={this.props.cerrarModal}>
+                &lt;div className="caja">
+                    &lt;div className="formulario">
+                        &lt;label className="tag">Información filtro&lt;/label>
+
+                        &lt;Input
+                            id="parametro"
+                            label="parametro"
+                            value={this.state.parametro}
+                            onChange={this.change}
+                        />
+
+                        &lt;Input
+                            id="descripcion"
+                            label="descripcion"
+                            value={this.state.descripcion}
+                            onChange={this.change}
+                        />
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;div className="contenedor">
+                    &lt;button onClick={this.consultar}>consultar&lt;/button>
+                &lt;/div>
+
+                &lt;div className="contenedor">
+                    &lt;Tabla datos={this.state.lista} columnas={this.columnas} />
+                &lt;/div>
+            &lt;/VentanaModal>
+        )
+    }
+}
+
+export default ConsultaEntrada
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

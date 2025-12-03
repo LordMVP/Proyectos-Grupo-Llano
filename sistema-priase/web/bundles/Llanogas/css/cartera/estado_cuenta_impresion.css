@@ -1,0 +1,143 @@
+/**********Estilo para la tabla****************/
+.tabla{
+    width: 100%;
+    border:solid 1px #408BC4;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+    
+}
+
+    .tabla tr{
+        border: solid 1px #AAA;
+    }
+
+
+    .tabla thead tr{
+        background-color:#6EA9D5;
+        color:#AAA;
+        height: 25px;
+    }
+
+    .tabla tbody tr:nth-child(2n){
+        background-color: #D9F3FF !important;
+    }
+
+    .tabla td, .tabla th{
+        padding:5px;
+        border-right: solid 1px #AAA;
+    }
+
+    .tabla thead tr th{
+        vertical-align: middle;
+    }
+    
+    .tabla tbody td button{
+        display: none;
+    }
+    
+    
+    /* Se adiciona la regla de estilo para que el campo de los detalles sean mas 
+    oscuros y se pueda visualizar correctamente en la impresion*/
+    .tabla tbody tr td{
+        color: #373737;
+    }
+
+    div#contenedor{
+        width: 100%;
+        border:none;
+        padding: 7px 5px 10px 5px; 
+        border-radius:0px;
+        box-shadow: none;
+        margin-top: 10px;
+    }
+
+    fieldset{
+        border:none;
+    }
+
+    legend{
+        margin-left: -20px;
+        position: relative;
+    }
+
+    div#menu{
+        display:none;
+    }
+
+    div#divGeneral{
+        display:block;
+        width: 960px;
+        margin:0 auto;
+        border-left: none;
+    }
+
+    .inputImpresion,
+    .campoCorto input[type="text"],
+    .campo input[type="text"],
+    .campoBusqueda input[type="text"]{
+        background-color: inherit;
+        border:none;
+        border-radius:0px;
+        border-bottom: solid 1px #999;
+    }
+
+    #txtSuscripcion{
+        border:none !important;
+        background-color: #FFF;
+        border-radius: 0px !important;
+        border-bottom: solid 1px #999 !important;
+    }
+
+    .campoBusqueda button{
+        display: none;
+    }
+
+
+    h2{
+        color:#408BC4;
+        text-align: left;
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-top: 12px;
+        margin-bottom: 5px;
+    }
+    
+#btnImprimir, #divComandos, #btnCargarFinanciaciones, 
+#btnVerFormasPago, #btnCargarSimulador, 
+#divLiquidacion, .btnSimple
+{
+    display:none;
+}
+#tblFacturas tbody tr:not(.selected),
+.tabla td[header="thSimulador"] .tabla #thSimulador,
+.tabla td[header="thSeleccion"] .tabla #thSeleccion,
+.tabla td[header="thDetallesFactura"], #thDetallesFactura
+{
+    display:none;
+}
+
+/*Se cambia el valor del atributo display con el fin de que sea mostrado en la impresion*/
+#divTotal
+{
+    display: block;
+}
+
+
+#tblFinanciaciones tbody tr:not(.selected), 
+#tblFacturas tbody tr:not(.selected), 
+#tblFinanciaciones td[header="thSimulador"],#tblFinanciaciones #thSimulador,
+#tblReestructuracion td[header="thSimulador"],#tblReestructuracion #thSimulador,
+#tblFinanciaciones td[header="thConcepto"],#tblFinanciaciones #thConcepto,
+td[header="thSeleccion"], #thSeleccion, #tblReestructuracion td[header="thNuevaLiquidacion"],
+#tblReestructuracion #thNuevaLiquidacion
+{
+    display:none;
+}
+
+.tabla input[type="text"], .tabla input[type="number"], .tabla select{
+    border:none;
+    border-radius:0px;
+}
+#tblConceptosImprimir{display: table;}

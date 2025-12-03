@@ -1,0 +1,26 @@
+{
+    "reports": [
+        {
+            "id": 1,
+            "name": "arqueo_caja",
+            "file_name": "arqueo_caja_v2.jrxml",
+            "parameters": [{
+                    "name": "PR_STR_FECHA_CONSULTA",
+                    "alias":"fechaConsulta",
+                    "type": "DATE",
+                    "required": true
+                }, {
+                    "name": "PR_INT_MEDIO_PAGO",
+                    "alias":"medioPago",
+                    "type": "INT",
+                    "required": true
+                }, {
+                    "name": "PR_INT_CODIGO_PROYECTO",
+                    "alias":"codigoProyecto",
+                    "type": "INT",
+                    "required": true
+                }
+            ]
+        }
+    ]
+}

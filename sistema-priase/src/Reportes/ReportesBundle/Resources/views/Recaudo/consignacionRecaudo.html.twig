@@ -1,0 +1,88 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Consignacion Recaudo -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ConsignacionRecaudoController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" required="true" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta1.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" required="true" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta2.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div> 
+                                
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label>Metodo de Pago</label>
+                                    <select type="text" name="metodosPago" id="metodosPago" ng-model="info.metodosPago" class="form-control input-sm">                      
+                                        <option value="-1">Todos</option>
+                                        <option ng-repeat="metodoPago in metodosPago" ng-value="metodoPago.id">
+                                            {[{metodoPago.nombre}]}
+                                        </option>                                            
+                                    </select>                                        
+                                </div>
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Al ingresar y validar todos los parametros necesarios y correctos, de clic en el boton Generar Reporte.
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <!--button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right"-->
+                                <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-gears fa-lg"></i> Generar el reporte <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a ng-click="info.formato='pdf'; generarReporte()">
+                                            <i class="fa fa-file-pdf-o fa-lg"></i> Archivo PDF
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a ng-click="info.formato='xlsx';generarReporte()">
+                                            <i class="fa fa-file-excel-o fa-lg"></i> Archivo Excel
+                                        </a>
+                                    </li>
+
+                                </ul>
+                                
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/consignacion.recaudo.angular.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta_impresion.css')}}" />
+    <style type="text/css">
+        div#divFiltro, div#divFiltroFacturas{
+            display:none;
+        }
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Condonar Cartera Corriente - {{empresa}}  {% endblock %}
+
+{% block body %}
+<div id="divComandos">
+    <div class="divBotones">
+        <input type="button" value="grabar" id="btnGrabar" class="btn" />
+        <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        <input type="button" value="imprimir" id="btnImprimir" class="btn" />
+    </div>
+</div>
+
+<fieldset id="divCabecera">
+        <legend>Suscripción</legend>
+        <div class="campoBusqueda">
+            <label for="btnFormaPago">Suscripción:</label>
+            <input type="text" id="txtSuscripcion" disabled="disabled" />
+            <button id="btnSuscripcion" title="Buscar una suscripción"></button>
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtDocumento">NIT/CC:</label>
+            <input type="text" id="txtDocumento" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtNombre">Nombre completo:</label>
+            <input type="text" id="txtNombre" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtCodAnterior">Código anterior:</label>
+            <input type="text" id="txtCodAnterior" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtMunicipio">Municipio:</label>
+            <input type="text" id="txtMunicipio" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtBarrio">Barrio:</label>
+            <input type="text" id="txtBarrio" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtDireccion">Dirección:</label>
+            <input type="text" id="txtDireccion" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtTelefono">Teléfono:</label>
+            <input type="text" id="txtTelefono" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtCelular">Celular:</label>
+            <input type="text" id="txtCelular" disabled="disabled" />
+        </div>
+        
+        <div class="campo">
+            <label for="txtSaldoCondonable">Saldo Condonable: </label>
+            <input type="text" id="txtSaldoCondonable" maxlength="30" disabled="disabled"  />
+        </div>
+          <input type="button" id="btnCargarFacturas" value="Facturas Interes Mora" class="btnSimple" disabled="disabled" />	
+          <input type="button" id="btnCargarFacturasIntCorriente" value="Facturas Interes Corriente" class="btnSimple" disabled="disabled" />
+      
+    </fieldset>
+
+
+    <table id="tblFacturas" class="tabla"></table>
+    <table id="tblConceptosCompletos" class="tabla"></table>
+   
+<!-- Division para filtro -->
+<div id="camposBuscarSuscripcion" style="display:none;" >
+    <div class="campo">
+        <label for="txtMunicipio">Municipio: </label>
+        <input type="text" id="txtMunicipio" maxlength="30" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroSus">Suscripción:</label>
+        <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroCodAnt">Código Anterior:</label>
+        <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+    </div>
+    <span id="spanMensaje" class="pMensaje"></span>
+    <div id="divListaSelección"></div>
+</div>
+
+<!--División para consulta de conceptos de factura -->
+
+<div id="divConceptosFactura" style="display:none;">
+    <table id="tblConceptosCondonable" class="tabla"></table>
+    <table id="tblConceptosNoCondonable" class="tabla"></table>
+</div>
+<div id="divConfirmCancelar" style="display:none">
+    <p>Se cancelará la condonación actual ¿Desea continuar?</p>
+</div>
+<div id="divMotivos" style="display:none">
+    <label for="cmbMotivo">Motivo de condonación:</label>
+    {{cmbMotivosNota|raw}}
+    <label for="txtDescripcion">Descripción:</label>
+    <textarea id="txtDescripcion"></textarea>
+</div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/condonarCartera/condonarCartera.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/condonarCartera/condonarCartera.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/condonarCartera/condonarCartera.vista.js')}}"></script>
+    
+{% endblock %}

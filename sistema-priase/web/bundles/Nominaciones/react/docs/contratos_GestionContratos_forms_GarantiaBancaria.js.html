@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/forms/GarantiaBancaria.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/forms/GarantiaBancaria.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Input, Combo, Util, Fecha } from 'appfuture-react';
+import { get as getProp } from 'object-path';
+
+const listaTipoCalculo = [
+  { texto: 'Si', valor: 'S' },
+  { texto: 'No', valor: 'N' },
+];
+
+class GarantiaBancaria extends Component {
+
+  state = {
+    cantidadContratada: '',
+  };
+
+  componentDidMount() {
+    this.refrescarValorPrecioGarantia();
+  }
+
+  /**
+   * Limpia y/o resetea los valores del state, lo que a su vez limpiará los valores en los campos de la interfaz.
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      mostrarModalConsulta: false,
+
+      // Datos de la entidad
+      // ...
+
+      // Estado de la aplicacion
+      // ...
+
+    });
+  };
+
+  /**
+   * Controla los cambios de los componentes de la interfaz y setea el objeto state con sus respectivos valores.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    const control = evento.target;
+    let nuevoEstado = {};
+    nuevoEstado[control.name] = control.value;
+    let garantia = { ...this.props.garantia };
+    if (!garantia.bancaria) {
+      garantia.bancaria = {};
+    }
+    garantia.bancaria[control.name] = control.value;
+    this.calcularPrecioGarantia(garantia)
+    //this.props.actualizarGarantia(garantia);
+  }
+
+  /**
+   * Método encargado de calcular el precio del calculo de la garantia
+   */
+  refrescarValorPrecioGarantia = () => {
+    let garantia = { ...this.props.garantia };
+    if (!garantia.bancaria) {
+      garantia.bancaria = {};
+    }
+    this.calcularPrecioGarantia(garantia);
+  };
+
+  /**
+   * Validará el formulario...
+   * @returns {Boolean}
+   */
+  validarDocumento = () => {
+    const { tipoDocumento, fechaInicio, fechaFin, fechaExpedicion } = this.state;
+    if (tipoDocumento === '' || tipoDocumento === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo de documento' } };
+    }
+
+    if (fechaFin === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo de documento' } };
+    }
+
+    if (fechaInicio === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha de inicio' } };
+    }
+
+    if (fechaFin == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha fin' } };
+    }
+
+    if (fechaExpedicion == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha de expedición' } };
+    }
+  }
+
+  /**
+   * Calculará el precio de garantia para contrato tipo suministro teniendo en cuenta si el usuario
+   * ha seleccionado que se calculara de manera diaria o no diaria.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @return {Number}
+   */
+  calcularPrecioGarantiaSuministro = (cantidadContratada, precioContrato) => {
+    let precioGarantia = 0;
+    if (this.props.garantia.calculoDiario == 'S') {
+      precioGarantia = cantidadContratada * precioContrato * 60;
+    } else {
+      precioGarantia = (cantidadContratada / 30 * precioContrato) * 60;
+    }
+    return precioGarantia;
+  };
+
+  /**
+   * Calculará el precio de garantia para el contrato de tipo transporte.
+   * Además validará si existen o no los valores del tramo (valorCargoVariable, valorCargoFijo, valorCargoAOM)...
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  valorTRM Valor de la TRM ya sea diaria o techo
+   * @return {number}
+   */
+  calcularPrecioGarantiaTransporte = (cantidadContratada, precioContrato, valorTRM) => {
+    if (!this.props.cabecera.valorCargos) {
+      this.props.mostrarAlerta('Atención', 'No se econtraron los valores necesarios para el cálculo de transporte, por favor comprueb el tipo de cálculo que ha seleccionado y reintente nuevamente.');
+      return 0;
+    }
+    let precioGarantia = 0;
+    const valorCargoVariable = parseFloat(getProp(this.props, 'cabecera.valorCargos.variable', '0'));
+    const valorCargoFijo = parseFloat(getProp(this.props, 'cabecera.valorCargos.fijo', '0'));
+    const valorCargoAOM = parseFloat(getProp(this.props, 'cabecera.valorCargos.aom', '0'));
+    precioGarantia = ((((((valorCargoFijo / 365) * valorTRM) + valorCargoVariable) * valorTRM) + valorCargoAOM) / 365) * 70 * cantidadContratada;
+    return precioGarantia;
+  };
+
+  /**
+   * Calculará el precio de la garantia para el tipo de contrato ATR.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @return {number}
+   */
+  calcularPrecioGarantiaATR = (cantidadContratada, precioContrato) => {
+    const dm = getProp(this.props, 'garantia.bancaria.dm', '0');
+    const precioGarantia = ((cantidadContratada * (!dm ? 0 : dm)) / 30) * 70;
+    return precioGarantia;
+  };
+
+  /**
+   * Calcula el precio de la garantia para el tipo de contrato GNC.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  valorTRM Valor de la TRM ya sea diaria o techo
+   * @return {number}
+   */
+  calcularPrecioGarantiaGNC = (cantidadContratada, precioContrato, valorTRM) => {
+    const precioGarantia = ((cantidadContratada * precioContrato) * 80) * valorTRM;
+    return precioGarantia;
+  };
+
+  /**
+   * Calcula el precio de la garantia para tipo de contrato conexión.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @return {Number}
+   */
+  calcularPrecioGarantiaConexion = (cantidadContratada, precioContrato) => {
+    const precioGarantia = cantidadContratada * precioContrato * 80;
+    return precioGarantia;
+  };
+
+  /**
+   * Calcula el precio de la garantia.
+   * @param {Object} garantia Datos de la garantia
+   * @return {Number}
+   */
+  calcularPrecioGarantia = (garantia) => {
+    if (!this.props.garantia.bancaria) {
+      this.props.actualizarGarantia(garantia);
+      return 0;
+    }
+    const valorTRM = (getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+      getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0);
+    const { tipoContrato } = this.props.garantia.bancaria;
+    const tiposContrato = this.props.tiposContrato;
+    let { cantidadContratada, precioContrato } = this.props.cabecera;
+    let precioGarantia = 0;
+    switch (tipoContrato) {
+      case tiposContrato.GNV_SUMINISTRO.codigo:
+      case tiposContrato.SUMINISTRO.codigo:
+        precioGarantia = this.calcularPrecioGarantiaSuministro(cantidadContratada, precioContrato);
+        break;
+      case tiposContrato.TRANSPORTE.codigo:
+        precioGarantia = this.calcularPrecioGarantiaTransporte(cantidadContratada, precioContrato, valorTRM);
+        break;
+      case tiposContrato.ATR.codigo:
+        precioGarantia = this.calcularPrecioGarantiaATR(cantidadContratada, precioContrato);
+        break;
+      case tiposContrato.GNC.codigo:
+        precioGarantia = this.calcularPrecioGarantiaGNC(cantidadContratada, precioContrato, valorTRM);
+        break;
+      case tiposContrato.CONEXION.codigo:
+        precioGarantia = this.calcularPrecioGarantiaConexion(cantidadContratada, precioContrato);
+        break;
+    }
+
+    if (isNaN(precioGarantia)) {
+      precioGarantia = 0;
+    }
+
+    garantia.bancaria.precioGarantia = precioGarantia;
+    this.props.actualizarGarantia(garantia);
+
+    return precioGarantia;
+  };
+
+  /**
+   * Obtiene la lista de los tipos de contrato seleccionados por el usuario.
+   * @return {Array}
+   */
+  obtenerListaTiposContratos = () => {
+    const { tiposContrato } = this.props.listas;
+    return tiposContrato.filter(tipoContrato => tipoContrato.seleccionado);
+  };
+
+  /**
+   * Retornará el DOM del componente.
+   * @return {string}
+   */
+  render() {
+    const tiposContrato = this.props.tiposContrato;
+    return (
+      &lt;div>
+        &lt;div className='row col-12 poliza-contratos mt-5'>
+          &lt;Input
+            label='Cantidad contratada:'
+            value={this.props.cabecera.cantidadContratada}
+            name='cantidadContratada'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Precio Contrato:'
+            value={this.props.cabecera.precioContrato}
+            name='precioContrato'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Precio Garantía Ban:'
+            value={getProp(this.props, 'garantia.bancaria.precioGarantia', '')}
+            name='precioGarantia'
+            extra={{ disabled: true }}
+          />
+          &lt;Combo
+            key={Util.generarIdControl('tiposContratos')}
+            opciones={this.obtenerListaTiposContratos()}
+            propTexto='uniNombre1'
+            propValor='uniPropiedad.tipocontrato'
+            label='Tipo Contrato:'
+            name='tipoContrato'
+            value={getProp(this.props, 'garantia.bancaria.tipoContrato', '')}
+            onChange={this.controlarCambio}
+          />
+          {
+            //Se agregan las fechas de cobertura para tipo de garantia bancaria //Cambio solicitado por ROSMIRA 20-01-2020
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') !== tiposContrato.GNC.codigo &amp;&amp; (
+              &lt;Fragment>
+                &lt;Fecha
+                  label='Fecha Inicial Cobertura:'
+                  name='fechaInicial'
+                  value={getProp(this.props, 'garantia.bancaria.fechaInicial', '')}
+                  fecha={getProp(this.props, 'garantia.bancaria.fechaInicial', '')}
+                  onChange={this.controlarCambio}
+                />
+                &lt;Fecha
+                  label='Fecha Fin Cobertura:'
+                  name='fechaFin'
+                  value={getProp(this.props, 'garantia.bancaria.fechaFin', '')}
+                  fecha={getProp(this.props, 'garantia.bancaria.fechaFin', '')}
+                  onChange={this.controlarCambio}
+                />
+              &lt;/Fragment>
+            )
+          }
+          {
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') === tiposContrato.SUMINISTRO.codigo &amp;&amp;
+            (
+              &lt;Combo
+                key={Util.generarIdControl('calculoDiario')}
+                opciones={listaTipoCalculo}
+                propTexto='texto'
+                propValor='valor'
+                cols={2}
+                label='Cálculo Diario:'
+                name='calculoDiario'
+                value={getProp(this.props, 'garantia.bancaria.calculoDiario', 'N')}
+                onChange={this.controlarCambio}
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') === tiposContrato.TRANSPORTE.codigo &amp;&amp;
+            (
+              &lt;div className='form-group row col-12'>
+                &lt;Input
+                  label='TRM:'
+                  value={getProp(this.props, 'cabecera.trmTecho', '0')}
+                  name='trmTransporte'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo Variable:'
+                  value={getProp(this.props, 'cabecera.valorCargos.variable', '0')}
+                  name='cargoVariable'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo Fijo:'
+                  value={getProp(this.props, 'cabecera.valorCargos.fijo', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoFijo'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo AOM:'
+                  value={getProp(this.props, 'cabecera.valorCargos.aom', '0')}
+                  name='cargoAOM'
+                  extra={{ disabled: true }}
+                />
+              &lt;/div>
+            )
+          }
+          {
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') === tiposContrato.ATR.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='Dm:'
+                value={getProp(this.props, 'garantia.bancaria.dm', '0')}
+                onChange={this.controlarCambio}
+                name='dm'
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') === tiposContrato.CONEXION.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='TRM:'
+                value={(getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+                  getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0)}
+                name='trmConexion'
+                extra={{ disabled: true }}
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.bancaria.tipoContrato', '') === tiposContrato.GNC.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='TRM:'
+                value={(getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+                  getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0)}
+                name='trmGNC'
+                extra={{ disabled: true }}
+              />
+            )
+          }
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+}
+
+/**
+ * Se definen los tipos de dato de los prototipos que recibe el componente.
+ */
+GarantiaBancaria.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  actualizarGarantia: PropTypes.func,
+  garantia: PropTypes.object,
+  tiposContrato: PropTypes.object
+};
+
+/**
+ * Se exporta el componente.
+ */
+export { GarantiaBancaria };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

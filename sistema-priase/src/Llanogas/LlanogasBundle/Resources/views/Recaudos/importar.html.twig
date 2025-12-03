@@ -1,0 +1,105 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+
+    <style>
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            margin-right: 55px;
+            display: inline-block;
+            width: 40%;
+            position: relative;
+            top: 16px;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Recaudos: Importación  - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="cargar" id="btnCargar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <fieldset>
+            <legend>Recaudos</legend>
+            <div class="campo">
+                <label for="cmbFormaPago">Forma de pago:</label>
+                <select id="cmbFormaPago">
+                    <option value="75">Efectivo</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="cmbMedioPago">Medio de pago:</label>            
+                {{cmbMedioPago|raw}}
+            </div>
+            <div class="campo" id="cmbSucursal">
+                
+            </div>
+
+            <div class="campo">
+                <label for="txtFechaPago">Fecha de pago: </label>
+                <input type="text" id="txtFechaPago"/>
+            </div>
+            <div class="campo">
+                <label for="txtEmpresa">Empresa:</label>
+                <input type="text" id="txtEmpresa" disabled="disabled" value="{{empresa}}  " />
+            </div>
+            <div>
+                <div id="divArchivo" style="margin-top: 15px">
+                    <input type="file" id="txtArchivo"/>
+                </div>
+            </div>
+            <div>
+                <div style="width: 50%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumen" class="tabla"></table>
+                </div>
+                <div style="width: 49%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumenConProblemas" class="tabla"></table>
+                </div>
+                <div style="width: 29%; display: inline-block;">
+                    <button class="btnSimple" id="btnEliminarResumen">Eliminar resumen</button>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <fieldset id="divInfoProceso" style="display:none">
+        <legend> Proceso cargar recaudos</legend>
+        <div id="divCargando"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Se está ejecutando el proceso, <br>esto puede tardar unos minutos...</p>                
+        </div>
+        <table id="tblProceso" class="tabla" style="width: 70%; display: inline-table; margin: 20px 20px;"></table>
+    </fieldset>
+    <div id="divCancelarOpe" style="display: none;">
+        <p>Se cancelará la importación actual, ¿Desea continuar?</p>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/importar/importar.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/importar/importar.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/importar/importar.vista.js')}}"></script>
+{% endblock %}

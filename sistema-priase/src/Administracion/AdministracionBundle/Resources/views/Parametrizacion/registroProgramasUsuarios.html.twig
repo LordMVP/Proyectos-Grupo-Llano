@@ -1,0 +1,238 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylsheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+
+
+    <style>
+        #divProgramas #seleccionProgramas div{
+            float:left;
+            width: 97%;
+            padding: 6px;
+        }
+        #divProgramas #seleccionProgramas #divBotonProgramas{
+            width: 6%;
+        }
+        #divBotonProgramas{
+            position: relative;
+            top: 75px;
+        }
+        #divProgramas #seleccionProgramas button{
+            min-width: 40px;
+            display: list-item; 
+        }
+
+        .listaProgramas{
+            margin-right:15px;
+            min-height:170px;
+            max-height: 170px;
+            overflow: auto;
+            border:solid 1px #000;
+            padding:5px;
+            font-size: 10px;
+        }
+
+        .listaSeleccion div{
+            width: 90% !important;
+        }
+
+        #seleccionProgramas {
+            display: flex;
+        }
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block titulo %}Autorización - Programas por Perfil  {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <!-- Division Mostrar Botones Administracion usuarios  Oscar Baquero-->
+        <div class="divBotones">
+            <input type="button" value="Nuevo" id="btnNuevo" class="btn" />
+            <input type="button" value="Grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="Buscar" id="btnFiltrar" class="btn" />
+        </div>
+    </div>
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <!-- Div Usuarios --> 
+            <div id="divUsuarios">
+                <fieldset>
+                    <legend>Datos del Colaborador</legend>
+                    <!-- Division Mostrar Información Ruta -->
+                    <div class="campo" >
+                        <label for="txtCedula">Cedula:</label>
+                        <input type="text" id="txtCedula" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtNombreUsuario">Nombre:</label>
+                        <input type="text" id="txtNombreUsuario" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtCorreo">Correo:</label>
+                        <input type="text" id="txtCorreo" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtTopeFinanciar">Tope de Financiación:</label>
+                        <input type="text" id="txtTopeFinanciar" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo"  style="display: none;">
+                        <label for="txtIdePerfil">Ide Perfil:</label>
+                        <input type="text" id="txtIdePerfil" disabled="disabled" required="required"/>
+                    </div>
+
+                    <div class="campo" id="divIdeUsuario">
+                        <label for="txtIdeUsuario">Ide Usuario:</label>
+                        <input type="text" id="txtIdeUsuario" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <label for="cboRecaudoExterno">Recaudo Externo:</label>
+                        <select id="cboRecaudoExterno" disabled="disabled">                            
+                            <option value="S">SI</option>
+                            <option value="N">NO</option>
+
+                        </select>
+                    </div>
+
+                    <div class="campo" id="divtxtPerfil">
+                        <label for="txtPerfil">Perfil:</label>
+                        <input type="text" id="txtPerfil" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo" id="divPassword" style="display: none;">
+                        <label for="txtPassword">Clave</label>
+                        <input type="password" id="txtPassword" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo" id="divPasswordConfirmar" style="display: none;" >
+                        <label for="txtPasswordConfirmar">Confirmar Clave</label>
+                        <input type="password" id="txtPasswordConfirmar" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <input type="checkbox" name="checkPerfil" value="" id="checkPerfil">Asignar perfil existente.
+                    </div>
+                    <div class="campo" id="divcheckPerfilNuevo">
+                        <input type="checkbox" name="checkPerfilNuevo" value="" id="checkPerfilNuevo">Generar un nuevo perfil.
+                    </div>
+                    <div class="campo" style="display:none" id="divcboPerfilActual">
+                        <label for="cboPerfilActual">Perfiles:</label>
+                        <select id="cboPerfilActual">
+                        </select>
+                    </div>
+
+                    <span id="mensajeAlerta" class="pMensaje"></span>
+
+                </fieldset>
+
+            </div>
+
+
+            <div  id="divOpcionesMenuPrograma" style="display:none">
+                <fieldset>
+                    <legend>Opciones de Menú</legend>
+                    <div id="divMenu" class="campo" style="margin: 0px 10px 10px 0px;">
+                        <label for="cboMenu">Menú:</label>
+                        <select id="cboMenu"></select>
+                    </div>
+                    <div id="divcboOpcionesMenu" class="campo" style="margin: 0px 10px 10px 0px;" style="display:none" >
+                        <label for="cboOpcionesMenu">Opciones de Menú:</label>
+                        <select id="cboOpcionesMenu"></select>
+                    </div>
+                    <div id="divAllProgramas" class="campo">                                       
+                            <input type ="button" id="btnAllProgramas" class="btnSimple" value="Todas los Programas" />
+                        </div>
+
+                </fieldset>
+            </div>   
+
+            <div id="pestanias" style="display:none">
+                <ul>
+                    <li><a href="#divProgramas"><i class="fa fa-list-ul fa-1x"></i> Programas </a></li>
+                </ul>        
+                <div id="divProgramas">
+
+
+                    <div id="seleccionProgramas">
+                        <div>
+                            <fieldset>
+                                <legend>Programas</legend>
+                                <label for="txtFiltroProgramas">Buscar:   
+                                    <input type="text" id="txtFiltroProgramas" /></label>
+                                <div class="listaProgramas" id="listaProgramasSeleccion" style="width: 93%">
+                                    <div class="listaSeleccion"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div id="divBotonProgramas">
+                            <button class="btnSimple" data-funcion="listas" id="btnProgramasSeleccion" data-id="seleccionar">
+                                <i class="fa fa-angle-right fa-lg"></i>
+                            </button>
+                            <button class="btnSimple" data-funcion="listas" id="btnProgramasDeseleccion" data-id="deseleccionar">
+                                <i class="fa fa-angle-left fa-lg"></i>
+                            </button>
+                            <button class="btnSimple" data-funcion="listas" id="btnAllProgramasSeleccion" data-id="seleccionar">
+                                <i class="fa fa-angle-double-right fa-lg"></i>
+                            </button>
+                            <button class="btnSimple" data-funcion="listas" id="btnAllProgramasDeseleccion" data-id="deseleccionar">
+                                <i class="fa fa-angle-double-left fa-lg"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <fieldset>
+                                <legend>Programas Seleccionados</legend>
+                                <div class="listaProgramas"  id="listaProgramasSeleccionada" style="width: 93%; min-height: 210px;">
+                                    <div class="listaSeleccion"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="divBuscarColaborador" style="display: none;">
+
+                <div class="campo">
+                    <label for="txtCedulaColaborador">Cedula Colaborador:</label>
+                    <input type="text" id="txtCedulaColaborador" maxlength="15" />
+                </div>
+                <div class="campo">
+                    <label for="txtNombreColaborador">Nombre:</label>
+                    <input type="text" id="txtNombreColaborador" maxlength="20" />
+                </div>
+
+
+                <input type ="button" id="btnBuscarColaborador" class="btnSimple" value="Buscar"/>
+
+                <div id="divResultadosFiltro" style="display:none;">
+                    <table id="tblResultadoFiltro" class="tabla"></table>    
+                </div>
+
+                <span id="mensajeAlertaDialogo" class="pMensaje"></span>
+            </div>
+
+            <div id="divAutorizacionPerfil" style="display:none">
+                <div>
+                    <h2>Él colaborador no tiene perfil para Prisma. Autorice la creación de perfil</h2>
+                </div>
+                <div>
+                    <label for="cboPerfil">Perfiles:</label>
+                    <select id="cboPerfil">
+
+                    </select>
+                </div>
+            </div>
+        </div >       
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.crypt.js"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/registroProgramasUsuarios/registroProgramasUsuarios.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/registroProgramasUsuarios/registroProgramasUsuarios.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Administracion/js/registroProgramasUsuarios/registroProgramasUsuarios.vista.js')}}"></script>
+{% endblock %}

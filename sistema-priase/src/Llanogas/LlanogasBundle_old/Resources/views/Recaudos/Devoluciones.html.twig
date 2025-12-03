@@ -1,0 +1,111 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Devoluciones - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="nuevo" id="btnNuevo" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <fieldset>
+                <legend>Información del suscriptor</legend>
+
+                <div class="campoCorto">
+                    <label for="txtIdSuscripcion">Id Suscripción:</label>
+                    <input type="text" id="txtIdSuscripcion" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtSuscripcion">Suscripción:</label>
+                    <input type="text" id="txtSuscripcion" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtDocumento">NIT/CC:</label>
+                    <input type="text" id="txtDocumento" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtCodigoAnterior">Cód. Anterior:</label>
+                    <input type="text" id="txtCodigoAnterior" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtNombre">Nombre:</label>
+                    <input type="text" id="txtNombre" disabled="disabled" />
+                </div>
+
+            </fieldset>
+            <div>
+                <table id="tblDevoluciones" class="tabla"></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDoc">Cédula/NIT:</label>
+            <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <button id="btnBuscar" class="btnSimple">Buscar</button>
+    </div>
+    <!-- División para completar información de la devolución-->
+    <div id="divDetallesDevolucion" style="display:none;">
+        <label for="cmbMotivoNota">Motivos:</label>
+        <select id="cboMotivoNota">
+            <option value="-1"> Seleccione una opción</option>
+            {% for motivo in motivos %}
+                <option value="{{motivo.idmotivo}}">{{motivo.nombre}}</option>
+            {% endfor %}
+        </select>
+        <div>
+            <label for="txtObservaciones">Observaciones:</label>
+            <textarea id="txtObservaciones"></textarea>
+        </div>
+        <span class="pMensaje" id="pMensajeGrabar"></span>
+    </div>
+    
+    <!-- Confirmación de cancelación -->
+    <div id="divConfirmCancelar">
+        <p>Se cancelará la devolución ¿Desea continuar?</p>
+    </div>
+    <!-- Dialogo para mostrar detalles de una devolución-->
+    <div id="divDetallesDevolucionDialog" style="display:none;">
+        <table class="tabla" id="tblDetalleFactura"></table>
+        <table class="tabla" id="tblDetalleRecaudo"></table>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/devoluciones/devoluciones.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/devoluciones/devoluciones.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/devoluciones/devoluciones.vista.js')}}"></script>
+{% endblock %}

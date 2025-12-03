@@ -1,0 +1,36 @@
+.canasta-horaria {
+
+  &__td-acciones {
+    display: flex;
+    justify-content: center;
+
+    button {
+      border: unset;
+      color: #408BC4;
+      cursor: pointer;
+      background: unset;
+    }
+  }
+
+}
+
+.tbl-intervalos-sin-ruta {
+
+  label {
+    display: none;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .col-12 {
+    padding: 0;
+  }
+
+}
+
+.form-control-custom{
+  display: block;
+  width: auto;
+}

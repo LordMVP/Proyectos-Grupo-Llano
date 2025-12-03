@@ -1,0 +1,18 @@
+#btnQuitarConceptos,
+#btnQuitarMunicipio,
+#btnQuitarTipoUso,
+#btnAgregarConceptos,
+#divBuscarSuscripcion,
+#divConfirmarCancelar,
+#divBuscarLiquidacion,
+#fieldsetAgregarConceptos,
+#fieldsetLiquidacionEspecial,
+#fieldsetOtrasVinculaciones{
+    display: none;
+}
+.agregar {
+    margin-bottom: 5px;
+}
+table {
+    display: inline-table;
+}

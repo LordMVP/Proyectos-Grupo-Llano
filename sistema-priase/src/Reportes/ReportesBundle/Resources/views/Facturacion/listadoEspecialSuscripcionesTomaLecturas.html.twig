@@ -1,0 +1,168 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/angular-datatables.min.css')}}" />    
+{% endblock %}
+{% block titulo %}Listado especial para toma de lecturas suscripciones - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="facturacionController">
+        <div id="divPanelContenedor">
+            <fieldset>  
+                <legend>Generacion de reporte de relacion de totales por consumo.</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">                            
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <form ng-submit="buscarTercero(1)">
+                                        <label>Suscripción o codigo</label>
+                                        <div class="input-group">                                        
+                                            <input ng-model="searchCodigo" type="text" class="form-control input-sm" placeholder="Buscar por codigo ....">
+                                            <span class="input-group-btn">
+                                                <button ng-click="buscarTercero(1)" class="btn btn-default input-sm" type="button">
+                                                    <span class="glyphicon glyphicon-search"></span>
+                                                </button>
+                                            </span>                                        
+                                        </div><!-- /input-group -->
+                                    </form>
+                                </div>
+                                <div class="col-lg-8">
+                                    <form ng-submit="buscarTercero(2)">
+                                        <label>Nombre del tercero</label>
+                                        <div class="input-group">                                        
+                                            <input ng-model="searchNombre" type="text" class="form-control input-sm" placeholder="Buscar tercero ....">
+                                            <span class="input-group-btn">
+                                                <button ng-click="buscarTercero(2)" class="btn btn-default input-sm" type="button">
+                                                    <span class="glyphicon glyphicon-search"></span>
+                                                </button>
+                                            </span>                                        
+                                        </div><!-- /input-group -->
+                                    </form>
+                                </div>           
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                <div class="col-lg-12" ng-animate="box" ng-hide="ocultarTabla">
+                                    <h3>Resultados de la busquedad</h3>
+                                    <table class="table">
+                                        <thead>
+                                        <th>Documento</th>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Opcion</th>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="tercero in terceros">
+                                                <td>{[{tercero.tercero_documento}]}</td>
+                                                <td>{[{tercero.tercero_nombre}]}</td>
+                                                <td>{[{tercero.tercero_tipo}]}</td>
+                                                <td>
+                                                    <a ng-click="seleccionarTercero(tercero)">
+                                                        Seleccionar
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                <div class="col-lg-12" ng-show="tercero!=null">
+                                    <table class="table table-condensed">
+                                        <tr>
+                                            <td>Documento tercero</td>
+                                            <td>{[{tercero.tercero_documento}]}</td>
+                                            <td>Nombre tercero</td>
+                                            <td>{[{tercero.tercero_nombre}]}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tipo tercero</td>
+                                            <td>{[{tercero.tercero_tipo}]}</td>
+                                            <td>Numero suscripciones</td>
+                                            <td>{[{tercero.numero_suscripciones}]}</td>
+                                        </tr>                                        
+                                    </table>                                
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 form-group">
+                                    <label>Ciclos disponibles</label>
+                                    <select id="ciclo" ng-model="ciclo" ng-change="updateTipoUso(ciclo)" class="form-control input-sm">
+                                        <option ng-value="-1">Todos los ciclos</option>
+                                        <option ng-repeat="option in ciclos" ng-value="$index">
+                                            {[{option.cic_nombre}]}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-6 form-group">
+                                    <label>Tipos de uso</label>
+                                    <select id="tipoUso" ng-model="tipoUso" class="form-control input-sm">
+                                        <option ng-value="-1">Todos los tipos</option>
+                                        <option ng-repeat="option in tiposUso" ng-value="$index">
+                                            {[{option.f2}]}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                
+                                <div class="col-lg-6 form-group">
+                                    <label>Mes</label>
+                                    <select id="mesPeriodo" ng-model="mesPeriodo" class="form-control input-sm">
+                                        <option ng-repeat="mes in meses" ng-value="mes.numerodemes">
+                                            {[{mes.periodo}]}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-lg-6 form-group">
+                                    <label>Año</label>
+                                    <select id="annoPeriodo" ng-model="annoPeriodo" class="form-control input-sm">
+                                        <option ng-repeat="anno in annos" ng-value="anno.anos">
+                                            {[{anno.anos}]}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                
+                            </div>
+                            <hr/>
+                        </div>
+                        <div class="panel-footer">   
+                            <div class="row">
+                                <div class="col-md-4 col-md-offset-2">
+                                    <button type="button" class="btn btn-primary btn-sm" ng-click="generarReporte(1)">
+                                        <i class="fa fa-file-excel-o fa-lg"></i> Generar Listados
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary btn-sm" ng-click="generarReporte(2)">
+                                        <i class="fa fa-file-pdf-o fa-lg"></i> Generar Facturacion
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </div>
+    </div>
+    <script type="text/ng-template" id="terceroTemplate.html">
+        <a>        
+        <span ng-bind-html="match.model.tercero_nombre | uibTypeaheadHighlight:query"></span>                
+        </a>
+    </script>
+</div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-animate.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/listados/listadoTomaLecturas.control.angular.js')}}"></script>
+{% endblock %}

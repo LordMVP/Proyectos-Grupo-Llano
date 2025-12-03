@@ -1,0 +1,342 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/recaudos/consignaciones.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="{{asset('bundles/Llanogas/css/recaudos/fileinput.min.css')}}" />
+    <style type="text/css">
+
+        div#divFiltro, div#divFiltroFacturas{
+            display:none;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Cartera: Gestión de Cartera - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="filtrar" id="btnFiltrar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+        <div class="divBotones">
+            <input type="button" value="primero" id="btnPrimero" class="btn" />
+            <input type="button" value="anterior" id="btnAnterior" class="btn" />
+            <input type="button" value="siguiente" id="btnSiguiente" class="btn" />
+            <input type="button" value="último" id="btnUltimo" class="btn" />
+        </div>
+    </div>
+
+    <fieldset id="fsInfoSuscripcion">
+        <legend>Información de Suscripción</legend>
+        <div>
+            <div class="campoCorto">
+                <label for="cmbEstado">Estado:</label>
+                {{cmbEstado|raw}}
+            </div>
+
+            <div class="campo">
+                <label for="txtFecha">Fecha:</label>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtIdSuscripcion">Id Suscripción:</label>
+                <input type="text" id="txtIdSuscripcion" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtCodAnterior">Cód. Anterior:</label>
+                <input type="text" id="txtCodAnterior" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtNombreSuscriptor">Nombre Suscriptor:</label>
+                <input type="text" id="txtNombreSuscriptor" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtNumGestion">Núm. Gestión:</label>
+                <input type="text" id="txtNumGestion" disabled="disabled" />
+            </div>
+
+            <div class="campo">
+                <label for="txtTelefonoCelular">Teléfono celular:</label>
+                <input type="text" id="txtTelefonoCelular" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTelefonoFijo">Teléfono fijo:</label>
+                <input type="text" id="txtTelefonoFijo" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtDireccion">Dirección:</label>
+                <input type="text" id="txtDireccion" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtCicloPeriodo">Ciclo y Periodo:</label>
+                <input type="text" id="txtCicloPeriodo" disabled="disabled" />
+            </div>
+
+
+
+            <div class="campo">
+                <label for="txtTipoSuscripcion">Tipo de Suscripción:</label>
+                <input type="text" id="txtTipoSuscripcion" disabled="disabled" />
+            </div>
+
+
+            <div class="campo">
+                <label for="txtTipoUso">Tipo de Uso:</label>
+                <input type="text" id="txtTipoUso" disabled="disabled" />
+            </div>
+
+            <button id="btnCargarFacturas" class="btnSimple">Cargar Facturas</button>
+        </div>
+    </fieldset>
+
+    <div>
+        <button id="btnNuevoSeguimiento" class="btnSimple">Nuevo Seguimento</button>
+    </div>
+
+    <div>
+        <table class="tabla" id="tblFacturas"></table>
+    </div> 
+
+    <!--Fieldset oculto para ver el historial-->
+    <fieldset id="fieldsetHistorial">
+        <legend>Historial</legend>
+        <table id="tblHistorial" class="tabla"></table>
+    </fieldset>
+
+    <!-- Division para filtro suscriptor-->
+    <div id="divFiltro">
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDoc">Cédula/NIT:</label>
+            <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+    </div>
+
+
+    <!--Div para el filtro de facturas -->
+    <div id="divFiltroFacturas">
+
+        <div>
+            <div class="campoMitad">
+                <label for="cmbTipoDocumento">Tipo de Documento:</label>
+                <select id="cmbTipoDocumento"></select>
+            </div>
+            <div class="campoMitad" style="margin-left: 10px; margin-right: 15px;">
+                <label for="cmbDocumento">Documento:</label>
+                <select id="cmbDocumento"></select>
+            </div>
+        </div>
+
+
+        <fieldset class="grupoControles campoMitad">
+            <legend>Morosidad</legend>
+            <div class="campoMitad">
+                <label for="txtMorosidadInicial">Desde:</label>
+                <input type="number" id="txtMorosidadInicial" min="0" />
+            </div>
+
+            <div class="campoMitad">
+                <label for="txtMorosidadFinal">Hasta:</label>
+                <input type="number" id="txtMorosidadFinal" min="0" />
+            </div>
+        </fieldset>
+
+        <fieldset class="grupoControles campoMitad">
+            <legend>Saldo</legend>
+            <div class="campoMitad">
+                <label for="txtSaldoInicial">Desde:</label>
+                <input type="number" id="txtSaldoInicial" min="0" />
+            </div>
+
+            <div class="campoMitad">
+                <label for="txtSaldoFinal">Hasta:</label>
+                <input type="number" id="txtSaldoFinal" min="0" />
+            </div>
+        </fieldset>
+
+    </div>
+
+    <!-- Div para enviar la informacion del seguimiento -->
+    <div id="divSeguimiento" style="display:none;">
+        <div style="margin-bottom:10px;">
+            <label for="cmbEtapa">Etapa: </label>
+            <select id="cmbEtapa">
+                <option value="0">Seleccione una opción</option>
+                {% for etapa in etapas %}
+                    <option value="{{etapa.idetapa}}">{{etapa.etapa}}</option>
+                {% endfor %}
+            </select>
+
+            <label for="cmbMedioComunicacion">Medio de Comunicación: </label>
+            <select id="cmbMedioComunicacion">
+                <option value="0">Seleccione una opción</option>
+                <option value="217">Visita</option>
+                <option value="215">Carta</option>
+                <option value="216">Llamada Telefónica</option>
+            </select>
+
+            <div>
+                <button id="btnAdjuntarArchivo" class="btnSimple">Adjuntar archivo</button>
+            </div>
+            <div id="archivoAdjunto" style="display: none;">
+                <input type="file" id="txtArchivo" multiple accept="pdf" />
+            </div>
+            <div id="divArchivos">
+
+            </div>
+            <p id="pMensajeArchivo" class="pMensaje"></p>
+        </div>
+
+
+        <div id="divInfoVisita" style="display:none;">
+            <div>
+                <div class="campo">
+                    <label for="txtNombreReceptor">Nombre de quien atiende la visita:</label>
+                    <input type="text" id="txtNombreReceptor" data-nombre="Nombre persona atiende Visita" data-id="21" />
+                </div>
+                <div class="campo">
+                    <label for="txtParentesco">Parentesco con el titular:</label>
+                    <input type="text" id="txtParentesco" data-nombre="Parentesco Persona con Titular" data-id="22" />
+                </div>
+                <div class="campo">
+                    <label for="txtTelefono">Teléfono:</label>
+                    <input type="text" id="txtTelefono" data-id="23" data-nombre="Telefono" />
+                </div>
+            </div>
+
+            <div>
+                <div class="campo">
+                    <label for="cmbEstadoServicio">Estado del Servicio:</label>
+                    <select id="cmbEstadoServicio" data-id="24" data-nombre="Estado del Servicio">
+                        <option value="0">Seleccione una opción</option>
+                        <option value="S">Suspendido</option>
+                        <option value="A">Activo</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="txtLecturaActual">Lectura Actual:</label>
+                    <input type="text" id="txtLecturaActual" data-nombre="Lectura Actual" data-id="25" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtMotivoMorosidad">Motivo de la Morosidad:</label>
+                    <select id="txtMotivoMorosidad" data-id="26" data-nombre="Motivo de la Morosidad" >
+                     <option value="0">Seleccione una opción</option>
+                        <option>Difícil situación economica</option>
+                        <option>Inconvenientes con la factura</option>
+                        <option>Desconoce el motivo</option>
+                        <option>Usuario manifiesta ya haber realizado el pago</option>
+                        <option>Otros</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <div class="campo">
+                    <label for="cmbVoluntadPago">Voluntad de Pago:</label>
+                    <select id="cmbVoluntadPago" data-id="27" data-nombre="Voluntad de Pago">
+                        <option value="0">Seleccione una opción</option>
+                        <option value="S">Sí</option>
+                        <option value="N">No</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="cmbInconvenientesServicio">Inconvenientes con el Servicio:</label>
+                    <select id="cmbInconvenientesServicio" data-id="28" data-nombre="Inconvenientes con el Servicio">
+                        <option value="0">Seleccione una opción</option>
+                        <option>No han instalado</option>
+                        <option>No han certificado</option>
+                        <option>No llega la factura</option>
+                        <option>La instalación esta mal elaborada</option>
+                        <option>Casa sola</option>
+                        <option>Casa deshabitada</option>
+                        <option>Otros</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="cmbCambioPropietario">¿Ha cambiado de propietario?: </label>
+                    <select id="cmbCambioPropietario" data-id="29" data-nombre="Ha cambiado de Propietario">
+                        <option value="0">Seleccione una opción</option>
+                        <option value="S">Sí</option>
+                        <option value="N">No</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+
+                <div class="campo">
+                    <label for="cmbCuotasAltas">¿Las cuotas de financiación son altas?:</label>
+                    <select id="cmbCuotasAltas" data-id="30" data-nombre="Cuotas de Financiacion Altas">
+                        <option value="0">Seleccione una opción</option>
+                        <option value="S">Sí</option>
+                        <option value="N">No</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="divInfoCarta" style="display:none;">
+            <label for="txtObservacionesCarta">Observaciones:</label>   
+            <textarea id="txtObservacionesCarta" data-id="17" data-nombre="Observacion"></textarea>
+        </div>
+
+        <div id="divInfoLlamada" style="display:none;">
+            <div class="campo">
+                <label for="txtPersonaAtiende">Nombre de quien atiende:</label>
+                <input type="text" id="txtPersonaAtiende" data-nombre="Nombre Persona Atiende Llamada" data-id="18" />
+            </div>
+            <div class="campo">
+                <label for="txtMotivoMorosidadLlamada">Motivo de morosidad:</label>
+                <select id="txtMotivoMorosidadLlamada" data-nombre="Motivo de la Morosidad" data-id="19" />
+                        <option value="0">Seleccione una opción</option>
+                        <option>Difícil situación economica</option>
+                        <option>Inconvenientes con la factura</option>
+                        <option>Desconoce el motivo</option>
+                        <option>Usuario manifiesta ya haber realizado el pago</option>
+                        <option>Otros</option>
+                    </select>
+            </div>
+            <div class="campo">
+                <label for="txtFechaEstimadaPago">Fecha para cancelar la deuda:</label>
+                <input type="text" id="txtFechaEstimadaPago" data-nombre="Posible Fecha Cancela Deuda" data-id="20" />
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/fileinput.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/gestionar_cartera/gestionar_cartera.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/gestionar_cartera/gestionar_cartera.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/gestionar_cartera/gestionar_cartera.vista.js')}}"></script>
+
+
+{% endblock %}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="SyrSusreconex" table="syr_susReconex">
+    <id name="syrIderegistro" type="bigint" column="syr_ideRegistro">
+      <generator strategy="SEQUENCE"/>
+    </id>
+    <field name="syrEstado" type="string" column="syr_estado" nullable="false"/>
+    <field name="syrFecha" type="datetime" column="syr_fecha" nullable="false"/>
+    <field name="syrFecaprobac" type="datetime" column="syr_fecAprobac" nullable="true"/>
+    <field name="syrFecprocesad" type="datetime" column="syr_fecProcesad" nullable="true"/>
+    <field name="syrObservacion" type="string" column="syr_observacion" length="255" nullable="true"/>
+    <field name="dsusIderegistr" type="smallint" column="dsus_ideRegistr" nullable="false"/>
+    <field name="proIderegistro" type="smallint" column="pro_ideRegistro" nullable="false"/>
+    <field name="cicIderegistro" type="smallint" column="cic_ideRegistro" nullable="false"/>
+    <field name="perIderegistro" type="smallint" column="per_ideRegistro" nullable="false"/>
+    <field name="perAno" type="smallint" column="per_ano" nullable="false"/>
+  </entity>
+</doctrine-mapping>

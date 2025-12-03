@@ -1,0 +1,35 @@
+<!-- TEMPLATE PARA MOSTRAR LA INFORMACIÓN DE LA CARTERA FINANCIADA : ESTADO DE CUENTA -->
+
+<div id="templateCarteraFinanciada">
+    {{#vlrfinanciaciones}}
+    <h2>Consulta Financiación {{idfinanciacion}}</h2>
+    <div class="divFinanciacion">
+        <div class="campoCorto">
+            <label for="txtIdFinanciacion_{{idfinanciacion}}">ID Suscripción:</label>
+            <input type="text" id="txtIdFinanciacion_{{idfinanciacion}}" value="{{idfinanciacion}}" disabled="disabled" class="inputImpresion" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaFinanciacion_{{idfinanciacion}}">Valor financiable:</label>
+            <input type="text" id="txtFechaFinanciacion_{{idfinanciacion}}" value="{{valorfinanciacion}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+
+        <div class="campo">
+            <label for="txtCapitaInicial_{{idfinanciacion}}">Valor no financiable:</label>
+            <input type="text" id="txtCapitaInicial_{{idfinanciacion}}" value="{{valornofinanciacion}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+        <div class="campoCorto">
+            <label for="txtSaldoCapital_{{idfinanciacion}}">Interés por mora:</label>
+            <input type="text" id="txtSaldoCapital_{{idfinanciacion}}" value="{{valorinteres}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtValorAmortizado_{{idfinanciacion}}">Interés corriente:</label>
+            <input type="text" id="txtValorAmortizado_{{idfinanciacion}}" value="{{valorcorriente}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+
+        <hr />
+    </div>
+    {{/vlrfinanciaciones}}
+</div>
+

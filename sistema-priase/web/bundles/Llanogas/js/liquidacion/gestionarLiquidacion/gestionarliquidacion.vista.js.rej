@@ -1,0 +1,11 @@
+diff a/web/bundles/Llanogas/js/liquidacion/gestionarLiquidacion/gestionarliquidacion.vista.js b/web/bundles/Llanogas/js/liquidacion/gestionarLiquidacion/gestionarliquidacion.vista.js	(rejected hunks)
+@@ -502,7 +502,8 @@
+         $.each(camposValidar, function (index, elemento) {
+             var campo = $(elemento);
+             if (campo.val() === '' || campo.val() === '-1' || campo.val() === null) {
+-                camposInvalidos += $('label[for =' + campo[0].id + ']').html() + ' ';
++                var label = $('label[for =' + campo[0].id + ']').html();
++                camposInvalidos += label.replace(':', '');
+             }
+         });
+         if (camposInvalidos !== '') {

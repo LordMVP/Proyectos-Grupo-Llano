@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ListarAgendas/subcomponentes/Lista.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ListarAgendas/subcomponentes/Lista.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Botonera, Input, Tabla } from 'appfuture-react'
+
+import Util from '../../../global/util'
+import Peticion from '../../../global/peticion'
+import API from '../../../global/rutas_api'
+
+import { toast } from 'react-toastify'
+
+/**
+ *
+ *
+ * @class Lista
+ * @extends {Component}
+ */
+class Lista extends Component {
+
+	/**
+     *Define estados iniciales
+     * @memberof Lista
+     */
+	state = {
+		lista: [],
+
+		// defecto
+
+		empresa: '8000212729',
+		agenda: '',
+	}
+
+	columnas = [
+		{
+			Header: 'Agendas',
+
+			columns: [
+				{ Header: 'Agenda', accessor: 'agendaCod' },
+				{ Header: 'Descripcion', accessor: 'agendaNom' },
+				{ Header: 'Alias', accessor: 'agendaAlias' },
+
+				{
+					Header: 'Acción',
+					accessor: 'id',
+					Cell: (props) => {
+						const editar = () => {
+							const { empresa } = this.state
+							const { original } = props
+
+							this.props.onChange({ ...original, empresa })
+						}
+
+						const eliminar = async () => {
+							const {
+								original: { agendaLlacom },
+							} = props
+
+							await Peticion.post({
+								url: API.LISTAR_AGENDAS.ELIMINAR_AGENDA,
+								parametros: { agendaLlacom },
+							})
+
+							this.buscar()
+						}
+
+						// elemento
+
+						return (
+							&lt;div className="d-flex justify-content-center btn-group">
+								&lt;button className="btn" onClick={editar}>
+									editar
+								&lt;/button>
+								&lt;button className="btn" onClick={eliminar}>
+									eliminar
+								&lt;/button>
+							&lt;/div>
+						)
+					},
+				},
+			],
+		},
+	]
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+
+	/**
+	 *
+	 * Busca por agenda y lista la información en una tabla
+	 * @async
+	 * @method
+	 */
+	buscar = async () => {
+		let parametros = {
+			agendaNom: this.state.agenda,
+		}
+
+		// peticion
+
+		let lista = await Peticion.post({
+			url: API.LISTAR_AGENDAS.CONSULTA_POR_CODIGO,
+			parametros,
+		})
+
+		if (!lista.length) {
+			// no hay datos
+
+			let opciones = {
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+			}
+
+			toast.error('Nada que coincida con ese código', opciones)
+			return
+		}
+
+		this.setState({ lista })
+	}
+
+	/**
+	 *
+	 * Crear la lista y actualiza los estados del componente padre
+	 * @method
+	 */
+	crear = () => this.props.onChange({})
+
+	/**
+	 *Renderiza la vista 
+	 * @return {JSX} componente - returna vista jsx 
+	 */
+	render() {
+		const { BotonBuscar } = this
+
+		return (
+			&lt;React.Fragment>
+				&lt;h1>Listar agendas&lt;/h1>
+
+				&lt;div className="d-flex justify-content-center btn-group">
+					&lt;button className="btn" onClick={this.buscar}>
+						&lt;span>buscar&lt;/span>
+					&lt;/button>
+					&lt;button className="btn" onClick={this.crear}>
+						&lt;span>crear&lt;/span>
+					&lt;/button>
+				&lt;/div>
+
+				&lt;div className="contenedor fila">
+					&lt;Input
+						id="agenda"
+						label="código o nombre"
+						value={this.state.agenda}
+						onChange={this.change}
+					/>
+				&lt;/div>
+
+				&lt;div className="contenedor">
+					&lt;Tabla datos={this.state.lista} columnas={this.columnas} />
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+export default Lista
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

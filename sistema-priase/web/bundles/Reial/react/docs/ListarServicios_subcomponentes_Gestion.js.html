@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ListarServicios/subcomponentes/Gestion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ListarServicios/subcomponentes/Gestion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input, Interruptor, VentanaDialogo } from 'appfuture-react'
+
+import Util from '../../../global/util'
+import Peticion from '../../../global/peticion'
+import API from '../../../global/rutas_api'
+
+
+/**
+ *
+ *
+ * @class Gestion
+ * @extends {Component}
+ */
+class Gestion extends Component {
+
+	montado = false
+
+	/**
+     *Define estados iniciales
+     * @memberof Gestion
+     */
+	state = {
+		dialogoModal: false,
+
+		// defecto
+
+		identificador: '',
+
+		codigo: '',
+		orden: '',
+		nombre: '',
+		valor: '',
+		porcentaje: '',
+		permitirAdjunto: false,
+
+		padre: '-1',
+		tipo: '-1',
+		empresa: '-1',
+		dependencia: '-1',
+		municipio: '-1',
+	}
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+	BotonGuardar = () => {
+		const { dialogoModal, identificador, codigo, ...estado } = this.state
+
+		/* prettier-ignore */
+
+		return Util.validarObjeto(estado)
+			? &lt;button className="btn" onClick={this.handleDialogo}>guardar&lt;/button>
+			: &lt;button className="btn" disabled={true}>guardar&lt;/button>
+	}
+	/**
+     *
+     *Habilita el botón eliminar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+	BotonEliminar = () => {
+		/* prettier-ignore */
+
+		return this.props.value.servicioCod
+			? &lt;button className="btn" onClick={this.eliminar}>eliminar&lt;/button>
+			: &lt;button className="btn" disabled={true}>eliminar&lt;/button>
+	}
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     */
+	componentDidMount() {
+		// empresaJson
+
+		Peticion.post({
+			url: API.LISTAR_SERVICIOS.LISTAR_EMPRESAS,
+			config: {
+				valor: 'empresaCod',
+				texto: 'empresaNom',
+			},
+			callback: empresaJson => this.setState({ empresaJson }),
+		})
+
+		// datos
+
+		if (this.props.value.servicioCod) {
+			// editar
+
+			this.obtenerServicio()
+		}
+
+		else this.montado = true
+	}
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} props - Cargar atributos del componente
+     */
+	componentDidUpdate(props, state) {
+		if (this.montado) {
+			// dependenciaJson y municipioJson
+
+			if (this.state.empresa !== state.empresa) {
+				// consultar dependencias
+
+				if (Util.validarValor(this.state.empresa)) {
+					this.cambioEmpresa(this.state.empresa)
+				}
+
+				else this.setState({
+					dependencia: '-1',
+					municipio: '-1',
+					dependenciaJson: undefined,
+					municipioJson: undefined,
+				})
+			}
+
+			// padreJson
+
+			if (this.state.tipo !== state.tipo) {
+				if (Util.validarValor(this.state.tipo)) {
+					this.obtenerPadre(this.state.tipo)
+				}
+
+				else this.setState({
+					padre: '-1',
+					padreJson: undefined,
+				})
+			}
+
+			// tipoJson
+
+			if (this.state.dependencia !== state.dependencia) {
+				const { dependencia, empresa } = this.state
+
+				if (Util.validarValor(dependencia) &amp;&amp; Util.validarValor(empresa)) {
+					this.obtenerTipo(dependencia, empresa)
+				}
+
+				else this.setState({
+					tipo: '-1',
+					padre: '-1',
+					tipoJson: undefined,
+					padreJson: undefined,
+				})
+			}
+		}
+	}
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+	/**
+	 *
+	 *Detecta el cambio de empresa y lista las dependecias asociadas
+	 * @method
+	 * @async
+	 * @param {string} empresa - Valor empresa
+	 */
+	cambioEmpresa = async (empresa) => {
+		empresa = Util.obtenerId(empresa)
+
+		// dependenciaJson
+
+		await Peticion.post({
+			url: API.LISTAR_AGENDAS.LISTAR_DEPENDENCIAS,
+			parametros: {
+				depempresaCodemp: empresa
+			},
+			config: {
+				valor: 'depempresaCod',
+				texto: 'depempresaNom',
+			},
+			callback: dependenciaJson => this.setState({ dependenciaJson })
+		})
+
+		// municipioJson
+
+		await Peticion.post({
+			url: API.LISTAR_SERVICIOS.LISTAR_MUNICIPIOS,
+			parametros: {
+				proyectoCodemp: empresa
+			},
+			config: {
+				valor: 'proyectoCod',
+				texto: 'proyectoNom',
+			},
+			callback: municipioJson => this.setState({ municipioJson })
+		})
+	}
+
+	/**
+	 *
+	 * Lista los niveles con la empresa y la dependencia
+	 * @method
+	 * @async
+	 * @param {string} empresa - Valor empresa
+	 * @param {string} dependencia - Valor dependencia
+	 */
+	obtenerTipo = async (dependencia, empresa) => {
+		return Peticion.post({
+			url: API.LISTAR_SERVICIOS.LISTAR_NIVELES,
+			parametros: {
+				nivelCodemp: Util.obtenerId(empresa),
+				nivelCoddepemp: Util.obtenerId(dependencia),
+			},
+			config: {
+				valor: 'nivelCod',
+				texto: 'nivelNom',
+			},
+			callback: tipoJson => this.setState({ tipoJson })
+		})
+	}
+
+	/**
+	 *
+	 * Lista los niveles por servicio
+	 * @method
+	 * @async
+	 * @param {string} tipo - Valor tipo
+	 */
+	obtenerPadre = async (tipo) => {
+		return Peticion.post({
+			url: API.LISTAR_SERVICIOS.CONSULTA_POR_NIVEL,
+			parametros: {
+				servicioNiv: Util.obtenerId(tipo)
+			},
+			config: {
+				valor: 'servicioCod',
+				texto: 'servicioNom',
+			},
+			callback: padreJson => this.setState({ padreJson })
+		})
+	}
+	/**
+	 *
+	 * Lista los niveles por servicio
+	 * @method
+	 * @async
+	 */
+	obtenerServicio = async () => {
+		const servicio = this.props.value
+
+		this.setState({
+			identificador: servicio.servicioLlacom,
+			codigo: servicio.servicioCod,
+			orden: servicio.servicioOrdser,
+			nombre: servicio.servicioNom,
+			valor: servicio.servicioValuni,
+			porcentaje: servicio.servicioPorval,
+			permitirAdjunto: servicio.servicioAdjuntoreial || false,
+
+			padre: servicio.servicioItedep,
+			tipo: servicio.servicioNiv,
+			empresa: servicio.servicioCodemp,
+			dependencia: servicio.servicioCoddepemp,
+			municipio: servicio.servicioCodpro,
+		})
+
+		await this.cambioEmpresa(servicio.servicioCodemp)
+		await this.obtenerPadre(servicio.servicioNiv)
+		await this.obtenerTipo(servicio.servicioCoddepemp, servicio.servicioCodemp)
+
+		this.montado = true
+	}
+
+	/**
+	 *
+	 * Cierra la acción de gestión
+	 * @method
+	 */
+	cerrar = () => this.props.onChange(null)
+
+	/**
+	 *
+	 * Elimina el servicio seleccionado
+	 * @method
+	 */
+	eliminar = () => {
+		Peticion.post({
+			url: API.LISTAR_SERVICIOS.ELIMINAR_SERVICIO,
+			parametros: {
+				servicioCod: this.state.codigo
+			}
+		})
+
+		// final
+
+		this.cerrar()
+	}
+
+	/**
+	 *
+	 * Guarda el servicio seleccionado
+	 * @method
+	 */
+	guardar = () => {
+		const servicio = this.props.value
+		const parametros = {
+			servicioNom: this.state.nombre,
+			servicioNiv: Util.obtenerId(this.state.tipo),
+			servicioCoddepemp: Util.obtenerId(this.state.dependencia),
+			servicioCodemp: this.state.empresa,
+			servicioAdjuntoreial: this.state.permitirAdjunto,
+			servicioValuni: this.state.valor,
+			servicioPorval: this.state.porcentaje,
+			servicioItedep: Util.obtenerId(this.state.padre),
+			servicioCodpro: Util.obtenerId(this.state.municipio),
+		}
+
+		if (servicio.servicioLlacom) {
+			// editar
+
+			parametros.servicioCod = servicio.servicioLlacom
+			parametros.servicioLlacom = this.state.identificador
+		}
+
+		Peticion.post({
+			url: API.LISTAR_SERVICIOS.CREAR_EDITAR,
+			parametros,
+		})
+
+		// final
+
+		this.cerrar()
+	}
+
+
+	/**
+	 *
+	 * Despliega el modal
+	 * @method
+	 * 
+	 */
+	handleDialogo = () => {
+		this.setState({ dialogoModal: !this.state.dialogoModal })
+	}
+
+	botones = [
+		{ texto: 'guardar', callback: this.guardar },
+		{ texto: 'cancelar', callback: this.handleDialogo },
+	]
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */	
+	render() {
+		const { BotonGuardar, BotonEliminar } = this
+
+		return (
+			&lt;React.Fragment>
+				&lt;h1>Crear/Editar servicio&lt;/h1>
+
+				&lt;VentanaDialogo
+					titulo="Confirmación"
+					texto="¿Confirma transacción?"
+					mostrar={this.state.dialogoModal}
+					botones={this.botones}
+				/>
+
+				&lt;div className="d-flex justify-content-center btn-group">
+					&lt;BotonGuardar />
+					&lt;BotonEliminar />
+					&lt;button className="btn" onClick={this.cerrar}>
+						&lt;span>cancelar&lt;/span>
+					&lt;/button>
+				&lt;/div>
+
+				&lt;div className="contenedor formulario">
+					&lt;Input
+						id="identificador"
+						label="identificador"
+						value={this.state.identificador || 'Autogenerado'}
+						extra={{ disabled: true }}
+					/>
+
+					&lt;Input
+						id="codigo"
+						label="codigo"
+						value={this.state.codigo || 'Autogenerado'}
+						extra={{ disabled: true }}
+					/>
+
+					&lt;Combo
+						id="empresa"
+						label="empresa"
+						value={this.state.empresa}
+						opciones={this.state.empresaJson}
+						onChange={this.change}
+					/>
+
+					&lt;Combo
+						id="dependencia"
+						label="dependencia"
+						value={this.state.dependencia}
+						opciones={this.state.dependenciaJson}
+						onChange={this.change}
+						extra={{ disabled: !this.state.dependenciaJson }}
+					/>
+
+					&lt;Combo
+						id="municipio"
+						label="municipio"
+						value={this.state.municipio}
+						opciones={this.state.municipioJson}
+						onChange={this.change}
+						extra={{ disabled: !this.state.municipioJson }}
+					/>
+
+					&lt;Combo
+						id="tipo"
+						label="tipo"
+						value={this.state.tipo}
+						opciones={this.state.tipoJson}
+						onChange={this.change}
+						extra={{ disabled: !this.state.tipoJson }}
+					/>
+
+					&lt;Combo
+						id="padre"
+						label="padre"
+						value={this.state.padre}
+						opciones={this.state.padreJson}
+						onChange={this.change}
+						extra={{ disabled: !this.state.padreJson }}
+					/>
+
+					&lt;Input
+						id="orden"
+						label="orden"
+						value={this.state.orden}
+						onChange={this.change}
+					/>
+
+					&lt;Input
+						id="nombre"
+						label="nombre"
+						value={this.state.nombre}
+						onChange={this.change}
+					/>
+
+					&lt;Input
+						id="valor"
+						label="valor"
+						value={this.state.valor}
+						onChange={this.change}
+					/>
+
+					&lt;Input
+						id="porcentaje"
+						label="porcentaje"
+						value={this.state.porcentaje}
+						onChange={this.change}
+					/>
+				&lt;/div>
+
+				&lt;div className="contenedor columna">
+					&lt;Interruptor
+						id="permitirAdjunto"
+						label="permitir adjuntar archivos"
+						value={this.state.permitirAdjunto}
+						onChange={this.change}
+					/>
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+export default Gestion
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

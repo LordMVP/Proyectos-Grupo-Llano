@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BusquedaServicios/subcomponentes/Servicio/Materiales.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BusquedaServicios/subcomponentes/Servicio/Materiales.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import { Combo, Input, Fecha, Tabla } from 'appfuture-react';
+
+import Autocompletado from '../../../Assets/componentes/Autocompletado';
+import API from '../../../../global/rutas_api';
+import Peticion from '../../../../global/peticion';
+import axios from 'axios';
+import Util from '../../../../global/util';
+
+
+/**
+ *
+ *
+ * @class Materiales
+ * @extends {Component}
+ */
+class Materiales extends Component {
+
+	/**
+     *Define estados iniciales
+     * @memberof Materiales
+     */
+  state = {
+    colaboradorJson: this.props.colaboradorJson || [],
+    materialJson: this.props.materialJson || [],
+    listaMaterial: this.props.listaMaterial || [],
+    lista: this.props.lista || [],
+
+    // defecto
+
+    colaborador: '',
+    material: '',
+
+    cantidad: '',
+    fechaAplicacion: '',
+    valorMaterial: '',
+    observaciones: '',
+    numeroMedidor: '',
+    habilitarNumeroMedidor: true,
+
+
+    alto: '',
+    largo: '',
+    profundo: '',
+  }
+
+  columnas = [
+    {
+      Header: 'Materiales',
+
+      columns: [
+        {
+          Header: 'Material',
+          accessor: 'material',
+          /*Cell: (props) => props.value.materialCod*/
+        },
+
+        { Header: 'Cantidad', accessor: 'tranmaterialCan' },
+
+        {
+          Header: 'Fecha Aplicación',
+          accessor: 'tranmaterialFecgra',
+          Cell: (props) => {
+            try {
+              return props.value;
+            } catch (error) {
+              return 'Indefinida';
+            }
+          },
+        },
+
+        { Header: 'Medidas', accessor: 'tranmaterialMedidas' },
+
+        {
+          Header: 'Observaciones',
+          accessor: 'tranmaterialObservaciones',
+        },
+      ],
+    },
+  ]
+
+	/**
+     *
+     *Habilita el botón agregar
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */
+
+  BotonAgregar = () => {
+    /* prettier-ignore */
+    const { colaborador, material, fechaAplicacion, cantidad, valorMaterial, alto, largo, profundo } = this.state
+    return Util.validarObjeto({ colaborador, material, fechaAplicacion, cantidad, valorMaterial, alto, largo, profundo })
+      ? &lt;button className="btn" onClick={this.agregar}>agregar&lt;/button>
+      : &lt;button className="btn" disabled={true}>agregar&lt;/button>
+  }
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */
+  BotonGuardar = () => {
+    return (this.props.value.length > 0)
+      ? &lt;button className="btn" onClick={this.guardar}>Guardar&lt;/button>
+      : &lt;button className="btn" disabled={true}>Guardar&lt;/button>
+  };
+
+  /**
+   * Método encargado de llegar un control de cuanto se actualiza el componente.
+   * @method
+   * @param {Object} props Propiedades del componente
+   */
+  componentDidUpdate(props, state) {
+    if (props.servicio.id !== this.props.servicio.id) {
+      //this.obtenerLista()
+    }
+    if (props.colaboradorJson !== this.props.colaboradorJson) {
+      this.setState({ colaboradorJson: this.props.colaboradorJson })
+    }
+    if (props.materialJson !== this.props.materialJson) {
+      this.setState({ materialJson: this.props.materialJson })
+    }
+    if (props.listaMaterial !== this.props.listaMaterial) {
+      this.setState({ listaMaterial: this.props.listaMaterial })
+    }
+  }
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+  async componentDidMount() {
+    const { servicio } = this.props
+  }
+
+  change = ({ target: { id, value } }) => {
+    this.setState({ [id]: value });
+    if (id == 'material') {
+      if (value.search('-') !== -1) {
+        const listaMaterial = this.state.listaMaterial;
+        const filtro = Util.obtenerId(value);
+        const item = listaMaterial.filter((a) => {
+          return a.materialCod == filtro;
+        });
+        this.setState({
+          valorMaterial: item[0].materialVlruni,
+          habilitarNumeroMedidor: !item[0].materialSwtmed,
+          numeroMedidor: item[0].materialSwtmed ? this.state.numeroMedidor : ''
+        });
+      } else {
+        this.setState({
+          valorMaterial: ''
+        });
+      }
+    }
+  }
+
+	/**
+	 *
+	 * Agregar material en la BD
+	 * @method
+	 * 
+	 */
+  agregar = () => {
+    const { alto, largo, profundo } = this.state
+    const servicio = this.props.servicio
+    const fecha = this.state.fechaAplicacion
+    //obtener valor del material
+    const listaMaterial = this.state.listaMaterial
+    const filtro = Util.obtenerId(this.state.material)
+    let materialSwtmed = listaMaterial.filter((a) => {
+      return a.materialCod == filtro
+    })
+    materialSwtmed = materialSwtmed[0].materialSwtmed
+
+    const datos = [
+      ...this.props.value,
+      {
+        tranmaterialCan: this.state.cantidad,
+        materialSwtmed,
+        tranmaterialFecgra: fecha,
+        tranmaterialOrdtra: servicio.ordenTrabajo,
+        tranmaterialCodsus: Util.obtenerId(servicio.suscriptor),
+        tranmaterialCodmat: Util.obtenerId(this.state.material),
+        tranmaterialCodemp: Util.obtenerId(servicio.contratante),
+        tranmaterialCodser: Util.obtenerId(servicio.id),
+        tranmaterialVlruni: this.state.valorMaterial,
+        tranmaterialObservaciones: this.state.observaciones,
+        tranmaterialMedidas: [alto, largo, profundo].join(', '),
+        medidorNummed: this.state.numeroMedidor,
+        //uso de la tabla
+        material: Util.obtenerId(this.state.material, 1)
+				/*material: {
+					materialCod: Util.obtenerId(this.state.material, 1),
+				},
+				tranmaterialNomemp: Util.obtenerId(this.state.colaborador, 1),*/
+      },
+    ]
+    this.props.onChange({ target: { id: 'materiales', value: datos } })
+    this.limpiarCampos()
+  }
+
+  /**
+   * Método encargado de guardar los materiales
+   * @method
+   */
+  guardar = async () => {
+    this.limpiarCampos()
+    this.props.onChange({ target: { id: 'materiales', value: [] } });
+    await this.props.guardar();
+    this.consultarMaterialesServicio();
+  };
+
+  /**
+   * Limpiar el formulario de agregar materiales
+   * @method
+   */
+  limpiarCampos = () => {
+    this.setState({
+      material: '',
+      cantidad: '',
+      fechaAplicacion: '',
+      valorMaterial: '',
+      observaciones: '',
+      alto: '',
+      largo: '',
+      profundo: '',
+    });
+  }
+
+
+  /**
+   * Método encargado de consultar los materiales listados
+   * @method
+   */
+  consultarMaterialesServicio = () => {
+    const servicio = this.props.servicio;
+    axios.post(API.BUSQUEDA_SERVICIOS.CONSULTAR_MATERIALES, {
+      ordenTrabajo: servicio.ordenTrabajo,
+      servicio: servicio.id,
+      suscripcion: servicio.suscriptor,
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        let lista = respuesta.data.datos.map(fila => {
+          fila.material = (typeof fila.material == 'string') ? fila.material : fila.material.materialNom;
+          return fila;
+        });
+        this.setState({ lista: lista });
+      }
+    });
+  };
+
+  /**
+ *Renderiza la vista 
+ * @return {JSX} componente - returna vista jsx 
+ */
+  render() {
+    return (
+      &lt;React.Fragment>
+        &lt;div className="contenedor formulario">
+          &lt;Autocompletado
+            id="colaborador"
+            label="colaborador"
+            marcaAgua={'Escribe el colaborador'}
+            opciones={this.state.colaboradorJson}
+            onChange={this.change}
+            value={this.state.colaborador}
+            required={true}
+            extra={{
+              disabled: false
+            }}
+          />
+          &lt;Autocompletado
+            id="material"
+            label="material"
+            marcaAgua={'Escribe el material'}
+            opciones={this.state.materialJson}
+            onChange={this.change}
+            value={this.state.material}
+            required={true}
+            extra={{
+              disabled: false
+            }}
+          />
+          &lt;Fecha
+            id='fechaAplicacion'
+            label='Fecha Aplicación'
+            name='fechaAplicacion'
+            fecha={this.state.fechaAplicacion}
+            onChange={this.change}
+          />
+          &lt;Input
+            id="numeroMedidor"
+            label="número medidor"
+            type="text"
+            value={this.state.numeroMedidor}
+            onChange={this.change}
+            extra={{
+              disabled: this.state.habilitarNumeroMedidor,
+            }}
+          />
+          &lt;Input
+            id="cantidad"
+            label="cantidad"
+            type="number"
+            value={this.state.cantidad}
+            onChange={this.change}
+          />
+          &lt;Input
+            id="valorMaterial"
+            label="valor material"
+            type="number"
+            value={this.state.valorMaterial}
+            onChange={this.change}
+          />
+          &lt;Input
+            id="observaciones"
+            label="observaciones"
+            value={this.state.observaciones}
+            onChange={this.change}
+          />
+        &lt;/div>
+
+        &lt;div className="contenedor fila">
+          &lt;Input
+            id="alto"
+            label="alto"
+            type="number"
+            value={this.state.alto}
+            onChange={this.change}
+          />
+
+          &lt;Input
+            id="largo"
+            label="largo"
+            type="number"
+            value={this.state.largo}
+            onChange={this.change}
+          />
+
+          &lt;Input
+            id="profundo"
+            label="profundo"
+            type="number"
+            value={this.state.profundo}
+            onChange={this.change}
+          />
+
+          &lt;div>
+            &lt;this.BotonAgregar />
+            &lt;this.BotonGuardar />
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div className="contenedor">
+          &lt;Tabla
+            datos={[...this.state.lista, ...this.props.value]}
+            columnas={this.columnas}
+          />
+        &lt;/div>
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+export default Materiales
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <style>
+        .controlTable input, .controlTable select{
+            width: 7.5em;
+        }
+        .btnDerecha{
+            text-align: right; 
+            padding-right: 35px;
+        }
+
+        .td-direccion{
+            min-width: 170px;
+        }
+
+        .td-valor{
+            min-width: 70px;
+        }
+
+        .td-observaciones{
+            min-width: 200px;
+        }
+            .td-observaciones input{
+                width: 95%;
+            }
+
+        .td-secuencia,
+        .td-suspension{
+            min-width: 50px;
+        }
+
+        .at-data-table{
+            max-height: 800px;
+        }
+
+        .td-efectiva{
+            min-width: 50px;
+        }
+
+        #divSuspension a, 
+        #divReconexion a{
+            color:#408BC4;
+        }
+    
+            #divSuspension a i, 
+            #divReconexion a i{
+                font-size:13px; 
+                margin-left:5px;
+            }
+
+        #divSuspension a:hover, 
+        #divReconexion a:hover{
+            text-decoration: none;
+        }
+
+        .txtFechaRequerido{
+            width:60px; 
+            text-align:center; 
+            padding-left:0px;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}Registro rápido de suspensiones y reconexiones - {{empresa}}  {% endblock %}
+
+{% block body %}
+{#    <input type="hidden" style="display: none;" value="{{fechaactual}}" id="txtFechaActual" />#}
+    <input type="hidden" style="display: none;" value="{{fechaactualSuspension}}" id="txtFechaactualSuspension" />
+    <input type="hidden" style="display: none;" value="{{fechaactualReconexion}}" id="txtFechaactualReconexion" />
+    <div class="divContenedorColapsable">
+        <div class="divColapsable">
+            <h3 class="tituloColapsable">Cabecera de las suspensiones y reconexiones</h3>
+            <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+        </div>
+        <div class="contenidoColapsable">
+            <div id="divFiltro">
+                <fieldset>
+                    <legend>Buscar:</legend>
+                    <label style="display: inline;" for="rbtnSus"><input name="radFiltrar" type="radio" data-val="S" id="rbtnSus"/> Suspensiones</label>
+                    <label style="display: inline;" for="rbtnRec"><input name="radFiltrar" type="radio" data-val="R" id="rbtnRec"/> Reconexiones</label>
+                </fieldset>
+                <fieldset id="fsParametros" style="display: none;">
+                    <legend>Filtro</legend>
+                    <div class="campo">
+                        <label for="txtMunicipio">Municipio:</label>
+                        <input type="text" id="txtMunicipio" placeholder="Municipio"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtBarrio">Barrio:</label>
+                        <input type="text" id="txtBarrio" placeholder="Barrio" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFechaProgramacion">Fecha de Programación:</label>
+                        <input type="text" id="txtFechaProgramacion" placeholder="Fecha de Programación"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cmbRuta">Ruta:</label>
+                        <select id="cmbRuta">
+                            <option value="-1" >Seleccione una opción</option>
+                            {% for rutas in listarutas %}
+                                <option value="{{rutas.idruta}}">{{rutas.ruta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cmbZona">Zona:</label>
+                        <select id="cmbZona">
+                            <option value="-1" >Seleccione una opción</option>
+                            <option value="R">Rural</option>
+                            <option value="U">Urbana</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cmbMotivoSus" id="lCmbMotivoSus" style="display: none;">Motivo:</label>
+                        <select id="cmbMotivoSus" style="display: none;">
+                            <option value="-1" >Seleccione una opción</option>
+                            {% for motivosus in listamotivosuspension %}
+                                <option value="{{motivosus.idmotivo}}">{{motivosus.motivo}}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="cmbMotivoReconexion" id="lCmbMotivoReconexion"style="display: none;">Motivo:</label>
+                        <select id="cmbMotivoReconexion" style="display: none;">
+                            <option value="-1" >Seleccione una opción</option>
+                            {% for motivorec in listamotivoreconexion %}
+                                <option value="{{motivorec.idmotivo}}">{{motivorec.motivo}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtTerceroRealiza">Tercero que ejecuta:</label>
+                        <input type="text" id="txtTerceroRealiza" placeholder="Tercero que ejecuta"/>
+                    </div>
+
+                    <div class="campo">
+                        <fieldset>
+                            <legend>Alto riesgo:</legend>
+                            <label style="display: inline;" for="rbtnS">
+                                <input name="radAltoRiesgo" type="radio" data-val="S" id="rbtnS"/>Sí
+                            </label>
+                            <label style="display: inline;" for="rbtnN">
+                                <input id="rbtnN" name="radAltoRiesgo" type="radio" data-val="N"/>No 
+                            </label>
+                        </fieldset>
+                    </div>
+                    <div class="campo">
+                        <fieldset>
+                            <legend>Efectiva</legend>
+                            <label style="display: inline;" for="rbtnSReal">
+                                <input name="radRealizado" type="radio" data-val="S" id="rbtnSReal"/>Sí
+                            </label>
+                            <label style="display: inline;" for="rbtnNReal">
+                                <input name="radRealizado" type="radio" data-val="N" id="rbtnNReal"/>No
+                            </label>
+                        </fieldset>
+                    </div>
+
+                    <div class="campo">
+                        <fieldset>
+                            <legend>Secuencia de ruta</legend>
+                            <div class="campo">
+                                <label for="txtSecuenciaDesde">Desde:</label>
+                                <input type="text" id="txtSecuenciaDesde" placeholder="Desde"/>
+                            </div>
+                            <div class="campo">
+                                <label for="txtSecuenciaHasta">Hasta:</label>
+                                <input type="text" id="txtSecuenciaHasta" placeholder="Hasta"/>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <button class="btnSimple" id="btnBuscar">Buscar</button>
+
+                </fieldset>
+            </div>        
+        </div>
+    </div>
+
+
+
+    
+
+    <div id="tabsOperaciones">
+
+        <div id="divSuspension" style="display: none;">
+
+            <div class="divContenedorColapsable">
+                <div class="divColapsable">
+                    <h3 class="tituloColapsable">Valor por defecto para suspensiones</h3>
+                    <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+                </div>
+                <div class="contenidoColapsable">
+                    <fieldset>
+                        <legend>Valores por defecto para suspensiones</legend>
+                        <div id="divLlenar">
+                            <div class="campo">
+                                <label for="txtFechaEjecucionSuspension">Fecha de Ejecución: <a href="#" data-refer="thFechaEjecucion" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <input type="text" id="txtFechaEjecucionSuspension" placeholder="Fecha de Ejecución" data-column="8" data-refer=".sspanFechaEjec"/>
+                            </div>
+                            <div class="campo">
+                                <label for="cmbNovedadSuspension">Novedad: <a href="#" data-refer="thNovedad" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <select id="cmbNovedadSuspension" data-column="11" data-refer=".sNovedad">
+                                    <option value="-1" >Seleccione una opción</option>
+                                    {% for novedadsus in listanovedadsuspension %}
+                                        <option value="{{novedadsus.id}}">{{novedadsus.nombre}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label for="txtTerceroSuspension">Tercero que ejecuta: <a href="#" data-refer="thTerceroEjecuta" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <input type="text" id="txtTerceroSuspension" placeholder="Tercero que ejecuta" data-column="13" data-refer=".sTercero"/>
+                            </div>
+                            <div class="campo">
+                                <label for="cmbTipoSuspension">Tipo de suspensión: <a href="#" data-refer="thTipoSuspension" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <select id="cmbTipoSuspension" data-column="12" data-refer=".sTiposuspension">
+                                    <option value="-1" >Seleccione una opción</option>
+                                    {% for tiposus in listatiposuspension %}
+                                        <option value="{{tiposus.idtiposuspension}}">{{tiposus.tiposuspension}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="campo">
+                                <label>Efectiva: <a href="#" data-refer="thRealizada" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                    <label style="display: inline;" for="rbtnSSuspension">
+                                        <input type="radio" name="radSusRealizado" data-column="14" data-refer=".sRealizada" data-val="S" id="rbtnSSuspension"/>Sí
+                                    </label>
+                                    <label style="display: inline; margin-left: 50px;" for="rbtnNSuspension">
+                                        <input type="radio" name="radSusRealizado" data-column="14" data-refer=".sRealizada" data-val="N" id="rbtnNSuspension"/>No
+                                    </label>
+                                    <button class="btnSimple btnLimpiarRealizado" style="margin-left: 20px;">Limpiar campo</button>
+                            </div>
+                            <div class="campo">
+                                <label for="txtObservacionSuspension">Observación: <a href="#" data-refer="thObsevaciones" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <textarea id="txtObservacionSuspension" placeholder="Observacion" style="max-height: 25px; min-height: 1px;"></textarea>
+                            </div>
+                            <div class="btnDerecha">
+                                <button id="btnAplicarSuspension" class="btnSimple">Aplicar a todos</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+
+
+            <div style="position:relative;">
+                <div id="divtblSuspension">
+                    <table id="tblSuspension" class="tabla" ></table>
+                </div>
+                <span id="spanGuardars" class="pMensaje"></span>
+                <div class="btnDerecha">
+                    <button id="btnGuardarSus" class="btnSimple">Guardar información</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div id="divReconexion" style="display: none;">
+
+            <div class="divContenedorColapsable">
+                <div class="divColapsable">
+                    <h3 class="tituloColapsable">Valores por defecto para reconexiones</h3>
+                    <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+                </div>
+                <div class="contenidoColapsable">
+                    
+                    <div id="divLlenar">
+                        <div class="campo">
+                            <label for="txtFechaEjecucionReconexion">Fecha de Ejecución: <a href="#" data-refer="thFechaEjecucion" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                            <input type="text" id="txtFechaEjecucionReconexion" placeholder="Fecha de Ejecución" data-refer=".rspanFechaEjec"/>
+                        </div>
+                        <div class="campo">
+                            <label for="cmbNovedadReconexion">Novedad: <a href="#" data-refer="thNovedad" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                            <select id="cmbNovedadReconexion" data-column="11" data-refer=".rNovedad">
+                                <option value="-1" >Seleccione una opción</option>
+                                {% for novedadrec in listanovedadreconexion %}
+                                    <option value="{{novedadrec.id}}">{{novedadrec.nombre}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtTerceroReconexion">Tercero que ejecuta: <a href="#" data-refer="thTerceroEjecuta" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                            <input type="text" id="txtTerceroReconexion" data-column="12" data-refer=".rTercero" placeholder="Tercero que ejecuta"/>
+                        </div>
+                        
+                        
+                        <div class="campo">
+                            <label for="txtObservacionReconexion">Observación: <a href="#" data-refer="thObsevaciones" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                            <textarea id="txtObservacionReconexion" placeholder="Observacion" style="max-height: 25px; min-height: 1px;"></textarea>
+                        </div>
+                        <div class="campo">
+                            <label>Efectiva: <a href="#" data-refer="thRealizada" title="Ver/Ocultar Columna"><i class="fa fa-eye-slash"></i></a></label>
+                                <label style="display: inline;" for="rbtnSReconexion">
+                                    <input type="radio" name="radSusRealizado" data-val="S" id="rbtnSReconexion"/>Sí
+                                </label>
+                                <label style="display: inline; margin-left: 50px;" for="rbtnNReconexion">
+                                    <input type="radio" name="radSusRealizado" data-val="N" id="rbtnNReconexion"/>No
+                                </label>
+                                <button class="btnSimple btnLimpiarRealizado" style="margin-left: 20px;">Limpiar campo</button>
+                        </div>
+                        <div class="btnDerecha">
+                            <button id="btnAplicarReconexion" class="btnSimple">Aplicar a todos</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+                
+            <div id="divtblReconexion">
+                <table id="tblReconexion" class="tabla"></table>
+            </div>
+            <span id="spanGuardarr" class="pMensaje"></span>
+            <div class="btnDerecha">
+                <button id="btnGuardarRec" class="btnSimple">Guardar información</button>
+            </div>
+            
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/registroRapido/registroRapido.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/registroRapido/registroRapido.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/registroRapido/registroRapido.vista1.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/eventoEximente/GestionEventoEximente/GestionEventoEximente.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/eventoEximente/GestionEventoEximente/GestionEventoEximente.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Botonera, Combo, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { RConsultaTercerosEximente } from '../ConsultaTercerosEximente';
+import RUTAS_API from '../../../../global/rutas_api';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionEventoEximente.scss';
+import { TIPOS_UNIDADES_MEDIDA, obtenerDatosRespuesta } from '../../../../global/util_nominaciones';
+import { toast } from 'react-toastify'
+
+class GestionEventoEximente extends Component {
+
+  state = {
+    // Datos de la entidad
+    agentesSeleccionados: [],
+    fechaIniEvento: '',
+    fechaFinEvento: '',
+    nombreAdjunto: '',
+    tipoContrato: '',
+    listaAdjuntos: [],
+    listaTipoContrato: [],
+    // Estado de la aplicacion
+    mostrarModalAgentes: false,
+
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    const params = { criterio: '' };
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { ...params, categoria: TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_CONTRATO }),
+    ];
+
+    axios.all(peticiones)
+      .then(axios.spread((unidadMedida, tipoContrato) => {
+        let datosAplicacion = {
+          listaUnidades: [],
+          listaTipoContrato: [],
+        }
+        datosAplicacion.listaUnidades = obtenerDatosRespuesta(unidadMedida);
+        datosAplicacion.listaTipoContrato = obtenerDatosRespuesta(tipoContrato);
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      agentesSeleccionados: [],
+      listaAdjuntos: [],
+      fechaIniEvento: ' ',
+      fechaFinEvento: ' ',
+      tipoContrato: '-1',
+      // Estado de la aplicacion
+      mostrarModalAgentes: false,
+
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar los valores de la tabla agentes
+   * @return {bool}
+   */
+  validarTablaAgentes = () => {
+    for (let i = 0; i &lt; this.state.agentesSeleccionados.length; i++) {
+      const agente = this.state.agentesSeleccionados[i];
+      if (agente.cntCantidadcontratada === '') {
+        this.props.mostrarAlerta('Datos Incompletos', 'Debe ingresar una cantidad contratada en el agente: ' + agente.terIdeagente.terNombre);
+        return false;
+      }
+
+      if (!agente.uniIderegistro || agente.uniIderegistro === '' || agente.uniIderegistro === '-1') {
+        this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar una unidad de medida en el agente: ' + agente.terIdeagente.terNombre);
+        return false;
+      }
+    };
+    return true
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    //Variables
+    const { fechaIniEvento,
+      fechaFinEvento,
+      agentesSeleccionados,
+      listaAdjuntos,
+      tipoContrato } = this.state;
+    const fechaIni = new Date(fechaIniEvento);
+    const fechaFin = new Date(fechaFinEvento);
+    //Validaciones
+    if (tipoContrato === '' || tipoContrato === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo de contrato' } };
+    }
+
+    if (fechaIniEvento.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial' } };
+    }
+
+    if (fechaFinEvento.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final' } };
+    }
+
+    if (fechaIni > fechaFin) {
+      return { respuesta: false, mensaje: { titulo: 'Atención', mensaje: 'La fecha fin debe ser mayor a la fecha inicial' } };
+    }
+
+    if (!Util.validarArreglo(agentesSeleccionados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un agente' } };
+    }
+
+    if (!Util.validarArreglo(listaAdjuntos)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe adjuntar al menos un documento' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar un string con el los valores de los archivos adjuntos
+   * @returns {string}
+   */
+  obtenerAdjuntos = () => {
+    if (!Util.validarArreglo(this.state.listaAdjuntos)) {
+      return;
+    }
+    return JSON.stringify(this.state.listaAdjuntos);
+  };
+
+  /**
+   * Método encargado de generar un JSON con los valores ingresados
+   * @returns {Object}
+   */
+  obtenerDatos = () => {
+    const { fechaIniEvento, fechaFinEvento } = this.state;
+    let datos = {
+      'fechaInicial': fechaIniEvento,
+      'fechaFinal': fechaFinEvento,
+    }
+    const lista = this.state.agentesSeleccionados.map(datos => (
+      {
+        'cntIdecontrato': { "cntIderegistro": datos.cntIderegistro },
+        'eveFechainicio': fechaIniEvento,
+        'eveFechafin': fechaFinEvento,
+        'eveCantidad': datos.cntCantidadcontratada,
+        'uniIdemedida': { 'uniIderegistro': datos.uniIderegistro },
+        'eveAdjunto': this.obtenerAdjuntos(),
+      }
+    ));
+    datos.listaValores = lista;
+    return datos
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    const validarTabla = this.validarTablaAgentes();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    if (!validarTabla) {
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerDatos();
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_EVENTO_EXIMENTE.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de validar que no se encuentre ningun adjunto repetido
+   * @returns {bool}
+   */
+  verificarArchivo = (archivo) => {
+    const lista = [...this.state.listaAdjuntos];
+    const index = lista.findIndex(p => p.nombreOriginal.trim() == archivo.name.trim());
+    return index >= 0;
+  };
+
+  /**
+   * Método encargado de validar que no se subá más de un archivo por contrato
+   * @returns {bool}
+   */
+  verificarContrato = (contrato) => {
+    const lista = [...this.state.listaAdjuntos];
+    const index = lista.findIndex(p => p.cntIdecontrato.trim() == contrato.trim());
+    return index >= 0;
+  };
+
+  /**
+   * Método encargado de subir el archivo adjunto
+   * @param {Array} adjunto Contiene los datos del adjunto seleccionado
+   * @param {number} contrato número de contrato al cual se le adjuntara el archivo
+   * @returns {bool}
+   */
+  subirArchivo = (adjunto, contrato) => {
+    if (this.verificarArchivo(adjunto)) {
+      this.props.mostrarAlerta('Error', 'El archivo ya se encuentra en la lista');
+      return;
+    }
+    const data = new FormData();
+    data.append('archivo[]', adjunto);
+    const configuracion = { headers: { 'Content-Type': 'multipart/form-data' } };
+    axios.post(RUTAS_API.GLOBAL.SUBIR_ARCHIVOS, data, configuracion)
+      .then((respuesta) => {
+        this.procesarArchivo(respuesta.data.datos, contrato);
+      });
+  };
+
+  /**
+   * Método encargado de agregar el adjunto seleccionado a una lista
+   * @param {Array} adjunto Contiene los datos del adjunto seleccionado
+   * @param {number} contrato número de contrato al cual se le adjuntara el archivo
+   */
+  procesarArchivo = (adjunto, contrato) => {
+    adjunto = adjunto[0];
+    adjunto.cntIdecontrato = contrato;
+    let { listaAdjuntos } = this.state;
+    listaAdjuntos.push(adjunto);
+    this.setState({ listaAdjuntos: listaAdjuntos, nombreAdjunto: adjunto.nombreOriginal });
+
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el cambio al ingresar una nueva cantidad contratada
+   * @param {number} index Posición que se esta modificando
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioCantidadContratada = (index, evento) => {
+    const agentes = [...this.state.agentesSeleccionados];
+    agentes[index].cntCantidadcontratada = evento.target.value;
+    this.setState({ agentes });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al seleccionar una nueva unidad de medida
+   * @param {number} index Posición que se esta modificando
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   */
+  controlarCambioUnidadMedida = (index, evento) => {
+    const agentes = [...this.state.agentesSeleccionados];
+    agentes[index].uniIderegistro = evento.target.value;
+    this.setState({ agentes });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al seleccionar un adjunto
+   * @param {number} contrato Posición número de contrato que se le va a adjuntar el archivo
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   * @returns {bool}
+   */
+  controlarCambioArchivo = (contrato, evento) => {
+    if (evento.target.files.length === 0) {
+      return;
+    }
+
+    if (this.verificarContrato(contrato)) {
+      this.props.mostrarAlerta('Error', 'Ya se le ha adjuntado un documento a este contrato');
+      return;
+    }
+    const adjunto = evento.target.files[0];
+    this.subirArchivo(adjunto, contrato);
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal de la consulta de agentes o terceros
+   */
+  abrirModalAgentes = () => {
+    if (this.state.tipoContrato == '' || this.state.tipoContrato == '-1') {
+      toast.error('Debe seleccionar el tipo de contrato');
+      return;
+    }
+    this.setState({
+      mostrarModalAgentes: true
+    });
+  };
+
+  /**
+   * Método encargado agregar los agentes seleccionados
+   * @param {Object} agentesTerceros Agentes seleccionados por el usuario
+   */
+  onSeleccionarAgentes = (agentesTerceros) => {
+    this.setState({
+      mostrarModalAgentes: false,
+      agentesSeleccionados: [...agentesTerceros]
+    });
+  };
+
+  /**
+   * Método encargado de generar la carta de notificación al tercero que tenga un contacto tipo Representante Legal
+   * @param {number} idContrato Identificador del contrato al cual se le generará la notificación
+   * @returns {bool}
+   */
+  generarDocumento = (idContrato) => {
+    const { fechaIniEvento, fechaFinEvento } = this.state;
+    const fecha1 = new Date(fechaIniEvento);
+    const fecha2 = new Date(fechaFinEvento);
+    if (fechaIniEvento.trim() === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe ingresar la fecha inicial');
+      return false;
+    }
+
+    if (fechaFinEvento.trim() === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe ingresar la fecha final');
+      return false;
+    }
+
+    if (fecha1 > fecha2) {
+      this.props.mostrarAlerta('Datos Erroneos', 'La fecha final debe ser mayor que la inicial');
+      return false;
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_EVENTO_EXIMENTE.GENERAR_DOCUMENTO, { 'idContrato': idContrato, 'fechaInicio': fechaIniEvento, 'fechaFinal': fechaFinEvento })
+      .then(respuesta => {
+        let a = document.createElement('a');
+        a.href = 'data:' + { type: "Content-Type: application/msword" } + ';base64,' + respuesta.data.datos;
+        a.download = "Notificacion.docx";
+        a.target = '_blank';
+        a.click();
+      });
+  };
+
+  /**
+   * Método encargado de mostrar los agentes seleccionados
+   * @returns {Array}
+   */
+  renderBodyAgentes = () => {
+    return this.state.agentesSeleccionados.map((a, index) => (
+      &lt;tr key={a.terIdeagente.terIderegistro}>
+        &lt;td>{a.terIdeagente.terNombre}&lt;/td>
+        &lt;td>{a.cntNumero}&lt;/td>
+        &lt;td>{a.uniIdetipouso.uniNombre1}&lt;/td>
+        &lt;td>
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            value={a.cntCantidadcontratada}
+            cols={12}
+            onChange={(evento) => {
+              this.controlarCambioCantidadContratada(index, evento)
+            }}
+            name='cantidadContratada'
+          />
+        &lt;/td>
+        &lt;td>
+          &lt;Combo
+            opciones={this.state.listaUnidades}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            name='unidadMedida'
+            cols={12}
+            value={a.uniIderegistro}
+            onChange={(evento) => {
+              this.controlarCambioUnidadMedida(index, evento)
+            }}
+          />
+        &lt;/td>
+        &lt;td>
+          &lt;button className='btnAdjuntar' onClick={() => {
+            this.generarDocumento(a.cntIderegistro)
+          }}>Generar Documento&lt;/button>
+        &lt;/td>
+        &lt;td>
+          &lt;div className="upload-btn-wrapper">
+            &lt;button className="btnAdjuntar">Adjuntar archivo&lt;/button>
+            &lt;input
+              type='file'
+              id='selectorArchivo'
+              accept='application/pdf'
+              ref={ref => (this.selectorArchivo = ref)}
+              className='adjunto'
+              onChange={(evento) => {
+                this.controlarCambioArchivo(a.cntNumero, evento)
+              }}
+            />
+          &lt;/div>
+        &lt;/td>
+      &lt;/tr>
+    ));
+  };
+
+  /**
+   * Método encargado de eliminar el adjunto seleccionado
+   * @param {number} index Posición que se desea eliminar
+   */
+  eliminarAdjunto = (index) => {
+    const lista = [...this.state.listaAdjuntos];
+    lista.splice(index, 1);
+    this.setState({ listaAdjuntos: lista });
+  };
+
+  /**
+   * Método encargado de mostrar los adjuntos seleccionados
+   * @returns {Array}
+   */
+  renderAdjuntos = () => {
+    const { listaAdjuntos } = this.state;
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Documento&lt;/th>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Eliminar&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            listaAdjuntos.map((adjunto, index) => {
+              return (
+                &lt;tr key={"Adjunto_" + index}>
+                  &lt;td>{adjunto.nombreOriginal}&lt;/td>
+                  &lt;td>{adjunto.cntIdecontrato}&lt;/td>
+                  &lt;td>
+                    &lt;button className='btn btn-danger' onClick={() => {
+                      this.eliminarAdjunto(index);
+                    }}>Eliminar&lt;/button>
+                  &lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaTipoContrato}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo de contrato:'
+            name='tipoContrato'
+            value={this.state.tipoContrato}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha inicial del evento:'
+            name='fechaIniEvento'
+            fecha={this.state.fechaIniEvento}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha Fin del Evento:'
+            name='fechaFinEvento'
+            fecha={this.state.fechaFinEvento}
+            onChange={this.controlarCambio}
+          />
+          &lt;div className='col-6'>
+            &lt;p>&lt;b>Tercero&lt;/b>&lt;/p>
+            &lt;button className='btn btn-primary' onClick={this.abrirModalAgentes}>Buscar&lt;/button>
+          &lt;/div>
+          {this.state.agentesSeleccionados.length > 0 &amp;&amp;
+            &lt;table className='table table-striped mt28'>
+              &lt;thead>
+                &lt;tr>
+                  &lt;th>Agente o Tercero&lt;/th>
+                  &lt;th>No. de Contrato&lt;/th>
+                  &lt;th>Tipo de Uso&lt;/th>
+                  &lt;th>Cantidad Habilitada&lt;/th>
+                  &lt;th>Unidad de Medida&lt;/th>
+                  &lt;th>Documento&lt;/th>
+                  &lt;th>Subir Documento&lt;/th>
+                &lt;/tr>
+              &lt;/thead>
+              &lt;tbody>
+                {this.renderBodyAgentes()}
+              &lt;/tbody>
+            &lt;/table>
+          }
+        &lt;/div>
+        {this.state.listaAdjuntos.length > 0 &amp;&amp;
+          this.renderAdjuntos()
+        }
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalAgentes}
+          titulo='Seleccionar Agentes o Terceros'
+          cerrarModal={() => this.setState({ mostrarModalAgentes: false })}>
+          &lt;RConsultaTercerosEximente
+            esModal
+            seleccionMultiple
+            entidadesSeleccionadas={this.state.agentesSeleccionados}
+            seleccionarEntidades={this.onSeleccionarAgentes}
+            mostrarAlerta={this.props.mostrarAlerta}
+            tipoContrato={this.state.tipoContrato}
+          />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionEventoEximente.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionEventoEximente);
+
+export { VistaRedux as RGestionEventoEximente };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+nominaciones_nominaciones_global_login:
+  pattern: /login
+  defaults: { _controller: NominacionesNominacionesBundle:Login:index }
+
+nominaciones_nominaciones_global:
+  pattern: /api/global/{ruta}
+  defaults: { _controller: NominacionesNominacionesBundle:Login:api }
+
+nominaciones_nominaciones_api:
+  pattern: /api/{ruta}
+  defaults: { _controller: NominacionesNominacionesBundle:Default:api }
+
+nominaciones_nominaciones_index:
+  pattern: /{ruta}
+  defaults: { _controller: NominacionesNominacionesBundle:Default:index }
+
+nominaciones_nominaciones_todas:
+  pattern: /
+  defaults: { _controller: NominacionesNominacionesBundle:Default:index }

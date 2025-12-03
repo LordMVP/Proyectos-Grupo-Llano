@@ -1,0 +1,145 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+<style type="text/css">
+    #divCargando {
+        min-width: 100px;
+        max-width: 310px;
+        min-height: 40px;
+        background-color: #8AB6D9;
+        color: #FFF;
+        font-size: 12px;
+        margin: 0 auto;
+        border-radius: 20px;
+        text-align: center;
+        padding: 5px 15px 5px 28px;
+    }
+    #divCargando p{
+        margin: 5px 15px 5px 28px;
+        display: inline-block;
+    }
+    #divCargando img {
+        padding: 5px 5px 5px 34px;
+    }
+    .divContenedorColapsable {
+        padding-right: 10px;
+    }
+
+    #divResultadosConError,
+    #divResultadosProcesadasCorrectas{
+        max-height: 200px;
+        overflow-y:auto;
+    }
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Facturar Financiación  {% endblock %}
+
+{% block body %}
+
+<fieldset id="fsInfoSuscripcion">
+    <legend> Criterios  </legend>
+    <div id="divCamposProceso">
+        <div class="campoMitad"  >
+            <label>Ciclo</label>
+            <select id="cboCiclo">
+                <option value="-1"> Seleccione una opción</option>
+                {% for ciclo in ciclos %}
+                    <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <input type="button" id="btnFacturarFinanciacion" value="Facturar Financiación" class="btnSimple"/>
+            <button class="btnSimple" id="btnAprobarFac">Aprobar facturación</button>
+        </div>
+    </div>
+    <div style=" display: none;" id="divProgreso">
+        <div style="width: 100%;display:block; ">
+            <div id="divCargando"> 
+                <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                <p>Facturando financiaciones, <br>esto puede tardar unos minutos...</p>                
+            </div>    
+        </div>
+        
+        <div id="divTbl" style="display: block; width: 100%; margin-top: 15px;">
+            <table id="tblProgreso" class="tabla"></table>    
+        </div>
+        
+    </div>
+</fieldset>
+
+<div id="divErroresProceso" style="display:none;">
+    <fieldset id="fsResultadosConError">
+        <legend>Errores del proceso</legend>
+        <div id="divResultadosConError">
+            <table id="tblErroresProceso" class="tabla"></table>
+        </div>
+    </fieldset>
+    <fieldset id="fsResultadosCorrectas">
+        <legend>Financiaciones facturadas correctamente</legend>
+        <div id="divResultadosProcesadasCorrectas">
+            <table id="tblFacturasCorrectas" class="tabla"></table>
+        </div>
+    </fieldset>
+</div>
+
+<fieldset id="fsResumen" style="display: none;">
+    <legend>Resumen de la facturación</legend>
+    <div>
+        <p id="pResultado" class="pMensaje" style="font-size: 14px;"></p>
+        <div class="divContenedorColapsable">
+            <div class="divColapsable">
+                <h3 class="tituloColapsable"><span id="spanCorrectas"></span> financiaciones procesadas correctamente </h3>
+                <div class="btnColapsable"><a class="fa fa-minus"></a></div>
+            </div>
+            <div class="divContenidoColapsable">
+                <table id="tblCompletadas" class="tabla"></table>    
+            </div>  
+        </div>
+        <div class="divContenedorColapsable">
+            <div class="divColapsable">
+                <h3 class="tituloColapsable">
+                    <span id="spanErrores"></span> financiaciones con problemas
+                </h3>
+                <div class="btnColapsable"><a class="fa fa-minus"></a></div>
+            </div>
+            <div class="divContenidoColapsable">
+            <table id="tblResultado" class="tabla"></table>    
+        </div>
+        </div>
+        
+        
+        
+    </div>
+</fieldset>
+<div id="diConfirmacion" style="display: none;">
+    <label id="pInformacion"></label>
+    <table class="tabla" id="tblLiquidacion"></table>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/jquery.dataTables.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.tableTool.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/facturar_financiacion/facturar.financiacion.modelo.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/facturar_financiacion/facturar.financiacion.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/facturar_financiacion/facturar.financiacion.vista.js')}}"></script>
+<script type="text/javascript">
+    (
+        function(){
+            facturarFinanciacionModel.interval = setInterval(that.consultarProgreso, 5000);
+            that.consultarProgreso();    
+        }
+    )();
+</script>
+{% endblock %}

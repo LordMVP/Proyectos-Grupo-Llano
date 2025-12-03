@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/liquidarContrato/GestionLiquidarContrato/GestionLiquidarContrato.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/liquidarContrato/GestionLiquidarContrato/GestionLiquidarContrato.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico } from 'appfuture-react';
+import { limpiarDatosHistorico } from '../../../../global/util_nominaciones';
+import axios from 'axios';
+
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import GestionDocumentos from '../../cambioEstadoContrato/GestionEstadoContrato/GestionDocumentos';
+
+const ESTADO_FINALIZADO = 'F';
+const ESTADO_LIQUIDADO = 'L';
+
+const periodosCantidadContratada = [
+  { id: 'D', texto: 'Diaria' },
+  { id: 'S', texto: 'Semanal' },
+  { id: 'M', texto: 'Mensual' },
+  { id: 'A', texto: 'Anual' }
+];
+
+/**
+ * Si el contrato es tipo cliente se habilita generar acta y se debe adjuntar obligatorio.
+ * Si es proveedor se adjunta, es obligatorio.
+ */
+
+class GestionLiquidarContrato extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    contrato: null,
+    listaEstados: [],
+    adjuntos: [],
+    listaTiposDocumento: [],
+    listaUnidadMedida: []
+  };
+
+  /**
+   * Se ejecutará cuando se cargue la interfaz/componente.
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.consultarListaEstados((listaEstados, listaTiposDocumento, listaUnidad) => {
+      this.setState({
+        listaEstados: listaEstados.data.datos,
+        listaTiposDocumento: listaTiposDocumento.data.datos,
+        listaUnidadMedida: listaUnidad.data.datos
+      });
+    });
+  }
+
+  /**
+  * Consulta la lista de los estados...
+  */
+  consultarListaEstados = (callback) => {
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_ESTADOS, { criterio: '', idClase: CLASES_UNIDADES.ESTADOS_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPO_ARCHIVO_DOCUMENTO }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.UNIDAD_MEDIDA }),
+    ];
+
+    axios.all(peticiones)
+      .then(
+        axios.spread((listaEstados, listaTiposDocumento, listaUnidadMedida) => {
+          callback(listaEstados, listaTiposDocumento, listaUnidadMedida);
+        })
+      );
+
+  };
+
+  /**
+   * Limpiará el formulario seteando los valores del state.
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      contrato: null,
+      estadoContrato: null,
+    });
+    limpiarDatosHistorico('gestion_liquidar_contrato');
+  };
+
+  /**
+   * Obtiene el id específico del estado contrato finalizado.
+   * @return {number}
+   */
+  obtenerIdEstado = (codigoEstado) => {
+    const { listaEstados } = this.state;
+
+    if (!Util.validarArreglo(listaEstados)) {
+      this.props.mostrarAlerta('Error de configuración', 'No hay estados configurados.');
+      return -1;
+    }
+    const estado = listaEstados.filter(e => (JSON.parse(e.uniPropiedad).estado == codigoEstado));
+    if (!Util.validarArreglo(estado)) {
+      return 0;
+    }
+    return estado[0].uniIderegistro;
+  };
+
+  /**
+   * Obtiene los botones de la interfaz.
+   * @return {array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Buscar', callback: this.buscarContrato },
+      { texto: 'Liquidar contrato', callback: this.finalizarContrato },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Mostrará el panel de búsqueda del contrato.
+   * @returns {Boolean}
+   */
+  buscarContrato = () => {
+    const idEstado = this.obtenerIdEstado(ESTADO_FINALIZADO);
+    if (idEstado &lt; 0) {
+      return;
+    }
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_FINALIZAR_CONTRATO.url,
+        estadosContrato: [idEstado],
+        inhabilitarEstado: true,
+      }
+    });
+  };
+
+  /**
+   * Mostrará una alerta de confirmación de actualización del estado, si el usuario confirma la actualización ejecutará la actualización.
+   */
+  confirmarFinalizarContrato = () => {
+    this.props.mostrarAlerta('Confirmar', 'Se finalizará el contrato, ¿Desea continuar?', [
+      { clase: 'btn btn-primary', callback: this.ejecutarFinalizarContrato, texto: 'Sí' },
+      { clase: 'btn btn-default', texto: 'No' },
+    ]);
+  };
+
+  /**
+   * Ejecuta la petición al servidor para Actualizar el estado...
+   * @returns {Boolean}
+   */
+  ejecutarFinalizarContrato = () => {
+    const { contrato } = this.state;
+    if (!contrato) {
+      this.props.mostrarAlerta('Error', 'Debe seleccionar un contrato.');
+      return;
+    }
+
+    const estadoContrato = this.obtenerIdEstado(ESTADO_LIQUIDADO);
+    if (estadoContrato === 0) {
+      this.props.mostrarAlerta('Error de configuración', 'No se encontró el código del estado para liquidación de contrato, configure correctamente los estados para este programa.');
+      return;
+    }
+
+    const entidadGuardar = {
+      cntIderegistro: contrato.cntIderegistro,
+      cntVersion: contrato.cntVersion,
+      uniIdeestado: {
+        uniIderegistro: estadoContrato
+      },
+      listaDocumentos: this.obtenerListaDocumentos()
+    };
+
+    // Reemplazar con ruta del Endpoint para guardar
+    axios.post(RUTAS_API.CONTRATOS.ACTUALIZAR_ESTADO_CONTRATO, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+ * Obtiene la lista de documentos para registrar.
+ * @return {array}
+ */
+  obtenerListaDocumentos = () => {
+    const listaDocumentos = [...this.state.adjuntos];
+    return listaDocumentos.map((f) => {
+      return {
+        cntdNombre: f.nombre,
+        uniIdetipodocumento: {
+          uniIderegistro: f.tipoDocumento
+        },
+        cntdFechainicio: f.fechaInicio,
+        cntdFechafinal: f.fechaFin,
+        cntdFechaexpedicion: f.fechaExpedicion,
+        cntdIdearchivo: f.id
+      };
+    });
+  };
+
+  /**
+   * Prepara el objeto y lo envia al servidor para actualizar el estado del contrato.
+   */
+  finalizarContrato = () => {
+    //Confirmamos...
+    this.confirmarFinalizarContrato();
+  };
+
+  /**
+   * Controla el cambio de los valores de los componentes.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cargar los datos de la entidad seleccionada
+   * @param {Object} entidad Datos de la entidad seleccionada
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      contrato: entidad,
+    });
+  };
+
+  /**
+   * Obtiene el tipo de agente/tercero en base al tipo de negocio.
+   * @return {string}
+   */
+  obtenerTipoNegocio = () => {
+    const { cntTiponegocio } = this.state.contrato;
+    return (cntTiponegocio === 'V') ? 'Cliente' : 'Proveedor';
+  };
+
+
+  /**
+   * Obtiene los tipos de contrato de las propiedades que recibe de la tabla.
+   * @return {string}
+   */
+  obtenerTiposContrato = () => {
+    const listaTipos = this.state.contrato.listaTipos;
+    if (!Array.isArray(listaTipos) || listaTipos.length == 0) {
+      return 'Indefinido';
+    }
+    return listaTipos.map(tipo => {
+      return tipo.uniIdetipocontrato.uniNombre1;
+    }).join(',');
+  };
+
+  /**
+   * Método encargado de obtener el nombre de la periodicidad en caso de que exista.
+   * @param {String} periodicidad Identificador de la periodicidad.
+   * @returns {String}
+   */
+  obtenerNombrePeriodicidad = (periodicidad) => {
+    if (periodicidad) {
+      const periodo = periodosCantidadContratada.find(p => p.id == periodicidad);
+      return periodo.texto;
+    }
+    return '';
+  };
+
+  /**
+   * Método encargado de obtener el nombre de la unidad de medida.
+   * @param {Number} idUnidadMedida Identificador de la unidad de medida.
+   * @returns {String}
+   */
+  obtenerNombreUnidadMedida = (idUnidadMedida) => {
+    const { listaUnidadMedida } = this.state;
+    if (listaUnidadMedida.length > 0) {
+      const unidad = listaUnidadMedida.find(p => p.uniIderegistro == idUnidadMedida);
+      return (unidad) ? unidad.uniNombre1 : '';
+    }
+    return;
+  };
+
+  /**
+   * Actualiza la lista de documentos
+   * @param {Object} cambio Datos del adjunto
+   */
+  actualizarDocumentos = (cambio) => {
+    this.setState(cambio);
+  };
+
+  /**
+   * Renderiza el formulario con los campos del detalle básico del contrato.
+   * @return {Component}
+   */
+  renderFormularioDetallesContrato = () => {
+    return (
+      &lt;div className="row mt-5">
+        &lt;Input
+          label='Tipo Tercero:'
+          value={this.obtenerTipoNegocio()}
+          name='proveedor'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Agente / Tercero:'
+          value={this.state.contrato.terIdeagente.terNomcompleto}
+          name='terNomcompleto'
+          extra={{ disabled: true }}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Número Contrato:'
+          cols={4}
+          value={this.state.contrato.cntNumero}
+          name='numeroContrato'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Tipo Contrato:'
+          value={this.obtenerTiposContrato()}
+          name='tipoContrato'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Fecha Inicio:'
+          value={this.state.contrato.cntFechainicio}
+          name='fechaInicio'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Fecha Fin:'
+          value={this.state.contrato.cntFechafin}
+          name='fechaFin'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Estado Contrato:'
+          value={this.state.contrato.uniIdeestado.uniNombre1}
+          name='uniIderegistro.uniNombre1'
+          extra={{ disabled: true }}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Cantidad Contratada:'
+          value={this.state.contrato.cntCantidadcontratada}
+          name='cntCantidadcontratada'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Unidad Medida Cantidad Contratada:'
+          value={this.obtenerNombreUnidadMedida(this.state.contrato.uniIdemedidacontratada.uniIderegistro)}
+          name='uniIdemedidacontratada.uniIderegistro'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Periodicidad:'
+          value={this.obtenerNombrePeriodicidad(this.state.contrato.cntPeriodo)}
+          name='cntPeriodo'
+          extra={{ disabled: true }}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Precio Contrato:'
+          value={this.state.contrato.cntPrecio}
+          name='cntPrecio'
+          extra={{ disabled: true }}
+        />
+        &lt;Input
+          label='Unidad Medida Precio:'
+          value={this.obtenerNombreUnidadMedida(this.state.contrato.uniIdemedidaprecio.uniIderegistro)}
+          name='uniIdemedidaprecio.uniIderegistro'
+          extra={{ disabled: true }}
+        />
+        {
+          this.state.contrato.cntTiponegocio === 'V' &amp;&amp; (
+            &lt;div className='form-group m-t-24 mr-3'>
+              &lt;button className='btn btn-primary' onClick={this.descargarActa}>&lt;i className='fa fa-fw fa-download'>&lt;/i> Descargar acta&lt;/button>
+            &lt;/div>
+          )
+        }
+        &lt;div className='col-12 mt-5'>
+          &lt;h2>&lt;i className='fa fa-fw fa-paperclip'>&lt;/i> Adjuntar Acta&lt;/h2>
+          &lt;hr />
+          &lt;GestionDocumentos
+            tipoNegocio={this.state.contrato.cntTiponegocio}
+            adjuntos={this.state.adjuntos}
+            mostrarAlerta={this.props.mostrarAlerta}
+            listaTiposDocumento={this.state.listaTiposDocumento}
+            actualizarAdjuntos={this.actualizarAdjuntos}
+          />
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de actualizar los adjuntos del componente GestionDocumentos
+   * @param {Object} cambio Datos del adjunto
+   */
+  actualizarAdjuntos = (cambio) => {
+    this.setState(cambio);
+  };
+
+  /**
+   * Devuelve el contenido que reendirazará el componente.
+   * @return {Component}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        {!this.state.contrato &amp;&amp; (
+          &lt;div className="alert alert-warning alert-dismissible fade show mt-5" role="alert">
+            &lt;strong>&lt;i className='fa fa-fw fa-info'>&lt;/i> Debe buscar un contrato&lt;/strong>
+          &lt;/div>
+        )}
+        {
+          this.state.contrato &amp;&amp; this.renderFormularioDetallesContrato()
+        }
+      &lt;/Fragment>
+    );
+  }
+}
+
+GestionLiquidarContrato.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionLiquidarContrato);
+
+export { VistaRedux as RGestionLiquidarContrato };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

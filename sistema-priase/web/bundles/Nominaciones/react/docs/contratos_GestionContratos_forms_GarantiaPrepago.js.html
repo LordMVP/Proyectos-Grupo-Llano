@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/forms/GarantiaPrepago.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/forms/GarantiaPrepago.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Input, TextoNumerico, Combo, Fecha, Util } from 'appfuture-react';
+import { get as getProp } from 'object-path';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import moment from 'moment';
+
+const TIPOS_PREPAGO = {
+  DIARIO: { codigo: 'D', valor: 1 },
+  SEMANAL: { codigo: 'S', valor: 7 },
+  QUINCENAL: { codigo: 'Q', valor: 15 },
+  MENSUAL: { codigo: 'M', valor: 30 },
+  ANUAL: { codigo: 'A', valor: 365 },
+};
+
+const listaTipoPrepago = [
+  { texto: 'Diario', valor: TIPOS_PREPAGO.DIARIO.codigo },
+  { texto: 'Semanal', valor: TIPOS_PREPAGO.SEMANAL.codigo },
+  { texto: 'Quincenal', valor: TIPOS_PREPAGO.QUINCENAL.codigo },
+  { texto: 'Mensual', valor: TIPOS_PREPAGO.MENSUAL.codigo },
+  { texto: 'Anual', valor: TIPOS_PREPAGO.ANUAL.codigo },
+];
+
+class GarantiaPrepago extends Component {
+
+  state = {
+
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    let garantia = { ...this.props.garantia };
+    if (!garantia.prepago) {
+      garantia.prepago = {};
+    }
+    const otrosParametros = this.calcularNumeroDias(getProp(this.props, 'garantia.prepago.numeroDiasPrepago', 0));
+    garantia.prepago = { ...garantia.prepago, ...otrosParametros };
+    this.calcularPrecioGarantia(garantia);
+  }
+
+  /**
+   * Método encargado de calcular el precio del calculo de la garantia
+   */
+  refrescarValorPrecioGarantia = () => {
+    let garantia = { ...this.props.garantia };
+    if (!garantia.prepago) {
+      garantia.prepago = {};
+    }
+    this.calcularPrecioGarantia(garantia);
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux de garantia
+   * @param {Object} cambio Cambio a realizar en la garantia
+   */
+  actualizarObjetoGarantia = (cambio) => {
+    let garantia = { ...this.props.garantia };
+    if (!garantia.prepago) {
+      garantia.prepago = { ...cambio };
+    }
+    garantia.prepago = { ...garantia.prepago, ...cambio };
+    this.calcularPrecioGarantia(garantia);
+  };
+
+  /**
+   * Método encargado de calcular el número de días del prepago
+   * @param {Object} valor Valor que se le asignara
+   * @param {String} nombrePropiedad Propiedad a actualizar en el redux
+   */
+  calcularNumeroDias = (valor, nombrePropiedad = 'tipoPrepago') => {
+    if (nombrePropiedad != 'tipoPrepago') {
+      return;
+    }
+    for (const key in TIPOS_PREPAGO) {
+      if (TIPOS_PREPAGO.hasOwnProperty(key)) {
+        const dato = TIPOS_PREPAGO[key];
+        if (dato.codigo == valor || dato.valor == valor) {
+          return { tipoPrepago: dato.codigo };
+        }
+      }
+    }
+    return {};
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    const control = evento.target;
+    let nuevoEstado = {};
+    nuevoEstado[control.name] = control.value;
+    let garantia = { ...this.props.garantia };
+    if (!garantia.prepago) {
+      garantia.prepago = {};
+    }
+    let otrosParametros = this.calcularNumeroDias(control.value, control.name);
+    if (control.name == 'fechaFin') {
+      otrosParametros = this.obtenerDuracionPrepago(control.value);
+    }
+
+    garantia.prepago = { ...garantia.prepago, ...otrosParametros };
+    if (control.name === 'cruzaCuentas') {
+      this.consultarValorCruceCuenta(control.checked);
+    }
+    garantia.prepago[control.name] = (control.type === 'checkbox') ? control.checked : control.value;
+    this.calcularPrecioGarantia(garantia);
+  };
+
+  /**
+   * Consultar valor cruce cuenta.
+   * @param {Object} valor Valida si se checkeo el cruce de cuentas
+   */
+  consultarValorCruceCuenta = (valor) => {
+    if (!valor) {
+      return;
+    }
+    axios.post(RUTAS_API.CONTRATOS.CONSULTAR_VALOR_CRUCE_CUENTA, { idTercero: getProp(this.props, 'cabecera.agenteTercero.terIderegistro') })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.actualizarObjetoGarantia({ valorCruceCuentas: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Actualizará la cabecera del objeto Redux.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  actualizarCabeceraRedux = (evento) => {
+    const input = evento.target;
+    let cambio = new Object();
+    cambio[input.name] = input.value;
+    this.props.actualizarCabecera(cambio);
+  };
+
+  /**
+   * Calculará el precio prepago para el tipo de contrato GNV suministro.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  numeroDiasPrepago Días de duración del prepago
+   * @return {number}
+   */
+  calcularPrecioGarantiaSuministroGNV = (cantidadContratada, precioContrato, numeroDiasPrepago) => {
+    const precio = cantidadContratada * precioContrato * numeroDiasPrepago;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de garantia para contrato tipo suministro teniendo en cuenta si el usuario
+   * ha seleccionado que se calculara de manera diaria o no diaria.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  valorTRM Valor de la TRM ya sea diaria o techo
+   * @param {Number}  numeroDiasPrepago Días de duración del prepago
+   * @return {Number}
+   */
+  calcularPrecioGarantiaSuministro = (cantidadContratada, precioContrato, valorTRM, numeroDiasPrepago) => {
+    //Se agrega validación para usar TRM del día si no se esta usando TRM techo // Cambio solicitado por ROSMIRA 20-01-2020
+    const precio = cantidadContratada * precioContrato * valorTRM * numeroDiasPrepago;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de garantia para el contrato de tipo transporte.
+   * Además validará si existen o no los valores del tramo (valorCargoVariable, valorCargoFijo, valorCargoAOM)...
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  valorTRM Valor de la TRM ya sea diaria o techo
+   * @param {Number}  numeroDiasPrepago Días de duración del prepago
+   * @return {number}
+   */
+  calcularPrecioGarantiaTransporte = (cantidadContratada, precioContrato, valorTRM, numeroDiasPrepago) => {
+    const valorCargoFijo = getProp(this.props, 'cabecera.valorCargos.fijo', 0);
+    const valorCargoVariable = getProp(this.props, 'cabecera.valorCargos.variable', 0);
+    const valorCargoAOM = getProp(this.props, 'cabecera.valorCargos.aom', 0);
+    const porcentajeComercializacion = getProp(this.props, 'cabecera.porcentajeComercializacion', 0);
+    const precio = ((valorCargoFijo / 365) * valorTRM + valorCargoVariable * valorTRM + (valorCargoAOM / 365)) + ((valorCargoAOM / 365) * (cantidadContratada * numeroDiasPrepago) * 0.05) + porcentajeComercializacion;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la garantia para el tipo de contrato ATR.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  numeroDiasPrepago Días de duración del prepago
+   * @return {number}
+   */
+  calcularPrecioGarantiaATR = (cantidadContratada, precioContrato, numeroDiasPrepago) => {
+    const valorDM = getProp(this.props, 'garantia.prepago.dm', 0);
+    const precio = (cantidadContratada * valorDM) * numeroDiasPrepago;
+    return precio;
+  };
+
+  /**
+   * Calcula el precio de la garantia para el tipo de contrato GNC.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @param {Number}  valorTRM Valor de la TRM ya sea diaria o techo
+   * @param {Number}  numeroDiasPrepago Días de duración del prepago
+   * @return {number}
+   */
+  calcularPrecioGarantiaGNC = (cantidadContratada, precioContrato, valorTRM, numeroDiasPrepago) => {
+    const precio = (cantidadContratada * precioContrato) * valorTRM * numeroDiasPrepago;
+    return precio;
+  };
+
+  /**
+   * Calcula el precio de la garantia para tipo de contrato conexión.
+   * @param {Number} cantidadContratada Cantidad contratada asignada
+   * @param {Number}  precioContrato Precio del contrato asignado
+   * @return {Number}
+   */
+  calcularPrecioGarantiaConexion = (cantidadContratada, precioContrato) => {
+    const precio = cantidadContratada * precioContrato * 30;
+    return precio;
+  };
+
+  calcularPrecioGarantiaGNV = (cantidadContratada, precioContrato) => {
+  };
+
+  /**
+   * Calculará el precio de la garantía.
+   * @param {Object} garantia Datos de la garantia
+   * @return {number}
+   */
+  calcularPrecioGarantia = (garantia) => {
+    if (!this.props.garantia.prepago) {
+      this.props.actualizarGarantia(garantia);
+      return 0;
+    }
+    const valorTRM = (getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+      getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0);
+    const numeroDiasPrepago = getProp(garantia, 'prepago.numeroDiasPrepago', 0);
+    const { tipoContrato } = this.props.garantia.prepago;
+    const tiposContrato = this.props.tiposContrato;
+    let { cantidadContratada, precioContrato } = this.props.cabecera;
+    let precioGarantia = 0;
+    switch (tipoContrato) {
+      case tiposContrato.GNV.codigo:
+        precioGarantia = this.calcularPrecioGarantiaGNV();
+        break;
+      case tiposContrato.GNV_SUMINISTRO.codigo:
+        precioGarantia = this.calcularPrecioGarantiaSuministroGNV(cantidadContratada, precioContrato, numeroDiasPrepago);
+        break;
+      case tiposContrato.SUMINISTRO.codigo:
+        precioGarantia = this.calcularPrecioGarantiaSuministro(cantidadContratada, precioContrato, valorTRM, numeroDiasPrepago);
+        break;
+      case tiposContrato.TRANSPORTE.codigo:
+        precioGarantia = this.calcularPrecioGarantiaTransporte(cantidadContratada, precioContrato, valorTRM, numeroDiasPrepago);
+        break;
+      case tiposContrato.ATR.codigo:
+        precioGarantia = this.calcularPrecioGarantiaATR(cantidadContratada, precioContrato, numeroDiasPrepago);
+        break;
+      case tiposContrato.GNC.codigo:
+        precioGarantia = this.calcularPrecioGarantiaGNC(cantidadContratada, precioContrato, valorTRM);
+        break;
+      case tiposContrato.CONEXION.codigo:
+        precioGarantia = this.calcularPrecioGarantiaConexion(cantidadContratada, precioContrato);
+        break;
+    }
+
+    if (isNaN(precioGarantia)) {
+      precioGarantia = 0;
+    }
+
+    garantia.prepago.precioGarantia = precioGarantia;
+    this.props.actualizarGarantia(garantia);
+
+    return precioGarantia;
+  };
+
+  /**
+   * Calcula el número de días para el prepago formato: {# días # meses, # años}
+   * @param {String} fechaFin Fecha fin del prepago
+   * @return {String}
+   */
+  obtenerDuracionPrepago = (fechaFin) => {
+    const fechaInicio = getProp(this.props, 'garantia.prepago.fechaInicial', '');
+    if (!fechaInicio || fechaInicio == '') {
+      return '';
+    }
+    const momentInicio = moment(fechaInicio);
+    const momentFin = moment(fechaFin);
+    let diferencia = momentFin.diff(momentInicio, 'days');
+    const cambio = { numeroDiasPrepago: diferencia };
+    return cambio;
+  }
+
+  /**
+   * Obtiene la lista de los tipos de contrato seleccionados por el usuario.
+   * @returns {Array}
+   */
+  obtenerListaTiposContratos = () => {
+    const { tiposContrato } = this.props.listas;
+    return tiposContrato.filter(tipoContrato => tipoContrato.seleccionado);
+  };
+
+  /**
+   *Retornará el DOM del componente.
+   * @return {string}
+   */
+  render() {
+    const tiposContrato = this.props.tiposContrato;
+    const porcentajeComercializacionActivo = (getProp(this.props, 'tipoCalculo.tipoCalculo', '') === 'C');
+    return (
+      &lt;div className='row col-12'>
+        &lt;div className='row col-12 poliza-contratos mt-5'>
+          &lt;Combo
+            opciones={listaTipoPrepago}
+            propTexto='texto'
+            propValor='valor'
+            label='Tipo de Prepago:'
+            name='tipoPrepago'
+            value={getProp(this.props, 'garantia.prepago.tipoPrepago', '')}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.obtenerListaTiposContratos()}
+            propTexto='uniNombre1'
+            propValor='uniPropiedad.tipocontrato'
+            label='Tipo Contrato:'
+            name='tipoContrato'
+            value={getProp(this.props, 'garantia.prepago.tipoContrato', '')}
+            onChange={this.controlarCambio}
+          />
+          {
+            getProp(this.props, 'garantia.prepago.tipoContrato', '') !== tiposContrato.GNC.codigo &amp;&amp; (
+              &lt;Fragment>
+                &lt;Fecha
+                  label='Fecha Inicial Cobertura:'
+                  name='fechaInicial'
+                  value={getProp(this.props, 'garantia.prepago.fechaInicial', '')}
+                  fecha={getProp(this.props, 'garantia.prepago.fechaInicial', '')}
+                  onChange={this.controlarCambio}
+                />
+                &lt;Fecha
+                  label='Fecha Fin Cobertura:'
+                  name='fechaFin'
+                  value={getProp(this.props, 'garantia.prepago.fechaFin', '')}
+                  fecha={getProp(this.props, 'garantia.prepago.fechaFin', '')}
+                  onChange={this.controlarCambio}
+                />
+              &lt;/Fragment>
+            )
+          }
+          &lt;Input
+            label='Cantidad contratada:'
+            value={getProp(this.props, 'cabecera.cantidadContratada', '0')}
+            onChange={this.controlarCambio}
+            name='cantidadContratada'
+            extra={{ disabled: true }}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Precio contrato:'
+            cols={4}
+            value={getProp(this.props, 'cabecera.precioContrato', '')}
+            extra={{ disabled: (getProp(this.props, 'tipoCalculo.tipoCalculo', '') !== 'C') }}
+            onChange={this.actualizarCabeceraRedux}
+            name='precioContrato'
+          />
+          &lt;Input
+            label='Precio Prepago:'
+            value={getProp(this.props, 'garantia.prepago.precioGarantia', 0)}
+            onChange={this.controlarCambio}
+            name='precioPrepago'
+            extra={{ disabled: true }}
+          />
+          {
+            getProp(this.props, 'garantia.prepago.tipoContrato', '') !== tiposContrato.CONEXION.codigo &amp;&amp;
+            (
+              &lt;Fragment>
+                {
+                  (porcentajeComercializacionActivo) &amp;&amp; (
+                    &lt;label className='m-t-28 col-4'>
+                      &lt;input type="checkbox"
+                        name='usaPorcentajeContrato'
+                        checked={getProp(this.props, 'garantia.prepago.usaPorcentajeContrato', false)}
+                        onChange={this.controlarCambio}
+                      /> &lt;span>Usa % de comercialización&lt;/span>
+                    &lt;/label>
+                  )
+                }
+                {
+                  (getProp(this.props, 'garantia.prepago.usaPorcentajeContrato', false) || porcentajeComercializacionActivo) &amp;&amp; (
+                    &lt;Input
+                      label='% Comercialización:'
+                      value={getProp(this.props, 'cabecera.porcentajeComercializacion', '0')}
+                      onChange={this.actualizarCabeceraRedux}
+                      name='porcentajeComercializacion'
+                      extra={{ disabled: (!getProp(this.props, 'garantia.prepago.usaPorcentajeContrato', false) || !porcentajeComercializacionActivo) }}
+                    />
+                  )
+                }
+              &lt;/Fragment>
+            )
+          }
+          {
+            getProp(this.props, 'garantia.prepago.tipoContrato', '') !== tiposContrato.CONEXION.codigo &amp;&amp;
+            (
+              &lt;Fragment>
+                &lt;TextoNumerico
+                  aceptaDecimales={false}
+                  aceptaNegativos={false}
+                  label='No. Días prepag:'
+                  name='numeroDiasPrepago'
+                  value={getProp(this.props, 'garantia.prepago.numeroDiasPrepago', '0')}
+                  onChange={this.controlarCambio}
+                  extra={{ disabled: true }}
+                />
+                &lt;label className='form-group m-t-28 pl-3 col-4'>
+                  &lt;input type="checkbox"
+                    name='cruzaCuentas'
+                    checked={getProp(this.props, 'garantia.prepago.cruzaCuentas', false)}
+                    onChange={this.controlarCambio}
+                  /> &lt;span>Cruce de cuentas&lt;/span>
+                &lt;/label>
+                &lt;TextoNumerico
+                  aceptaDecimales={false}
+                  aceptaNegativos={false}
+                  label='Valor a Cruzar:'
+                  cols={4}
+                  value={getProp(this.props, 'garantia.prepago.valorCruceCuentas', null)}
+                  onChange={this.controlarCambio}
+                  name='valorCruceCuentas'
+                  extra={{ disabled: true }}
+                />
+              &lt;/Fragment>
+            )
+          }
+          {
+            ((getProp(this.props, 'garantia.prepago.tipoContrato', '') === tiposContrato.SUMINISTRO.codigo) || (getProp(this.props, 'garantia.prepago.tipoContrato', '') === tiposContrato.GNV_SUMINISTRO.codigo)) &amp;&amp;
+            (
+              &lt;Input
+                label='TRM:'
+                value={(getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+                  getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0)}
+                onChange={this.controlarCambio}
+                extra={{ disabled: true }}
+                name='trmSuministro'
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.prepago.tipoContrato', '') === tiposContrato.TRANSPORTE.codigo &amp;&amp;
+            (
+              &lt;Fragment>
+                &lt;Input
+                  label='TRM:'
+                  value={getProp(this.props, 'cabecera.trmTecho', '0')}
+                  onChange={this.controlarCambio}
+                  name='trmTransporte'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo Variable:'
+                  value={getProp(this.props, 'cabecera.valorCargos.variable', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoVariable'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo AOM:'
+                  value={getProp(this.props, 'cabecera.valorCargos.aom', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoAOM'
+                  extra={{ disabled: true }}
+                />
+                &lt;Input
+                  label='Cargo Fijo:'
+                  value={getProp(this.props, 'cabecera.valorCargos.fijo', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoFijo'
+                  extra={{ disabled: true }}
+                />
+              &lt;/Fragment>
+            )
+          }
+          {
+            getProp(this.props, 'garantia.prepago.tipoContrato', '') === tiposContrato.ATR.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='Dm:'
+                value={getProp(this.props, 'garantia.prepago.dm', '0')}
+                onChange={this.controlarCambio}
+                name='dm'
+              />
+            )
+          }
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+}
+
+GarantiaPrepago.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  actualizarGarantia: PropTypes.func,
+  garantia: PropTypes.object,
+  tipoCalculo: PropTypes.object,
+  tiposContrato: PropTypes.object,
+  actualizarCabecera: PropTypes.func
+};
+
+export { GarantiaPrepago };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

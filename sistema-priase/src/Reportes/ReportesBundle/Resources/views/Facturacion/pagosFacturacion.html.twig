@@ -1,0 +1,139 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de pagos y anticipos -{{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="PagosFacturacionControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtros de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label>Año</label>
+                                    <select id="anos"  name="anos" ng-model="info.anos" class="form-control" ng-change="cargarPeriodos()">
+                                        <option ng-repeat="ano in anos" ng-value="ano.anos">{[{ano.anos}]}</option>
+                                    </select>   
+                                    <p class="help-block" ng-if="reporte.anos.$error.required">
+                                        * El años es obligatorio
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors >
+                                    <label>Periodo</label>
+                                    <select id="periodo"  name="periodo" ng-model="info.idordenperiodo"  class="form-control">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.idorden">{[{periodo.nombre}]}</option>
+                                    </select> 
+                                    <p class="help-block" ng-if="reporte.anos.$error.required">
+                                        * El periodo es obligatorio
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="panel-footer">    
+                                <div class="col-md-9">
+                                    <div class="alert-box info">
+                                        Toda la informacion sera generada en un archivo .xlsx
+                                    </div>  
+                                </div>                            
+                                                              
+                                <div class="btn-group col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Reporte Pagos  <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">                                                                              
+                                        <li>
+                                            <a ng-click="download=true;generarReporte(1)">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Cx Cobrar y Tar. Basica
+                                            </a>
+                                        </li>    
+                                        <li>
+                                            <a ng-click="download=true;generarReporte(2)">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Todo Concepto
+                                            </a>
+                                        </li> 
+                                    </ul>
+                                </div>                            
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+            <fieldset>
+                <legend>Parametros del reporte Anticipos</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <!--div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta1.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div-->
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Periodo de Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta2.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-3" show-errors>
+                                    <label>Municipio</label>
+                                    <select type="text" name="municipio" id="municipio" ng-model="info.municipio" class="form-control input-sm">                                            
+                                        <option ng-repeat="item in municipios" ng-value="item.idmunicipio">{[{item.municipio}]}</option>                                            
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.municipio.$error.required">
+                                        El municipio es requerido
+                                    </p>
+                                </div>
+                            </div>                                                                                                                 
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Generar reporte formato xlsx.
+                                </div>  
+                            </div>
+
+                            <div class="btn-group col-md-3">
+                                <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-gears fa-lg"></i> Reporte Anticipos  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">                                                                              
+                                    <li>
+                                        <a ng-click="download=true;generarReporte2()">
+                                            <i class="fa fa-file-excel-o fa-lg"></i> Anticipos
+                                        </a>
+                                    </li>                                    
+                                    <li>
+                                        <a ng-click="download=true;generarReporte3()">
+                                            <i class="fa fa-file-excel-o fa-lg"></i> Anticipos Conciliacion
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div> 
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>    
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/pagosFacturacion.angular.js')}}"></script>
+{% endblock %}

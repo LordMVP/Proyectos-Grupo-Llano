@@ -1,0 +1,6 @@
+/*
+@media only screen and (max-width : 1550px) {div.dataTables_wrapper { max-width: 2000px; }}
+@media only screen and (min-width : 1024px) {div.dataTables_wrapper { max-width: 1000px; }}
+@media only screen and (min-width : 768px) and (max-width : 1023px) { div.dataTables_wrapper { max-width: 900px; }}
+@media only screen and (max-width : 767px) { div.dataTables_wrapper { max-width: 650px; } }
+*/

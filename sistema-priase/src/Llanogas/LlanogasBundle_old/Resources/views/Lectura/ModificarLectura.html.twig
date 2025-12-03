@@ -1,0 +1,371 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Modificar Lectura  {% endblock %}
+
+{% block body %}
+
+
+    <div id="divComandos">
+
+        <div class="divBotones">
+            <input type="button" value="filtrar" id="btnFiltrar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+
+
+        <div id="divCabecera">
+            <div class="divIzquierda">
+                <fieldset>
+                    <legend>Suscripción</legend>
+
+                    <div class="campo">
+                        <label for="txtIdSuscripcion">Id Suscripción:</label>
+                        <input type="text" id="txtIdSuscripcion" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtNombre">Nombre:</label>
+                        <input type="text" id="txtNombre" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtDocumento">Documento:</label>
+                        <input type="text" id="txtDocumento" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtIdMedidor">Id Medidor:</label>
+                        <input type="text" id="txtIdMedidor" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtDescripcionMedidor">Descripción Medidor:</label>
+                        <input type="text" id="txtDescripcionMedidor" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtCodigoAnterior">Código Anterior:</label>
+                        <input type="text" id="txtCodigoAnterior" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtCicloPeriodo">Ciclo Periodo:</label>
+                        <input type="text" id="txtCicloPeriodo" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtTipoUso">Tipo Uso:</label>
+                        <input type="text" id="txtTipoUso" disabled="disabled" />
+                    </div>
+
+                    <input type="button" value="Detalle Medidor" id="btnCargarDetalleMedidor" class="btnSimple">
+
+
+
+                </fieldset>
+
+                <!--División para mostrar última lectura realizada-->
+                <fieldset id="divLecturaActual">
+                    <legend>Lectura Actual</legend>
+
+                    <div class="campo">
+                        <label for="txtFecha">Fecha:</label>
+                        <input type="text" id="txtFecha" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtLecturaAnteriorUltima">Lectura Anterior:</label>
+                        <input type="text" id="txtLecturaAnteriorUltima" required="required" data-campo="lecturaanterior"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtLecturaActualUltima">Lectura Actual:</label>
+                        <input type="text" id="txtLecturaActualUltima" required="required" data-campo="lecturaactual"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtConsumoUltima">Consumo:</label>
+                        <input type="text" id="txtConsumoUltima"  data-campo="consumo"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtConsumoPromedio">Consumo Promedio:</label>
+                        <input type="text" id="txtConsumoPromedio" disabled="disabled" data-campo="consumopromedio" />
+                    </div>
+                    <div class="campo" >
+                        <div  style="width:48%;display: inline-block;margin-right:2.8%">
+                            <label for="txtFactorCorreccion">Factor Corrección</label>
+                            <input type="text" id="txtFactorCorreccion" disabled="disabled" data-campo="factorcorreccion"/>
+                        </div>
+                        <div style="width:48%;display: inline-block">
+                            <label for="cboAplicarNota">Aplicar Nota</label>
+                            <select id="cboAplicarNota" >
+                                <option value="-1"> Seleccione una opción</option>
+                                <option value="S"> Si</option>
+                                <option value="N"> No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campoCompleto">
+                        <label for="txtObservacionesActual">Observaciones:</label>
+                        <textarea id="txtObservacionesActual" required="required" data-campo="observaciones"></textarea>
+                    </div>
+                    <input type="button" value="Detalle Lectura" id="btnDetalleLectura" class="btnSimple">
+                    <input type="button" value="Historial Lecturas" id="btnHistorialMedidor" class="btnSimple">
+
+
+                </fieldset>
+
+                <!-- Division para filtro -->
+                <div id="camposBuscarSuscripcion">
+                    <div class="campo">
+                        <label for="txtFiltroSus">Suscripción:</label>
+                        <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtFiltroDoc">Cédula/NIT:</label>
+                        <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtFiltroCodAnt">Código Anterior:</label>
+                        <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+                    </div>
+                    <span id="spanMensaje" class="pMensaje"></span>
+                    <div style="text-align:right;">
+                        <button id="btnFiltrarSuscriptor" class="btnSimple">Buscar</button>
+                    </div>
+                    <div class="listaSuscripciones"></div> 
+                </div>
+                <!-- Division para filtro -->
+
+                <!-- Modal motivo Nota -->
+                <div id="divMotivoNota">
+                    <div class="campoCompleto">
+                        <label for="cmbMotivosNota">Motivo de la Nota:</label>
+                        {{cmbMotivosNota|raw}}
+                    </div> 
+                    <div class="campoCompleto">
+                        <label for="txtObservacionesNota">Observaciones:</label>
+                        <textarea name="" id="txtObservacionesNota"></textarea>
+                    </div>
+                    <div>
+                        <p class="pMensaje" id="mensajeDetalleNota"></p>
+                    </div>
+                </div>
+                <!-- Modal motivo Nota -->
+
+
+
+
+                <!-- Confirmación de cancelación -->
+                <div id="divConfirmarCancelar">
+                    <p>Se cancelará la operación actual ¿Desea continuar?</p>
+                </div>
+                <!-- Confirmación de eliminación -->
+                <div id="divConfirmarEliminar">
+                    <p>Se eliminará un detalle de lectura ¿Desea continuar?</p>
+                </div>
+
+                <!--Ventana Emergente Detalle de Medidor-->
+                <div id="divDetalleMedidor">
+
+                    <div class="campo">
+                        <label for="txtIdMedidorEmergente">Id Medidor:</label>
+                        <input type="text" id="txtIdMedidorEmergente" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtMunicipio">Municipio:</label>
+                        <input type="text" id="txtMunicipio" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtDireccion">Dirección:</label>
+                        <input type="text" id="txtDireccion" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtBarrio">Barrio:</label>
+                        <input type="text" id="txtBarrio" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtNumerocatastral">Número Catastral:</label>
+                        <input type="text" id="txtNumerocatastral" disabled="disabled" />
+                    </div>
+                </div>
+
+                <!--Ventana Emergente Agregar Lectura-->
+                <div id="divAgregarLectura">
+                    <div class="campo">
+                        <label for="cboEstado">Estado:</label>
+                        <select id="cboEstado">
+                            <option value="P">Procesado</option>
+                            <option value="E">Ejecutado</option>
+                            <option value="A">Activo</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFechaEjecucion">Fecha de Ejecución:</label>
+                        <input type="text" id="txtFechaEjecucion" data-attr="fechaEjecucion" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFechaProgramacion">Fecha de Programación:</label>
+                        <input type="text" id="txtFechaProgramacion" data-attr="fechaProgramacion" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtLecturaActual">Lectura Actual:</label>
+                        <input type="text" id="txtLecturaActual"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFactorCorreccionEmergente">Factor Corrección:</label>
+                        <input type="text" id="txtFactorCorreccionEmergente"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtConsumo">Consumo:</label>
+                        <input type="text" id="txtConsumo" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtIdMedidorAgregarLectura">Id Medidor:</label>
+                        <input type="text" id="txtIdMedidorAgregarLectura"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtEmpresaLectura">Empresa/Empleado Lectura:</label>
+                        <input type="text" id="txtEmpresaLectura" data-attr="terceroLectura" value=" "/>
+                        <input type="hidden" id="idEmpresaLectura" data-attr="idTerceroLectura"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cboAnomalias">Anomalía:</label>
+                        <select id="cboAnomalias">
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cboNovedades">Novedad:</label>
+                        <select id="cboNovedades">
+                        </select>
+                    </div>
+                    <div class="campo campoRadio">
+                        <fieldset>
+                            <legend>Ejecutada</legend>
+                            <label for="rbtnEjecutadaS">
+                                <input type="radio" id="rbtnEjecutadaS" title="S" name="rbtnEjecutada" data-attr="ejecutada" value="S"  />
+                                Sí
+                            </label>
+                            <label for="rbtnEjecutadaN">
+                                <input type="radio" id="rbtnEjecutadaN" title="N" name="rbtnEjecutada" data-attr="ejecutada" value="N"  />
+                                No
+                            </label>
+                        </fieldset>
+                    </div>
+
+                    <div>
+                        <label for="txtObservaciones">Observaciones:</label>
+                        <textarea id="txtObservaciones" data-attr="observaciones"></textarea>
+                    </div>
+                </div>
+
+                <!--Ventana Emergente Ver Encabezado Histórico-->
+                <div id="divVerEncabezadoHistorico">
+                    <div class="campo">
+                        <label for="txtIdMedidorHistorico" >Id Medidor:</label>
+                        <input type="text" id="txtIdMedidorHistorico" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtFechaHistorico" >Fecha:</label>
+                        <input type="text" id="txtFechaHistorico" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtCicloPeriodoHistorico" >Ciclo-Periodo:</label>
+                        <input type="text" id="txtCicloPeriodoHistorico" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtLecturaAnteriorHistorico">Lectura Anterior:</label>
+                        <input type="text" id="txtLecturaAnteriorHistorico" disabled="disabled"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtLecturaActualHistorico">Lectura Actual:</label>
+                        <input type="text" id="txtLecturaActualHistorico" disabled="disabled"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtFactorCorreccionEmergenteHistorico">Factor Corrección:</label>
+                        <input type="text" id="txtFactorCorreccionEmergenteHistorico" disabled="disabled"/>
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtConsumoHistorico" >Consumo:</label>
+                        <input type="text" id="txtConsumoHistorico" disabled="disabled"/>
+                    </div>
+
+                    <div>
+                        <label for="txtObservacionesHistorico">Observaciones:</label>
+                        <textarea id="txtObservacionesHistorico" disabled="disabled"></textarea>
+                    </div>
+                </div>
+
+
+                <!--División para el detalle de lectura actual-->
+                <div id="divDetalleLectura">
+                    <fieldset>
+                        <legend>Detalle Lectura</legend>
+                        <table id="tblDetalleLectura" class="tabla"></table>
+                        <span class="pMensaje" id="spanMensajeLecturas"></span>
+                        <input type="button" value="Agregar Lectura" id="btnAgregarLectura" class="btnSimple">
+                    </fieldset>
+                </div>
+
+                <!--División para el historial del lecturas-->
+
+                <div id="divEncabezadoHistorico">
+                    <fieldset>
+                        <legend>Historial Lecturas</legend>
+                        <div class="campo">
+                            <label for="txtFechaInicial">Fecha Inicial:</label>
+                            <input type="text" id="txtFechaInicial"/>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtFechaFinal">Fecha Final:</label>
+                            <input type="text" id="txtFechaFinal"/>
+                        </div>
+
+                        <input type="button" value="Buscar" id="btnBuscarHistorial" class="btnSimple"/>
+
+                        <table id="tblHistorialMedidor" class="tabla"></table>
+                    </fieldset>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/lectura/modificarlectura/modificarlectura.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/lectura/modificarlectura/modificarlectura.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/lectura/modificarlectura/modificarlectura.vista.js')}}"></script>
+{% endblock %}

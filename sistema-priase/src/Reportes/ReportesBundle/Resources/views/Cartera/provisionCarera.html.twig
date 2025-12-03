@@ -1,0 +1,67 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de provision por cartera -{{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ProvisionCarteraControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtro de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicio (yyyy-mm-dd):</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="info.fechaInicio" id="fechaInicio" name="fechaInicio" />
+                                    <p class="help-block" ng-if="reporte.fechaInicio.$error.required">
+                                        La fecha inicio es requerida
+                                    </p>
+                                </div> 
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Fin (yyyy-mm-dd):</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="info.fechaFin" id="fechaFin" name="fechaFin" />
+                                    <p class="help-block" ng-if="reporte.fechaFin.$error.required">
+                                        La fecha fin es requerida
+                                    </p>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="nit_cedula">#Cedula o #Nit:</label>
+                                    <input class="form-control input-sm" ng-model="info.nit_cedula" id="nit_cedula" name="nit_cedula" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte regulados
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/provisionCartera.angular.js')}}"></script>
+{% endblock %}

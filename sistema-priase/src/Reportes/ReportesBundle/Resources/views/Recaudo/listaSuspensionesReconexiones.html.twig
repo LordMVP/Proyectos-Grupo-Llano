@@ -1,0 +1,190 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Lista de Suspensiones-Reconexiones -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="SuspensionesReconexionesController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    
+                                </div>  
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Registrar Datos.
+                                </div>  
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Lista suspensiones
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar lista reconexiones
+                                </button>
+                            </div>
+                            
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+                <legend>Parametros del reporte facturacion</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta3" id="fechaConsulta3" name="fechaConsulta3" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta4" id="fechaConsulta4" name="fechaConsulta3" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Proyecto</label>
+                                        <select id="proyecto" name="proyecto" ng-model="info.proyecto" class="form-control">
+                                            {% for proyecto in proyectos %}
+                                                <option ng-value="{{proyecto.idmunicipio}}">{{proyecto.municipio}}
+                                                </option>
+                                            {% endfor %}
+                                            
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                            El proyecto es requerido.
+                                        </p>
+                                    </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Zona de Alto Riesgo</label>
+                                        <select id="zona" name="zona" ng-model="info.zona" class="form-control">
+                                            <option value="1">SI</option>
+                                            <option value="2">NO</option>                                            
+                                        </select>                                        
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Zona</label>
+                                        <select id="zonatipo" name="zonatipo" ng-model="info.zonatipo" class="form-control">
+                                            <option value="1">URBANA</option>
+                                            <option value="2">RURAL</option>                                            
+                                        </select>                                      
+                                </div>
+                                 <div class="form-group col-md-4" show-errors>
+                                        <label>Tipo de reporte</label>
+                                        <select ng-change="actualizarMotivos()" id="tipo" name="tipo" ng-model="info.tipo" class="form-control">                                            
+                                            <option value="1">Suspensiones</option>
+                                            <option value="2">Reconexiones</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipo.$error.required">
+                                            El tipo de reporte es requerido
+                                        </p>
+                                 </div>
+                                
+                                <!-- Inicio de modificacion Julian Poveda-->
+                                
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Tipo de Suspensión</label>
+                                        <select multiple="true" id="filtros_suspension" name="filtros_suspension" ng-model="info.idfiltro" class="form-control">
+                                            <option ng-repeat="filtro in filtros_suspension" ng-value="filtro.idfiltro">
+                                                {[{filtro.nombre}]}
+                                            </option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipo.$error.required">
+                                            El tipo de reporte es requerido
+                                        </p>
+                                 </div>
+                                
+                                <!-- Fin modificacion Julian Poveda-->
+                                
+                                 <div class="form-group col-md-4" show-errors>
+                                    <label for="idmotivo">Motivo: </label>
+                                    <select multiple="true" id="idmotivo" name="idmotivo" ng-model="info.idmotivo" class="form-control">                                                                               
+                                        <option ng-repeat="resultado in resultados" ng-value="resultado.idmotivo">
+                                            {[{resultado.nombre}]}
+                                        </option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.resultado.$error.required">
+                                        El motivo es obligatorio.
+                                    </p>
+                                    
+                                </div>
+                                                             
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Generar reporte formato xlsx.
+                                </div>  
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" ng-click="generarReporte3()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i>Lista suspensiones 
+                                </button>
+                            </div>
+                            <div class="btn-group col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Reporte Reconexiones  <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">                                                                              
+                                        <li>
+                                            <a ng-click="download=true;generarReporte4()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i>Lista Reconexiones
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="download=true;generarReporte5()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i>Lista reconexiones Tarde
+                                            </a>
+                                        </li>                                                                               
+                                    </ul>
+                                </div> 
+                            
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/suspensiones.reconexiones.angular.js')}}"></script>
+    
+{% endblock %}

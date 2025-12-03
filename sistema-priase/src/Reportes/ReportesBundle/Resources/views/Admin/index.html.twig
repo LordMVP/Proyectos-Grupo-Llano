@@ -1,0 +1,32 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+{% endblock %}
+{% block titulo %}Administracion de reportes Servidor Remoto- {{empresa}}  {% endblock %}
+
+{% block body %}
+    <form action="cargarReporte" name="cargarArchivo" id="cargarArchivo" method="post" enctype="multipart/form-data">
+        <div id="divPanelContenedor">
+            <div id="divCabecera">
+                <fieldset>
+                    <legend>Archivo del reporte</legend>                    
+                    <div class="campo" >
+                        <label for="archivoReporte">Archivo del reporte</label>
+                        <input type="file" id="fileReport" name="fileReport" required="true" accept="jrxml/*,png/*,jpg/*,jasper/*" />
+                    </div>
+                    
+                    <div class="campo" id="boton">
+                        <input type="button" id="btnCargarArchivo" value="Cargar Reporte" class="btnSimple" />
+                    </div>                    
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/admin/admin.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/admin/admin.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/admin/admin.vista.js')}}"></script>
+{% endblock %}

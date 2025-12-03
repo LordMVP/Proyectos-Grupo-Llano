@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calcularTakeOrPay/GestionTakeOrPay/GestionTakeOrPay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calcularTakeOrPay/GestionTakeOrPay/GestionTakeOrPay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionTakeOrPay.scss';
+import { get as getProp } from 'object-path';
+import { RConsultaTopGrupal } from '../../topGrupal/ConsultaTopGrupal';
+
+class GestionTakeOrPay extends Component {
+
+  state = {
+    // Datos de la entidad
+    listaContratos: null,
+    fechaInicio: '',
+    fechaFin: '',
+    idTopGrupal: '',
+    nombreTopGrupal: '',
+    // Estado de la aplicacion
+    mostrarModalConsulta: false,
+    estado: true,
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      fechaInicio: ' ',
+      fechaFin: ' ',
+      nombreTopGrupal: '',
+      idTopGrupal: '',
+      listaContratos: null,
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+      estado: true,
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    let funciones = [{ texto: 'Guardar', callback: this.guardarEntidad }];
+    funciones.push({ texto: 'Consultar Top Grupal', callback: this.consultarEntidad });
+    funciones.push({ texto: 'Calcular', callback: this.calcular });
+    funciones.push({ texto: 'Generar Reporte', callback: this.generarReporte });
+    funciones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return funciones;
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { fechaFin, fechaInicio, listaContratos } = this.state;
+    const fechaInicioDate = Date.parse(fechaInicio);
+    const fechaFinDate = Date.parse(fechaFin);
+    const fechaActual = Date.now();
+    // Ejemplo Validacion
+    if (fechaInicio.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial' } };
+    }
+
+    if (fechaFin.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final' } };
+    }
+
+    if (fechaInicioDate > fechaFinDate) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La fecha inicial no puede ser mayor a la fecha final' } };
+    }
+
+    if (fechaFinDate > fechaActual) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La fecha final no puede ser mayor al día de hoy' } };
+    }
+
+    if (!Util.validarArreglo(listaContratos.listaTakeOrPayContrato)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe consultar un top grupal antes de guardar' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormularioConsultarContratos = () => {
+    const { fechaFin, fechaInicio, listaContratos, nombreTopGrupal } = this.state;
+    const fechaInicioDate = Date.parse(fechaInicio);
+    const fechaFinDate = Date.parse(fechaFin);
+    const fechaActual = Date.now();
+    // Ejemplo Validacion
+    if (fechaInicio.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial' } };
+    }
+
+    if (fechaFin.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final' } };
+    }
+
+    if (fechaInicioDate > fechaFinDate) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La fecha inicial no puede ser mayor a la fecha final' } };
+    }
+
+    if (fechaFinDate > fechaActual) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La fecha final no puede ser mayor al día de hoy' } };
+    }
+
+    if (nombreTopGrupal.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el top grupal' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar el JSON de guardar
+   * @returns {Object}
+   */
+  obtenerDatos = () => {
+    const { listaContratos, fechaInicio, fechaFin, idTopGrupal } = this.state;
+    let objetoDevolver = {};
+    const lista = listaContratos.listaTakeOrPayContrato.filter(p => p.cantidadReal != null &amp;&amp; p.cantidadFirme != null);
+    const objeto = lista.map((dato, index) => {
+      return {
+        cntIdecontrato: { cntIderegistro: dato.contrato.cntIderegistro },
+        tpgIdetopgrupal: { tpgIderegistro: idTopGrupal },
+        nvcCantidadreal: dato.cantidadReal,
+        nvcCantidadfirme: this.obtenerCantidadFirme(dato.cantidadFirme, dato.cantidadReal),
+        nvcConsumoocacional: dato.consumoOcasional,
+        nvcFechainicialcalculo: fechaInicio,
+        nvcFechafinalcalculo: fechaFin,
+      }
+    });
+    objetoDevolver.listaValores = objeto;
+    return objetoDevolver;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerDatos();
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULAR_TAKE_OR_PAY.GUARDAR, entidadGuardar);
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consulta
+   * @returns {bool}
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del boton consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de consultar los contratos del top grupal
+   * @returns {Boolean}
+   */
+  calcular = () => {
+    const { fechaFin, fechaInicio, idTopGrupal } = this.state;
+    const validacion = this.validarFormularioConsultarContratos();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULAR_TAKE_OR_PAY.CONSULTAR_CONTRATOS, { 'topgrupal': idTopGrupal, 'fechaInicial': fechaInicio, 'fechaFinal': fechaFin })
+      .then((respuesta) => {
+        if (respuesta.data.codigo === 0) {
+          return false;
+        }
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaContratos: respuesta.data.datos, });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de generar el reporte
+   * @returns {Boolean}
+   */
+  generarReporte = () => {
+    const { idTopGrupal, fechaFin, fechaInicio } = this.state;
+    if (idTopGrupal == '') {
+      this.props.mostrarAlerta("Datos Incompletos", "Debe seleccionar el top grupal");
+      return false;
+    }
+    if (fechaInicio == '') {
+      this.props.mostrarAlerta("Datos Incompletos", "Debe selecciona la fecha inicio");
+      return false;
+    }
+    if (fechaFin == '') {
+      this.props.mostrarAlerta("Datos Incompletos", "Debe selecciona la fecha fin");
+      return false;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULAR_TAKE_OR_PAY.GENERAR_DOCUMENTO, { 'idTopGrupal': idTopGrupal, 'fechaInicio': fechaInicio, 'fechaFinal': fechaFin })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let a = document.createElement('a');
+          a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+          a.download = "Reporte.xls";
+          a.target = '_blank';
+          a.click();
+          return;
+        }
+        if (respuesta.data.codigo == 0) {
+          this.props.mostrarAlerta("Atención", "Debe guardar el registro primero.");
+        }
+      });
+  };
+
+  /**
+   * Método encargado de cargar los datos de la ventana modal de consulta
+   * @param {Object} entidad Datos seleccionados de la consulta
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      estado: false,
+      idTopGrupal: entidad.tpgIderegistro,
+      nombreTopGrupal: entidad.tpgNombre,
+    });
+  };
+
+  /**
+   * Método encargado de obtener el valor de la cantidad firme
+   * @param {number} cantidadFirme La cantidad firme del contrato consultado
+   * @param {number} cantidadReal La cantidad real del contrato consultado
+   */
+  obtenerCantidadFirme = (cantidadFirme, cantidadReal) => {
+    let cantidadF = cantidadFirme;
+    let cantidadR = cantidadReal;
+    if (!cantidadF || cantidadF === null) {
+      cantidadF = cantidadR;
+    }
+    return cantidadF;
+  };
+
+  /**
+   * Método encargado de mostrar la tabla para el calculo del consumo
+   * @returns {array}
+   */
+  renderTablaConsumo = () => {
+    return (
+      &lt;table className='table table-striped mt30'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Calculo Consumo Ocacional&lt;/th>
+          &lt;/tr>
+          &lt;tr>
+            &lt;th>Top Grupal&lt;/th>
+            &lt;th>Contrato&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaContratos.map((dato, index) => {
+            return (
+              &lt;tr key={dato.contrato.cntIderegistro}>
+                &lt;td>{dato.contrato.tpgIdetopgrupal.tpgNombre}&lt;/td>
+                &lt;td>{dato.contrato.cntNumero}&lt;/td>
+              &lt;/tr>
+            );
+          })}
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de obtener el porcentaje dado el valor decimal
+   * @param {number} porcentajeDeficiente Valor decimal
+   * @returns {number}
+   */
+  obtenerPorcentaje = (porcentajeDeficiente) => {
+    if (porcentajeDeficiente) {
+      return porcentajeDeficiente * 100;
+    }
+    return 0;
+  };
+
+  /**
+   * Método encargado de generar la tabla con los contratos del top grupal seleccionado
+   * @returns {array}
+   */
+  renderTabla = () => {
+    return (
+      &lt;div className='col-12 mt-3'>
+        &lt;table className='table table-striped'>
+          &lt;thead>
+            &lt;tr>
+              &lt;th>Top Grupal&lt;/th>
+              &lt;th>Número Contrato&lt;/th>
+              &lt;th>Agente&lt;/th>
+              &lt;th>Cantidad Contratada&lt;/th>
+              &lt;td>% Top&lt;/td>
+              &lt;td>Consumo real (m3)&lt;/td>
+              &lt;td>Cantidad Deficiente&lt;/td>
+              &lt;td>% Participación cantidad deficiente&lt;/td>
+              &lt;td>Asignaciòn de la cantidad deficiente&lt;/td>
+              &lt;th>Cantidad Firme&lt;/th>
+              &lt;th>Consumo Ocacional&lt;/th>
+              &lt;th>% Firmeza&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {this.state.listaContratos.listaTakeOrPayContrato.map((dato, index) => {
+              return (
+                &lt;tr key={dato.contrato.cntIderegistro}>
+                  &lt;td>{dato.contrato.tpgIdetopgrupal.tpgNombre}&lt;/td>
+                  &lt;td>{dato.contrato.cntNumero}&lt;/td>
+                  &lt;td>{dato.contrato.terIdeagente.terNomcompleto}&lt;/td>
+                  &lt;td>{dato.cantidadContratada}&lt;/td>
+                  &lt;td>{dato.cantidadTop}&lt;/td>
+                  &lt;td>{dato.cantidadReal}&lt;/td>
+                  &lt;td>{dato.cantidadDeficiente}&lt;/td>
+                  &lt;td>{this.obtenerPorcentaje(dato.porcentajeParticipacion)}&lt;/td>
+                  &lt;td>{dato.asignacionCantidadDeficiente}&lt;/td>
+                  &lt;td>{dato.cantidadFirme}&lt;/td>
+                  &lt;td>{dato.cantidadOcasional}&lt;/td>
+                  &lt;td>{dato.firmeza}&lt;/td>
+                &lt;/tr>
+              );
+            })}
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario con el detalle del calculo del top crupal
+   * @returns {JSX}
+   */
+  renderDetalleTop = () => {
+    return (
+      &lt;div className="grupo-campos col-12 mt-5">
+        &lt;legend className='title'>
+          Top Grupal
+          &lt;/legend>
+        &lt;div className='row mt-5'>
+          &lt;Input
+            label='Cantidad Mínima:'
+            value={getProp(this.state.listaContratos, 'cantidadMinimaTop')}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Cantidad Contratada:'
+            value={getProp(this.state.listaContratos, 'cantidadContatadaTop')}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Consumo Real:'
+            value={getProp(this.state.listaContratos, 'cantidadRealTop')}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Cantidad Deficiente:'
+            value={getProp(this.state.listaContratos, 'cantidadDeficienteTop')}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Input
+            label='Nombre Top Grupal:'
+            value={this.state.nombreTopGrupal}
+            extra={{ disabled: true, readOnly: true }}
+            name='nombreTopGrupal'
+          />
+          &lt;Fecha
+            label='Fecha Inicio:'
+            name='fechaInicio'
+            fecha={this.state.fechaInicio}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha Fin:'
+            name='fechaFin'
+            fecha={this.state.fechaFin}
+            onChange={this.controlarCambio}
+          />
+          {
+            getProp(this.state, 'listaContratos.listaTakeOrPayContrato', []).length > 0 &amp;&amp;
+            this.renderTabla()
+          }
+        &lt;/div>
+        {this.state.listaContratos != null &amp;&amp;
+          this.renderDetalleTop()
+        }
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo='Top Grupal'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaTopGrupal
+            esModal
+            seleccionarEntidad={this.cargarDatos}
+          />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionTakeOrPay.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionTakeOrPay);
+
+export { VistaRedux as RGestionTakeOrPay };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

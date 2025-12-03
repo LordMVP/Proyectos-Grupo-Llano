@@ -1,0 +1,182 @@
+libranza_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller: LibranzaBundle:Default:index }
+    #Caso de uso de aprobación de la solicitud de crédito
+    
+    #INICIO Libranza solicitud de credito
+libranza_credito:
+    pattern:  /credito/registro/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:index}
+
+libranza_credito_barrios:
+    pattern:  /credito/barrios/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:obtenerBarrios}
+
+libranza_credito_departamentos:
+    pattern:  /credito/departamentos/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:obtenerDepartamentos}
+libranza_credito_ciudades:
+    pattern:  /credito/ciudades/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:obtenerCiudades}
+libranza_credito_municipios:
+    pattern:  /credito/municipios/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:obtenermunicipios } 
+
+libranza_credito_informacion_carga:
+    pattern:  /credito/informacion/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:obtenerInformacion}
+    
+libranza_credito_consultar_nombres:
+    pattern:  /credito/terceros/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:consultarTerceros}
+
+
+libranza_credito_insertar:
+    pattern:  /credito/registro/insertar/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:registrarCredito}
+
+libranza_credito_actualizar:
+    pattern:  /credito/registro/actualizar/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:actualizarCredito}
+
+libranza_credito_consultar:
+    pattern:  /credito/registro/consultar/
+    defaults: { _controller: LibranzaBundle:ValidarCredito:consultarCredito}
+    
+libranza_credito_adjuntar_credito:
+    pattern:  /credito/registro/adjuntar/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:subirAdjunto}
+
+libranza_credito_eliminar_archivo:
+    pattern:  /credito/registro/eliminaradjunto/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:eliminarAdjunto}
+
+#Routing para porcesar la solicitud a un archivo 
+libranza_credito_consultar_cargar_datos:
+    pattern:  /credito/exportar/cargardatos/
+    defaults: { _controller: LibranzaBundle:ExportarFormato:cargarSesionDatos}
+
+libranza_credito_consultar_exportar:
+    pattern:  /credito/exportar/exportarDatos/
+    defaults: { _controller: LibranzaBundle:ExportarFormato:index}
+
+
+#FIN 
+libranza_credito_aprobar:
+    pattern:  /credito/aprobar_rechazar/
+    defaults: { _controller: LibranzaBundle:AprobarRechazarCredito:index}
+libranza_credito_aprobar_scoring:
+    pattern:  /credito/aprobar_rechazar/calificacion/
+    defaults: { _controller: LibranzaBundle:AprobarRechazarCredito:ObtenerCalificacionParametrizada}
+
+libranza_credito_validar:
+    pattern:  /credito/validar/
+    defaults: { _controller: LibranzaBundle:ValidarCredito:index}
+libranza_credito_aprobar_aprobar:
+    pattern:  /credito/aprobar_rechazar/aprobarsolicitud/
+    defaults: { _controller: LibranzaBundle:AprobarRechazarCredito:AprobadoRechazar}
+libranza_credito_validar_credito:
+    pattern:  /credito/validar/validarcredito/
+    defaults: { _controller: LibranzaBundle:ValidarCredito:evaluarCredito}
+    
+
+libranza_credito_desembolsar:
+    pattern:  /credito/desembolsar/
+    defaults: { _controller: LibranzaBundle:CreditosAprobados:index}
+
+libranza_credito_calificar:
+    pattern:  /credito/calificar/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:index}
+
+libranza_credito_calificar_actualizar:
+    pattern:  /credito/calificar/actualizarinformacion/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:ActualizarInformacion}
+
+libranza_credito_calificar_validar_calificacion:
+    pattern:  /credito/calificar/validarcalificacion/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:ValidarCredito}
+
+libranza_credito_calificar_calificacion:
+    pattern:  /credito/calificar/obtener/calificacion/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:obtenerCalificacion}
+
+libranza_credito_calificar_registrar_calificacion:
+    pattern:  /credito/calificar/registrar/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:registrarCalificacion}
+
+libranza_credito_imprimir_documentos:
+    pattern:  /credito/calificar/imprimir/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:imprimirDocumentos}
+
+libranza_credito_parametrizacion_scoring:
+    pattern:  /credito/parametrizacion/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:index}
+
+libranza_credito_parametrizacion_scoring_funciones:
+    pattern:  /credito/parametrizacion/funciones_variables/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:obtenerFuncionesVariable}
+
+
+libranza_credito_parametrizacion_scoring_formularios:
+    pattern:  /credito/parametrizacion/formularios/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:obtenerFormularios}
+
+libranza_credito_validar_calificacion:
+    pattern:  /credito/calificar/validar/
+    defaults: { _controller: LibranzaBundle:ScoringCredito:ValidarCalificacion}
+
+libranza_credito_parametrizacion_scoring_variables:
+    pattern:  /credito/parametrizacion/variables/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:obtenerVariables}
+
+libranza_credito_parametrizacion_scoring_formulario_insertar:
+    pattern:  /credito/parametrizacion/formulario/crear/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:crearFormulario}
+
+libranza_credito_parametrizacion_scoring_crear_parametrizacion:
+    pattern:  /credito/parametrizacion/formulario/crear/parametrizacion/
+    defaults: { _controller: LibranzaBundle:ParametrizacionScoring:crearParametrizacion}
+
+libranza_credito_consultar_aprobados:
+    pattern:  /credito/registro/consultar/aprobados/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:consultarCreditoAprobados}
+
+
+libranza_credito_desembolsado_credito_obtener:
+    pattern:  /credito/desembolsar/obtener/
+    defaults: { _controller: LibranzaBundle:CreditosAprobados:ObtenerCreditosAprobados}
+
+libranza_credito_desembolsado_credito_aprobado:
+    pattern:  /credito/desembolsar/aprobar/
+    defaults: { _controller: LibranzaBundle:CreditosAprobados:AprobarDesembolso}
+libranza_credito_desembolsado_credito_sin_desembolsar:
+    pattern:  /credito/desembolsar/aprobar_sin_desembolsar/
+    defaults: { _controller: LibranzaBundle:CreditosAprobados:aprobarSinDesembolsarCredito}
+libranza_credito_resumen:
+    pattern:  /credito/resumen/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:Index}
+libranza_credito_resumen_etapas:
+    pattern:  /credito/resumen/etapas/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:obtenerEtapasCredito}
+libranza_credito_resumen_creditos:
+    pattern:  /credito/resumen/creditos/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:obtenerCreditos}
+libranza_credito_resumen_informacion:
+    pattern:  /credito/resumen/informacion/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:obtenerInformacion}
+libranza_credito_resumen_comentarios:
+    pattern:  /credito/resumen/comentarios/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:obtenerComentarios}
+libranza_credito_resumen_detalles:
+    pattern:  /credito/detalles/
+    defaults: { _controller: LibranzaBundle:ResumenCredito:renderDetalles}
+libranza_credito_aprobados:
+    pattern:  /credito/aprobados/
+    defaults: { _controller: LibranzaBundle:AprobadoNoDesembolsado:index}
+libranza_credito_aprobados_aprobar:
+    pattern:  /credito/aprobados/aprobar/
+    defaults: { _controller: LibranzaBundle:AprobadoNoDesembolsado:aprobarCredito}
+
+libranza_credito_token:
+    pattern:  /credito/token/
+    defaults: { _controller: LibranzaBundle:RegistroCredito:token}

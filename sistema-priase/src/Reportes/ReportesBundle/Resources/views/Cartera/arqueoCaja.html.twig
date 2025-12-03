@@ -1,0 +1,105 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de arqueo de caja - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ArqueoController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3> Ingrese los datos necesarios para la generacion del formato de arqueo de caja.</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6 form-group" show-errors>
+                                    <label for="fechaConsulta">Fecha Consulta</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta" id="fechaConsulta" name="fechaConsulta" required="true" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                <div class="col-md-6 form-group " show-errors>
+                                    <label for="codigoProyecto">Proyecto</label>
+                                    <select class="form-control input-sm" ng-model="info.codigoProyecto" id="codigoProyecto" required="required" name="codigoProyecto">
+                                        <option value="" disabled selected>Seleccione Proyecto</option>
+                                        {% for municipio in municipios %}
+                                            <option value="{{ municipio.idmunicipio }}" data-proyecto="{{municipio.municipio}}">{{municipio.municipio}}</option>
+                                        {% endfor %}                        
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.codigoProyecto.$error.required" >
+                                        El proyecto es requerido
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group" show-errors >
+                                    <label for="medioPago">Medio Pago</label>
+                                    <select class="form-control input-sm" ng-model="info.medioPago" ng-change="updateCajeros()" id="medioPago" required="required" name="medioPago">
+                                        <option value="" disabled selected>Seleccione medio de pago</option>
+                                        <option ng-repeat="medioPago in mediosPago" ng-value="medioPago.id">{[{medioPago.nombre}]}</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.medioPago.$error.required" >
+                                        El medio de pago es requerido
+                                    </p>
+                                </div>
+                                <div class="col-md-6 form-group" show-errors >
+                                    <label for="idcajero">Cajero</label>
+                                    <select class="form-control input-sm" ng-model="info.idcajero" id="idcajero" name="idcajero">
+                                        <option value="" disabled selected>Seleccione cajero</option>
+                                        <option ng-repeat="cajero in cajeros2" data-cargo = "{[{cajero.cajero_cargo}]}" ng-value="cajero.cajero_id">{[{cajero.cajero_nombre}]}</option>
+                                    </select>
+                                    
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                        El reporte por cajero solo tomara los recaudos del cajero seleccionado y generara el reporte para ese cajero,
+                                        el consolidado tomara los recaudos de todos los cajeros y generara el reporte a nombre del cajero seleccionado.
+                                    </ul>
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Generar el reporte <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a ng-click="info.consolidado=false;generarReporte()">
+                                                <i class="fa fa-file-pdf-o fa-lg"></i> Por cajero
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="info.consolidado=true;generarReporte2()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Consolidado
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </div>                                
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/arqueo.control.angular.js')}}"></script>
+{% endblock %}

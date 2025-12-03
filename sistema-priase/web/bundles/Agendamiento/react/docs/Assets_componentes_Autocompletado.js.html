@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Assets/componentes/Autocompletado.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Assets/componentes/Autocompletado.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import axios from 'axios'
+import Autosuggest from 'react-autosuggest'
+import URL from '../../../global/rutas_api'
+import Peticion from '../util/peticion'
+import PropTypes from 'prop-types'
+import './Autocompletado.scss'
+
+class AutoCompletado extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            _id: this.props.id,
+            value: '',
+            suggestions: [],
+            arreglo: this.props.opciones,
+        }
+        this.getSuggestionValue = this.getSuggestionValue.bind(this)
+    }
+
+    /**
+     * Actualiza los estados de las propiedades cuando se alteran en el padre
+     * @param prevProps Propiedad que almacena los cambios previos
+     * de los estados del padre CalendarioHábil, en particular de:
+     * lista, value y limpieza
+     * @return {No aplica}
+     */
+
+    componentDidUpdate(prevProps) {
+        //actualiza la lista de opciones
+        if (this.props.opciones !== prevProps.opciones) {
+            this.setState({
+                arreglo: this.props.opciones,
+            })
+        }
+        //reinicia el campo
+        if (this.props.value !== prevProps.value) {
+            if (this.props.value === '-1') {
+                this.onChange(null, { newValue: '', method: null })
+                this.props.onChange({
+                    target: { id: 'autocompletado', value: undefined },
+                })
+            }
+        }
+    }
+
+    theme = {
+        container: 'autocompletado',
+        containerOpen: 'activo',
+        input: 'form-control',
+        inputOpen: 'activo',
+        inputFocused: 'enfocado',
+        suggestionsContainer: 'autocompletado__contenedor',
+        suggestionsContainerOpen: 'activo',
+        suggestionsList: 'autocompletado__lista',
+        suggestion: 'autocompletado__sugerencia',
+        suggestionFirst: 'primero',
+        suggestionHighlighted: 'activo',
+        sectionContainer: 'autocompletado__seccion',
+        sectionContainerFirst: 'primero',
+        sectionTitle: 'autocompletado__titulo',
+    }
+
+    peticion = new Peticion(this)
+
+    renderSuggestion(suggestion) {
+        return &lt;span>{suggestion.texto}&lt;/span>
+    }
+
+    getSuggestionValue(suggestion) {
+        this.props.onChange({
+            target: { id: this.props.id, value: suggestion.texto },
+        })
+        return suggestion.texto
+    }
+
+    escapeRegexCharacters(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&amp;')
+    }
+
+    getSuggestions(value, arreglo) {
+        const escapedValue = this.escapeRegexCharacters(value.trim())
+
+        if (escapedValue === '') {
+            return []
+        }
+
+        const regex = new RegExp('/*' + escapedValue, 'i')
+
+        return arreglo.filter((language) => regex.test(language.texto))
+    }
+
+    onChange = (event, { newValue, method }) => {
+        this.setState({
+            value: newValue,
+        })
+    }
+
+    onSuggestionsFetchRequested = ({ value }) => {
+        this.setState({
+            suggestions: this.getSuggestions(value, this.state.arreglo),
+        })
+    }
+
+    onSuggestionsClearRequested = () => {
+        this.setState({
+            suggestions: [],
+        })
+    }
+
+    render() {
+        const { value, suggestions } = this.state
+        const inputProps = {
+            placeholder: this.props.marcaAgua,
+            value,
+            onChange: this.onChange,
+        }
+        const className = this.props.className
+            ? `form-group col-${this.props.cols} ${this.props.className}`
+            : `form-group col-${this.props.cols}`
+
+        return (
+            &lt;div className={className}>
+                &lt;label htmlFor={this.state._id}>
+                    {this.props.label || this.state._id}
+                &lt;/label>
+                &lt;Autosuggest
+                    suggestions={suggestions}
+                    theme={this.theme}
+                    onSuggestionsFetchRequested={
+                        this.onSuggestionsFetchRequested
+                    }
+                    onSuggestionsClearRequested={
+                        this.onSuggestionsClearRequested
+                    }
+                    getSuggestionValue={this.getSuggestionValue}
+                    renderSuggestion={this.renderSuggestion}
+                    inputProps={inputProps}
+                />
+            &lt;/div>
+        )
+    }
+}
+
+AutoCompletado.propTypes = {
+    opciones: PropTypes.array,
+    type: PropTypes.string,
+    placeholder: PropTypes.string,
+}
+
+AutoCompletado.defaultProps = {
+    cols: '4',
+    type: 'text',
+    value: '',
+    opciones: [],
+}
+
+export default AutoCompletado
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Jan 27 2020 01:52:38 GMT-0500 (Hora est. Pacífico, Sudamérica)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

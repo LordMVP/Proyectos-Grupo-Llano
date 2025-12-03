@@ -1,0 +1,84 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    
+    <style>
+        .campoMitad{
+            width: 99%;
+            display: inline-table;
+        }
+        .tblmunicipio{
+            display: block;
+            height: 200px;
+            overflow: scroll;
+            overflow-x:hidden;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Proceso Reconexiones - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" id="btnSuspension" value="ejecutar proceso" class="btnSimple"/>
+        </div>
+    </div>
+    <div id="divCabecera">
+        <fieldset id="divCampos" style="margin: 0 auto; width: 60%;">
+
+            <legend>Información Suscripción</legend>
+            <table id="tblTipoUso" class="tabla"></table>
+             <div class="campoMitad campos">
+                <div class="tblmunicipio">
+                    <table id="tblmunicipios" class="tabla"></table>
+                    <!--<input type="text" id="txtTipoUsoSuscripcion" />-->
+                </div>
+            </div>
+            <hr class="limpiar">
+            <div id="divDialogoResumen" style="display: none;">
+                <p id="pMensajeCantidadSuscripciones" style="display: none;">Cantidad de suscripciones que se activaron: <span style="font-weight: bold;"></span></p>
+                <div style="display: inline-block; width: 100%; float: left; ">
+                    <table id="tblResumen" class="tabla"></table>
+                </div>
+                <div style="display: inline-block; width: 100%; float: left;">
+                    <table id="tblSuspensiones" class="tabla"></table>
+                </div>
+                <div style="display: inline-block; width: 100%; float: left;">
+                    <table id="tblReconexiones" class="tabla"></table>
+                </div>
+            </div>
+            <hr class="limpiar">
+        </fieldset>
+        {% if procesoActivo != 0  %}
+            <fieldset style="margin: 0 auto; width: 60%;">
+                <legend>Progreso del proceso de reconexión</legend>
+                <div id="divProgreso">
+                    <p>Fecha de Inicio: {{proceso.fechaInicio}}</p>
+                    <p>Usuario: {{proceso.usuario}}</p>
+                    <p>Número de Registros Procesados: <span id="numeroRegistrosProcesados" >{{proceso.numeroRegistrosProcesados}}</span></p>
+                    <progress id="progress"/>
+                </div>
+            </fieldset>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/reconexiones/proceso.reconexion.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/reconexiones/proceso.reconexion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/reconexiones/proceso.reconexion.vista.js')}}"></script>
+    <script type="text/javascript">
+        procesoReconexionVista.init({{procesoActivo}}, {{tiposUsoSuscripcion|json_encode|raw}},{{municipios|json_encode|raw}});
+    </script>
+{% endblock %}

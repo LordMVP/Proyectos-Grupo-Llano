@@ -1,0 +1,112 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            display: none;
+            border-radius: 20px;
+            padding-left: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        #divDetallesExportacion #divMovimientos{
+            max-height: 200px;
+            overflow:auto;
+        }
+
+    </style>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+{% block titulo %} Exportar contabilización - {{empresa}}  {% endblock %}
+{% block body %}   
+    <a href="error/excel" target="_blank" id="linkexcel" ></a>
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="Aprobar" id="btnAprobar" class="btn" />
+            <input type="button" value="Eliminar" id="btnEliminar" class="btn" />
+            <input type="button" value="Regenerar" id="btnRegenerar" class="btn" />
+        </div>
+    </div>
+    <div id="divFiltroMovimientos">
+        <fieldset>
+            <legend>Movimiento contables</legend>
+            <div id="divSeleccion">
+                <div class="campo">
+                    <label for="cmbCiclo">Ciclo: </label>
+                    <select id="cmbCiclo">
+                        <option value="-1">Seleccione una opción</option>
+                        {% for ciclo in ciclos%}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>   
+                </div>
+                <div class="campo">
+                    <label for="cmbMovimiento">Movimiento contable: </label>
+                    <select id="cmbMovimiento"></select>   
+                </div>
+                <div class="campo">
+                    <label for="cmbTipoMovimiento">Tipo de movimiento:</label>
+                    <select id="cmbTipoMovimiento">
+                        <option value="-1"> Seleccione una opción </option>
+                        <option value="WSDC"> Caja Directa</option>
+                        <option value="WSCD"> Consignación Directa</option>
+                        <option value="WSMC" > Movimiento Contable</option>
+                        <option value="WSNC"> Notas Caja</option>
+                        <option value="WSFP"> Factura Proveedor</option>
+                    </select>
+                </div>
+                <div><button id="btnErrores" class="btnSimple">Ver Errores</button></div>
+            </div>
+            <div id="divExportacion">
+                <div id="divCargando" style="margin-bottom: 25px"> 
+                    <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                    <p><span class="span-operacion">Exportando</span> contabilización, <br>esto puede tardar unos minutos...</p>                
+                </div>
+                <table id="tblExportacion" class="tabla"></table>
+            </div>
+        </fieldset>
+    </div>
+    <div id="divDetallesMovimiento" style="display:none;">
+        <fieldset>
+            <legend>Movimientos contables a exportar</legend>
+            <div style="padding: 10px;">
+                <div id="divDetalleMovimiento">
+                    <table class="tabla" id="tblDetalleMovimiento"></table>
+                </div>
+                <div id="divDetalleEnviado">
+                    <table class="tabla" id="tblDetalleEnviado"></table>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/jquery.dataTables.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.tableTool.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/exportarContabilizacion/exportarContabilizacion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/exportarContabilizacion/exportarContabilizacion.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/exportarContabilizacion/exportarContabilizacion.vista.js')}}"></script>
+{% endblock %}

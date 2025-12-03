@@ -1,0 +1,20 @@
+# This file is auto-generated during the composer install
+parameters:
+  #  driver_class: Realestate\MssqlBundle\Driver\PDODblib\Driver
+    database_driver: pdo_sqlsrv
+#    database_host: 10.43.101.39
+    database_host: 10.43.51.26
+#   database_host: 192.168.10.109
+    database_port: 1433
+#    database_name: Llanogasdbu
+#    database_name: Tecnico
+    database_name: sevenpruebas
+    database_user: wsprisma
+    database_password: ws1234$.
+#    database_password: 1234
+    mailer_transport: smtp
+    mailer_host: smtp-relay.gmail.com
+    mailer_user: null
+    mailer_password: null
+    locale: es
+    secret: 123456789

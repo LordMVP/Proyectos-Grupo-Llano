@@ -1,0 +1,42 @@
+.calendario {
+    border: solid 1px #CCC;
+    border-radius: .4em;
+    padding: 2em;
+
+    .cabezera {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2em;
+
+        a {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        b { text-transform: capitalize }
+    }
+
+    .semana, .dias {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-align: center;
+        grid-gap: .5em;
+    }
+
+    .semana { margin-bottom: 1em }
+
+    .dia {
+        padding: .8em;
+        border-radius: .4em;
+        cursor: pointer;
+        border: solid 1px transparent;
+
+        &:hover:not(.pasado) { background: fade-out(#CCC,.8) }
+
+        &.activo { border-color: #CCC }
+
+        &.pasado { cursor: default }
+
+        &.habil { background: fade-out(#CCC, .6) }
+    }
+}

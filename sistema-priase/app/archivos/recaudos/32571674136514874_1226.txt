@@ -1,0 +1,5 @@
+Id Transacción,id factura,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Digite el Numero de Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+5130501242,-,2023-01-02 12:37:13,26568,APROBADA,PSE,454162	Bancolombia,1861905602,3,elizabeth.hoyos@stevensa.com,INDUSTRIAS ST EVEN SA,201.184.224.252
+5130491592,-,2023-01-02 11:30:25,27476,APROBADA,PSE,454163	BBVA,1861742964,3,co.tesoreria@winnergroup.com,WINNER GROUP SA,165.225.222.92
+5120738063,-,2023-01-02 18:41:23,27476,APROBADA,PSE,454164	Bancolombia,1860860467,1,tesoreria@lanieve.co,Distribuciones la Nieve Ltda,181.48.244.234
+5120597412,-,2023-01-02 12:40:17,26568,APROBADA,PSE,454165	Banco de Bogotá,1860174015,3,daniel.morales@offcorss.com,CI HERMECO SA,179.1.7.27

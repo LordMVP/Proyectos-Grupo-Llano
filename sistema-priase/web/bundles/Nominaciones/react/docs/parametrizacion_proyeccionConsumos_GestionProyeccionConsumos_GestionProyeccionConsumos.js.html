@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/proyeccionConsumos/GestionProyeccionConsumos/GestionProyeccionConsumos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/proyeccionConsumos/GestionProyeccionConsumos/GestionProyeccionConsumos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { formatearArray, TIPOS_UNIDADES_MEDIDA } from '../../../../global/util_nominaciones';
+import './GestionProyeccionConsumos.scss';
+
+const listaTipoDeUso = [
+  { id: 'D', nombre: 'Domestico' },
+  { id: 'C', nombre: 'Comercial' },
+  { id: 'I', nombre: 'Industrial' },
+  { id: 'G', nombre: 'GNV' }
+];
+
+class GestionProyeccionConsumos extends Component {
+
+  state = {
+    // Datos de la entidad
+    tipoUso: '',
+    puntoConsumo: '',
+    listaPuntosConsumo: [],
+    fecha: '',
+    cantidadProyectada: '',
+    listaUnidadMedida: [],
+    unidadMedida: '',
+
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PROYECCION_CONSUMOS.CONSULTAR_PUNTOS_CONSUMO, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+    ];
+
+    axios.all(peticiones)
+
+      .then(axios.spread((puntosConsumo, unidadesMedida) => {
+        const datosAplicacion = {
+          listaPuntosConsumo: [],
+          listaUnidadMedida: [],
+        };
+
+        if (puntosConsumo.data.codigo > 0) {
+          datosAplicacion.listaPuntosConsumo = formatearArray(puntosConsumo.data.datos);
+        }
+
+        if (unidadesMedida.data.codigo > 0) {
+          datosAplicacion.listaUnidadMedida = formatearArray(unidadesMedida.data.datos);
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      tipoUso: '',
+      puntoConsumo: '',
+      fecha: ' ',
+      cantidadProyectada: '',
+      unidadMedida: '',
+
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    //Variables
+    const { tipoUso, puntoConsumo, fecha, cantidadProyectada, unidadMedida } = this.state;
+
+    //Validaciones
+    if (tipoUso === '' || tipoUso === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un tipo de uso.' } };
+    }
+
+    if (puntoConsumo === '' || puntoConsumo === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un punto de consumo.' } };
+    }
+
+    if (cantidadProyectada.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar una cantidad proyectada.' } };
+    }
+
+    if (cantidadProyectada &lt; 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La cantidad proyectada solo admite valores positivos' } };
+    }
+
+    if (isNaN(cantidadProyectada)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'La cantidad proyectada solo admite valores númericos' } };
+    }
+
+    if (unidadMedida === '' || unidadMedida === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una unidad de medida.' } };
+    }
+
+    if (fecha.trim() === '' || fecha.trim() === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una fecha.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const { puntoConsumo, fecha, cantidadProyectada, unidadMedida, tipoUso } = this.state;
+    const entidadGuardar = {
+      'otcTipo': tipoUso,
+      'ptcIdepuntoconsumo': { 'ptcIderegistro': puntoConsumo },
+      'otcCantidad': cantidadProyectada,
+      'otcFechaproyeccion': fecha.substr(0, 7),
+      'uniIdemedidad': { 'uniIderegistro': unidadMedida },
+      'otcClase': "PYC"
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PROYECCION_CONSUMOS.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={listaTipoDeUso}
+            propTexto='nombre'
+            propValor='id'
+            label='Tipos de Uso:'
+            name='tipoUso'
+            value={this.state.tipoUso}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.listaPuntosConsumo}
+            propTexto='ptcoNombre'
+            propValor='ptcIderegistro'
+            label='Puntos De Consumo:'
+            name='puntoConsumo'
+            value={this.state.puntoConsumo}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label="Fecha:"
+            onChange={this.controlarCambio}
+            name='fecha'
+            formato='yyyy-MM'
+            fecha={this.state.fecha}
+          />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Cantidad Proyectada:'
+            value={this.state.cantidadProyectada}
+            onChange={this.controlarCambio}
+            name='cantidadProyectada'
+          />
+          &lt;Combo
+            opciones={this.state.listaUnidadMedida}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Unidades de Medida:'
+            name='unidadMedida'
+            value={this.state.unidadMedida}
+            onChange={this.controlarCambio}
+          />
+        &lt;/div>
+
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionProyeccionConsumos.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionProyeccionConsumos);
+
+export { VistaRedux as RGestionProyeccionConsumos };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

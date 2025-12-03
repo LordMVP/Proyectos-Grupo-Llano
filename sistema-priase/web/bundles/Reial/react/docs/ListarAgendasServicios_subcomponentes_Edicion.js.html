@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ListarAgendasServicios/subcomponentes/Edicion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ListarAgendasServicios/subcomponentes/Edicion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input, VentanaModal } from 'appfuture-react'
+
+import API from '../../../global/rutas_api'
+import Peticion from '../../../global/peticion'
+import Util from '../../../global/util'
+
+/**
+ *
+ *
+ * @class Edicion
+ * @extends {Component}
+ */
+class Edicion extends Component {
+
+	/**
+     *Define estados iniciales
+     * @memberof Edicion
+     */
+    state = {
+        indice: 0,
+        identificador: '',
+
+        empresa: '',
+        agenda: '',
+
+        servicio: '-1',
+        tipo: '-1',
+        dependencia: '-1',
+        municipio: '-1',
+    }
+
+    montado = false
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+    BotonGuardar = () => {
+        /* prettier-ignore */
+
+        return Util.validarObjeto(this.state)
+            ? &lt;button className="btn" onClick={this.guardar}>guardar&lt;/button>
+            : &lt;button className="btn" disabled={true}>guardar&lt;/button>
+    }
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+    change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} props - Cargar atributos del componente
+     */
+    componentDidUpdate(props, state) {
+        if (this.props.editable !== props.editable) {
+            this.inicializar()
+        }
+
+        // tipoJson
+
+        if (this.state.dependencia !== state.dependencia) {
+            const { dependencia, empresa } = this.state
+
+            if (Util.validarValor(dependencia) &amp;&amp; Util.validarValor(empresa)) {
+                this.obtenerTipo(dependencia, empresa)
+            }
+
+            else this.setState({
+                tipo: '-1',
+                tipoJson: undefined,
+            })
+        }
+    }
+
+    /**
+     *
+     * Cancelar la edición y actualizar es estado del componente padre
+     * @method
+     */
+    cancelar = () => this.props.procesar(null)
+
+	/**
+	 *
+	 * Permite guardar la edición de listar agendas servicios
+	 * @method
+	 * 
+	 */
+    guardar = () => {
+        let datos = {
+            indice: this.state.indice,
+            servicio: {
+                servicioCod: Util.obtenerId(this.state.servicio),
+                servicioNom: Util.obtenerId(this.state.servicio, 1),
+            },
+            dependencia: {
+                depempresaCod: Util.obtenerId(this.state.dependencia),
+                depempresaNom: Util.obtenerId(this.state.dependencia, 1),
+            },
+            municipio: {
+                proyectoCod: Util.obtenerId(this.state.municipio),
+                proyectoNom: Util.obtenerId(this.state.municipio, 1),
+            },
+            serageCodser: Util.obtenerId(this.state.servicio),
+            serageCodage: Util.obtenerId(this.state.agenda),
+            serageNivser: Util.obtenerId(this.state.tipo),
+            serageOrdser: this.state.orden,
+            serageCodemp: Util.obtenerId(this.state.empresa),
+            serageCodpro: Util.obtenerId(this.state.municipio),
+            serageCoddepemp: Util.obtenerId(this.state.dependencia)
+        }
+
+        if (this.state.identificador) datos.serageCod = this.state.identificador
+
+        this.props.procesar(datos)
+    }
+
+    /**
+     *
+     * Consulta por código y lista la información en el combobox
+     * @method
+     * @async
+     */
+    inicializar = async () => {
+        const datos = this.props.editable
+        const indice = datos.indice == undefined ? -1 : datos.indice
+
+        // servicioJson
+
+        Peticion.post({
+            url: API.LISTAR_SERVICIOS.CONSULTA_POR_CODIGO,
+            parametros: {},
+
+            config: {
+                valor: 'servicioCod',
+                texto: 'servicioNom',
+                textoComoValor: true,
+            },
+
+            callback: servicioJson => this.setState({ servicioJson }),
+        })
+
+        // dependenciaJson
+
+        Peticion.post({
+            url: API.LISTAR_AGENDAS.LISTAR_DEPENDENCIAS,
+            parametros: {
+                depempresaCodemp: datos.serageCodemp,
+            },
+            config: {
+                valor: 'depempresaCod',
+                texto: 'depempresaNom',
+                textoComoValor: true,
+            },
+            callback: dependenciaJson => this.setState({ dependenciaJson })
+        })
+
+        // municipioJson
+
+        Peticion.post({
+            url: API.LISTAR_AGENDAS_SERVICIOS.LISTAR_MUNICIPIOS,
+            parametros: {
+                proyectoCodemp: datos.serageCodemp
+            },
+            config: {
+                valor: 'proyectoCod',
+                texto: 'proyectoNom',
+                textoComoValor: true,
+            },
+            callback: municipioJson => this.setState({ municipioJson })
+        })
+
+        // establecer
+
+        const dependencia = datos.dependencia
+            ? `${datos.serageCoddepemp} - ${datos.dependencia.depempresaNom}` : '-1'
+
+        const municipio = datos.municipio
+            ? `${datos.serageCodpro} - ${datos.municipio.proyectoNom}` : '-1'
+
+        const servicio = datos.servicio
+            ? `${datos.serageCodser} - ${datos.servicio.servicioNom}` : '-1'
+
+        await this.setState({
+            indice,
+            identificador: datos.serageCod || '',
+            crear: datos.crear || false,
+            empresa: datos.serageCodemp,
+            agenda: datos.serageCodage,
+
+            orden: datos.serageOrdser || '',
+            tipo: datos.serageNivser || '-1',
+            servicio,
+            dependencia,
+            municipio,
+        })
+    }
+
+    /**
+     *
+     * Consulta los niveles y lista la información en el combobox
+     * @method
+     * @async
+     */
+    obtenerTipo = async (dependencia, empresa) => {
+        return Peticion.post({
+            url: API.LISTAR_SERVICIOS.LISTAR_NIVELES,
+            parametros: {
+                nivelCodemp: Util.obtenerId(empresa),
+                nivelCoddepemp: Util.obtenerId(dependencia),
+            },
+            config: {
+                valor: 'nivelCod',
+                texto: 'nivelNom',
+            },
+            callback: tipoJson => this.setState({ tipoJson })
+        })
+    }
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+    render() {
+        const { BotonGuardar } = this
+
+        return (
+            &lt;VentanaModal
+                cerrarModal={this.props.cerrarModal}
+                mostrar={this.props.mostrar}
+                titulo="Editar asociación agenda servicio"
+            >
+                &lt;div className="contenedor formulario">
+                    &lt;Combo
+                        id="servicio"
+                        label="servicio"
+                        value={this.state.servicio}
+                        opciones={this.state.servicioJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Combo
+                        id="dependencia"
+                        label="dependencia"
+                        value={this.state.dependencia}
+                        onChange={this.change}
+                        opciones={this.state.dependenciaJson}
+                    />
+
+                    &lt;Combo
+                        id="tipo"
+                        label="tipo"
+                        value={this.state.tipo}
+                        onChange={this.change}
+                        opciones={this.state.tipoJson}
+                        extra={{ disabled: !this.state.tipoJson }}
+                    />
+
+                    &lt;Combo
+                        id="municipio"
+                        label="municipio"
+                        value={this.state.municipio}
+                        opciones={this.state.municipioJson}
+                        onChange={this.change}
+                    />
+
+                    &lt;Input
+                        id="orden"
+                        label="orden"
+                        value={this.state.orden}
+                        onChange={this.change}
+                    />
+                &lt;/div>
+
+                &lt;div className="contenedor btn-group">
+                    &lt;BotonGuardar />
+                    &lt;button className="btn" onClick={this.cancelar}>
+                        &lt;span>cancelar&lt;/span>
+                    &lt;/button>
+                &lt;/div>
+            &lt;/VentanaModal>
+        )
+    }
+}
+
+export default Edicion</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/forms/PolizaContratos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/forms/PolizaContratos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Input, TextoNumerico, Combo, Util, Fecha } from 'appfuture-react';
+import { get as getProp } from 'object-path';
+
+class PolizaContratos extends Component {
+
+  state = {
+  };
+
+  componentDidMount() {
+    this.refrescarValorPrecioGarantia();
+  }
+
+  refrescarValorPrecioGarantia = () => {
+    let garantia = { ...this.props.garantia };
+    if (!garantia.poliza) {
+      garantia.poliza = {};
+    }
+    this.calcularPrecioGarantia(garantia);
+  };
+
+  /**
+ * Controlará los cambios de los componentes de la interfaz y guardará dichos datos en el objeto global de Redux.
+ */
+  controlarCambio = (evento) => {
+    const control = evento.target;
+    let nuevoEstado = {};
+    nuevoEstado[control.name] = control.value;
+    let garantia = { ...this.props.garantia };
+    if (!garantia.poliza) {
+      garantia.poliza = {};
+    }
+    garantia.poliza[control.name] = control.value;
+    this.calcularPrecioGarantia(garantia)
+    //this.props.actualizarGarantia(garantia);
+  }
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato Suministro GNV.
+   * @return {number}
+   */
+  calcularPrecioGarantiaSuministroGNV = (cantidadContratada, precioContrato) => {
+    const precio = cantidadContratada * precioContrato * 60;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato Suministro.
+   * @return {number}
+   */
+  calcularPrecioGarantiaSuministro = (cantidadContratada, precioContrato) => {
+    const precio = cantidadContratada * precioContrato * 30;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato transporte.
+   * @return {number}
+   */
+  calcularPrecioGarantiaTransporte = (cantidadContratada, precioContrato, valorTRM) => {
+    const valorCargoVariable = getProp(this.props, 'cabecera.valorCargos.variable', 0);
+    const valorCargoFijo = getProp(this.props, 'cabecera.valorCargos.fijo', 0);
+    const valorCargoAom = getProp(this.props, 'cabecera.valorCargos.aom', 0);
+    const precio = (valorCargoFijo / 365) * valorTRM + valorCargoVariable * valorTRM + valorCargoAom / 365 * 60 * cantidadContratada;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato ATR.
+   * @return {number}
+   */
+  calcularPrecioGarantiaATR = (cantidadContratada, precioContrato) => {
+    const valorDM = getProp(this.props, 'garantia.poliza.dm', 0);
+    const precio = ((cantidadContratada * valorDM) / 30) * 70;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato Conexión.
+   * @return {number}
+   */
+  calcularPrecioGarantiaConexion = (cantidadContratada, precioContrato, valorTRM) => {
+    const precio = cantidadContratada * precioContrato * 80 * valorTRM;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza para el tipo de contrato GNC.
+   */
+  calcularPrecioGarantiaGNC = (cantidadContratada, precioContrato, valorTRM) => {
+    const precio = cantidadContratada * precioContrato * 80 * valorTRM;
+    return precio;
+  };
+
+  /**
+   * Calculará el precio de la poliza.
+   * @return {number}
+   */
+  calcularPrecioGarantia = (garantia) => {
+    if (!this.props.garantia.poliza) {
+      this.props.actualizarGarantia(garantia);
+      return 0;
+    }
+    const valorTRM = (getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+      getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0);
+    const { tipoContrato } = this.props.garantia.poliza;
+    const tiposContrato = this.props.tiposContrato;
+    let { cantidadContratada, precioContrato } = this.props.cabecera;
+    let precioGarantia = 0;
+    switch (tipoContrato) {
+      case tiposContrato.GNV_SUMINISTRO.codigo:
+        precioGarantia = this.calcularPrecioGarantiaSuministroGNV(cantidadContratada, precioContrato);
+        break;
+      case tiposContrato.SUMINISTRO.codigo:
+        precioGarantia = this.calcularPrecioGarantiaSuministro(cantidadContratada, precioContrato);
+        break;
+      case tiposContrato.TRANSPORTE.codigo:
+        precioGarantia = this.calcularPrecioGarantiaTransporte(cantidadContratada, precioContrato, valorTRM);
+        break;
+      case tiposContrato.ATR.codigo:
+        precioGarantia = this.calcularPrecioGarantiaATR(cantidadContratada, precioContrato);
+        break;
+      case tiposContrato.GNC.codigo:
+        precioGarantia = this.calcularPrecioGarantiaGNC(cantidadContratada, precioContrato, valorTRM);
+        break;
+      case tiposContrato.CONEXION.codigo:
+        precioGarantia = this.calcularPrecioGarantiaConexion(cantidadContratada, precioContrato), valorTRM;
+        break;
+    }
+
+    if (isNaN(precioGarantia)) {
+      precioGarantia = 0;
+    }
+
+    garantia.poliza.precioGarantia = precioGarantia;
+    this.props.actualizarGarantia(garantia);
+
+    return precioGarantia;
+  };
+
+  /**
+   * Obtiene la lista de los tipos de contrato seleccionados por el usuario.
+   * @return {array}
+   */
+  obtenerListaTiposContratos = () => {
+    const { tiposContrato } = this.props.listas;
+    return tiposContrato.filter(tipoContrato => tipoContrato.seleccionado);
+  };
+
+  render() {
+    const tiposContrato = this.props.tiposContrato;
+    console.log('TIPOS CONTRATO', tiposContrato);
+    return (
+      &lt;div>
+        &lt;div className='row col-12 poliza-contratos'>
+          &lt;Combo
+            key={Util.generarIdControl('tiposContratos')}
+            opciones={this.obtenerListaTiposContratos()}
+            propTexto='uniNombre1'
+            propValor='uniPropiedad.tipocontrato'
+            label='Tipo Contrato:'
+            name='tipoContrato'
+            value={getProp(this.props, 'garantia.poliza.tipoContrato', '')}
+            onChange={this.controlarCambio}
+          />
+          {
+            //Se agregan las fechas de cobertura para tipo de garantia poliza //Cambio solicitado por ROSMIRA 20-01-2020
+            getProp(this.props, 'garantia.poliza.tipoContrato', '') !== tiposContrato.GNC.codigo &amp;&amp; (
+              &lt;Fragment>
+                &lt;Fecha
+                  label='Fecha Inicial Cobertura:'
+                  name='fechaInicial'
+                  value={getProp(this.props, 'garantia.poliza.fechaInicial', '')}
+                  fecha={getProp(this.props, 'garantia.poliza.fechaInicial', '')}
+                  onChange={this.controlarCambio}
+                />
+                &lt;Fecha
+                  label='Fecha Fin Cobertura:'
+                  name='fechaFin'
+                  value={getProp(this.props, 'garantia.poliza.fechaFin', '')}
+                  fecha={getProp(this.props, 'garantia.poliza.fechaFin', '')}
+                  onChange={this.controlarCambio}
+                />
+              &lt;/Fragment>
+            )
+          }
+          &lt;Input
+            label='Cantidad contratada:'
+            value={getProp(this.props, 'cabecera.cantidadContratada', '0')}
+            onChange={this.controlarCambio}
+            name='cantidadContratada'
+            extra={{ disabled: true }}
+            disabled={true}
+          />
+          &lt;Input
+            label='Precio contrato:'
+            value={getProp(this.props, 'cabecera.precioContrato', '0')}
+            onChange={this.controlarCambio}
+            name='precioContrato'
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Precio Póliza:'
+            value={getProp(this.props, 'garantia.poliza.precioGarantia', '')}
+            onChange={this.controlarCambio}
+            name='precioPoliza'
+            extra={{ disabled: true }}
+          />
+          {
+            // ((getProp(this.props, 'garantia.poliza.tipoContrato', '') === tiposContrato.SUMINISTRO.codigo) || getProp(this.props, 'garantia.poliza.tipoContrato', '') !== tiposContrato.GNV_SUMINISTRO.codigo) &amp;&amp; (
+            &lt;Input
+              label='Empresa Expide Póliza:'
+              value={getProp(this.props, 'garantia.poliza.expidePoliza', '')}
+              onChange={this.controlarCambio}
+              name='expidePoliza'
+            />
+            // )
+          }
+          {
+            getProp(this.props, 'garantia.poliza.tipoContrato', '') === tiposContrato.TRANSPORTE.codigo &amp;&amp;
+            (
+              &lt;Fragment>
+                &lt;Input
+                  label='TRM:'
+                  value={(getProp(this.props, 'cabecera.usaTRMTecho') == 'S') ?
+                  getProp(this.props, 'cabecera.trmTecho', 0) : getProp(this.props, 'cabecera.trmDia', 0)}
+                  onChange={this.controlarCambio}
+                  name='trm'
+                  extra={{ disabled: true }}
+                  disabled={true}
+                />
+                &lt;Input
+                  label='Cargo Variable:'
+                  value={getProp(this.props, 'cabecera.valorCargos.variable', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoVariable'
+                  extra={{ disabled: true }}
+                  disabled={true}
+                />
+                &lt;Input
+                  label='Cargo Fijo:'
+                  value={getProp(this.props, 'cabecera.valorCargos.fijo', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoFijo'
+                  extra={{ disabled: true }}
+                  disabled={true}
+                />
+                &lt;Input
+                  label='Cargo AOM:'
+                  value={getProp(this.props, 'cabecera.valorCargos.aom', '0')}
+                  onChange={this.controlarCambio}
+                  name='cargoAOM'
+                  extra={{ disabled: true }}
+                  disabled={true}
+                />
+              &lt;/Fragment>
+            )
+          }
+          {
+            getProp(this.props, 'garantia.poliza.tipoContrato', '') === tiposContrato.ATR.codigo &amp;&amp;
+            (
+              &lt;TextoNumerico
+                aceptaDecimales={true}
+                aceptaNegativos={false}
+                label='Dm:'
+                cols={4}
+                value={getProp(this.props, 'garantia.poliza.dm', '0')}
+                onChange={this.controlarCambio}
+                name='dm'
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.poliza.tipoContrato', '') === tiposContrato.SUMINISTRO.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='Conexión TRM:'
+                value={getProp(this.props, 'cabecera.trmTecho', '0')}
+                onChange={this.controlarCambio}
+                name='conexionTrm'
+                extra={{ disabled: true }}
+              />
+            )
+          }
+          {
+            getProp(this.props, 'garantia.poliza.tipoContrato', '') === tiposContrato.GNC.codigo &amp;&amp;
+            (
+              &lt;Input
+                label='GNC:'
+                value={getProp(this.props, 'cabecera.trmTecho', '0')}
+                onChange={this.controlarCambio}
+                name='gncTRM'
+                extra={{ disabled: true }}
+              />
+            )
+          }
+
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+}
+
+PolizaContratos.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  actualizarGarantia: PropTypes.func,
+  actualizarCabecera: PropTypes.func,
+  garantia: PropTypes.object,
+  tiposContrato: PropTypes.object,
+};
+
+export default PolizaContratos;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

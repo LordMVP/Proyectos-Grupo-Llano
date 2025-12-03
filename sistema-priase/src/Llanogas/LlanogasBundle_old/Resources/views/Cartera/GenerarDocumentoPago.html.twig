@@ -1,0 +1,158 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/financiacion.css')}}" />
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta_impresion.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+{% block titulo %}Cartera: Generar Documento de Pago - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="imprimir" id="btnImprimir" style="display:none;" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+
+    <div id="divFormulario">
+
+        <fieldset id="cabecera">
+            <legend>Información de la suscripción</legend>
+            <div class="campoBusqueda">
+                <label for="btnFormaPago">Suscripción:</label>
+                <input type="text" id="txtSuscripcion" disabled="disabled" />
+                <button id="btnSuscripcion" title="Buscar un suscriptor"></button>
+            </div>
+            <div class="campo">
+                <label for="txtCodAnterior">Código anterior:</label>
+                <input type="text" id="txtCodAnterior" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTipoSuscripcion">Tipo de Suscripción:</label>
+                <input type="text" id="txtTipoSuscripcion" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNombre">Nombre completo:</label>
+                <input type="text" id="txtNombre" disabled="disabled" />
+            </div>
+
+            <button id="btnCargarFinanciaciones" class="btnSimple">Consultar Financiaciones</button>
+
+        </fieldset>
+
+        <div>
+            <table class="tabla" id="tblFinanciaciones"></table>
+            <div id="div_campos">
+                <div class="col-md-2 campo" id="divCapTotal">
+                    <label for="txtTotalReestructuracion">Total Capital:</label>
+                    <input type="text" id="txtTotalCapitalRees" disabled="disabled" />
+                </div>
+                <div class="col-md-2 campo" id="divIntTotal">
+                    <label for="txtTotalReestructuracion">Intereses:</label>
+                    <input type="text" id="txtTotalIntRees" disabled="disabled" />
+                </div>
+                <div class="col-md-4 campo" id="divTotal">
+                    <label for="txtTotalReestructuracion">Total Reestructuración:</label>
+                    <input type="text" id="txtTotalReestructuracion" disabled="disabled" />
+                </div> 
+            </div>
+        </div>
+
+    </div>
+    <!--División para mostrar concepto que puede financiar-->
+    <div id="divConceptos" style="display: none;">
+        <table class="tabla" id="tblConceptos"></table>
+        <div class="campo">
+            <label for="txtTotalFinanciarConcepto">Total Financiación:</label>
+            <input type="text" id="txtTotalFinanciarConcepto" disabled="disabled" />
+        </div>
+    </div>
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDoc">Cédula/NIT:</label>
+            <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+    </div>
+
+
+    <!-- Division para simulador -->
+    <div id="divSimulador" style="display:none;" >
+        <div class="campo campo-impresion-20pto" style="display: none" id="divSuscripcionImprimir">
+            <label for="txtSuscripcionImprimir" >Id suscripción:</label>
+            <input type="text" id="txtSuscripcionImprimir" class="inputImpresion"/>
+        </div>
+        <div class="campo" style="display: none" >
+            <label for="txtPropietarioImprimir">Nombre Propietario:</label>
+            <input type="text" id="txtPropietarioImprimir" class="inputImpresion"/>
+        </div>
+        <div class="campo" style="display: none" >
+            <label for="txtDireccionImprimir">Dirección Predio:</label>
+            <input type="text" id="txtDireccionImprimir" class="inputImpresion"/>
+        </div>
+        <div class="campo campo-impresion-20pto" style="display: none" id="divFechaActualImprimir">
+            <label for="txtFechaActualImprimir">Fecha actual:</label>
+            <input type="text" id="txtFechaActualImprimir" class="inputImpresion" value="{{fecha}}"/>
+        </div>
+        <div class="campo campo-impresion-20pto">
+            <label for="txtIntereses">Intereses: </label>
+            <input type="text" id="txtIntereses" placeholder="El valor se divide por 100" maxlength="10" class="inputImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo campo-impresion-20pto">
+            <label for="txtNumeroCuotas">Número de cuotas:</label>
+            <input type="text" id="txtNumeroCuotas" maxlength="2" placeholder="Número cuotas"  value="10" class="inputImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo" >
+            <label for="txtCapitalInicial" >Capital Inicial:</label>
+            <input type="text" id="txtCapitalInicial" placeholder="Capital inicial" value="200000" class="inputImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo" style="display: none">
+            <label for="txtCuotaInicialImprimir">Cuota Inicial:</label>
+            <input type="text" id="txtCuotaInicialImprimir" class="inputImpresion"/>
+        </div>
+        <div class="campo" style="display: none" >
+            <label for="txtVlrCuotaMensualImprimir">Valor Aprox. Cuota Mensual:</label>
+            <input type="text" id="txtVlrCuotaMensualImprimir" class="inputImpresion"/>
+        </div>
+        <div class="campo" style="display: none" >
+            <label for="txtVlrPrimerCuotaImprimir">Valor Aprox. Primer Cuota:</label>
+            <input type="text" id="txtVlrPrimerCuotaImprimir" class="inputImpresion"/>
+        </div>
+        <p class="pMensaje"><strong>Nota:</strong> Los valores de la cuota son aproximados ya que la tasa de interés varía trimestralmente.</p>
+        <p class="pMensaje" style="font-size: 14px;"><strong>Cláusula Aceleratoria:</strong> Conforme con lo establecido en el artículo 69 de la ley 45 de 1990, ante el incumplimiento por parte del deudor del pago de tres o mas de los instalamentos o cuotas debidas, se hará exigible la totalidad de la obligación en la factura emitida.</p>
+        <div style="margin-top: 20px;" id="divTbl"></div> 
+    </div>
+    <div id="contentFrame" style="display:none;">
+        <iframe src="/achagua/sistema/web/bundles/Llanogas/templates/contenidoframe.html" frameborder="0" id="iframePrint"></iframe>
+    </div>
+
+    <table class="tabla" id="tblConceptosImprimir" style="display:none;"></table>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/amortizador.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generardoc/control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generardoc/modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generardoc/vista.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/GestionContratos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/GestionContratos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Botonera, Util } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../global/rutas_api';
+
+// Util y Constantes
+import { CLASES_UNIDADES } from '../../../global/constantes';
+import { parsearJSONUniPropiedad, esObjetoVacio, formatearArray, limpiarDatosHistorico, TIPOS_UNIDADES_MEDIDA } from '../../../global/util_nominaciones';
+
+// REDUX
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+
+import { mostrarAlerta, mostrarProgramaModal } from '../../../store/actions/AplicacionAcciones';
+import { actualizarCabeceraContrato, actualizarListaContratos, actualizarTipoCalculoContrato, actualizarDocumentosContrato, actualizarGarantia, limpiarContrato } from '../../../store/actions/ContratosAcciones';
+
+// VISTAS
+import { RCabeceraContrato } from './forms/CabeceraContrato';
+import { RCalculoPrecioContrato } from './CalculoPrecioContrato/CalculoPrecioContrato';
+import { RGestionDocumentos } from './forms/GestionDocumentos';
+import { RSeleccionTipoGarantia } from './forms/SeleccionTipoGarantia';
+import PolizaContratos from './forms/PolizaContratos';
+import { get as getProp } from 'object-path';
+import { SelectorPuntosSalida } from '../../utils/SelectorPuntosSalida';
+import moment from 'moment';
+
+import './GestionContratos.scss';
+import RUTAS_VISTA from '../../../global/rutas_vista';
+import { toast } from 'react-toastify';
+
+const VISTAS = [
+  { id: 0, titulo: 'Cabecera del Contrato', componente: 'obtenerCabeceraContrato' },
+  { id: 1, titulo: 'Tipo de Cálculo de Precio', componente: 'obtenerTipoCalculoPrecio' },
+  { id: 2, titulo: 'Selección Garantias', componente: 'obtenerSeleccionTipoGarantias' },
+  { id: 3, titulo: 'Gestión de Documentos', componente: 'obtenerGestionDocumentos' },
+];
+
+const TIPOS_GARANTIA = {
+  BANCARIA: 'GB',
+  PREPAGO: 'PR',
+  POLIZA: 'PO'
+};
+
+const TIPOS_CACULO_PRECIO = {
+  NINGUNO: 'N',
+  TRAMOS: 'T',
+  CANASTA: 'C'
+};
+
+const TIPOS_SERVICIO = {
+  SUMINISTRO: 'S',
+  TRANSPORTE: 'T'
+};
+
+const TIPOS_CANASTA = {
+  HORARIA: "H",
+  CONSUMO: "C",
+  DUPLEX: "A",
+};
+
+
+class GestionContratos extends Component {
+  refPuntosSalida = null;
+  state = {
+    mostrarModalConsulta: false,
+    //navegador
+    programaActual: 1,
+    // Estado de la aplicacion
+    tiposDeUso: null,
+    tiposMercado: null,
+    tiposContrato: null,
+    fuentesDistribucion: null,
+    topGrupal: null,
+    tiposModalidadContrato: null,
+    clasesContrato: null,
+    puntosSalida: null,
+    unidadesMedida: null,
+    listaTramos: null,
+    listaArchivos: [],
+    // Datos de cada formulario
+    cabecera: null,
+    //navegador
+    programaActual: 0,
+    idContratoTemporal: null,
+    idContrato: null,
+
+  };
+
+  /**
+   * Verifica si se está consultando un contrato y ejecuta la consulta correspondiente para obtener los datos.
+   * @returns {Boolean}
+   */
+  consultarContrato = () => {
+    const { idContrato } = this.state;
+    if (!idContrato) {
+      return;
+    }
+    axios.post(RUTAS_API.CONTRATOS.CONSULTAR_DETALLE_CONTRATO, { idContrato: idContrato })
+      .then((respuesta) => {
+        if (respuesta.data.codigo > 0) {
+          this.mostrarObjeto(respuesta.data.datos);
+        } else {
+          this.props.mostrarAlerta('Error', 'No se encontró el contrato');
+        }
+      });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.cargarDatosAplicacion(this.consultarContrato);
+  }
+
+  /**
+   * Cargará la información principal del módulo, en este caso consultará las listas necesariaas y demás información que necesite del servidor para empezar.
+   * @param {Function} callback Funcion a ejecutar
+   */
+  cargarDatosAplicacion = (callback) => {
+    const obj = sessionStorage.getItem('contratos');
+    if (obj) {
+      const json = JSON.parse(obj);
+      this.props.actualizarListaContratos(json.listas);
+      (typeof callback === 'function') &amp;&amp; callback();
+      return;
+    }
+    const params = { criterio: '' };
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_USO_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_MERCADO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.FUENTES_DISTRIBUCION.CONSULTAR_FUENTES_DISTRIBUCION, { ...params }),
+      axios.post(RUTAS_API.PARAMETRIZACION.TOP_GRUPAL.CONSULTAR_TOPS_GRUPAL, { ...params }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPOS_MODALIDAD_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.CLASE_CONTRATO }),
+      axios.post(RUTAS_API.PARAMETRIZACION.PUNTOS_SALIDA.CONSULTAR_PUNTOS_SALIDA, { ...params }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.UNIDAD_MEDIDA }),
+      axios.post(RUTAS_API.PARAMETRIZACION.TRAMOS.CONSULTAR_TRAMOS, { ...params }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.RUTA_GNC_CONEXION }),
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_MEDIDOR_SUMINISTRO.CONSULTAR),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_ARCHIVO_DOCUMENTO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_TRM, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.CONSULTAR_HORARIO_ACTIVIDAD, { criterio: '' }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.MONEDA }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.CANTIDAD }),
+      axios.post(RUTAS_API.PARAMETRIZACION.UNIDADES_MEDIDA.CONSULTAR_POR_ESTRUCTURA, { criterio: '', categoria: TIPOS_UNIDADES_MEDIDA.PRECIO_CAPACIDAD }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { idClase: CLASES_UNIDADES.TIPO_GARANTIA })
+    ];
+
+    axios.all(peticiones)
+      .then(
+        axios.spread((tiposUso, tiposMercado, tiposContrato, fuentesDistribucion, topGrupal, tiposModalidadContrato, clasesContrato, puntosSalida, unidadesMedida, listaTramos, rutasGNC, medidores, documentos, trmdia, horarioActividad, monedas, cantidad, precioCapacidad, tiposGarantias) => {
+          this.props.actualizarListaContratos({
+            consultasTerminadas: true,
+            tiposGarantias: formatearArray(parsearJSONUniPropiedad(tiposGarantias.data.datos)),
+            tiposDeUso: formatearArray(parsearJSONUniPropiedad(tiposUso.data.datos)),
+            tiposMercado: formatearArray(parsearJSONUniPropiedad(tiposMercado.data.datos)),
+            tiposContrato: formatearArray((parsearJSONUniPropiedad(tiposContrato.data.datos))),
+            fuentesDistribucion: formatearArray(parsearJSONUniPropiedad(fuentesDistribucion.data.datos)),
+            topGrupal: formatearArray(topGrupal.data.datos),
+            tiposModalidadContrato: formatearArray(parsearJSONUniPropiedad(tiposModalidadContrato.data.datos)),
+            clasesContrato: formatearArray(parsearJSONUniPropiedad(clasesContrato.data.datos)),
+            puntosSalida: formatearArray(puntosSalida.data.datos),
+            unidadesMedida: formatearArray(parsearJSONUniPropiedad(unidadesMedida.data.datos)),
+            listaTramos: formatearArray(listaTramos.data.datos),
+            rutasGNC: formatearArray(parsearJSONUniPropiedad(rutasGNC.data.datos)),
+            rutas: formatearArray(parsearJSONUniPropiedad(rutasGNC.data.datos)),
+            medidores: formatearArray(medidores.data.datos),
+            listaTiposDocumentos: formatearArray(documentos.data.datos),
+            monedas: formatearArray(monedas.data.datos),
+            cantidad: formatearArray(cantidad.data.datos),
+            precioCapacidad: formatearArray(precioCapacidad.data.datos),
+          });
+          this.props.actualizarCabeceraContrato({ trmDia: (trmdia.data.codigo > 0) ? trmdia.data.datos.covlValor : 0 });
+          this.props.actualizarTipoCalculoContrato({ tipoCalculo: 'N' });
+          if (horarioActividad.data.codigo > 0) {
+            const actividad = horarioActividad.data.datos;
+            this.mostrarAlertaActividad(actividad[0]);
+          }
+          (typeof callback === 'function') &amp;&amp; callback();
+        }), (err) => {
+          console.log(err);
+        }
+      );
+  };
+
+  /**
+   * Si el arreglo está indefinido o es un null retornará un arreglo vacio: []
+   * @param {Array} arreglo Lista a validar
+   * @return {Array}
+   */
+  corregirArreglo = (arreglo) => {
+    if (!Array.isArray(arreglo)) {
+      return [];
+    }
+    return arreglo;
+  };
+
+  /**
+   * Setea la actividad y una bandera en true para mostrar una alerta que indicará
+   * al usuario el tipo de actividad que pertenece al horario en el que
+   * accede a la interfaz.
+   * @param {Object} actividad Datos de la actividad
+   */
+  mostrarAlertaActividad = (actividad) => {
+    if (actividad) {
+      this.setState({ mostrarAlertaActividad: true, actividad: actividad });
+    } else {
+      this.setState({ mostrarAlertaActividad: false });
+    }
+  };
+
+  /**
+   * Actualizará algunos atributos del state para limpiar los datos temporales que se guardan en este.
+   */
+  limpiarFormulario = () => {
+    const trmDia = getProp(this.props, 'cabecera.trmDia', 0);
+    this.props.limpiarContrato();
+    this.resetearListas();
+    this.props.actualizarCabeceraContrato({ trmDia: trmDia });
+    limpiarDatosHistorico(RUTAS_VISTA.GESTION_CONTRATOS.url, this.props);
+  };
+
+  /**
+   * Método encargado de limpiar las listas
+   * @param {Array} lista Lista a limpiar
+   * @returns {Array}
+   */
+  resetearLista = (lista) => {
+    if (!Util.validarArreglo(lista)) {
+      return [];
+    }
+    return lista.map(item => {
+      item.seleccionado = false;
+      return item;
+    })
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux para la cabecera del contrato
+   * @param {Object} nuevoCambio Cambio a realizar en la cabecera
+   */
+  actualizarCabeceraRedux = (nuevoCambio) => {
+    this.props.actualizarCabeceraContrato({
+      ...this.props.cabecera,
+      ...nuevoCambio
+    });
+  };
+
+  /**
+   * Quitará los atributos seleccionado a false.
+   */
+  resetearListas = () => {
+    const { tiposContrato, listaTramos, puntosSalida, rutas, medidores } = this.props.listas;
+    const nuevosTiposContrato = this.resetearLista(tiposContrato);
+    const nuevosListaTramos = this.resetearLista(listaTramos);
+    const nuevosPuntosSalida = this.resetearLista(puntosSalida);
+    const nuevosRutas = this.resetearLista(rutas);
+    const nuevosMedidores = this.resetearLista(medidores);
+    const listasActuales = this.props.listas;
+    this.props.actualizarListaContratos({
+      ...listasActuales,
+      consultasTerminadas: true,
+      tiposContrato: [...nuevosTiposContrato],
+      listaTramos: [...nuevosListaTramos],
+      puntosSalida: [...nuevosPuntosSalida],
+      rutas: [...nuevosRutas],
+      medidores: [...nuevosMedidores]
+    })
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Obtiene un arreglo con objetos que construirán los botones de la interfaz.
+   * @return {array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Valdia el formulario.
+   * @return {object}
+   */
+  validarFormulario = () => {
+    if (!this.props.cabecera.agenteTercero) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el tercero.' } };
+    }
+
+    if (!Util.validarArreglo(this.props.documentos.adjuntos)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Complete la subida de los documentos.' } };;
+    }
+
+    //Validamos las rutas...
+    const tiposContrato = this.props.listas.tiposContrato.filter(tipoContrato => (tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato == 'CNX') || (tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato == 'GNC'));
+    if (tiposContrato.length > 0) {
+      const rutasSeleccionadas = this.props.listas.rutasGNC.filter(ruta => ruta.seleccionado);
+      if (rutasSeleccionadas.length === 0) {
+        return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar como mínimo una ruta.' } };;
+      }
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Obtiene la lista de documentos para registrar.
+   * @return {array}
+   */
+  obtenerListaDocumentos = () => {
+    const listaDocumentos = [...this.props.documentos.adjuntos];
+    return listaDocumentos.map((f) => {
+      return {
+        cntdNombre: f.nombre,
+        uniIdetipodocumento: {
+          uniIderegistro: f.tipoDocumento
+        },
+        cntdFechainicio: f.fechaInicio,
+        cntdFechafinal: f.fechaFin,
+        cntdFechaexpedicion: f.fechaExpedicion,
+        cntdIdearchivo: f.id
+      };
+    });
+  };
+
+  /**
+   * Obtiene el objeto garantia teniendo en cuenta el tipo...
+   * @return {object}
+   */
+  obtenerGarantia = () => {
+    //Tener en cuenta que hay tres tipos de garantia.
+    let { garantia, cabecera } = this.props;
+    const tipoGarantia = garantia.tipoGarantia;
+
+    switch (tipoGarantia) {
+      case TIPOS_GARANTIA.BANCARIA:
+        garantia = garantia.bancaria;
+        break;
+      case TIPOS_GARANTIA.PREPAGO:
+        garantia = garantia.prepago;
+        break;
+      case TIPOS_GARANTIA.POLIZA:
+        garantia = garantia.poliza;
+        break;
+    }
+
+    const objetoGarantia = {
+      cntgTipo: tipoGarantia,
+      cntgCrucecuenta: ((garantia.cruzaCuentas) ? 'S' : 'N'),
+      cntgValorcontrato: cabecera.precioContrato,
+      cntgPrecio: garantia.precioGarantia, //Renombrar los precios calculados.
+      cntgValordm: garantia.dm,
+      cntgFechainicio: garantia.fechaInicial,
+      cntgFechafin: garantia.fechaFin,
+      cntgPorcentaje: garantia.porcentajeComercializacion,
+      cntgNumerodias: garantia.numeroDiasPrepago,
+      cntgCalculodiario: garantia.calculoDiario,
+      cntgEmpresaexpide: garantia.expidePoliza,
+      cntgTipocontrato: garantia.tipoContrato
+    };
+    return objetoGarantia;
+  };
+
+  /**
+   * Obtiene el objeto de garantía usando el objeto contrato que viene del registro.
+   * @return {Object}
+   */
+  obtenerGarantiaContrato = (contrato) => {
+    if (!contrato.garantia) {
+      return { tipoGarantia: 'NA' };
+    }
+    let garantia = {
+      tipoGarantia: contrato.cntTipogarantia,
+    };
+    let tipoGarantia = null;
+    switch (garantia.tipoGarantia) {
+      case TIPOS_GARANTIA.BANCARIA:
+        tipoGarantia = 'bancaria';
+        break;
+      case TIPOS_GARANTIA.PREPAGO:
+        tipoGarantia = 'prepago';
+        break;
+      case TIPOS_GARANTIA.POLIZA:
+        tipoGarantia = 'poliza';
+        break;
+    };
+    let fechaIni = contrato.garantia.cntgFechainicio;
+    fechaIni = moment(fechaIni);
+    fechaIni = moment(fechaIni).format("YYYY-MM-DD");
+    let fechaFin = contrato.garantia.cntgFechafin;
+    fechaFin = moment(fechaFin);
+    fechaFin = moment(fechaFin).format("YYYY-MM-DD");
+    garantia[tipoGarantia] = {
+      cruzaCuentas: ('S' === contrato.garantia.cntgCrucecuenta),
+      precioContrato: contrato.garantia.cntgValorcontrato,
+      precioGarantia: contrato.garantia.cntgPrecio,
+      dm: contrato.garantia.cntgValordm,
+      fechaInicial: fechaIni,
+      fechaFin: fechaFin,
+      porcentajeComercializacion: contrato.garantia.cntgPorcentaje,
+      numeroDiasPrepago: contrato.garantia.cntgNumerodias,
+      calculoDiario: contrato.cntCalculoDiario,
+      expidePoliza: contrato.garantia.cntgEmpresaexpide,
+      tipoContrato: contrato.garantia.cntgTipocontrato,
+      valorCruceCuentas: contrato.garantia.cruce
+    };
+    return garantia;
+  };
+
+  /**
+   * Obtiene la lista de contratos seleccionados...
+   * @return {array}
+   */
+  obtenerListaTipos = () => {
+    //const listaTiposContrato = this.
+    const { tiposContrato } = this.props.listas;
+
+    return tiposContrato.filter(tipo => tipo.seleccionado).map((tipo) => {
+      return {
+        uniIdetipocontrato: {
+          uniIderegistro: tipo.uniIderegistro
+        }
+      };
+    });
+  };
+
+  /**
+   * Obtiene la lista de tramos que ha seleccionado el usuario para realizar las operaciones respectivas del contrato.
+   * @return {array}
+   */
+  obtenerListaGlobalTramos = () => {
+    const { listaTramos } = this.props.listas;
+    return listaTramos.filter(tramo => tramo.seleccionado).map((tramo) => {
+      return {
+        trcaIdetramocargo: {
+          trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+        },
+        cntrCargovariable: tramo.cargoVariable
+      }
+    });
+  };
+
+  /**
+   * Obtiene la lista de puntos de salida que ha seleccionado el usuario.
+   * @return {array}
+  */
+  obtenerPuntosSalida = () => {
+    const { puntosSalida } = this.props.listas;
+    return puntosSalida.filter(p => p.seleccionado).map((puntoSalida) => {
+      return {
+        ptsaIdesalida: {
+          ptsaIderegistro: puntoSalida.ptsaIderegistro,
+        },
+        cntsCantidadcontratada: puntoSalida.cntsCantidadcontratada,
+        uniIdemedidacantidad: { uniIderegistro: puntoSalida.uniIdemedidacantidad }
+      }
+    });
+  };
+
+  /**
+   * Obtiene la lista de rutas que ha seleccionado el usuario para realizar las operaciones respectivas del contrato.
+   * @return {array}
+   */
+  obtenerListaRutas = () => {
+    const { rutas } = this.props.listas;
+    return rutas.filter(ruta => ruta.seleccionado).map((ruta) => {
+      if (ruta.seleccionado) {
+        return {
+          uniIderutagnc: {
+            uniIderegistro: ruta.uniIderegistro
+          },
+          uniIdemedida: {
+            uniIderegistro: ruta.uniIdemedida
+          },
+          cntuValor: ruta.cntuValor
+        }
+      }
+    });
+  };
+
+  /**
+   * Obtiene la lista de medidores...
+   * @return {array}
+   */
+  obtenerListaMedidores = () => {
+    const { medidores } = this.props.listas;
+    return medidores.filter(medidor => medidor.seleccionado).map((medidor) => {
+      if (medidor.seleccionado) {
+        return {
+          mesuIderegistro: medidor.mesuIderegistro
+        };
+      }
+    });
+  };
+
+  /**
+  * Verifica si la selección actual del usuario es canasta horaria suministro y devuelve los rangos que haya parametrizado el usuario.
+  * @param {Object} canasta Datos de la canasta
+  * @return {array}
+  */
+  obtenerListaCanastaHorariaSuministro = (canasta) => {
+    let listaCanasta = [];
+    //Verificamos si hay tarifas horarias...
+    if (canasta.tarifaHoraria &amp;&amp; canasta.canastaHorariaSuministro) {
+      const v = canasta.canastaHorariaSuministro.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaHorariaSuministro.canastaConRutas : canasta.canastaHorariaSuministro.canastaSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.HORARIA,
+          cncHorainicio: rango.rango.horaInicio,
+          cncHorafin: rango.rango.horaFin,
+          listaValores: this.obtenerListaValores(rango),
+        };
+      });
+    }
+    return listaCanasta;
+  };
+
+  /**
+   * Obtiene la lista de rangos de transporte.
+   * @param {Object} canasta Datos de la canasta
+   * @return {array}
+   */
+  obtenerListaCanastaHorariaTransporte = (canasta) => {
+    let listaCanasta = [];
+    //Verificamos si hay tarifas horarias...
+    if (canasta.tarifaHoraria &amp;&amp; canasta.canastaHorariaTransporte) {
+      //Verificamos si debemos tomar las horas con rutas o sin rutas...
+      const v = canasta.canastaHorariaTransporte.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaHorariaTransporte.canastasConRutas : canasta.canastaHorariaTransporte.canastasSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.HORARIA,
+          cncHorainicio: rango.rango.horaInicio,
+          cncHorafin: rango.rango.horaFin,
+          listaValores: this.obtenerListaValores(rango)
+        };
+      });
+    }
+    return listaCanasta;
+  };
+
+  /**
+   * Método encargado de obtener la unidad de medida del cargo dependiendo del tipo
+   * @param {Object} tramo Tramo al cual se le quiere obtener los cargos
+   * @param {String} tipo Tipo del cargo
+   */
+  obtenerUnidadMedidaCargo = (tramo, tipo) => {
+    //Verificamos el cargo seleccionado...
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.uniIdemedidavariable.uniIderegistro;
+      case 'F':
+        return cargoSeleccionado.uniIdemedidafijo.uniIderegistro;
+      case 'A':
+        return cargoSeleccionado.uniIdemedidaoym.uniIderegistro;
+    }
+  };
+
+  /**
+   * Obtiene la lista de valores para canasta duplex con rutas...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresCanastaDuplexConRutasSinTramos = (rango) => {
+    return rango.subRangos.map(sr => {
+      const subRango = { ...sr };
+      const obj = {
+        cncTipo: TIPOS_CANASTA.DUPLEX,
+        cncHorainicio: subRango.horaInicio,
+        cncHorafin: subRango.horaFin,
+        cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+      };
+      obj.listaValores = [];
+      subRango.rutas.map(rt => {
+        const ruta = { ...rt };
+        const temporal = {
+          cncvValor: ruta.valor,
+          uniIdemedida: {
+            uniIderegistro: ruta.unidadMedida,
+          },
+          cncvPorcentaje: ruta.valorPorcentaje,
+          uniIderuta: {
+            uniIderegistro: ruta.uniIderegistro,
+          },
+          trcaIdetramocargo: null
+        };
+        obj.listaValores.push(temporal);
+      });
+      return obj;
+    });
+  };
+
+  /**
+   * Obtiene la lista de valores para canasta duplex con rutas...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresCanastaDuplexConRutas = (rango) => {
+    return rango.subRangos.map(sr => {
+      const subRango = { ...sr };
+      const obj = {
+        cncTipo: TIPOS_CANASTA.DUPLEX,
+        cncHorainicio: subRango.horaInicio,
+        cncHorafin: subRango.horaFin,
+        cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+      };
+      obj.listaValores = [];
+      subRango.rutas.map(rt => {
+        const ruta = { ...rt };
+        ruta.tramos.map(t => {
+          const tramo = { ...t };
+          const temporal = {
+            cncvValor: tramo.cargoVariable ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V'),
+            uniIdemedida: {
+              uniIderegistro: tramo.unidadMedida ? tramo.unidadMedida : this.obtenerUnidadMedidaCargo(tramo, 'V'),
+            },
+            cncvPorcentaje: tramo.valorPorcentaje,
+            uniIderuta: {
+              uniIderegistro: ruta.uniIderegistro,
+            },
+            trcaIdetramocargo: {
+              trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+            }
+          };
+          obj.listaValores.push(temporal);
+        });
+      });
+      return obj;
+    });
+  };
+
+  /**
+   * Obtiene los valires de canasta duplex sin rutas...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresCanastaDuplexSinRutasSinTramos = (rango) => {
+    return rango.subRangos.map(sr => {
+      const subRango = { ...sr };
+      const obj = {
+        cncTipo: TIPOS_CANASTA.DUPLEX,
+        cncHorainicio: subRango.horaInicio,
+        cncHorafin: subRango.horaFin,
+        cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+      };
+
+      obj.listaValores = [];
+
+      const temporal = {
+        cncvValor: subRango.valor,
+        uniIdemedida: {
+          uniIderegistro: subRango.unidadMedida,
+        },
+        cncvPorcentaje: subRango.valorPorcentaje,
+        uniIderuta: null,
+        trcaIdetramocargo: null
+      };
+      obj.listaValores.push(temporal);
+      return obj;
+    });
+  };
+
+  /**
+   * Obtiene los valires de canasta duplex sin rutas...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresCanastaDuplexSinRutas = (rango) => {
+    return rango.subRangos.map(sr => {
+      const subRango = { ...sr };
+      const obj = {
+        cncTipo: TIPOS_CANASTA.DUPLEX,
+        cncHorainicio: subRango.horaInicio,
+        cncHorafin: subRango.horaFin,
+        cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+      };
+      obj.listaValores = [];
+      subRango.tramos.map(t => {
+        const tramo = { ...t };
+        const temporal = {
+          cncvValor: tramo.cargoVariable ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V'),
+          uniIdemedida: {
+            uniIderegistro: tramo.unidadMedida ? tramo.unidadMedida : this.obtenerUnidadMedidaCargo(tramo, 'V'),
+          },
+          cncvPorcentaje: tramo.valorPorcentaje,
+          uniIderuta: null,
+          trcaIdetramocargo: {
+            trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+          }
+        };
+        obj.listaValores.push(temporal);
+      });
+      return obj;
+    });
+  };
+
+
+  /**
+   * Obtiene la lista de canasta duplex para suministro.
+   * @param {Object} canasta Datos de la canasta
+   * @return {Array}
+   */
+  obtenerListaCanastaDuplexSuministro = (canasta) => {
+    let listaCanasta = [];
+    if (canasta.tarifaHoraria &amp;&amp; canasta.tarifaConsumo &amp;&amp; canasta.canastaDuplexSuministro) {
+      const v = canasta.canastaDuplexSuministro.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaDuplexSuministro.canastasConRutas : canasta.canastaDuplexSuministro.canastasSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.DUPLEX,
+          cncValorinicial: rango.rango.horaInicio,
+          cncValorfinal: rango.rango.horaFin,
+          cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+          canastaDetalle: v ? (this.obtenerValoresCanastaDuplexConRutasSinTramos(rango)) : (this.obtenerValoresCanastaDuplexSinRutasSinTramos(rango))
+        }
+      });
+    }
+    return listaCanasta;
+  };
+
+
+  /**
+   * Obtiene la lista de canasta duplex para transporte.
+   * @param {Object} canasta Datos de la canasta
+   * @return {Array}
+   */
+  obtenerListaCanastaDuplexTransporte = (canasta) => {
+    let listaCanasta = [];
+    if (canasta.tarifaHoraria &amp;&amp; canasta.tarifaConsumo &amp;&amp; canasta.canastaDuplexTransporte) {
+      const v = canasta.canastaDuplexTransporte.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaDuplexTransporte.canastasConRutas : canasta.canastaDuplexTransporte.canastasSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.DUPLEX,
+          cncValorinicial: rango.rango.horaInicio,
+          cncValorfinal: rango.rango.horaFin,
+          cncTiposervicio: this.props.tipoCalculo.tipoServicio,
+          canastaDetalle: v ? (this.obtenerValoresCanastaDuplexConRutas(rango)) : (this.obtenerValoresCanastaDuplexSinRutas(rango))
+        }
+      });
+    }
+    return listaCanasta;
+  };
+
+  /**
+   * Verifica la selección actual del usuario es canasta consumo suministro y devuelve los rangos que haya parametrizado el usuario.
+   * @param {Object} canasta Datos de la canasta
+   */
+  obtenerListaCanastaConsumoSuministro = (canasta) => {
+    let listaCanasta = [];
+    //Verificamos si hay tarifas consumo.
+    if (canasta.tarifaConsumo &amp;&amp; canasta.canastaConsumoSuministro) {
+      const v = canasta.canastaConsumoSuministro.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaConsumoSuministro.canastaConRutas : canasta.canastaConsumoSuministro.canastaSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.CONSUMO,
+          cncValorinicial: rango.rango.inicio,
+          cncValorfinal: rango.rango.fin,
+          listaValores: this.obtenerListaValores(rango),
+        };
+      });
+    }
+    return listaCanasta;
+  };
+
+
+  /**
+   * Obtiene la lista rangos de transporte de comsumo.
+   * @param {Object} canasta Datos de la canasta
+   * @return {Array};
+   */
+  obtenerListaCanastaConsumoTransporte = (canasta) => {
+    let listaCanasta = [];
+    //Verificamos si hay tarifas de consumo...
+    if (canasta.tarifaConsumo &amp;&amp; canasta.canastaConsumoTransporte) {
+      //Verificamos si debemos tomar las horas con rutas o sin rutas...
+      const v = canasta.canastaConsumoTransporte.usaRutasGNC === 'S';
+      let listaRangos = v ? canasta.canastaConsumoTransporte.canastasConRutas : canasta.canastaConsumoTransporte.canastasSinRutas;
+      listaCanasta = listaRangos.map((rango) => {
+        return {
+          cncTipo: TIPOS_CANASTA.CONSUMO,
+          cncValorinicial: rango.rango.horaInicio,
+          cncValorfinal: rango.rango.horaFin,
+          listaValores: this.obtenerListaValores(rango),
+        };
+      });
+    }
+    return listaCanasta;
+  };
+
+
+  /**
+   * Obtiene la lista de canasta cuando el tipo de servicio es suministro...
+   * @param {Object} canasta Datos de la canasta
+   * @return {Array}
+   */
+  obtenerListaCanastaSuministro = (canasta) => {
+    if (canasta.tarifaHoraria &amp;&amp; canasta.tarifaConsumo) {
+      return this.obtenerListaCanastaDuplexSuministro(canasta);
+    } else if (canasta.tarifaHoraria) {
+      return this.obtenerListaCanastaHorariaSuministro(canasta);
+    } else if (canasta.tarifaConsumo) {
+      return this.obtenerListaCanastaConsumoSuministro(canasta);
+    }
+  };
+
+  /**
+   * Obtiene la lista de rangos para canasta cuando el tipo de servicio es transporte.
+   * @param {Object} canasta Datos de la canasta
+   * @return {Array};
+   */
+  obtenerListaCanastaTransporte = (canasta) => {
+    if (canasta.tarifaHoraria &amp;&amp; canasta.tarifaConsumo) {
+      return this.obtenerListaCanastaDuplexTransporte(canasta);
+    } else if (canasta.tarifaHoraria) {
+      return this.obtenerListaCanastaHorariaTransporte(canasta);
+    } else if (canasta.tarifaConsumo) {
+      return this.obtenerListaCanastaConsumoTransporte(canasta);
+    }
+  }
+
+  /**
+   * Obtiene el valor por defecto de los rangos que no tienen tramos ni rutas.
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValorPorDefecto = (rango) => {
+    return [{
+      trmIdetramo: rango.tramo ? {
+        trmIderegistro: typeof rango.tramo === 'object' ? rango.tramo.trmIderegistro : rango.tramo
+      } : null,
+      cncvValor: (rango.valorRango != undefined) ? rango.valorRango : rango.valor,
+      uniIdemedida: (rango.unidadMedida) ? {
+        uniIderegistro: rango.unidadMedida
+      } : null,
+      cncvPorcentaje: (rango.porcentajeRango !== undefined) ? rango.porcentajeRango : rango.porcentaje,
+      uniIderuta: {
+        uniIderegistro: null
+      }
+    }];
+  };
+
+
+  /**
+   * Obtiene la lista de valores por rutas...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresPorRutas = (rango) => {
+    return rango.rutas.map((ruta) => {
+      return {
+        trmIdetramo: rango.tramo ? {
+          trmIderegistro: rango.tramo
+        } : null,
+        cncvValor: ruta.valor,
+        uniIdemedida: {
+          uniIderegistro: ruta.unidadMedida
+        },
+        cncvPorcentaje: (ruta.porcentajeRango !== undefined) ? ruta.porcentajeRango : ruta.porcentaje,
+        uniIderuta: {
+          uniIderegistro: ruta.uniIderegistro
+        }
+      }
+    });
+  };
+
+  /**
+   * Obtiene la lista de valores por tramos...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresPorTramos = (rango) => {
+    return rango.tramos.map((tramo) => {
+      return {
+        trcaIdetramocargo: {
+          trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+        },
+        cncvValor: this.obtenerValorCargo(tramo, 'V'),
+        uniIdemedida: {
+          uniIderegistro: tramo.unidadMedida
+        },
+        cncvPorcentaje: (tramo.porcentajeRango !== undefined) ? tramo.porcentajeRango : ((tramo.porcentaje) ? tramo.porcentaje : tramo.valorPorcentaje),
+        uniIderuta: {
+          uniIderegistro: null
+        }
+      }
+    });
+  };
+
+  /**
+   * Obtiene la lista de valores por rutas con tramos...
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresPorRutasConTramos = (rango) => {
+    let listaValores = [];
+    for (let i = 0, ruta; ruta = rango.rutas[i], i &lt; rango.rutas.length; i++) {
+      for (let i = 0, tramo; tramo = ruta.tramos[i], i &lt; ruta.tramos.length; i++) {
+        const valor = {
+          trmIdetramo: {
+            trmIderegistro: tramo.trmIderegistro
+          },
+          trcaIdetramocargo: {
+            trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+          },
+          cncvValor: null,
+          uniIdemedida: {
+            uniIderegistro: (tramo.unidadMedida &amp;&amp; tramo.unidadMedida != -1) ? tramo.unidadMedida : null
+          },
+          cncvPorcentaje: (tramo.valorPorcentaje != undefined) ? tramo.valorPorcentaje : tramo.trmPorcentajevariable,
+          uniIderuta: {
+            uniIderegistro: ruta.uniIderegistro
+          }
+        };
+        listaValores.push(valor);
+      }
+    }
+    return listaValores;
+  };
+
+  /**
+   * Obtiene los valores por tramo.
+   * @param {Object} rango Datos del rango
+   * @return {Array}
+   */
+  obtenerValoresPorTramo = (rango) => {
+    return [{
+      trmIdetramo: {
+        trmIderegistro: (typeof rango.tramo === 'string') ? rango.tramo : rango.tramo.trmIderegistro
+      },
+      trcaIdetramocargo: {
+        trcaIderegistro: (tramo.listaCargos.find(cargo => cargo.seleccionado)).trcaIderegistro
+      },
+      cncvValor: null,
+      uniIdemedida: {
+        uniIderegistro: rango.tramo.unidadMedida
+      },
+      cncvPorcentaje: rango.porcentaje,
+      uniIderuta: {
+        uniIderegistro: null
+      }
+    }];
+  };
+
+  /**
+   * Recibe la lista de valores(rutas) y retorna el arreglo en el formato que se debe enviar para guardar.
+   * @param {Object} rango Datos del rango
+   * @returns {Array}
+   */
+  obtenerListaValores = (rango) => {
+    //Retorna un solo valor con los datos extra del rango...
+    if (!rango.tramos &amp;&amp; !rango.rutas) {
+      return this.obtenerValorPorDefecto(rango);
+    }
+    //Retorna los valores por rutas...
+    if (!rango.tramos &amp;&amp; rango.rutas &amp;&amp; rango.rutas.length > 0 &amp;&amp; (!rango.rutas[0].tramos)) {
+      return this.obtenerValoresPorRutas(rango);
+    }
+    //Retorna los valores por tramos...
+    if (!rango.rutas &amp;&amp; rango.tramos) {
+      return this.obtenerValoresPorTramos(rango);
+    }
+    //Retorna los valores por rutas con tramos...
+    if (!rango.tramos &amp;&amp; rango.rutas &amp;&amp; rango.rutas.length > 0 &amp;&amp; (rango.rutas[0].tramos)) {
+      return this.obtenerValoresPorRutasConTramos(rango);
+    }
+    //Retorna los valores por tramo.
+    if (!rango.rutas &amp;&amp; rango.tramo) {
+      return this.obtenerValoresPorTramo(rango);
+    }
+  };
+
+  /**
+   * Obtiene los rangos que se registraron para la canasta tarifaria.
+   * @return {Array}
+   */
+  obtenerCanastaTarifaria = () => {
+    const { tipoCalculo } = this.props;
+    //Valida si el tipo de calculo seleccionado no es canasta para retornar nulo.
+    if (tipoCalculo.tipoCalculo !== TIPOS_CACULO_PRECIO.CANASTA) {
+      return null;
+    }
+    //Procesamos los rangos agregados en Canasta Horaria Suministro.
+    if (tipoCalculo.tipoServicio === TIPOS_SERVICIO.SUMINISTRO) {
+      return this.obtenerListaCanastaSuministro(tipoCalculo);
+    }
+    if (tipoCalculo.tipoServicio === TIPOS_SERVICIO.TRANSPORTE) {
+      return this.obtenerListaCanastaTransporte(tipoCalculo);
+    }
+  };
+
+  /**
+   * Obtener clase de contrato.
+   * @return {Number}
+   */
+  obtenerClaseContrato = () => {
+    const tiposContratoSeleccionados = this.obtenerTiposContratoSeleccionados();
+    if (tiposContratoSeleccionados.findIndex(tc => (tc.uniPropiedad) &amp;&amp; ((tc.uniPropiedad.tipocontrato === 'T') || tc.uniPropiedad.tipocontrato === 'S')) >= 0) {
+      const claseContrato = getProp(this.props, 'cabecera.claseContrato', null);
+      if (!claseContrato) {
+        return null;
+      }
+      return {
+        uniIderegistro: claseContrato
+      };
+    } else {
+      return null;
+    }
+  };
+
+  /**
+   * Obtiene la cabecera del contrato.
+   * @param {Object} contrato Datos del contrato
+   * @return {Object}
+   */
+  obtenerCabeceraDelContrato = (contrato) => {
+    return {
+      idContrato: contrato.cntIderegistro,
+      versionContrato: contrato.cntVersion,
+      numeroContrato: contrato.cntNumero,
+      capacidadC2: contrato.cntCapacidad,
+      unidadMedidaC2: contrato.uniIdemedidacapacidad,
+      agenteTercero: {
+        terIderegistro: contrato.terIdeagente.terIderegistro,
+        terNomcompleto: contrato.terIdeagente.terNomcompleto,
+      },
+      tercero: contrato.terIdeagente.terNomcompleto,
+      tipoNegocio: contrato.cntTiponegocio,
+      tipoUso: (contrato.uniIdetipouso) ? contrato.uniIdetipouso.uniIderegistro : null,
+      tipoMercado: (contrato.uniIdetipomercado) ? contrato.uniIdetipomercado.uniIderegistro : null,
+      claseContrato: getProp(contrato, 'uniIdeclasecontrato.uniIderegistro', null),
+      fechaInicio: contrato.cntFechainicio,
+      fechaFin: contrato.cntFechafin,
+      fuenteDistribucion: (contrato.uniIdefuente) ? contrato.uniIdefuente.uniIderegistro : null,
+      takeOrPay: (contrato.cntTakeorpay === 'S') ? 'true' : 'false',
+      topGrupal: (contrato.tpgIdetopgrupal) ? contrato.tpgIdetopgrupal.tpgIderegistro : null,
+      firmeza: (contrato.cntFirmeza),
+      tipoCalculo: {
+        tipoCalculo: contrato.cntTipoprecio
+      },
+      precioContrato: contrato.cntPrecio,
+      unidadMedida: getProp(contrato, 'uniIdemedidacontratada.uniIderegistro', null),
+      unidadMedidaPrecio: getProp(contrato, 'uniIdemedidaprecio.uniIderegistro', null),
+      precioContratoPesos: contrato.cntPreciopesos,
+      valorPesos: contrato.cntPreciopesos,
+      porcentajeComercializacion: contrato.cntPorcencomercial,
+      modalidadContrato: contrato.uniIdemodalidadcontrato.uniIderegistro,
+      codigoGestor: contrato.cntCodigogestor,
+      cantidadContratada: contrato.cntCantidadcontratada,
+      cantidadContratadaDisabled: true,
+      periodoCantidadContratada: contrato.cntPeriodo,
+      tipoGarantia: contrato.cntTipogarantia,
+      aporteGNV: contrato.cntAportegnv,
+      valorGNV: contrato.cntValoraportegnv,
+      usaTRMTecho: contrato.cntUsatrmtecho,
+      trmTecho: contrato.cntTrmtecho,
+    };
+  };
+
+  /**
+   * Obtendrá los datos de la canasta seleccionada.
+   * @param {Object} contrato Datos del contrato
+   * @return {Object}
+   */
+  obtenerTipoCalculoContrato = (contrato) => {
+    let tipoCalculo = {
+      tipoCalculo: contrato.cntTipocalculoprecio,
+      tipoServicio: contrato.cntTiposervicio,
+    };
+    const listaCanasta = contrato.listaCanastaTarifaria;
+    //Obtenemos los tipos de tarifa.
+    tipoCalculo.tarifaHoraria = (!Util.validarArreglo(listaCanasta)) ? false : (((listaCanasta.findIndex(item => (item.cncTipo === TIPOS_CANASTA.HORARIA) || (item.cncTipo === TIPOS_CANASTA.DUPLEX))) >= 0) ? true : false);
+    tipoCalculo.tarifaConsumo = (!Util.validarArreglo(listaCanasta)) ? false : (((listaCanasta.findIndex(item => (item.cncTipo === TIPOS_CANASTA.CONSUMO) || (item.cncTipo === TIPOS_CANASTA.DUPLEX))) >= 0) ? true : false);
+    //Obtenemos la información de canastas horarias...
+    tipoCalculo.canastaHorariaSuministro = (tipoCalculo.tarifaHoraria &amp;&amp; tipoCalculo.tipoServicio === TIPOS_SERVICIO.SUMINISTRO) ? this.obtenerTarifaHorarias(listaCanasta) : {};
+    tipoCalculo.canastaHorariaTransporte = (tipoCalculo.tarifaHoraria &amp;&amp; tipoCalculo.tipoServicio === TIPOS_SERVICIO.TRANSPORTE) ? this.obtenerTarifaHorariasTransporte(listaCanasta) : {};
+    //Obtenemos la información de canastas consumo...
+    tipoCalculo.canastaConsumoSuministro = (tipoCalculo.tarifaConsumo &amp;&amp; tipoCalculo.tipoServicio === TIPOS_SERVICIO.SUMINISTRO) ? this.obtenerTarifaConsumo(listaCanasta) : {};
+    tipoCalculo.canastaConsumoTransporte = (tipoCalculo.tarifaConsumo &amp;&amp; tipoCalculo.tipoServicio === TIPOS_SERVICIO.TRANSPORTE) ? this.obtenerTarifaConsumoTransporte(listaCanasta) : {};
+
+    if (tipoCalculo.tarifaHoraria &amp;&amp; tipoCalculo.tarifaConsumo) {
+      tipoCalculo.canastaDuplexTransporte = (tipoCalculo.tipoServicio === TIPOS_SERVICIO.TRANSPORTE) ? this.obtenerDuplexTransporte(contrato.listaCanastaFusion) : {};
+      tipoCalculo.canastaDuplexSuministro = (tipoCalculo.tipoServicio === TIPOS_SERVICIO.SUMINISTRO) ? this.obtenerDuplexSuministro(contrato.listaCanastaFusion) : {};
+    }
+    return tipoCalculo;
+  };
+
+  /**
+   * Obtiene la lista de documentos del contrato...
+   * @param {Object} contrato Datos del contrato
+   * @return {Array}
+   */
+  obtenerDocumentoContrato = (contrato) => {
+    if (!Array.isArray(contrato.listaDocumentos)) {
+      return [];
+    }
+    return contrato.listaDocumentos.map(documento => {
+      return {
+        archivo: { name: documento.cntdNombre },
+        fechaExpedicion: documento.cntdFechaexpedicion,
+        fechaFin: documento.cntdFechafinal,
+        fechaInicio: documento.cntdFechainicio,
+        id: documento.cntdIdearchivo,
+        nombre: documento.cntdNombre,
+        tipo: documento.cntdIde,
+        tipoDocumento: documento.uniIdetipodocumento
+      };
+    });
+  };
+
+  /**
+  * Obtiene la lista de tarifas horarias.
+  * @param {Array}
+  * @return {Array}
+  */
+  obtenerTarifaHorariasTransporte = (listaCanasta) => {
+    //Obtenemos las canastas horarias sin rutas...
+    const listasSinRutas = this.obtenerTarifaHorariasSinRutasTransporte(listaCanasta);
+    const listaConRutas = this.obtenerTarifaHorariaConRutasTransporte(listaCanasta);
+    return {
+      canastasSinRutas: listasSinRutas,
+      canastasConRutas: listaConRutas,
+      usaRutasGNC: (Array.isArray(listaConRutas) &amp;&amp; listaConRutas.length > 0) ? 'S' : 'N'
+    };
+  };
+
+
+  /**
+   * Obtiene la lista de tarifas horarias.
+   * @param {Array} listaCanasta Lista de canastas
+   * @return {Array}
+   */
+  obtenerTarifaHorarias = (listaCanasta) => {
+    //Obtenemos las canastas horarias sin rutas...
+    const listasSinRutas = this.obtenerTarifaHorariasSinRutas(listaCanasta);
+    const listaConRutas = this.obtenerTarifaHorariaConRutas(listaCanasta);
+    return {
+      canastaSinRutas: listasSinRutas,
+      canastaConRutas: listaConRutas,
+      usaRutasGNC: (Array.isArray(listaConRutas) &amp;&amp; listaConRutas.length > 0) ? 'S' : 'N'
+    };
+  };
+
+
+  /**
+   * Obtiene la lista de tarifas de consumo.
+   * @param {Array} listaCanasta Lista de canastas
+   * @return {Array}
+   */
+  obtenerTarifaConsumo = (listaCanasta) => {
+    //Obtenemos las canastas horarias sin rutas...
+    const listasSinRutas = this.obtenerTarifaHorariasSinRutasConsumo(listaCanasta);
+    const listaConRutas = this.obtenerTarifaHorariaConRutasConsumo(listaCanasta);
+    const usaRutasGNC = (Array.isArray(listaConRutas) &amp;&amp; listaConRutas.length > 0) ? 'S' : 'N';
+    return {
+      canastaSinRutas: listasSinRutas,
+      canastaConRutas: listaConRutas,
+      usaRutasGNC: usaRutasGNC,
+      intervalos: ((usaRutasGNC === 'S') ? listaConRutas.length : listasSinRutas.length)
+    }
+  };
+
+  /**
+   * Obtiene la lista de la canasta Duplex Suministro.
+   * @param {Array} listaCanasta Lista de canastas
+   * @return {Array}
+   */
+  obtenerDuplexSuministro = (listaCanasta) => {
+    const listasSinRutas = this.obtenerDuplexSuministroSinRutas(listaCanasta);
+    const listasConRutas = this.obtenerDuplexSuministroConRutas(listaCanasta);
+    const usaRutasGNC = (Array.isArray(listasConRutas) &amp;&amp; listasConRutas.length > 0) ? 'S' : 'N';
+    return {
+      canastasSinRutas: listasSinRutas,
+      canastasConRutas: listasConRutas,
+      usaRutasGNC: usaRutasGNC,
+      intervalos: (usaRutasGNC === 'S') ? listasConRutas.length : listasSinRutas.length
+    };
+  };
+
+  /**
+   * Obtiene la lista de la canasta Duplex Transporte.
+   * @param {Array} listaCanasta Lista de canastas
+   * @return {Array}
+   */
+  obtenerDuplexTransporte = (listaCanasta) => {
+    const listasSinRutas = this.obtenerDuplexTransporteSinRutas(listaCanasta);
+    const listaConRutas = this.obtenerDuplexTransporteConRutas(listaCanasta);
+    const usaRutasGNC = (Array.isArray(listaConRutas) &amp;&amp; listaConRutas.length > 0) ? 'S' : 'N';
+    return {
+      canastasSinRutas: listasSinRutas,
+      canastasConRutas: listaConRutas,
+      usaRutasGNC: usaRutasGNC,
+      intervalos: (usaRutasGNC === 'S') ? listaConRutas.length : listasSinRutas.length
+    };
+  };
+
+  /**
+  * Obtiene la lista de tarifas de consumo de transporte.
+  * @param {Array} listaCanasta Lista de canastas
+  * @return {Array}
+  */
+  obtenerTarifaConsumoTransporte = (listaCanasta) => {
+    //Obtenemos las canastas horarias sin rutas...
+    const listasSinRutas = this.obtenerTarifaHorariasSinRutasConsumoTransporte(listaCanasta);
+    const listaConRutas = this.obtenerTarifaHorariaConRutasConsumoTransporte(listaCanasta);
+    const usaRutasGNC = (Array.isArray(listaConRutas) &amp;&amp; listaConRutas.length > 0) ? 'S' : 'N';
+    return {
+      canastasSinRutas: listasSinRutas,
+      canastasConRutas: listaConRutas,
+      usaRutasGNC: usaRutasGNC,
+      intervalos: usaRutasGNC === 'S' ? listaConRutas.length : listasSinRutas.length
+    };
+  };
+
+  /**
+   * Obtiene la ruta.
+   * @param {Object} valor Datos de la ruta
+   * @return {Object}
+   */
+  obtenerRuta = (valor) => {
+    const { rutasGNC } = this.props.listas;
+    const objetoRuta = rutasGNC.filter(ruta => ruta.uniIderegistro === valor.uniIderuta)
+      .map(ruta => {
+        ruta.idRutaRango = Util.generarIdControl('idRutaControl');
+        ruta.seleccionado = true;
+        ruta.porcentaje = valor.cncvPorcentaje;
+        ruta.valor = valor.cncvValor;
+        ruta.tramos = valor.tramos;
+        ruta.unidadMedida = valor.uniIdemedida;
+        return ruta;
+      });
+    return objetoRuta[0];
+  };
+
+
+  /**
+   * Obtiene la lista de items de tarifas horarias con rutas.
+   * @param {Array} listaCanasta Lista de canastas
+   * @return {Array}
+   */
+  obtenerTarifaHorariaConRutas = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.HORARIA &amp;&amp; item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('CanastaConRuta_'),
+        rango: {
+          horaInicio: item.cncHorainicio,
+          horaFin: item.cncHorafin,
+        },
+        rutas: item.listaValores.map(valor => {
+          return this.obtenerRuta(valor);
+        })
+      };
+    });
+  };
+
+  /**
+  * Obtiene la lista de items de tarifas horarias con rutas.
+  * @param {Array} listaCanasta Lista de canastas
+  * @return {Array}
+  */
+  obtenerTarifaHorariaConRutasConsumo = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.CONSUMO &amp;&amp; item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idIntervaloSinRuta: Util.generarIdControl('CanastaConRuta_'),
+        idRangoConRuta: Util.generarIdControl('idRangoConRuta'),
+        porcentaje: item.listaValores[0].cncvPorcentaje,
+        valor: item.listaValores[0].cncvValor,
+        rango: {
+          inicio: item.cncValorinicial,
+          fin: item.cncValorfinal,
+        },
+        rutas: item.listaValores.map(valor => {
+          return this.obtenerRuta(valor);
+        })
+      };
+    });
+  };
+
+
+  /**
+  * Obtiene la lista de items de tarifas horarias con rutas.
+  * @param {Array} listaCanasta Lista de canastas
+  * @return {array}
+  */
+  obtenerTarifaHorariaConRutasConsumoTransporte = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.CONSUMO &amp;&amp; item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idIntervaloSinRuta: Util.generarIdControl('CanastaConRuta_'),
+        idRangoConRuta: Util.generarIdControl('idRangoConRuta'),
+        porcentaje: item.listaValores[0].cncvPorcentaje,
+        valor: item.listaValores[0].cncvValor,
+        rango: {
+          horaInicio: item.cncValorinicial,
+          horaFin: item.cncValorfinal,
+        },
+        rutas: this.obtenerListaRutasConTramos(item.listaValores)
+      };
+    });
+  };
+
+  /**
+  * Obtiene la lista de items de tarifas horarias con rutas.
+  * @param {Array} listaCanasta Lista de canastas
+  * @return {array}
+  */
+  obtenerTarifaHorariaConRutasTransporte = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.HORARIA &amp;&amp; item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('CanastaConRuta_'),
+        rango: {
+          horaInicio: item.cncHorainicio,
+          horaFin: item.cncHorafin,
+        },
+        rutas: this.obtenerListaRutasConTramos(item.listaValores)
+      };
+    });
+  };
+
+  /**
+   * Método encargado de obtener los tramos dada una ruta y una lista
+   * @param {Number} idRuta Identificador de la ruta
+   * @param {Array} listaValores Valores de la canasta
+   */
+  obtenerTramosPorRuta = (idRuta, listaValores) => {
+    return listaValores.filter(valor => valor.uniIderuta === idRuta).map(valor => {
+      if (valor.uniIderuta === idRuta) {
+        //Buscamos el tramo...
+        let tramo = this.obtenerTramo(valor.trmIderegistro);
+        if (tramo) {
+          tramo.idTramoRango = Util.generarIdControl('idTramoRango');
+          tramo.unidadMedida = valor.uniIdemedida;
+          tramo.valorPorcentaje = valor.cncvPorcentaje;
+          return tramo;
+        }
+      }
+    });
+  };
+
+  /**
+   * Método encargado de obtener las rutas que tienen tramos
+   * @param {Array} listaValores Valores de la canasta
+   */
+  obtenerListaRutasConTramos = (listaValores) => {
+    let { listaTramos } = this.props.listas;
+    //Primero buscamos los tramos...
+    const tramos = listaValores.map(valor => {
+      let index = listaTramos.findIndex(tramo => tramo.trmIderegistro === valor.trmIderegistro);
+      if (index >= 0) {
+        const t = { ...listaTramos[index] };
+        t.idTramoRango = Util.generarIdControl('idTramo');
+        t.seleccionado = true;
+        t.valorPorcentaje = valor.cncvPorcentaje;
+        // listaTramos[index] = t;
+        return t;
+      }
+    });
+
+    const listaRutas = listaValores.map(valor => {
+      valor.tramos = this.obtenerTramosPorRuta(valor.uniIderuta, listaValores);
+      return this.obtenerRuta(valor);
+    });
+    this.props.actualizarListaContratos({ listaTramos: tramos });
+    return listaRutas;
+  };
+
+  /**
+   * Obtiene la lista de items de tarifas horarias sin rutas.
+   * @param {Array} listaValores Valores de la canasta
+   * @return {array}
+   */
+  obtenerTarifaHorariasSinRutas = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.HORARIA &amp;&amp; !item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        horaFin: item.cncHorafin,
+        idRangoSinRuta: Util.generarIdControl('canastaSinRuta_'),
+        rango: {
+          horaInicio: item.cncHorainicio, horaFin: item.cncHorafin
+        },
+        ultimaHora: item.cncHorafin,
+        unidadMedida: item.listaValores[0].uniIdemedida,
+        porcentajeRango: item.listaValores[0].cncvPorcentaje,
+        valorRango: item.listaValores[0].cncvValor
+      };
+    });
+  };
+
+
+  /**
+  * Obtiene la lista de items de tarifas horarias sin rutas de consumo.
+  * @param {Array} listaValores Valores de la canasta
+  * @return {array}
+  */
+  obtenerTarifaHorariasSinRutasConsumo = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.CONSUMO &amp;&amp; !item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idIntervaloSinRuta: Util.generarIdControl('canastaSinRuta_'),
+        porcentaje: item.listaValores[0].cncvPorcentaje,
+        rango: {
+          inicio: item.cncValorinicial, fin: item.cncValorfinal
+        },
+        unidadMedida: item.listaValores[0].uniIdemedida,
+        valor: item.listaValores[0].cncvValor,
+        tipoLiquidacion: item.cncTipoLiquidacion
+      };
+    });
+  };
+
+  /**
+  * Obtiene la lista de items de tarifas horarias con rutas de consumo.
+  * @param {Array} listaValores Valores de la canasta
+  * @return {array}
+  */
+  obtenerDuplexTransporteConRutas = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.DUPLEX &amp;&amp; item.canastadetalle.findIndex(detalle => detalle.cntUsaruta) >= 0) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('canastaConRuta_'),
+        rango: {
+          horaInicio: item.cncValorinicial, horaFin: item.cncValorfinal
+        },
+        subRangos: item.canastadetalle.map(subRango => {
+          const listaRutas = [];
+          //Recorre y construye la lista rutas...
+          subRango.listaValores.map(ruta => {
+            const r = this.props.listas.rutasGNC.find(tempRuta => tempRuta.uniIderegistro === ruta.uniIderuta);
+            const nuevaRuta = { ...r };
+            nuevaRuta.idRuta = Util.generarIdControl('_idRuta_');
+            nuevaRuta.idRutaRango = Util.generarIdControl('rangoRuta_');
+            nuevaRuta.tramos = subRango.listaValores
+              .filter(tramo => tramo.uniIderuta === ruta.uniIderuta)
+              .map(tramo => {
+                //Buscamos el tramo...
+                const tr = this.props.listas.listaTramos.find(t => t.trmIderegistro === tramo.trmIderegistro);
+                const nuevoTramo = { ...tr };
+                nuevoTramo.idTramoRango = Util.generarIdControl('idTramo');
+                nuevoTramo.cargoVariable = tramo.trcaCargovariable;
+                nuevoTramo.valorPorcentaje = tramo.cncvPorcentaje;
+                nuevoTramo.unidadMedida = tramo.uniIdemedida;
+                nuevoTramo.cargoVariable = this.obtenerValorCargo(nuevoTramo, 'V');
+                return nuevoTramo;
+              });
+
+            const existeruta = listaRutas.findIndex(rutaTemp => rutaTemp.uniIderegistro === ruta.uniIderuta) >= 0;
+            if (!existeruta) {
+              listaRutas.push(nuevaRuta);
+            }
+          });
+
+          this.marcarRutas(listaRutas);
+          return {
+            idSubRango: Util.generarIdControl('idSubRango'),
+            horaInicio: subRango.cncHorainicio,
+            horaFin: subRango.cncHorafin,
+            rutas: listaRutas
+          }
+        })
+      }
+    });
+  };
+
+  /**
+  * Cambia el estado al seleccionado de las ruta
+  * @param {Array} listaRutas Valores de la canasta
+  * @return {array}
+  */
+  marcarRutas = (listaRutas) => {
+    const nuevaListaRutas = [...this.props.listas.rutasGNC];
+    listaRutas.forEach(ruta => {
+      const index = nuevaListaRutas.findIndex(rutaTemp => rutaTemp.uniIderegistro === ruta.uniIderegistro);
+      if (index >= 0) {
+        nuevaListaRutas[index].seleccionado = true;
+      }
+    });
+    this.props.actualizarListaContratos({ rutasGNC: nuevaListaRutas });
+  };
+
+  /**
+   * Método encargado de obtener los valores de la canasta duplex suministro con rutas
+   * @param {Array} listaCanasta Datos de la canasta
+   */
+  obtenerDuplexSuministroConRutas = (listaCanasta) => {
+    let listaRutas = this.props.listas.rutasGNC;
+    const listaRutasCanasta = listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.DUPLEX &amp;&amp; item.canastadetalle.findIndex(detalle => detalle.cntUsaruta) >= 0) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('canastaSinRuta_'),
+        rango: {
+          horaInicio: item.cncValorinicial, horaFin: item.cncValorfinal
+        },
+        subRangos: item.canastadetalle.map(subRango => {
+          return {
+            idSubRango: Util.generarIdControl('idSubRango_'),
+            horaInicio: subRango.cncHorainicio,
+            horaFin: subRango.cncHorafin,
+            rutas: subRango.listaValores.map(ruta => {
+              const indexRuta = this.props.listas.rutasGNC.findIndex(r => r.uniIderegistro === ruta.uniIderuta);
+              listaRutas[indexRuta].seleccionado = true;
+              const r = this.props.listas.rutasGNC[indexRuta];
+              const nuevaRuta = { ...r };
+              nuevaRuta.valor = ruta.cncvValor;
+              nuevaRuta.unidadMedida = ruta.uniIdemedida;
+              nuevaRuta.valorPorcentaje = ruta.cncvPorcentaje;
+              return nuevaRuta;
+            })
+          }
+        })
+      };
+    });
+    // this.props.actualizarListaContratos({ rutasGNC: listaRutas, rutas: listaRutas });
+    return listaRutasCanasta;
+  };
+
+  /**
+   * Método encargado de obtener los valores de la canasta duplex suministro sin rutas
+   * @param {Array} listaCanasta Datos de la canasta
+   */
+  obtenerDuplexSuministroSinRutas = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.DUPLEX &amp;&amp; item.canastadetalle.findIndex(detalle => detalle.cntUsaruta) &lt; 0) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('canastaSinRuta_'),
+        rango: {
+          horaInicio: item.cncValorinicial, horaFin: item.cncValorfinal
+        },
+        subRangos: item.canastadetalle.map(subRango => {
+          return {
+            idSubRango: Util.generarIdControl('idSubRango_'),
+            horaInicio: subRango.cncHorainicio,
+            horaFin: subRango.cncHorafin,
+            valor: subRango.listaValores[0].cncvValor,
+            unidadMedida: subRango.listaValores[0].uniIdemedida,
+            valorPorcentaje: subRango.listaValores[0].cncvPorcentaje
+          }
+        })
+      };
+    });
+  };
+
+  /**
+   * Método encargado de obtener los valores de la canasta duplex transporte sin rutas
+   * @param {Array} listaCanasta Datos de la canasta
+   */
+  obtenerDuplexTransporteSinRutas = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.DUPLEX &amp;&amp; item.canastadetalle.findIndex(detalle => detalle.cntUsaruta) &lt; 0) {
+        return item;
+      }
+    }).map(item => {
+      return {
+        idRangoConRuta: Util.generarIdControl('canastaSinRuta_'),
+        porcentaje: 0,
+        rango: {
+          horaInicio: item.cncValorinicial, horaFin: item.cncValorfinal
+        },
+        subRangos: item.canastadetalle.map(subRango => {
+          return {
+            horaInicio: subRango.cncHorainicio,
+            horaFin: subRango.cncHorafin,
+            tramos: subRango.listaValores.map(tramo => {
+              //Buscamos el tramo...
+              const tr = this.props.listas.listaTramos.find(t => t.trmIderegistro === tramo.trmIderegistro);
+              const nuevoTramo = { ...tr };
+              nuevoTramo.cargoVariable = tramo.trcaCargovariable;
+              nuevoTramo.valorPorcentaje = tramo.cncvPorcentaje;
+              nuevoTramo.unidadMedida = tramo.uniIdemedida;
+              nuevoTramo.cargoVariable = this.obtenerValorCargo(nuevoTramo, 'V');
+              return nuevoTramo;
+            }),
+          }
+        })
+      };
+    });
+  };
+
+  /**
+  * Obtiene la lista de items de tarifas horarias sin rutas de consumo.
+  * @param {Array} listaCanasta Datos de la canasta
+  * @return {Array}
+  */
+  obtenerTarifaHorariasSinRutasConsumoTransporte = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.CONSUMO &amp;&amp; !item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      const valores = item.listaValores[0];
+      const idTramo = valores.trmIderegistro;
+      return {
+        idIntervaloSinRuta: Util.generarIdControl('canastaSinRuta_'),
+        porcentaje: item.listaValores[0].cncvPorcentaje,
+        rango: {
+          horaInicio: item.cncValorinicial, horaFin: item.cncValorfinal,
+          inicio: item.cncValorinicial, fin: item.cncValorfinal
+        },
+        cargoAOM: this.obtenerValorCargo(idTramo, 'A'),
+        cargoFijo: this.obtenerValorCargo(idTramo, 'F'),
+        cargoVariable: this.obtenerValorCargo(idTramo, 'V'),
+        tramos: item.listaValores.map(tramo => {
+          //Buscamos el tramo...
+          const tr = this.props.listas.listaTramos.find(t => t.trmIderegistro === tramo.trmIderegistro);
+          const nuevoTramo = { ...tr };
+          // const indexCargo = nuevoTramo.listaCargos.findIndex(cargo => cargo.trcaIderegistro == tramo.trcaIderegistro);
+          // nuevoTramo.listaCargos[indexCargo].trcaCargovariable =
+          nuevoTramo.cargoVariable = tramo.trcaCargovariable;
+          nuevoTramo.valorPorcentaje = tramo.cncvPorcentaje;
+          nuevoTramo.unidadMedida = tramo.uniIdemedida;
+          nuevoTramo.cargoVariable = this.obtenerValorCargo(nuevoTramo, 'V');
+          return nuevoTramo;
+        }),
+      };
+    });
+  };
+
+  /**
+   * Obtiene la lista de items de tarifas horarias sin rutas.
+   * @param {Array} listaCanasta Datos de la canasta
+   * @return {Array}
+   */
+  obtenerTarifaHorariasSinRutasTransporte = (listaCanasta) => {
+    return listaCanasta.filter((item) => {
+      if (item.cncTipo === TIPOS_CANASTA.HORARIA &amp;&amp; !item.cntUsaruta) {
+        return item;
+      }
+    }).map(item => {
+      const valores = item.listaValores[0];
+      const idTramo = valores.trmIderegistro;
+      return {
+        cargoAOM: this.obtenerValorCargo(idTramo, 'A'),
+        cargoFijo: this.obtenerValorCargo(idTramo, 'F'),
+        cargoVariable: this.obtenerValorCargo(idTramo, 'V'),
+        horaFin: item.cncHoraFin,
+        idRangoSinRuta: Util.generarIdControl('idRuta'),
+        porcentajeRango: valores.cncvPorcentaje,
+        rango: {
+          horaInicio: item.cncHorainicio,
+          horaFin: item.cncHorafin
+        },
+        tramos: item.listaValores.map(tramo => {
+          //Buscamos el tramo...
+          const tr = this.props.listas.listaTramos.find(t => t.trmIderegistro === tramo.trmIderegistro);
+          const nuevoTramo = { ...tr };
+          // const indexCargo = nuevoTramo.listaCargos.findIndex(cargo => cargo.trcaIderegistro == tramo.trcaIderegistro);
+          // nuevoTramo.listaCargos[indexCargo].trcaCargovariable =
+          nuevoTramo.cargoVariable = tramo.trcaCargovariable;
+          nuevoTramo.valorPorcentaje = tramo.cncvPorcentaje;
+          nuevoTramo.unidadMedida = tramo.uniIdemedida;
+          return nuevoTramo;
+        }),
+        unidadMedida: valores.uniIdemedida
+      };
+    });
+  };
+
+  /**
+   * Obtiene un tramo...
+   * @param {Number} idTramo Identificador del tramo
+   * @return {object}
+   */
+  obtenerTramo = (idTramo) => {
+    if ((typeof idTramo === 'string') || (typeof idTramo === 'number')) {
+      const i = this.props.listas.listaTramos.findIndex(t => t.trmIderegistro == idTramo);
+      const tramo = (i >= 0) ? this.props.listas.listaTramos[i] : null;
+      return tramo;
+    }
+    return null;
+  };
+
+  /**
+  * Obtiene el valor cargo de un tramo.
+  * @param {Object} tramo Datos del tramo
+  * @param {String} tipo Tipo del cargo
+  * @return {number}
+  */
+  obtenerValorCargo = (tramo, tipo) => {
+    if (!tramo) {
+      return -1;
+    }
+
+    //Verificamos el cargo seleccionado...
+    if (typeof tramo === 'string' || typeof tramo === 'number') {
+      tramo = this.props.listas.listaTramos.find(t => t.trmIderegistro == tramo);
+    }
+
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.trcaCargovariable;
+      case 'F':
+        return cargoSeleccionado.trcaCargofijo;
+      case 'A':
+        return cargoSeleccionado.trcaCargoaoym;
+    }
+  };
+
+  /**
+   * Obtiene la lista de tramos seleccionados.
+   * @return {array}
+   */
+  obtenerTramosSeleccionados = () => {
+    return this.props.listas.listaTramos.filter((t) => {
+      if (t.seleccionado) { t.idTramo = Util.generarIdControl('rangoTramo'); return t; }
+    });
+  };
+
+  /**
+   * Calcula el precio del contrato entre otros valores necesarios para garantias.
+   * @return {Object}
+   */
+  calcularPrecioContrato = () => {
+    const tramosSeleccionados = this.obtenerTramosSeleccionados();
+    if (tramosSeleccionados.length == 0) {
+      return;
+    }
+    let valores = {
+      precioContrato: 0,
+      valorCargos: {
+        variable: 0,
+        fijo: 0,
+        aom: 0
+      }
+    };
+    for (let i = 0; i &lt; tramosSeleccionados.length; i++) {
+      const tramo = tramosSeleccionados[i];
+      let valorVariable = tramo.cargoVariable ? tramo.cargoVariable : this.obtenerValorCargo(tramo, 'V');
+      let ValorFijo = this.obtenerValorCargo(tramo, 'F');
+      let valorAOM = this.obtenerValorCargo(tramo, 'A');
+      valores.valorCargos.variable += valorVariable;
+      valores.valorCargos.fijo += ValorFijo;
+      valores.valorCargos.aom += valorAOM;
+      valores.precioContrato += (valorVariable + ValorFijo + valorAOM);
+    }
+
+    this.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, valorCargos: valores.valorCargos });
+  };
+
+  /**
+   * Busca las unidades de medida para los puntos de salida seleccionados y los fija...
+   * @param {Array} listaPuntoSalida Lista de los puntos de salida seleccionado
+   */
+  parsearUnidadesMedidaPuntosSalida = (listaPuntosSalida) => {
+    return listaPuntosSalida.map(p => {
+      if (p.seleccionado == true) {
+        p.uniIdemedidacantidad = (p.uniIdemedidacantidad) ? p.uniIdemedidacantidad : p.uniIdemedida.uniIderegistro;
+      }
+      return p;
+    });
+  };
+
+  /**
+   * Mostrará el contrato en el formulario.
+   * @param {Object} contrato Datos del contrato
+   */
+  mostrarObjeto = async (contrato) => {
+    const cabecera = this.obtenerCabeceraDelContrato(contrato);
+    const garantia = this.obtenerGarantiaContrato(contrato);
+    const documentos = this.obtenerDocumentoContrato(contrato);
+    this.props.actualizarCabeceraContrato(cabecera);
+    console.log('LA GARANGIA', garantia);
+    this.props.actualizarGarantia(garantia);
+    this.props.actualizarDocumentosContrato({ adjuntos: documentos });
+    await this.props.actualizarListaContratos({
+      tiposContrato: Util.validarArreglo(contrato.listaTipos) ? [...contrato.listaTipos] : [],
+      listaTramos: Util.validarArreglo(contrato.listaTramos) ? [...contrato.listaTramos] : [],
+      puntosSalida: Util.validarArreglo(contrato.listaPuntoSalida) ? this.parsearUnidadesMedidaPuntosSalida(contrato.listaPuntoSalida) : [],
+      rutas: Util.validarArreglo(contrato.listaRutas) ? [...contrato.listaRutas] : [],
+      rutasGNC: Util.validarArreglo(contrato.listaRutas) ? [...contrato.listaRutas] : [],
+      medidores: Util.validarArreglo(contrato.listaMedidores) ? [...contrato.listaMedidores] : []
+    });
+
+    if (this.refPuntosSalida) {
+      this.refPuntosSalida.actualizarPuntosSalida();
+    }
+
+    const tipoCalculo = this.obtenerTipoCalculoContrato(contrato);
+    this.props.actualizarTipoCalculoContrato(tipoCalculo);
+    this.calcularPrecioContrato();
+  };
+
+  /**
+   * Obtiene la unidad de medida de la cantidad contratada
+   * @returns {number}
+   */
+  obtenerUnidadMedidaContratada = () => {
+    const { cabecera } = this.props;
+    const tiposContratosSelecccionados = getProp(this.props, 'listas.tiposContrato').filter(tipoContrato => tipoContrato.seleccionado);
+    const s = tiposContratosSelecccionados.find(tipoContrato => tipoContrato.uniPropiedad.tipocontrato === 'S');
+    if (s != null) {
+      const medidores = this.props.listas.medidores.filter(m => m.seleccionado);
+      return medidores[0].uniIdemedida.uniIderegistro;
+    }
+    return cabecera.unidadMedida;
+  };
+
+  /**
+   * Obtiene el objeto que se va a guardar..
+   * @returns {Boolean}
+   */
+  obtenerEntidadGuardar = () => {
+    const { cabecera, tipoCalculo, garantia } = this.props;
+    const tiposContratosSelecccionados = getProp(this.props, 'listas.tiposContrato').filter(tipoContrato => tipoContrato.seleccionado);
+    if (Util.validarArreglo(tiposContratosSelecccionados)) {
+      const s = tiposContratosSelecccionados.find(tipoContrato => tipoContrato.uniPropiedad.tipocontrato === 'S');
+      if (s != null) {
+        const medidores = this.props.listas.medidores.filter(m => m.seleccionado);
+        if (!Util.validarArreglo(medidores)) {
+          toast.error('Debe seleccionar al menos un medidor');
+          return null;
+        }
+      }
+    }
+    const entidadGuardar = {
+      cntCapacidad: cabecera.capacidadC2,
+      uniIdemedidacapacidad: {
+        uniIderegistro: (cabecera.unidadMedidaC2) ? cabecera.unidadMedidaC2 : null
+      },
+      cntNumero: cabecera.numeroContrato,
+      terIdeagente: {
+        terIderegistro: cabecera.agenteTercero.terIderegistro
+      },
+      cntTiponegocio: cabecera.tipoNegocio,
+      uniIdetipouso: {
+        uniIderegistro: cabecera.tipoUso
+      },
+      uniIdetipomercado: (cabecera.tipoMercado) ? {
+        uniIderegistro: cabecera.tipoMercado
+      } : null,
+      uniIdeclasecontrato: this.obtenerClaseContrato(),
+      cntFechainicio: cabecera.fechaInicio,
+      cntFechafin: cabecera.fechaFin,
+      uniIdefuente: (cabecera.fuenteDistribucion > 0) ? {
+        uniIderegistro: cabecera.fuenteDistribucion
+      } : null,
+      cntTakeorpay: (cabecera.takeOrPay === 'true') ? 'S' : 'N',
+      tpgIdetopgrupal: (cabecera.topGrupal) ? {
+        tpgIderegistro: cabecera.topGrupal
+      } : null,
+      cntFirmeza: cabecera.firmeza,
+      cntTipoprecio: tipoCalculo.tipoCalculo,
+      cntPrecio: cabecera.precioContrato,
+      uniIdemedidaprecio: {
+        uniIderegistro: cabecera.unidadMedidaPrecio
+      },
+      cntPreciopesos: cabecera.precioContrato,
+      cntPorcencomercial: cabecera.porcentajeComercializacion,
+      uniIdemodalidadcontrato: {
+        uniIderegistro: cabecera.modalidadContrato
+      },
+      cntCodigogestor: cabecera.codigoGestor,
+      cntCantidadcontratada: cabecera.cantidadContratada,
+      uniIdemedidacontratada: {
+        uniIderegistro: this.obtenerUnidadMedidaContratada()
+      },
+      cntVersion: 1,
+      cntPeriodo: cabecera.periodoCantidadContratada,
+      cntTipocalculoprecio: tipoCalculo.tipoCalculo,
+      cntTiposervicio: tipoCalculo.tipoServicio,
+      cntTipogarantia: garantia.tipoGarantia,
+      cntAportegnv: cabecera.aporteGNV,//Crear campo...
+      cntUsatrmtecho: cabecera.usaTRMTecho,
+      cntTrmtecho: cabecera.trmTecho,
+      cntValoraportegnv: cabecera.valorAporteGNV,//Craer campo...
+      garantia: this.obtenerGarantia(), //Verificar con Leo el tema de los dos campos que no conocía para el back. Verificar si la selección de tipo de contrato es múltiple.
+      listaDocumentos: this.obtenerListaDocumentos(),
+      listaTipos: this.obtenerListaTipos(),
+      listaTramos: this.obtenerListaGlobalTramos(),
+      listaPuntosSalida: this.obtenerPuntosSalida(),
+      listaRutas: this.obtenerListaRutas(), //Verificar y agregar módulo selección rutas si es neceario.
+      listaMedidores: this.obtenerListaMedidores(),//Verificar y agregar módulo si es necario.
+      listaCanastaTarifaria: this.obtenerCanastaTarifaria()
+    };
+
+    return entidadGuardar;
+  };
+
+  /**
+   * Envia la información al servidor para guardar el contrato.
+   * @returns {Boolean}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    let entidadGuardar = this.obtenerEntidadGuardar();
+    if (entidadGuardar == null) {
+      return;
+    }
+    if (this.props.cabecera.idContrato) {
+      entidadGuardar.cntIderegistro = this.props.cabecera.idContrato;
+      entidadGuardar.cntVersion = this.props.cabecera.versionContrato;
+    }
+
+    //Enviamos el objeto para guardar...
+    axios.post(RUTAS_API.CONTRATOS.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.props.mostrarAlerta('Correcto', 'Se ha guardado correctamente el contrato.');
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de redireccionar a la interfaz de consulta de contratos
+   */
+  consultarEntidad = () => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_CONTRATOS.url,
+      }
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de abrir el modal de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos de un componente externo
+   * @param {Object} entidad Datos componente externo
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      idContrato: entidad.cntIderegistro
+    });
+  };
+
+  /**
+   * Método encargado de validar las consultas requeridas para el cargue del programa
+   * @returns {Boolean}
+   */
+  validarRequeridosPrograma = () => {
+    return getProp(this.props, 'listas.consultasTerminadas', false);
+  };
+
+  /**
+   * Método encargado de renderizar el componente Cabecera del contrato
+   * @returns {Component}
+   */
+  obtenerCabeceraContrato = () => {
+    return (
+      &lt;RCabeceraContrato
+        mostrarProgramaModal={this.props.mostrarProgramaModal}
+        trmDia={0}
+        editandoContrato={false}
+        mostrarAlerta={this.props.mostrarAlerta}
+        renderPuntosSalida={this.renderPuntosSalida}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de renderizar el componente Calculo del precio
+   * @returns {Component}
+   */
+  obtenerTipoCalculoPrecio = () => {
+    return &lt;RCalculoPrecioContrato />;
+  };
+
+  /**
+   * Método encargado de renderizar el componente Gestion de Documentos
+   * @returns {Component}
+   */
+  obtenerGestionDocumentos = () => {
+    return &lt;RGestionDocumentos />;
+  };
+
+  /**
+   * Método encargado de renderizar el componente Seleccion de garantia
+   * @returns {Component}
+   */
+  obtenerSeleccionTipoGarantias = () => {
+    return &lt;RSeleccionTipoGarantia
+      tiposGarantia={TIPOS_GARANTIA}
+    />;
+  };
+
+  /**
+   * Método encargado de renderizar el componente Poliza de Contrato
+   * @returns {Component}
+   */
+  obtenerPolizaContrato = () => {
+    return (
+      &lt;PolizaContratos
+        tipoContrato=''
+        mostrarAlerta={this.props.mostrarAlerta}
+      />
+    );
+  };
+
+  /**
+   * Obtiene la lista de los tipos de contratos seleccionados por el usuario.
+   * @return {array}
+   */
+  obtenerTiposContratoSeleccionados = () => {
+    const listaTiposContrato = getProp(this.props, 'listas.tiposContrato', []);
+    const tiposContratoSeleccionados = listaTiposContrato.filter(tipoContrato => tipoContrato.seleccionado);
+    return tiposContratoSeleccionados;
+  };
+
+  /**
+   * Renderiza el botón para seleccionar los puntos de salida teºniendo en cuenta las condiciones necesarias...
+   * @returns {Component}
+   */
+  renderPuntosSalida = () => {
+    //Validar si el tipo de transporte seleccionado es Transporte...
+    const tiposContratoSeleccionados = this.obtenerTiposContratoSeleccionados();
+    if (tiposContratoSeleccionados.findIndex(tc => (tc.uniPropiedad) &amp;&amp; (tc.uniPropiedad.tipocontrato === 'T')) &lt; 0) {
+      return null;
+    }
+    const puntosSalida = getProp(this.props, 'listas.puntosSalida', []);
+    return (
+      &lt;SelectorPuntosSalida
+        titulo='Puntos de Salida:'
+        propTexto='ptsaNombre'
+        propValor='ptsaIderegistro'
+        seleccionarItem={this.actualizarPuntosSalida}
+        mostrarAlerta={this.props.mostrarAlerta}
+        unidadesMedida={this.props.listas.cantidad}
+        ref={ref => this.refPuntosSalida = ref}
+        lista={puntosSalida}
+      />
+    );
+  };
+
+  /**
+   * Actualiza la propiedad de la lista puntos de salida del objeto Redux.
+   * @param {Array} puntosSalida Puntos de salida seleccionados
+   * @return {array}
+   */
+  actualizarPuntosSalida = (puntosSalida) => {
+    let cantidadContratada = 0;
+    puntosSalida.forEach(ps => {
+      if (ps.seleccionado) {
+        cantidadContratada += ps.cntsCantidadcontratada > 0 ? parseFloat(ps.cntsCantidadcontratada) : ps.pstaCapacidad;
+      }
+    });
+    this.props.actualizarCabeceraContrato({ cantidadContratada: cantidadContratada });
+    this.props.actualizarListaContratos({ puntosSalida: [...puntosSalida] });
+  };
+
+  /**
+   * Método encargado de cargar el componente en el navegador
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  cargarVista = (evento) => {
+    this.setState({ programaActual: evento.target.value });
+  };
+
+  /**
+   * Método encargado de realizar la navegación entre las diferentes pestañas
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  navegar = (evento) => {
+    const tipo = evento.target.name;
+    const programaActual = parseInt(this.state.programaActual);
+    const incremento = tipo === 'btn-anterior' ? -1 : 1;
+    const nuevoIndice = programaActual + incremento;
+    if (VISTAS[nuevoIndice]) {
+      this.setState({ programaActual: nuevoIndice });
+    }
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+
+    if (!this.validarRequeridosPrograma()) {
+      return (&lt;div className="text-center">Cargando los datos del programa, esto puede tardar un momento...&lt;/div>);
+    }
+
+    return (
+      &lt;div className='contratos'>
+        {this.state.mostrarAlertaActividad &amp;&amp; (
+          &lt;div className='alerta-actividad'>
+            &lt;div className='header'>
+              &lt;a onClick={() => this.mostrarAlertaActividad(false)} className='close' >&amp;times;&lt;/a>
+              &lt;label>{this.state.actividad.uniIdeactividad.uniNombre1}&lt;/label>
+            &lt;/div>
+            &lt;div className='body'>
+              &lt;span className='icon'>&lt;i className='fa fa-fw fa-clock-o'>&lt;/i>&lt;/span>
+              &lt;span className='detalle'>{`${this.state.actividad.actHorainicio} - ${this.state.actividad.actHorafinal}`}&lt;/span>
+            &lt;/div>
+          &lt;/div>
+        )}
+
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='contratos__navegador'>
+
+          &lt;div className='contratos__navegador__cabecera'>
+            &lt;div className='colum btn-content'>
+              {this.state.programaActual > 0 &amp;&amp; (
+                &lt;button className='contratos__navegador__cabecera-btn' name='btn-anterior' onClick={this.navegar}>Anterior&lt;/button>
+              )}
+            &lt;/div>
+            &lt;div className='colum select-content'>
+              &lt;select name="programaActual" className='contratos__navegador__cabecera-select' onChange={this.cargarVista} value={this.state.programaActual}>
+                {VISTAS.map(p => (&lt;option key={p.id} value={p.id}>{p.titulo}&lt;/option>))}
+              &lt;/select>
+            &lt;/div>
+            &lt;div className='colum btn-content'>
+              {(this.state.programaActual &lt; (VISTAS.length - 1)) &amp;&amp; (
+                &lt;button className='contratos__navegador__cabecera-btn' name='btn-siguiente' onClick={this.navegar}>Siguiente&lt;/button>
+              )}
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="contratos__fragmento">
+            {this[VISTAS[parseInt(this.state.programaActual)].componente]()}
+          &lt;/div>
+
+        &lt;/div>
+
+      &lt;/div>
+    );
+  }
+}
+
+GestionContratos.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func,
+  mostrarProgramaModal: PropTypes.func,
+  actualizarCabeceraContrato: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  const contratos = state.contratos;
+  const { cabecera, documentos, garantia, tipoCalculo, listas } = contratos;
+  return { cabecera, documentos, garantia, tipoCalculo, listas, contratos };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+    mostrarProgramaModal,
+    actualizarCabeceraContrato,
+    actualizarListaContratos,
+    actualizarDocumentosContrato,
+    actualizarGarantia,
+    actualizarTipoCalculoContrato,
+    limpiarContrato
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionContratos);
+
+export { VistaRedux as RGestionContratos };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

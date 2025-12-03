@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/CanastaDuplexTransporte.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaTransporte/CanastaDuplexTransporte.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
+import { Input, TextoNumerico, Combo, Util } from 'appfuture-react';
+import Modal from 'react-bootstrap4-modal';
+import { SelectorTramos } from '../../../../utils/SelectorTramos';
+
+// Util
+import { ComboHoras } from '../Componentes/ComboHoras';
+import { get as getProp } from 'object-path';
+
+import './CanastaHorariaTransporte.scss';
+import { TransporteConRutas } from './TransporteConRutas';
+import { TransporteSinRutas } from './TransporteSinRutas';
+import { RTablaCanastaGenerica } from './TablaCanastaGenerica';
+
+const usaRutasGNC = [
+  { texto: 'Sí', valor: 'S' },
+  { texto: 'No', valor: 'N' }
+];
+
+const tiposLiquidacion = [
+  { texto: 'Volumen Marginal', valor: 'V' },
+  { texto: 'Rango Total', valor: 'R' }
+];
+
+class CanastaDuplexTransporte extends Component {
+
+  state = {
+    horaFin: '',
+    valor: '',
+    unidadMedida: '',
+    nombreUnidadMedida: '',
+    porcentaje: '',
+    idRangoSinRuta: null,
+    idRangoConRuta: null,
+    tramo: '',
+    mostrarRutas: false,
+    mostrarTramos: false,
+    ultimaHora: '00:00',
+    btnBloqueado: false,
+    textoBtn: 'Generar Intervalos',
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  actualizarState = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    this.setState(cambio);
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    if (target.name === 'unidadMedida') {
+      cambio['nombreUnidadMedida'] = target.text;
+    }
+
+    this.actualizarEstadoRedux(cambio);
+  };
+
+  /**
+   * Métodoe encargado de validar si usa rutas GNC
+   * @param {String} nombrePropiedad Nombre de la propiedad
+   * @param {String} valorPropiedad Valor de la propiedad
+   */
+  validarUsaRutasGNCValido = (nombrePropiedad, valorPropiedad) => {
+    const tarifaHoraria = getProp(this.props, 'tipoCalculo.tarifaHoraria', false);
+    const tarifaHorariaUsaRutasGNC = getProp(this.props, 'tipoCalculo.canastaHorariaTransporte.usaRutasGNC', 'N');
+    const tarifaConsumoUsaRutasGNC = valorPropiedad;
+    if (nombrePropiedad == 'usaRutasGNC' &amp;&amp; tarifaHoraria &amp;&amp; tarifaHorariaUsaRutasGNC != tarifaConsumoUsaRutasGNC) {
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux
+   * @param {Event} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    this.props.actualizarTipoCalculoContrato({ canastaDuplexTransporte: { ...this.props.canastaDuplexTransporte, ...cambio } });
+  };
+
+  /**
+   * Método encargado de validar los campos del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { unidadMedida, valor, porcentaje, horaFin } = this.state;
+
+    if (unidadMedida === '' || unidadMedida === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una unidad de medida.' } };
+    }
+
+    if (valor.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el valor.' } };
+    }
+
+    if (this.validarNumero(porcentaje) &amp;&amp; porcentaje > 100) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar un porcentaje válido menor o igual 100%.' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar que un valor sea un número
+   * @param {Number} numero Valor del número
+   * @returns {Boolean}
+   */
+  validarNumero = (numero) => {
+    return !/^([0-9.])*$/.test(numero);
+  };
+
+  /**
+   * Método encargado de mostrar el formulario con rutas
+   * @returns {Component}
+   */
+  renderFormularioConRutas = () => {
+    const { intervalos, canastasConRutas } = this.props.canastaDuplexTransporte;
+    if (!intervalos || intervalos === 0 || !Util.validarArreglo(canastasConRutas)) {
+      return null;
+    }
+    const { canastaDuplexTransporte, actualizarTipoCalculoContrato, actualizarListaContratos, listaUnidadesMedida, mostrarAlerta, listaTramos, rutasGNC, actualizarCabeceraRedux } = this.props;
+    return (
+      &lt;RTablaCanastaGenerica
+        canastaDuplexTransporte={canastaDuplexTransporte}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        actualizarListaContratos={actualizarListaContratos}
+        actualizarCabeceraRedux={actualizarCabeceraRedux}
+        listaUnidadesMedida={listaUnidadesMedida}
+        mostrarAlerta={mostrarAlerta}
+        listaTramos={listaTramos}
+        rutasGNC={rutasGNC}
+        intervalos={parseInt(intervalos)}
+        nombrePropiedadCanasta='canastaDuplexTransporte'
+        nombreObjetoCanasta='canastasConRutas'
+        usaRutas={true}
+        usaRangoIntervalos={true}
+        usaRangoHorario={true}
+        usaTramos={true}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario sin rutas
+   * @returns {Component}
+   */
+  renderFormularioSinRutas = () => {
+    const { intervalos, canastasSinRutas } = this.props.canastaDuplexTransporte;
+    if (!intervalos || intervalos === 0 || !Util.validarArreglo(canastasSinRutas)) {
+      return null;
+    }
+    const { canastaDuplexTransporte, actualizarTipoCalculoContrato, actualizarListaContratos, listaUnidadesMedida, mostrarAlerta, listaTramos, rutasGNC, actualizarCabeceraRedux } = this.props;
+    return (
+      &lt;RTablaCanastaGenerica
+        canastaDuplexTransporte={canastaDuplexTransporte}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        actualizarListaContratos={actualizarListaContratos}
+        actualizarCabeceraRedux={actualizarCabeceraRedux}
+        listaUnidadesMedida={listaUnidadesMedida}
+        mostrarAlerta={mostrarAlerta}
+        listaTramos={listaTramos}
+        rutasGNC={rutasGNC}
+        intervalos={parseInt(intervalos)}
+        nombrePropiedadCanasta='canastaDuplexTransporte'
+        nombreObjetoCanasta='canastasSinRutas'
+        usaRutas={false}
+        usaRangoIntervalos={true}
+        usaRangoHorario={true}
+        usaTramos={true}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los rangos sin ruta
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioRangoSinRuta = (evento) => {
+    // Controlar cambio
+    const control = evento.target;
+    const valor = control.value;
+    const nombrePropiedad = control.name;
+    const idRango = control.attributes['data-rango'].value;
+    const nuevosRangos = [...this.props.canastaDuplexTransporte.canastasSinRutas];
+
+    const indexRango = nuevosRangos.findIndex(a => a.idIntervaloSinRuta === idRango);
+    nuevosRangos[indexRango][nombrePropiedad] = valor;
+    // PENDIENTE
+    const rango = nuevosRangos[0];
+    const valores = this.obtenerPrecioContratoPorTramos(rango);
+    this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, valorCargos: valores.valorCargos });
+    this.actualizarEstadoRedux({ canastasSinRutas: nuevosRangos });
+  };
+
+  /**
+   * Obtiene el objeto tramo de la listaTramos por medio del idTramo (trmIderegistro)...
+   * @param {Object} tramo Datos del tramo
+   */
+  obtenerTramo = (tramo) => {
+    const idTramo = parseInt(tramo);
+    const index = this.props.listaTramos.findIndex(t => t.trmIderegistro === idTramo);
+    tramo = (index >= 0) ? this.props.listaTramos[index] : null;
+    return tramo;
+  };
+
+  /**
+   * Método encargado de validar los datos del tramo
+   * @param {Object} tramo Datos del tramo
+   */
+  validarTramo = (tramo) => {
+    tramo = this.obtenerTramo(tramo);
+    if (!tramo) {
+      this.props.mostrarAlerta('Atención', 'No se pudo obtener la información del tramo seleccionado.');
+      return false;
+    }
+
+    if (!Array.isArray(tramo.listaCargos) || tramo.listaCargos.length === 0) {
+      this.props.mostrarAlerta('Atención', 'El tramo seleccionado no tiene cargos configurados.');
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Bloquea el botón generar intervalos por 3 segundos...
+   */
+  bloquearBtn = () => {
+    this.setState({ btnBloqueado: true, textoBtn: 'Por favor Espere...' });
+    setTimeout(() => {
+      this.setState({ btnBloqueado: false, textoBtn: 'Generar Intervalos' });
+    }, 3000);
+  };
+
+  /**
+   * Genera los intervalos...
+   * @returns {Boolean}
+   */
+  generarIntervalos = () => {
+    const { intervalos, usaRutasGNC, canastasSinRutas, canastasConRutas, tramo, tipoLiquidacion } = this.props.canastaDuplexTransporte;
+
+    if (!tipoLiquidacion || tipoLiquidacion.trim() === '' || tipoLiquidacion === '-1') {
+      this.props.mostrarAlerta('Atención', 'Debe seleccionar un tipo de liquidación.');
+      return;
+    }
+
+    if (!this.props.cabecera.cantidadContratada) {
+      this.props.mostrarAlerta('Atención', 'Debe seleccionar una cantidad contratada en la cabecera del contrato.');
+      return;
+    }
+
+    if (usaRutasGNC === 'S') {
+      if (this.obtenerRutasSeleccionadas().length === 0) {
+        this.props.mostrarAlerta('Atención', 'Debe seleccionar una ruta como mínimo.');
+        return;
+      }
+    }
+
+    if (usaRutasGNC === 'S') {
+      if (this.obtenerTramosSeleccionados().length === 0) {
+        this.props.mostrarAlerta('Atención', 'Debe seleccionar una tramo como mínimo.');
+        return;
+      }
+    }
+
+    if (intervalos === '' || intervalos &lt;= 0) {
+      this.props.mostrarAlerta('Atención', 'Debe agregar una cantidad de intervalos mayor a 0');
+      return;
+    }
+
+    if (!this.state.horaFin || this.state.horaFin === '' || this.state.horaFin &lt; 0) {
+      this.props.mostrarAlerta('Atención', 'Debe seleccionar la hora fin.');
+      return;
+    }
+
+    this.bloquearBtn();
+
+    if ((!usaRutasGNC &amp;&amp; Util.validarArreglo(canastasSinRutas)) || (usaRutasGNC &amp;&amp; Util.validarArreglo(canastasConRutas))) {
+      // Mostrar mensaje indicando que se van a borrar los intervalos existentes
+      const botones = [
+        { texto: 'Cancelar', clase: 'btn-danger' },
+        { texto: 'Aceptar', clase: 'btn-primary', callback: this.crearArregloIntervalos }
+      ];
+      this.props.mostrarAlerta('Atención', 'Se eliminarán los intervalos actuales, ¿Desea continuar?', botones);
+      return;
+    }
+
+    this.crearArregloIntervalos();
+  };
+
+  /**
+   * Obtiene el valor cargo de un tramo.
+   * @param {Object} tramo Datos del tramo
+   * @param {String} tipo Tipo de cargo
+   * @return {Array}
+   */
+  obtenerValorCargo = (tramo, tipo) => {
+    //Verificamos el cargo seleccionado...
+    if (!Util.validarArreglo(tramo.listaCargos)) {
+      return -1;
+    }
+    var cargoSeleccionado = tramo.listaCargos.find(cargo => cargo.seleccionado);
+    switch (tipo) {
+      case 'V':
+        return cargoSeleccionado.trcaCargovariable;
+      case 'F':
+        return cargoSeleccionado.trcaCargofijo;
+      case 'A':
+        return cargoSeleccionado.trcaCargoaoym;
+    }
+  };
+
+  /**
+   * Método encargado de obtener las rutas que tienen tramos
+   * @returns {Array}
+   */
+  obtenerRutasConTramos = () => {
+    let rutas = this.obtenerRutasSeleccionadas();
+    for (let i = 0; i &lt; rutas.length; i++) {
+      rutas[i].tramos = this.obtenerTramosSeleccionados();
+    }
+    return rutas;
+  };
+
+  /**
+   * Método encargado de pasar el valor seleccionado a hora
+   * @param {String} valor Valor seleccionado
+   */
+  convertirValorAHora = (valor) => {
+    valor = parseInt(valor);
+    if (valor.toString().length === 1) {
+      return `0${valor}:00`;
+    }
+    return `${valor}:00`;
+  };
+
+  /**
+   * Método encargado de obtener una nueva hora fin
+   * @param {Number} horaFin Hora fin actual
+   */
+  obtenerNuevaHoraFin = (horaFin) => {
+    let nuevaHoraFin = horaFin === '23:59' ? 25 : parseInt(horaFin) + 1;
+    return nuevaHoraFin;
+  };
+
+  /**
+   * Método encargado de obtener los sub rangos nuevos de un rango
+   * @param {Object} rango Datos del rango
+   * @param {Boolean} aplicaRutas Valida si aplican las rutas
+   */
+  obtenerNuevosSubRangos = (rango, aplicaRutas = false) => {
+    const { horaFin, ultimaHora } = this.state;
+    if (Array.isArray(rango)) {
+      rango = rango[0];
+    }
+    let subRangos = [...getProp(rango, 'subRangos', [])];
+    const horaInicio = (ultimaHora !== '00:00') ? this.convertirValorAHora(parseInt(ultimaHora) - 1).substring(0, 4) + '1' : ultimaHora;
+
+    const nuevoSubRango = {
+      idSubRango: Util.generarIdControl('_idSubRango'),
+      horaInicio: horaInicio,
+      horaFin: horaFin,
+    };
+    if (!aplicaRutas) {
+      nuevoSubRango.tramos = this.obtenerTramosSeleccionados();
+    } else if (aplicaRutas) {
+      const rutasSeleccionadas = this.obtenerRutasSeleccionadas();
+      nuevoSubRango.rutas = rutasSeleccionadas.map((ruta, index) => {
+        ruta.idRuta = Util.generarIdControl('_idRuta_' + index);
+        ruta.tramos = this.obtenerTramosSeleccionados();
+        return ruta;
+      });
+    }
+    //rutas: this.obtenerRutasSeleccionadas(),
+    subRangos.push(nuevoSubRango);
+    this.setState({ ultimaHora: this.obtenerNuevaHoraFin(horaFin) });
+    return subRangos;
+  };
+
+  /**
+   * Crea el arreglo de intervalos que se mostrará en el panel...
+   * @returns {Boolean}
+   */
+  crearArregloIntervalos = () => {
+    const { intervalos, usaRutasGNC, tramo } = this.props.canastaDuplexTransporte;
+    const { cantidadContratada } = this.props.cabecera;
+    const cantidadRango = cantidadContratada / intervalos;
+    //Se agregan los rangos con rutas.
+    if (usaRutasGNC === 'S') {
+      const rangoModelo = getProp(this.props, 'canastaDuplexTransporte.canastasConRutas', null);
+      let nuevaCanastaConRutas = [];
+      let rangoInicial = 0;
+      for (let i = cantidadRango; i &lt;= cantidadContratada; i += cantidadRango) {
+        nuevaCanastaConRutas.push({ idRangoConRuta: Util.generarIdControl('canastaConRuta_'), rango: { horaInicio: rangoInicial, horaFin: i }, porcentaje: 0, subRangos: this.obtenerNuevosSubRangos(rangoModelo, true) });
+        rangoInicial = i + 1;
+      }
+      const rango = nuevaCanastaConRutas[0];
+      rango.subRangos = this.obtenerNuevosSubRangos(rangoModelo, true);
+      const valores = this.obtenerPrecioContratoPorTramos(rango);
+      this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, valorCargos: valores.valorCargos });
+      this.actualizarEstadoRedux({ canastasConRutas: nuevaCanastaConRutas });
+      return;
+    }
+
+    //Se agregan los rangos sin rutas.
+    let nuevaCanastaSinRutas = [];
+    let rangoInicial = 0;
+    const rangoModelo = getProp(this.props, 'canastaDuplexTransporte.canastasSinRutas', null);
+    for (let i = cantidadRango; i &lt;= cantidadContratada; i += cantidadRango) {
+      nuevaCanastaSinRutas.push({ idRangoConRuta: Util.generarIdControl('canastaConRuta_'), rango: { horaInicio: rangoInicial, horaFin: i }, porcentaje: 0, subRangos: this.obtenerNuevosSubRangos(rangoModelo) });
+      rangoInicial = i + 1;
+    }
+    const rango = nuevaCanastaSinRutas[0];
+    const valores = this.obtenerPrecioContratoPorTramos(rango);
+    this.props.actualizarCabeceraRedux({ precioContrato: valores.precioContrato, valorCargos: valores.valorCargos });
+    this.actualizarEstadoRedux({ canastasSinRutas: nuevaCanastaSinRutas });
+
+  };
+
+  /**
+   * Método encargado de obtener el precio del contrato dependiendo del rango
+   * @param {Object} rango Datos del rango
+   */
+  obtenerPrecioContrato = (rango) => {
+    if (!rango || !rango.tramo || !Array.isArray(rango.tramo.listaCargos) || rango.tramo.listaCargos.length === 0) {
+      return 0;
+    }
+    const tramo = rango.tramo;
+    let valor = 0;
+    let valorCargoVariable = this.obtenerValorCargo(tramo, 'V');
+    let valorCargoFijo = this.obtenerValorCargo(tramo, 'F');
+    let valorCargoAOM = this.obtenerValorCargo(tramo, 'A');
+    valor = (valorCargoVariable + valorCargoFijo + valorCargoAOM);
+    return valor;
+  };
+
+  /**
+   * Método encargado de obtener el precio del contrato dependiendo de los tramos
+   * @param {Object} rango Datos del rango
+   */
+  obtenerPrecioContratoPorTramos = (rango) => {
+    let valores = {
+      precioContrato: 0,
+      valorCargos: {
+        variable: 0,
+        fijo: 0,
+        aom: 0,
+      },
+      valorPorcentaje: 0,
+    };
+    if (!rango.rutas) {
+      //Obtenemos los valores de los tramos directamente...
+      const tramos = rango.subRangos[0].tramos;
+      if (!Util.validarArreglo(tramos)) {
+        return valores;
+      }
+      for (let i = 0; i &lt; tramos.length; i++) {
+        const tramo = tramos[i];
+        const valorCargoVariable = this.obtenerValorCargo(tramo, 'V');
+        const valorCargoFijo = this.obtenerValorCargo(tramo, 'F');
+        const valorCargoAOM = this.obtenerValorCargo(tramo, 'A');
+        valores.valorCargos.variable += valorCargoVariable;
+        valores.valorCargos.fijo += valorCargoFijo;
+        valores.valorCargos.aom += valorCargoAOM;
+        valores.precioContrato += (valorCargoVariable + valorCargoFijo + valorCargoAOM);
+        valores.valorPorcentaje += tramo.porcentaje;
+      }
+      return valores;
+    }
+    const subRango = rango.subRangos[0];
+    //Recorremos las rutas de los subrangos...
+    for (let j = 0; j &lt; subRango.rutas.length; j++) {
+      const ruta = subRango.rutas[j];
+      //Recorremos los tramos y sumamos los valores.
+      const tramos = ruta.tramos;
+      for (let i = 0; i &lt; tramos.length; i++) {
+        const tramo = tramos[i];
+        const valorCargoVariable = this.obtenerValorCargo(tramo, 'V');
+        const valorCargoFijo = this.obtenerValorCargo(tramo, 'F');
+        const valorCargoAOM = this.obtenerValorCargo(tramo, 'A');
+        valores.valorCargos.variable += valorCargoVariable;
+        valores.valorCargos.fijo += valorCargoFijo;
+        valores.valorCargos.aom += valorCargoAOM;
+        valores.precioContrato += (valorCargoVariable + valorCargoFijo + valorCargoAOM);
+        valores.valorPorcentaje += tramo.porcentaje;
+      }
+    };
+    return valores;
+  }
+
+  /**
+   * Método encargado de validar que formulario mostrar
+   * @returns {JSX}
+   */
+  renderTablaIntervalos = () => {
+    const usaRutasGNC = getProp(this.props, 'canastaDuplexTransporte.usaRutasGNC', 'N');
+    if (usaRutasGNC === 'N') {
+      return this.renderFormularioSinRutas();
+    }
+    return this.renderFormularioConRutas();
+  };
+
+  /**
+   * Método encargado de mostrar el buscador de tramos
+   * @returns {JSX}
+   */
+  renderBuscadorTramos = () => {
+    const tramosSeleccionados = this.obtenerTramosSeleccionados().length;
+    const textoTramos = `(${tramosSeleccionados}) seleccionadas`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>Tramos:&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={textoTramos} disabled={true} type="text" className="form-control" readOnly />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador"
+              title='Seleccionar Tramos'
+              onClick={() => this.setState({ mostrarTramos: true })}>&lt;i className="fa fa-fw fa-check-square-o">&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de obtener las rutas seleccionadas
+   * @returns {Array}
+   */
+  obtenerRutasSeleccionadas = () => {
+    const rutas = this.props.rutasGNC.filter((r) => {
+      if (r.seleccionado) { r.idRutaRango = Util.generarIdControl('rangoRuta'); return r }
+    });
+    return [...rutas];
+  };
+
+  /**
+   * Método encargado de obtener los tramos seleccionados
+   * @returns {Array}
+   */
+  obtenerTramosSeleccionados = () => {
+    return this.props.listaTramos.filter((t) => {
+      if (t.seleccionado) { t.idTramoRango = Util.generarIdControl('rangoTramo'); return t; }
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el buscador de rutas
+   * @returns {JSX}
+   */
+  renderBuscadorRutas = () => {
+    const rutasSeleccionadas = this.obtenerRutasSeleccionadas().length;
+    const textoRutas = `(${rutasSeleccionadas}) seleccionadas`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>Rutas:&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={textoRutas} disabled={true} type="text" className="form-control" readOnly />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador"
+              title='Seleccionar Rutas'
+              onClick={() => this.setState({ mostrarRutas: true })}>&lt;i className="fa fa-fw fa-check-square-o">&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de controlar el cambio en el componente selector de rutas
+   * @param {Event} event Evento ejecutado en el control de usuario
+   */
+  seleccionarRuta = (event) => {
+    const rutas = [...this.props.rutasGNC];
+    const idRuta = parseInt(event.target.value);
+    const index = rutas.findIndex(t => t.uniIderegistro === idRuta);
+    rutas[index].seleccionado = event.target.checked;
+    this.props.actualizarListaContratos({ rutasGNC: [...rutas] });
+  };
+
+  /**
+   * Método encargado de actualizar las rutas en los rangos en el objeto redux
+   * @returns {Boolean}
+   */
+  actualizarRutasEnRangos = () => {
+    // Si no hay rangos seleccionados, no hacer nada
+    const { canastaDuplexTransporte } = this.props;
+    if (!canastaDuplexTransporte || !Util.validarArreglo(canastaDuplexTransporte.canastasConRutas)) {
+      return;
+    }
+
+    const rutasSeleccionadas = [...this.obtenerRutasSeleccionadas()];
+    let nuevaCanasta = [...canastaDuplexTransporte.canastasConRutas];
+
+    nuevaCanasta.forEach(canasta => {
+
+      if (!Util.validarArreglo(canasta.rutas)) {
+        return;
+      }
+
+      let nuevasRutas = [...canasta.rutas];
+
+      // Validar que las rutas del rango coincidan con las rutas seleccionadas
+      rutasSeleccionadas.forEach(ruta => {
+
+        // Si hay más rutas seleccionadas que rutas en el rango, se agregan las nuevas rutas
+        if (rutasSeleccionadas.length > nuevasRutas.length) {
+          const rutaExiste = nuevasRutas.findIndex(rr => rr.uniIderegistro === ruta.uniIderegistro) > -1;
+          if (!rutaExiste) {
+            nuevasRutas.push({ ...ruta, valor: 0, unidadMedida: -1, porcentaje: 0, idRutaRango: Util.generarIdControl('rangoRuta') });
+          }
+        }
+
+        // Si el rango tiene más rutas de las que están seleccionadas, remover la ruta sobrante
+        if (nuevasRutas.length > rutasSeleccionadas.length) {
+          nuevasRutas = nuevasRutas.filter(rangoRuta => rutasSeleccionadas.findIndex(r => r.uniIderegistro === rangoRuta.uniIderegistro) > -1);
+        }
+
+      });
+      canasta.rutas = nuevasRutas;
+    });
+
+
+    this.actualizarEstadoRedux({ canastasConRutas: nuevaCanasta });
+  };
+
+  /**
+   * Método encargado de mostrar el modal de rutas
+   * @returns {JSX}
+   */
+  renderModalRutas = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarRutas}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Rutas&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione las Rutas&lt;/p>
+            {
+              this.props.rutasGNC.map(r => {
+                return (
+                  &lt;div key={`ruta_${r.uniIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={r.uniIderegistro} checked={r.seleccionado || false} onChange={this.seleccionarRuta} />
+                      &lt;span> {r.uniNombre1}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarRutas: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  /**
+   * Métod encargado de actualizar los tramos en el objeto redux
+   * @param {Array} tramos Tramos a actualizar
+   */
+  actualizarTramos = (tramos) => {
+    this.props.actualizarListaContratos({ listaTramos: [...tramos] });
+    this.actualizarTramosEnRangos();
+  };
+
+  /**
+   * Métod encargado de actualizar los tramos en los rangos en el objeto redux
+   * @returns {Boolean}
+   */
+  actualizarTramosEnRangos = () => {
+    const { canastaDuplexTransporte } = this.props;
+    if (!canastaDuplexTransporte || !Util.validarArreglo(canastaDuplexTransporte.canastasSinRutas)) {
+      return;
+    }
+    const tramosSeleccionados = [...this.obtenerTramosSeleccionados()];
+    let nuevaCanasta = [...canastaDuplexTransporte.canastasSinRutas];
+    nuevaCanasta.forEach(rango => {
+      if (!Util.validarArreglo(rango.subRangos)) {
+        return;
+      }
+      //Recorremos los subrangos...
+      rango.subRangos.forEach(subRango => {
+        if (!Util.validarArreglo(subRango.tramos)) {
+          return;
+        }
+        let nuevosTramos = [...subRango.tramos];
+        tramosSeleccionados.forEach(tramo => {
+          // Si hay más tramos seleccionados que tramos en el rango, se agregan las nuevas rutas
+          if (tramosSeleccionados.length > nuevosTramos.length) {
+            const tramoExiste = nuevosTramos.findIndex(t => t.trmIderegistro === tramo.trmIderegistro) > -1;
+            if (!tramoExiste) {
+              nuevosTramos.push({ ...tramo, cargoVariable: 0, cargoFijo: 0, cargoAOM: 0, unidadMedida: -1, valorPorcentaje: 0, idTramoRango: Util.generarIdControl('rangoTramo') });
+            }
+          }
+          // Si el rango tiene más tramos de los que están seleccionadas, remover la ruta sobrante
+          if (nuevosTramos.length > tramosSeleccionados.length) {
+            nuevosTramos = nuevosTramos.filter(t => tramosSeleccionados.findIndex(tt => tt.trmIderegistro === t.trmIderegistro) > -1);
+          }
+        });
+        subRango.tramos = nuevosTramos;
+      });
+    });
+
+    this.actualizarEstadoRedux({ canastasSinRutas: nuevaCanasta });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    let deshabilitarComboHoras = (this.state.ultimaHora > 24);
+    return (
+      &lt;div className='canasta-horaria container'>
+        &lt;div className='mt-3 card box-shadow'>
+          &lt;div className='card-header'>Canasta Tarifa Consumo&lt;/div>
+          &lt;div className='card-body'>
+            &lt;div>
+              &lt;h3 className='font-weight-bold text-center'>Rangos Horarios y de Consumo para contrato Tipo Trasporte&lt;/h3>
+            &lt;/div>
+            &lt;div className='row mt-2'>
+              &lt;Combo
+                opciones={tiposLiquidacion}
+                propTexto='texto'
+                propValor='valor'
+                label='Tipo de Liquidación:'
+                name='tipoLiquidacion'
+                value={getProp(this.props, 'canastaDuplexTransporte.tipoLiquidacion', '-1')}
+                onChange={this.controlarCambio}
+                cols={3}
+              />
+              &lt;ComboHoras
+                valor={this.state.horaFin}
+                onChange={this.actualizarState}
+                disabled={deshabilitarComboHoras}
+                ultimaHora={'00:00'}
+              />
+              &lt;Combo
+                opciones={usaRutasGNC}
+                propTexto='texto'
+                propValor='valor'
+                label='Valor por Rutas:'
+                name='usaRutasGNC'
+                cols={3}
+                mostrarOpcionPorDefecto={false}
+                value={getProp(this.props, 'canastaDuplexTransporte.usaRutasGNC', 'N')}
+                onChange={this.controlarCambio}
+              />
+              {
+                (getProp(this.props, 'canastaDuplexTransporte.usaRutasGNC', 'N') === 'S') &amp;&amp; (
+                  this.renderBuscadorRutas()
+                )
+              }
+              &lt;SelectorTramos
+                titulo='Tramos:'
+                propTexto='trmNombre'
+                propValor='trmIderegistro'
+                seleccionarItem={this.actualizarTramos}
+                mostrarAlerta={this.props.mostrarAlerta}
+                lista={getProp(this.props, 'listaTramos', [])}
+              />
+              &lt;TextoNumerico
+                aceptaDecimales={false}
+                aceptaNegativos={false}
+                label='No. Intervalos:'
+                cols={2}
+                value={getProp(this.props, 'canastaDuplexTransporte.intervalos', '0')}
+                onChange={this.controlarCambio}
+                name='intervalos'
+              />
+              &lt;Input
+                label='Cant. Contratada:'
+                value={this.props.cabecera.cantidadContratada || '0'}
+                name='cantidadContratada'
+                extra={{ disabled: true, readOnly: true }}
+                disabled={true}
+                cols={2}
+              />
+              &lt;div>
+                &lt;button className="btn btn-primary mt-4" disabled={this.state.btnBloqueado} onClick={this.generarIntervalos}>{this.state.textoBtn}&lt;/button>
+              &lt;/div>
+            &lt;/div>
+            {this.renderTablaIntervalos()}
+          &lt;/div>
+        &lt;/div>
+        {this.renderModalRutas()}
+      &lt;/div>
+    );
+  }
+}
+
+CanastaDuplexTransporte.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  listaUnidadesMedida: PropTypes.array,
+  listaTramos: PropTypes.array,
+  rutasGNC: PropTypes.array,
+  actualizarTipoCalculoContrato: PropTypes.func,
+  actualizarListaContratos: PropTypes.func,
+  canastaDuplexTransporte: PropTypes.object,
+  cabecera: PropTypes.object,
+  actualizarCabeceraRedux: PropTypes.func,
+};
+
+CanastaDuplexTransporte.defaultProps = {
+  canastaDuplexTransporte: {}
+};
+
+export { CanastaDuplexTransporte };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

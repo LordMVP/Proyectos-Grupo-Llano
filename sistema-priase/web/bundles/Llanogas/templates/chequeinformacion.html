@@ -1,0 +1,45 @@
+<!--TEMPLATE PARA EL CONTROL DE FORMAS DE PAGO -->
+<script id="tplInfoCheque" type="text/template">
+    <div id="divFormaPago{{indice}}">
+       <div class="campo" style="display:none">
+            <label for="cmbFormaPago{{indice}}">Forma de Pago</label>
+            <select id="cmbFormaPago{{indice}}">
+                <option value="78" selected>Cheque</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtValor{{indice}}">Valor:</label>
+            <input type="text" id="txtValor{{indice}}" />
+        </div>
+
+        <div id="divdetallesFormaPago{{indice}}">
+            <div class="campo">
+                <label for="txtDocGirador{{indice}}">NIT/CC Girador:</label>
+                <input type="text" id="txtDocGirador{{indice}}" maxlength="10" />    
+            </div>
+            <div class="campo">
+                <label for="txtNombreGirador{{indice}}">Nombre Girador:</label>
+                <input type="text" id="txtNombreGirador{{indice}}" maxlength="50" />
+            </div>
+            <div class="campo">
+                <label for="cmbBanco{{indice}}">Banco:</label>
+                <select id="cmbBanco{{indice}}"></select>
+            </div>
+        </div>
+        <div id="divDetallesCheque{{indice}}">
+            <div class="campo">
+                <label for="txtNumCuenta{{indice}}">Número de la cuenta:</label>
+                <input type="text" id="txtNumCuenta{{indice}}" maxlength="12" />    
+            </div>
+            <div class="campo">
+                <label for="txtNumCheque{{indice}}">Número de cheque:</label>
+                <input type="text" id="txtNumCheque{{indice}}" maxlength="4" />    
+            </div>
+        </div>
+        
+        <div>
+            <button id="btnRemoverForma{{indice}}" class="btnSimple">Remover Forma</button>
+        </div>
+        <hr style="margin:10px 0px 5px 0px; width: 95%;" />
+    </div>
+</script>

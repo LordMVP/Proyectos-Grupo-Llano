@@ -1,0 +1,11 @@
+dorbi_dorbi_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: DorbiDorbiBundle:Default:api }
+
+dorbi_dorbi_index:
+    pattern:  /{ruta}
+    defaults: { _controller: DorbiDorbiBundle:Default:index }
+
+dorbi_dorbi_todas:
+    pattern:  /
+    defaults: { _controller: DorbiDorbiBundle:Default:index }

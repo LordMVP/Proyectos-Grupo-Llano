@@ -1,0 +1,17 @@
+.priori-navbar {
+  border-bottom: 1px solid #00a1ff;
+  margin-bottom: 8px;
+}
+
+.deseleccionado {
+  background-color: #00a1ff;
+}
+
+.priori-navbar .btn {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-primary {
+  border-color: transparent;
+}

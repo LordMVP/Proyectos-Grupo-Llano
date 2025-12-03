@@ -1,0 +1,63 @@
+homafo:
+    resource: "@HomafoHomafoBundle/Resources/config/routing.yml"
+    prefix:   /homafo
+
+contacto_contacto:
+    resource: "@ContactoContactoBundle/Resources/config/routing.yml"
+    prefix:   /contacto
+
+rugii_rugii:
+    resource: "@RugiiRugiiBundle/Resources/config/routing.yml"
+    prefix:   /rugii
+
+reial_reial:
+    resource: "@ReialReialBundle/Resources/config/routing.yml"
+    prefix:   /reial
+
+agendamiento_agendamiento:
+    resource: "@AgendamientoAgendamientoBundle/Resources/config/routing.yml"
+    prefix:   /agendamiento
+
+nominaciones_nominaciones:
+    resource: "@NominacionesNominacionesBundle/Resources/config/routing.yml"
+    prefix:   /nominaciones
+    
+dorbi_taras:
+    resource: "@DorbiDorbiBundle/Resources/config/routing.yml"
+    prefix:   /dorbi
+
+externo_financiaciones:
+    resource: "@ExternoFinanciacionesBundle/Resources/config/routing.yml"
+    prefix:   /externo/financiacion
+
+administracion_administracion:
+    resource: "@AdministracionAdministracionBundle/Resources/config/routing.yml"
+    prefix:   /administracion
+
+libranza:
+    resource: "@LibranzaBundle/Resources/config/routing.yml"
+    prefix:   /libranza
+
+reportes:
+    resource: "@ReportesBundle/Resources/config/routing.yml"
+    prefix:   /reportes
+
+_llanogas_llanogas:
+    resource: "@LlanogasLlanogasBundle/Resources/config/routing.yml"
+    prefix:   /
+
+bioagricola_bioagricola:
+    resource: "@BioagricolaBioagricolaBundle/Resources/config/routing.yml"
+    prefix:   /bioagricola
+
+gestion_Cartera:
+    resource: "@GestionCarteraGestionCarteraBundle/Resources/config/routing.yml"
+    prefix:   /gestioncartera
+
+liquidacion_notas:
+    resource: "@LiquidacionyNotasLiquidacionyNotasBundle/Resources/config/routing.yml"
+    prefix:   /liquidacionynotas
+
+aprovechamiento:
+    resource: "@AprovechamientoAprovechamientoBundle/Resources/config/routing.yml"
+    prefix:   /aprovechamiento

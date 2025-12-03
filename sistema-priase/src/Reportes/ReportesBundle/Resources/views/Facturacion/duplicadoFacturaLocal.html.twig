@@ -1,0 +1,151 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/ng-table.min.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}  
+{% block titulo %}Reporte Duplicado de Factura  -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="DuplicadoController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            
+            {% for permiso in permisos %}
+                {%if permiso.ideunidad == 3850%}
+                    <fieldset>
+                        <legend>Reporte Duplicado Varias Suscripciones</legend>
+                        
+                        <div id="divControlesVarias">
+
+                                <div class="col-md-12">
+                                <div>
+                                    <label for="txtSuscripciones">Suscripciones:</label>
+                                    <textarea  rows="3"   ng-change="actualizarSuscripcion()" id="idSuscripciones" ng-model="info.idSuscripciones" placeholder="Ingrese las Suscripciones a generar el Duplicado separados por coma (,)."></textarea>
+                                    <button  type="button" class="btn btn-primary btn-sm pull-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-gears fa-lg"></i> Generar Duplicados  <span class="caret"></span>
+                                    </button>
+                                        <ul class="dropdown-menu">                                                                              
+                                            <li>
+                                                <a ng-click="download=true;generarReporte3(0)">
+                                                    <i class="fa fa-file-pdf-o fa-lg"></i> Imprimir Varias Factura
+                                                </a>
+                                            </li> 
+                                        </ul>
+                                </div>
+                                </div>
+                        </div>
+                        
+                        
+                    </fieldset>
+                {%endif%}
+            {% endfor %}   
+            <fieldset>
+                <legend>Reporte Duplicado de Factura</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group col-md-3" show-errors>
+                                        <label>Codigo Actual</label>
+                                        <input required="true" ng-change="actualizarAnno()"  name="idSuscripcion" id="idSuscripcion" ng-model="info.idSuscripcion"   class="form-control input-sm" placeholder="# Suscripcion"  value={{"idSuscripcion"}}/>
+                                        <p class="help-block" ng-if="reporte.idSuscripcion.$error.required">
+                                            El numero de Cliente es requerido
+                                        </p>
+                                    </div>
+                            {% for permiso in permisos %}
+                                {%if permiso.ideunidad == 1217%}
+                                    <div class="form-group col-md-6" show-errors>
+                                         <label for="fechaConsulta">Año Consulta (yyyy):</label>
+                                         <select id="fechaConsulta" name="fechaConsulta" ng-model="info.fechaConsulta" class="form-control">
+                                            <option ng-repeat="anno in annos" ng-value="anno.anno">
+                                                {[{anno.anno}]}
+                                            </option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.fechaConsulta.$error.required">
+                                            El Año es requerido.
+                                        </p> 
+                                    </div>     
+                                        <div class="col-md-2 form-group">
+                                            <label>Generar</label>
+                                            <button ng-click="download=true;buscarPeriodos()" class="form-control input-sm">
+                                                <i class="fa fa-search fa-1x"></i> Buscar 
+                                            </button>
+                                        </div>                                    
+                                    </div>
+
+
+                                    <div class="form-group col-md-12" uib-collapse="todos==1">
+
+                                        <label>Periodos Facturados</label> &nbsp;
+                                        <table ng-table-dynamic="ngTable with columnas" class="table table-condensed table-responsive">                                    
+                                            <tr ng-show="!agrupados || agrupados.length==0">
+                                                <td colspan="4">No hay resultados para mostrar</td>
+                                            </tr>
+                                            <thead>
+                                            <th>Id Periodo</th>
+                                            <th>Mes</th>
+                                            </thead>
+                                            <tr ng-repeat="row in $data" ng-click="seleccionarFila(row)" id="tr_{[{row.ide}]}">
+                                                <td>{[{row.ide}]}</td>
+                                                <td>{[{row.nombre}]}</td>                                                
+                                            </tr>
+                                        </table>
+
+                                    </div>  
+                                {%endif%}
+                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div ng-show="total!=0" class="alert-box info">
+                                    Seleccione un perido o imprima factura actual.
+                                </div>
+                                <div ng-show="total==0" class="alert-box error">
+                                    No se encontraron resultados para el numero nit o documento [ {[{info.numero_orden}]} {[{info.numeroDocumento}]} ]
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-md-2">
+                                    <button ng-disabled="selected==null" type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Generar reporte  <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">                                                                              
+                                        <li>
+                                            <a ng-click="download=true;generarReporte2(0)">
+                                                <i class="fa fa-file-pdf-o fa-lg"></i> Imprimir Factura
+                                            </a>
+                                        </li> 
+                                        
+                                        <li>
+                                            <a ng-click="download=true;generarReporte2(1)">
+                                                <i class="fa fa-file-pdf-o fa-lg"></i> Imprimir Factura Pagos
+                                            </a>
+                                        </li>
+                                    </ul>
+                            </div>
+                            
+                                          
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/autocomplete/ui-bootstrap-tpls-0.14.3.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/duplicadoFacturaLocal.angular.js')}}"></script>
+{% endblock %}

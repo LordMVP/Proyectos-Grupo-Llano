@@ -1,0 +1,133 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/facturacion/cargarFactorCorreccion.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    
+    
+    
+ <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            margin-left: 370px;
+            display: inline-block;
+            width: 40%;
+            position: relative;
+            top: 16px;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Cargar Factor Corrección  {% endblock %}
+
+{% block body %}
+
+    <form action="subir/" method="post" enctype="multipart/form-data">
+
+           
+
+        {% if opcion == 0 %}
+            <div id="divComandos">
+                <div class="divBotones">
+                    <input type="button" value="cargar" id="btnCargar" class="btnSimple" />
+                    <input type="submit"  id="btnSubmit" class="btn" style="display:none"/>
+                </div>
+            </div>
+
+
+ <div id="divInfoProceso" style="display:none">
+                <div id="divCargando"> 
+                    <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                    <p>Se está ejecutando el proceso, <br>esto puede tardar unos minutos...</p>                
+                </div>
+            </div>
+        {% endif %}
+
+        <div id="divPanelContenedor">
+         <fieldset>
+                <legend>Información</legend>
+                {% if opcion == 0 %}
+                    <div>
+                    
+                        <div class="campo">
+                            <label for="txtArchivo">Archivo:</label>
+                            <input type="file" id="txtArchivo" name="txtArchivo"/>
+
+                        </div>
+                        <div class="campo" style="margin-left:100px">
+                            <input type="checkbox" name="checkIndustrial" value="" id="checkIndustrial"> Marque, soló en caso de cargue de Factor de corrección de Industriales.
+                        </div>
+
+                    </div>
+                {% elseif respuesta.codigoRespuesta==-3  %}
+
+                    <table class="tabla">
+                        <caption> Listado de errores </caption>
+                        <thead>
+                            <tr>
+                                <th>Código Anterior</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for error in respuesta.errorlineas %}
+                                <tr>
+                                    <td>{{error.codigoanterior}}</td>
+                                    <td>{{error.descripcion}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>  
+                    <h4>
+                        {{respuesta.mensaje}}
+                    </h4>
+                    <div>
+                        <a href="../">Regresar</a>      
+                    </div> 
+                {% elseif respuesta.codigoRespuesta==-1  %}
+
+                    <h2 style="color:#F90;font-weight: bold;">
+                        {{respuesta.mensaje}}
+                    </h2>
+                    <div>
+                        <a href="../">Regresar</a>      
+                    </div> 
+                {% elseif respuesta.codigoRespuesta==1  %}
+
+                    <h2 style="color:#F90;font-weight: bold;">
+                        {{respuesta.mensaje}}
+                    </h2>
+                    <div>
+                        <a href="../">Regresar</a>      
+                    </div> 
+
+                {% endif %}  
+
+            </fieldset>
+        </div>	
+    </form>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/cargarFactorCorreccion/cargarfactorcorreccion.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/cargarFactorCorreccion/cargarfactorcorreccion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/cargarFactorCorreccion/cargarfactorcorreccion.vista.js')}}"></script>
+{% endblock %}

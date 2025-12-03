@@ -1,0 +1,22 @@
+ .contenedorLiquidacion{
+   margin-top: 1em;
+}
+.tabLiquidacion{
+  color: #00a1ff;
+}
+.nav-tabs .nav-link.active {
+  background-color: #00a1ff;
+  color: #FFFFFF;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+.butonLiquidar{
+  margin-top: 1.5em;
+  background-color: #00a1ff;
+}
+
+.butonLiquidar :hover{
+  background-color: #00a1ff;
+}
+.tab-content>.active {
+  display: contents;
+}

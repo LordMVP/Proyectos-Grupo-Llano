@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: configuracion/ConsultaConfiguraciones.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: configuracion/ConsultaConfiguraciones.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+
+import {
+  consultarConfiguracionesTipo,
+  consultarTiposConfiguraciones,
+  limpiarConfiguraciones
+} from '../../store/actions/ConfiguracionAcciones';
+
+import { Combo, Util, Input, Botonera, Tabla } from 'appfuture-react';
+import RUTAS_VISTA from '../../global/rutas_vista';
+
+class ConsultaConfiguraciones extends Component {
+  consultaGenerica = null;
+  state = {
+    tiposConfiguracion: null,
+    criterio: '',
+    configuracion: -1
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    if (!Util.validarArreglo(this.props.tiposConfiguracion)) {
+      this.props.consultarTiposConfiguraciones();
+    }
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir de la interfaz
+   */
+  componentWillUnmount() {
+    this.props.limpiarConfiguraciones();
+  };
+
+  /**
+   * Método encargado de ejecutar la petición de consulta
+   */
+  onBuscar = () => {
+    this.props.consultarConfiguracionesTipo({
+      'criterio': this.state.criterio,
+      'estIderegistro': this.state.configuracion
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio en el valor del tipo de configuración
+   * @param {Event} event evento El evento que se ejecuta en el control de usuario
+   */
+  onTiposConfiguracionChange = (event) => {
+    this.setState({
+      configuracion: parseInt(event.target.value, 0)
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio en el valor del criterio
+   * @param {Event} event El evento que se ejecuta en el control de usuario
+   */
+  onCriterioChange = (event) => {
+    this.setState({ criterio: event.target.value });
+  };
+
+  /**
+   * Método encargado de editar la configuración basica seleccionada
+   * @param {Object} configuracion Datos de la configuración seleccionada para edición
+   */
+  editarConfiguracion = (configuracion) => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONFIGURACION_GENERAL.url,
+      state: {
+        configuracionEditar: configuracion
+      }
+    });
+  };
+
+  /**
+   * Método encargado de mostrar los botones de editar y seleccionar
+   * @returns {Array}
+   */
+  renderCeldaAcciones = (props, contexto) => {
+    let iconoAccion = 'fa-edit';
+    let tituloAccion = 'Editar';
+    let funcion = contexto.editarConfiguracion;
+
+    if (contexto.props.esModal) {
+      iconoAccion = 'fa-check';
+      tituloAccion = 'Seleccionar';
+      funcion = contexto.props.seleccionarConfiguracion;
+    }
+
+    return (
+      &lt;span className='gestion-configuracion__link-accion'>
+        &lt;a
+          href='#' className={`fa ${iconoAccion}`}
+          onClick={(evento) => {
+            Util.detenerEvento(evento);
+            funcion.call(contexto, props.row._original);
+          }}>
+          {tituloAccion}
+        &lt;/a>
+      &lt;/span>
+    );
+  };
+
+  /**
+   * Método encargado mostrar las columnas de la tabla de consulta de configuración básica
+   * @returns {Array}
+   */
+  obtenerColumnas = () => {
+    const contexto = this;
+    return [
+      {
+        Header: 'Configuraciones',
+        columns: [
+          {
+            Header: 'Acción',
+            accessor: 'uniIderegistro',
+            Cell: (props) => contexto.renderCeldaAcciones(props, contexto)
+          },
+          {
+            Header: 'Configuración',
+            accessor: 'uniNombre1'
+          },
+          {
+            Header: 'Código',
+            accessor: 'uniCodigo',
+            Cell: (props) => {
+              const uniPropiedad = props.row._original.uniPropiedad;
+              if (!uniPropiedad) {
+                return '';
+              }
+
+              if (uniPropiedad === 'null') {
+                return '';
+              }
+              return JSON.parse(uniPropiedad).codigo || '';
+            }
+          }
+        ]
+      }
+    ];
+  };
+
+  /**
+   * Método encargado de mostrar la tabla para la consulta de configuraciones
+   * @returns {Component}
+   */
+  renderConfiguraciones = () => {
+    if (!Util.validarArreglo(this.props.configuraciones)) {
+      return &lt;div className='text-center '>Sin resultados&lt;/div>;
+    }
+    return (
+      &lt;Tabla
+        datos={this.props.configuraciones}
+        columnas={this.obtenerColumnas()}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   */
+  limpiarFormulario = () => {
+    this.props.limpiarConfiguraciones();
+    this.setState({
+      criterio: '',
+      configuracion: -1
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Consultar', callback: this.onBuscar },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    if (!Util.validarArreglo(this.props.tiposConfiguracion)) {
+      return &lt;p className='text-center'>Cargando...&lt;/p>;
+    }
+    return (
+      &lt;div>
+        &lt;div className="d-flex justify-content-center mt-5">
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        &lt;div className="row mt-5">
+          &lt;Combo
+            opciones={this.props.tiposConfiguracion}
+            propTexto='estNombre'
+            propValor='estIderegistro'
+            label='Tipo de Configuración:'
+            value={this.state.configuracion}
+            cols={6}
+            onChange={this.onTiposConfiguracionChange}
+            extra={{ disabled: this.props.bloquearTipoConfiguracion }}
+          />
+          &lt;Input cols={6} label='Criterio de Búsqueda' onChange={this.onCriterioChange} value={this.state.criterio} />
+        &lt;/div>
+
+        &lt;div className='mt-5'>
+          {this.renderConfiguraciones()}
+        &lt;/div>
+
+      &lt;/div>
+    );
+  };
+}
+
+ConsultaConfiguraciones.propTypes = {
+  history: PropTypes.object,
+  configuraciones: PropTypes.array,
+  tiposConfiguracion: PropTypes.array,
+  consultarConfiguracionesTipo: PropTypes.func,
+  consultarTiposConfiguraciones: PropTypes.func,
+  limpiarConfiguraciones: PropTypes.func,
+  esModal: PropTypes.bool,
+  seleccionarConfiguracion: PropTypes.any,
+  bloquearTipoConfiguracion: PropTypes.bool
+};
+
+ConsultaConfiguraciones.defaultProps = {
+  esModal: false,
+  bloquearTipoConfiguracion: false
+};
+
+const mapStateToProps = state => {
+  return {
+    configuraciones: state.configuracion.configuraciones || [],
+    error: state.configuracion.error || {},
+    tiposConfiguracion: state.configuracion.tiposConfiguracion || []
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    consultarConfiguracionesTipo,
+    consultarTiposConfiguraciones,
+    limpiarConfiguraciones
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConsultaConfiguraciones);
+
+export { VistaRedux as RConsultaConfiguraciones };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

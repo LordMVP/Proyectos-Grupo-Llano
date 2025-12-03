@@ -1,0 +1,87 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Rangos de consumo de gas - {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="rangosConsumoController as control">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Búsqueda de filtro</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group col-md-4" show-errors>
+                                <label for="cmbPeriodo">Período</label>
+                                <select required="required" ng-model="periodo" name="periodo" class="form-control">
+                                    <option ng-value="1">Enero</option>
+                                    <option ng-value="2">Febrero</option>
+                                    <option ng-value="3">Marzo</option>
+                                    <option ng-value="4">Abril</option>
+                                    <option ng-value="5">Mayo</option>
+                                    <option ng-value="6">Junio</option>
+                                    <option ng-value="7">Julio</option>
+                                    <option ng-value="8">Agosto</option>
+                                    <option ng-value="9">Septiembre</option>
+                                    <option ng-value="10">Octubre</option>
+                                    <option ng-value="11">Noviembre</option>
+                                    <option ng-value="12">Diciembre</option>
+                                </select>
+                                <p class="help-block">
+                                    Debe seleccionar el período.
+                                </p>
+                            </div>
+                            
+                            <div class="form-group col-md-4" show-errors>
+                                <label>Año de consulta</label>
+                                <input type="number" ng-model="anno" id="anno" name="anno" class="form-control"/>
+                                <p class="help-block" ng-if="reporte.anno.$error.required">
+                                    El año de consulta es requerido.
+                                </p>
+                            </div> 
+                            
+                            <div class="form-group col-md-4" show-errors>
+                                <label>Mercados</label>
+                                <select required="true" id="cbmMercados" name="mercados" ng-model="mercado" class="form-control">
+                                    <option ng-repeat="mercado in mercados" ng-value="mercado.idmercado">
+                                        {[{mercado.nombre}]}
+                                    </option>
+                                </select>
+                                <p class="help-block">
+                                    Debe seleccionar un mercado.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div class="alert-box info">
+                                    Seleccione el período hasta el cuál se generará el reporte de rangos de consumo.
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="control.generarReporte2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Costos vs Ingresos
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="control.generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/rangosConsumo.angular.js')}}"></script>
+{% endblock %}

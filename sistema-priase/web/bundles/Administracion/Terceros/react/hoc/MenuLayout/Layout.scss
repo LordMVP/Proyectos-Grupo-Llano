@@ -1,0 +1,63 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+
+  &__titulo {
+    width: 100%;
+    height: 70px;
+
+    h1 {
+      padding-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      vertical-align :middle;
+    }
+
+  }
+
+  &__contenedor-general {
+    display: flex;
+    flex-direction: row;
+    height: inherit;
+    margin-bottom: 45px;
+  }
+
+  &__contenedor-menu {
+    width: 20%;
+    height: 100%;
+  }
+
+  &__menu {
+    height: 100%;
+    padding-left: 10px;
+  }
+
+  &__contenedor-programa {
+    height: 100%;
+    width: 80%;
+    padding: 20px;
+    overflow-y: auto;
+
+    h2 {
+      text-align: left;
+    }
+  }
+
+  &__pie-pagina {
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+    border-top: solid 1px #AAA;
+    padding-top: 15px;
+    align-self: flex-end;
+    height: 30px;
+    position: absolute;
+    bottom: 0px;
+    background-color: #fff9f1;
+    width: 100%;;
+  }
+
+}

@@ -1,0 +1,26 @@
+.div-file-uploaded{
+  border: solid 1px #c7c7c7;
+  /* width: 50%; */
+  text-align: center;
+  box-shadow: 0px 0px 18px -11px;
+  min-height: 70px;
+  padding: 15px;
+}
+
+.center{
+  display: flex ; 
+  justify-content:center;
+}
+
+.btn-delete{
+  background:content-box;
+}
+
+.btn-delete:hover{
+  background: #ffffff !important;
+  border: 1px solid #b8b8b8;
+}
+
+.table td {
+  vertical-align: middle !important;
+}

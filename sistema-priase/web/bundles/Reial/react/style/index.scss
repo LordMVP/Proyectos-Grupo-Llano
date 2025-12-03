@@ -1,0 +1,198 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+
+// variables
+
+$color: #408BC4;
+$claro: #8AB6D9;
+$oscuro: #71A7D3;
+
+$gris: #CCC;
+
+$letra: 11pt;
+
+// principal
+
+@import './normalize';
+
+*,
+::before,
+::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+
+// predefinidos
+
+body {
+    font-family: 'Roboto', 'Arial', sans-serif !important;
+    font-size: $letra;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    margin-bottom: 2rem;
+}
+
+h1 { font-size: calc(1.0rem + 1.2vw) }
+h2 { font-size: calc(1.0rem + 1.0vw) }
+h3 { font-size: calc(1.0rem + 0.8vw) }
+h4 { font-size: calc(1.0rem + 0.6vw) }
+h5 { font-size: calc(1.0rem + 0.4vw) }
+h6 { font-size: calc(1.0rem + 0.2vw) }
+
+li {
+    padding: .25rem 0;
+}
+
+a { color: #8AB6D9 }
+
+[type="submit"],
+button,
+select {
+    cursor: pointer;
+}
+
+label { text-transform: capitalize }
+
+input[type="datetime-local"],
+input[type="password"],
+input[type="number"],
+input[type="mail"],
+input[type="text"],
+input[type="time"],
+input[type="date"],
+input[type="tel"],
+textarea,
+select {
+    width: 100%;
+    height: 2.5rem;
+    padding: .6rem .8rem;
+    border: solid 1px $gris;
+    border-radius: .2rem;
+    font: inherit;
+
+    &:disabled {
+        user-select: none;
+        cursor: default;
+    }
+}
+
+textarea {
+    resize: vertical;
+    min-height: 10rem;
+}
+
+select {
+    padding: 0 .8rem;
+    text-transform: capitalize;
+}
+
+select, table {
+    width: 100%;
+}
+
+[type="submit"], .btn {
+    min-width: 6rem;
+    height: 2.5rem;
+    font: inherit;
+    background: $oscuro;
+    padding: 0 .8rem;
+    border: solid 1px $color;
+    text-transform: capitalize;
+    color: white;
+    border-radius: .2rem;
+
+    .btn-success {
+      color: #fff;
+      background-color: #28a745;
+      border-color: #28a745;
+    }
+
+    &:hover { background: $claro; }
+
+    &:disabled {
+        $gris: fade-out($gris, .6);
+
+        background: $gris;
+        border-color: $gris;
+        color: black;
+        cursor: default;
+    }
+}
+
+
+
+// elementos
+
+.caja,
+fieldset {
+    width: 100%;
+    border: solid 1px $gris;
+    border-radius: .4rem;
+    padding: 2em;
+    position: relative;
+
+    .tag,
+    legend {
+        width: auto;
+        display: block;
+        font-size: $letra;
+        position: absolute;
+        top: -0.7rem;
+        left: 1.5rem;
+        background: #FFF;
+        padding: .2em .4em;
+        font-weight: bold;
+        text-transform: capitalize;
+        z-index: 1;
+    }
+}
+
+.contenedor {
+    width: 100%;
+    margin-top: 2em;
+
+    &:first-child {
+        width: auto;
+        margin-top: 0;
+    }
+}
+
+.formulario, .fila, .columna {
+    width: 100%;
+    align-items: flex-end;
+
+    &.alineado { align-items: flex-start }
+}
+
+.formulario {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(35vw,1fr));
+    grid-gap: 2em;
+}
+
+.fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    grid-gap: 2em;
+
+    @media (max-width: 45em) { grid-template-columns: 1fr }
+}
+
+.columna {
+    max-width: 40em;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    & > *:not(.tag) {
+        width: 100%;
+        margin-bottom: 2em;
+    }
+
+    &:nth-last-child(1) { margin-bottom: 0 }
+}

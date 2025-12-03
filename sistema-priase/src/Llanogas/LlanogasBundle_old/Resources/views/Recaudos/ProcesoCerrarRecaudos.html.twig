@@ -1,0 +1,66 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Proceso Cerrar Recaudos - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div id="divCabecera">
+        <fieldset id="fieldCabecera" style="margin: 0 auto; width: 60%;">
+            <div id="divCamposCierre">
+                <legend>Información Suscripción</legend>
+                <div style="margin: 0 auto; width: 60%;" >
+                    <label>Ciclo</label>
+                    <select id="cmbCiclo">
+                        <option value="-1"> Seleccione una opción </option>
+                        {% for ciclo in ciclos %}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>
+                    <div>
+                        <input type="button" id="btnAplicarRecaudos" value="Aplicar Recaudos" class="btnSimple"/>
+                    </div>
+                </div>
+            </div>
+                    
+            <div id="divResumenProceso" style="display:none;">
+                <div style="max-height: 65vh; overflow: auto">
+                    <table class="tabla" id="tblResumen"></table>
+                </div>
+            </div>
+            
+            <div id="divCamposProgreso">
+                <legend>Progreso de la aplicación del Recaudo</legend>
+                <div id="divProgreso">
+                    <p>Fecha de Inicio: {% if procesoActivo!=0  %} {{proceso.fechaInicio}}  {% endif %}</p>
+                    <p>Usuario: {% if procesoActivo!=0  %} {{proceso.usuario}}  {% endif %}</p>
+                    <p>Número de Registros Procesados: <span id="numeroRegistrosProcesados" > {% if procesoActivo!=0  %} {{proceso.numeroRegistrosProcesados}}  {% endif %}</span></p>
+                    <progress id="progress"/>
+                </div>
+            </div>
+
+        </fieldset>
+            
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/proceso_cerrar/cerrar.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/proceso_cerrar/cerrar.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/proceso_cerrar/cerrar.vista.js')}}"></script>
+    <script type="text/javascript">
+        cerrarVista.init({{procesoActivo}});
+    </script>
+{% endblock %}

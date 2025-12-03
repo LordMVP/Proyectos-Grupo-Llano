@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/revisionFacturas/GestionRevisionFacturas/GestionRevisionFacturas.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/revisionFacturas/GestionRevisionFacturas/GestionRevisionFacturas.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { get as getProp } from 'object-path';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico, Fecha } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import { limpiarHistorico } from '../../../../global/util_nominaciones';
+import './GestionRevisionFacturas.scss';
+
+const listaProcesos = [
+  { texto: 'Validación', id: 'V' },
+  { texto: 'Disperción', id: 'DP' }
+];
+
+const listaPeriodo = [
+  { texto: 'Día Anterior', id: 'D' },
+  { texto: 'Trimestre', id: 'T' }
+];
+
+const listaEDS = [
+  { texto: 'Propias', id: 'S' },
+  { texto: 'Terceros', id: 'N' }
+];
+
+class GestionRevisionFacturas extends Component {
+
+  state = {
+    // Datos de la entidad
+    proceso: '',
+    puntoSalida: '',
+    periodo: '',
+    trmTipo: '',
+    contratoSeleccionado: '',
+    fecha: '',
+    valorTRM: '',
+    numeroFactura: '',
+    valorFactura: '',
+    puntoSeleccionado: '',
+    eds: '',
+    unidadMedida: '',
+    umNominado: '',
+    nominado: '',
+    estado: false,
+    poderCalorificoPeriodo: '',
+    listaPuntosSalida: [],
+    listaPuntosSalidaAgregados: [],
+    listaPuntosSalidaCalculados: [],
+    listaContratos: [],
+    listaPuntosConsumo: [],
+    listaUnidadesMedida: [],
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.listaContratos) {
+      this.consultarPuntosSalida(state.listaContratos);
+    }
+    axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD_PROGRAMA, { criterio: '', idClase: CLASES_UNIDADES.UNIDAD_MEDIDA })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaUnidadesMedida: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Function} callBack Funcion a ejecutar
+   */
+  limpiarFormulario = (callback = null) => {
+    this.setState({
+      // Datos de la entidad
+      contratoSeleccionado: '',
+      proceso: '',
+      puntoSalida: '',
+      periodo: '',
+      trmTipo: '',
+      numeroFactura: '',
+      valorFactura: '',
+      fecha: '',
+      eds: '',
+      unidadMedida: '',
+      umNominado: '',
+      nominado: '',
+      puntoSeleccionado: '',
+      estado: false,
+      listaPuntosSalida: [],
+      listaPuntosSalidaAgregados: [],
+      listaPuntosSalidaCalculados: [],
+      listaContratos: [],
+      listaPuntosConsumo: [],
+    }, () => {
+      if (typeof callback === 'function') {
+        callback();
+      }
+    });
+    limpiarHistorico(this.props);
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    let funciones = [];
+    if (this.state.proceso == 'V') {
+      funciones.push({ texto: 'Generar Archivo', callback: this.generarArchivoValidacion });
+    }
+    if (this.state.proceso == 'DP') {
+      funciones.push({ texto: 'Generar Reporte', callback: this.generarReporte });
+    }
+    funciones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return funciones;
+  };
+
+  /**
+   * Método encargado de abrir la interfaz de consulta de contratos
+   */
+  consultarContrato = () => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_REVISION_FACTURAS.url,
+        seleccionMultiple: true,
+      }
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    if (evento.target.name == 'proceso') {
+      this.limpiarFormulario(() => {
+        this.setState(change);
+      });
+      return;
+    }
+    if (evento.target.name === 'trmTipo') {
+      this.calcularTRM(() => {
+        this.setState(change);
+      }, evento.target.value);
+      return;
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de obtener la lista de identificadores de la lista de contratos
+   * @param {Object} contratos Lista de contratos seleccionados
+   * @returns {string}
+   */
+  obtenerIdContrato = (contratos) => {
+    const identificadores = contratos.map((dato, index) => (
+      dato.cntIderegistro
+    ));
+    return identificadores.toString();
+  };
+
+  /**
+   * Método encargado de armar un objeto con los datos de punto de salida
+   * @param {Object} puntosSalida Puntos de salida consultados
+   * @returns {Object}
+   */
+  armarObjeto = (puntosSalida) => {
+    const lista = puntosSalida.map((dato, index) => {
+      return {
+        ptsaNombre: dato.ptsaIdesalida.ptsaNombre,
+        ptsaIderegistro: dato.ptsaIdesalida.ptsaIderegistro,
+        idContrato: dato.cntIdecontrato.cntIderegistro,
+      }
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de consultar los puntos de salida del contrato seleccionado
+   * @param {Object} entidad Datos del contrato seleccionado
+   */
+  consultarPuntosSalida = (entidad) => {
+    let { proceso, estado } = this.state;
+    if (entidad.length > 1) {
+      estado = true;
+      proceso = 'DP';
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTOS_SALIDA, { criterio: '', contratos: this.obtenerIdContrato(entidad) })
+        .then(respuesta => {
+          if (respuesta.data.codigo > 0) {
+            this.setState({
+              listaPuntosSalida: this.armarObjeto(respuesta.data.datos),
+              listaContratos: entidad,
+              listaPuntosSalidaAgregados: [],
+              estado: estado,
+              proceso: proceso,
+            });
+          }
+        });
+      return;
+    }
+    proceso = 'V';
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_PUNTOS_SALIDA, { criterio: '', contratos: entidad[0].cntIderegistro })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaPuntosSalida: this.armarObjeto(respuesta.data.datos),
+            contratoSeleccionado: entidad,
+            listaPuntosSalidaAgregados: [],
+            proceso: proceso,
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de seleccionar el punto que se desea para hacer el calculo
+   * @param {number} posicion Posición del punto seleccionado el la lista
+   */
+  seleccionarPunto = (posicion) => {
+    const punto = this.state.listaPuntosSalidaAgregados[posicion];
+    this.setState({
+      puntoSeleccionado: punto.puntoNombre
+    });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos calculados
+   * @returns {Array}
+   */
+  renderTablaPuntosCalculos = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Punto de Salida&lt;/th>
+            &lt;th>Nominado Propio KPC&lt;/th>
+            &lt;th>Nominado Desvio KPC&lt;/th>
+            &lt;th>Cantidad Contratada Diaria &lt;/th>
+            &lt;th>Unidad Medida &lt;/th>
+            &lt;th>% Comercialización &lt;/th>
+            &lt;th>TRM Último Día periodo $ &lt;/th>
+            &lt;th>TRM Impuesto $ &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaPuntosSalidaCalculados.map((dato, index) => {
+            return (
+              &lt;tr key={`punto_${dato.puntoNombre}`}>
+                &lt;td>{dato.puntoNombre}&lt;/td>
+                &lt;td>{dato.nomPropio}&lt;/td>
+                &lt;td>{dato.nomDesvio}&lt;/td>
+                &lt;td>{dato.cantContratada}&lt;/td>
+                &lt;td>{dato.nombreUnidad}&lt;/td>
+                &lt;td>{dato.pComercializacion}&lt;/td>
+                &lt;td>{dato.trmDia}&lt;/td>
+                &lt;td>{dato.trmImpuesto}&lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos de salida agregados
+   * @returns {Array}
+   */
+  renderTablaPuntosAgregados = () => {
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Agente O Tercero&lt;/th>
+            &lt;th>Número de Contrato&lt;/th>
+            &lt;th>Tipo de Contrato&lt;/th>
+            &lt;th>Fecha de Inicio &lt;/th>
+            &lt;th>Fecha Final &lt;/th>
+            &lt;th>Punto de Salida &lt;/th>
+            &lt;th>Selección &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaPuntosSalidaAgregados.map((dato, index) => {
+            return (
+              &lt;tr key={`punto_${dato.puntoNombre}`}>
+                &lt;td>{dato.nombreAgente}&lt;/td>
+                &lt;td>{dato.numeroContrato}&lt;/td>
+                &lt;td>{dato.tipos}&lt;/td>
+                &lt;td>{dato.fechaIni}&lt;/td>
+                &lt;td>{dato.fechaFin}&lt;/td>
+                &lt;td>{dato.puntoNombre}&lt;/td>
+                &lt;td>
+                  &lt;button className='btn btn-info' onClick={(evento) => {
+                    this.seleccionarPunto(index)
+                  }}>Seleccionar&lt;/button>
+                &lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de generar el archivo de validación
+   * @returns {bool}
+   */
+  generarArchivoValidacion = () => {
+    const { fecha, puntoSeleccionado, listaPuntosSalidaAgregados, contratoSeleccionado } = this.state;
+    if (fecha === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el periodo');
+      return false;
+    }
+    if (puntoSeleccionado === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar al cual le desea generar el reporte');
+      return false;
+    }
+    const punto = listaPuntosSalidaAgregados.find(p => p.puntoNombre == puntoSeleccionado);
+    const parametros = {
+      idPuntosalida: punto.idPuntoSalida,
+      anio: fecha.substr(0, 4),
+      mes: fecha.substr(6, 1),
+      idContrato: contratoSeleccionado[0].cntIderegistro
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_REVISION_FACTURAS.GENERAR_DOCUMENTO_VALIDACION, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let a = document.createElement('a');
+          a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+          a.download = "Reporte.xls";
+          a.target = '_blank';
+          a.click();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de calcular la TRM del tipo seleccionado
+   * @param {Function} callBack Funcion a ejecutar
+   * @param {String} tipoTRM tipo de la trm
+   * @returns {bool}
+   */
+  calcularTRM = (callback, tipoTRM) => {
+    const { fecha, trmTipo, puntoSeleccionado, listaPuntosSalidaAgregados, contratoSeleccionado } = this.state;
+    if (fecha === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el periodo');
+      return false;
+    }
+    if (puntoSeleccionado === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el punto que desea calcular');
+      return false;
+    }
+    if (tipoTRM &lt;= 0) {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el tipo de la TRM');
+      return false;
+    }
+    const punto = listaPuntosSalidaAgregados.find(p => p.puntoNombre == puntoSeleccionado);
+    const parametros = {
+      puntoSalida:
+        { ptsaIderegistro: punto.idPuntoSalida },
+      anio: fecha.substr(0, 4),
+      mes: fecha.substr(5, 2),
+      tipoTRM: tipoTRM
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_REVISION_FACTURAS.CALCULAR_TRM, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            valorTRM: respuesta.data.datos,
+            callback
+          })
+        }
+        if (typeof callback === 'function') {
+          callback();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de validar los campos necesarios para realizar el calculo de la validación
+   * @returns {Object}
+   */
+  validarFormularioCalcular = () => {
+    const { fecha, trmTipo, puntoSeleccionado, valorFactura, valorTRM, numeroFactura } = this.state;
+    if (fecha === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el periodo' } };
+    }
+    if (puntoSeleccionado === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el punto que desea calcular' } };
+    }
+    if (trmTipo &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el tipo de la TRM' } };
+    }
+    if (valorFactura === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el valor de la factura' } };
+    }
+    if (numeroFactura === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el número de la factura' } };
+    }
+    if (valorTRM === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe calcular el valor de la trm' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar los puntos agregados
+   * @param {number} idPunto Identificador del punto de salida que se quiere agregar
+   */
+  validarPuntoCalculado = (idPunto) => {
+    const lista = [...this.state.listaPuntosSalidaCalculados];
+    const index = lista.findIndex(p => p.idPuntoSalida == idPunto);
+    return index >= 0;
+  };
+
+  /**
+   * Método encargado de realizar el calculo de la validación para el punto seleccionado
+   * @return {bool}
+   */
+  calcular = () => {
+    const { fecha, trmTipo, puntoSeleccionado, valorFactura,
+      valorTRM, numeroFactura, listaPuntosSalidaAgregados,
+      contratoSeleccionado, listaPuntosSalidaCalculados } = this.state;
+    const validacion = this.validarFormularioCalcular();
+    const puntoCalculado = listaPuntosSalidaCalculados.find(p => p.puntoNombre == puntoSeleccionado);
+    if (puntoCalculado) {
+      if (this.validarPuntoCalculado(puntoCalculado.idPuntoSalida)) {
+        this.props.mostrarAlerta('Atención', 'Ya se realizo el calculo de el punto seleccionado');
+        return false;
+      }
+    }
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const punto = listaPuntosSalidaAgregados.find(p => p.puntoNombre == puntoSeleccionado);
+    const objetoEnviar = {
+      puntoSalida:
+        { ptsaIderegistro: punto.idPuntoSalida },
+      anio: fecha.substr(0, 4),
+      mes: fecha.substr(5, 2),
+      numeroFactura: numeroFactura,
+      valorFactura: valorFactura,
+      contrato:
+        { cntIderegistro: contratoSeleccionado[0].cntIderegistro },
+      tipoTRM: trmTipo,
+      valorTRM: valorTRM,
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_REVISION_FACTURAS.CALCULAR_VALIDACION, objetoEnviar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          listaPuntosSalidaCalculados.push({
+            nomPropio: respuesta.data.datos.nominadoPropioKPC,
+            nomDesvio: respuesta.data.datos.nominadoDesvioKPC,
+            cantContratada: respuesta.data.datos.cantidadContratadaDiaria,
+            uMedida: respuesta.data.datos.idemedida,
+            puntoNombre: punto.puntoNombre,
+            pComercializacion: respuesta.data.datos.comercializacion,
+            trmDia: respuesta.data.datos.ultimoDiaPeriodoTRM,
+            trmImpuesto: respuesta.data.datos.impuestoTRM,
+            idPuntoSalida: punto.idPuntoSalida,
+            nombreUnidad: respuesta.data.datos.idemedida.uniNombre1
+          });
+          this.setState({
+            listaPuntosSalidaCalculados: listaPuntosSalidaCalculados,
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario para el proceso de validación
+   * @returns {JSX}
+   */
+  renderValidacion = () => {
+    return (
+      &lt;div className='conf-general row mt-5'>
+        {this.state.listaPuntosSalidaAgregados.length > 0 &amp;&amp;
+          &lt;div className='col-12'>
+            {this.renderTablaPuntosAgregados()}
+          &lt;/div>
+        }
+        &lt;Combo
+          opciones={listaPeriodo}
+          propTexto='texto'
+          propValor='id'
+          label='TRM Impuesto:'
+          name='trmTipo'
+          value={this.state.trmTipo}
+          onChange={this.controlarCambio}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Valor TRM'
+          value={this.state.valorTRM}
+          name='valorTRM'
+          extra={{ disabled: true, readOnly: true }}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Punto Seleccionado'
+          value={this.state.puntoSeleccionado}
+          name='puntoSeleccionado'
+          extra={{ disabled: true, readOnly: true }}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Número de Factura'
+          value={this.state.numeroFactura}
+          onChange={this.controlarCambio}
+          name='numeroFactura'
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Valor Factura'
+          value={this.state.valorFactura}
+          onChange={this.controlarCambio}
+          name='valorFactura'
+        />
+        &lt;div className='form-group col-4'>
+          &lt;button className='btn btn-primary m-t-24' onClick={this.calcular}>&lt;i className='fa fa-fw fa-calculator'>&lt;/i> Calcular&lt;/button>
+        &lt;/div>
+        {this.state.listaPuntosSalidaCalculados.length > 0 &amp;&amp;
+          this.renderTablaPuntosCalculos()
+        }
+      &lt;/div>
+    )
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con el calculo del punto de consumo seleccionado
+   * @returns {Array}
+   */
+  renderTablaEDSCalculos = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>EDS&lt;/th>
+            &lt;th>Punto de Consumo&lt;/th>
+            &lt;th>Total Lectura&lt;/th>
+            &lt;th>Porcentaje&lt;/th>
+            &lt;th>Porcentaje Par&lt;/th>
+            &lt;th>Cantidad Nominadad&lt;/th>
+            &lt;th>Unidad Medida&lt;/th>
+            &lt;th>Cargo Fijo&lt;/th>
+            &lt;th>Cargo Variable&lt;/th>
+            &lt;th>{`Cargo AO&amp;M`}&lt;/th>
+            &lt;th>Impto tte &lt;/th>
+            &lt;th>Cuota&lt;/th>
+            &lt;th>Cargo Fijo(USD/kpc)&lt;/th>
+            &lt;th>Cargo Variable(USD/kpc)&lt;/th>
+            &lt;th>{`Cargo AO&amp;M($/kpcd)`}&lt;/th>
+            &lt;th>Sub Total&lt;/th>
+            &lt;th>Total Costo Transporte&lt;/th>
+            &lt;th>cop/kpc&lt;/th>
+            &lt;th>cop/m3&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaPuntosConsumo.map((dato, index) => {
+            return (
+              &lt;tr key={`punto_${dato.puntoconsumoNombre}`}>
+                &lt;td>{dato.tggnombre}&lt;/td>
+                &lt;td>{dato.puntoconsumoNombre}&lt;/td>
+                &lt;td>{dato.dispersion.totalLecturaPunto}&lt;/td>
+                &lt;td>{dato.dispersion.porcentajePunto}&lt;/td>
+                &lt;td>{dato.dispersion.porcentajeParpunto}&lt;/td>
+                {dato.unidadMedidaSeleccionadaCalculo === 'Seleccione una Opción' &amp;&amp;
+                  &lt;td>{(dato.cantidadnominadotercero == 0) ? dato.cantidadnominadopropio : dato.cantidadnominadotercero}&lt;/td>
+                }
+                {!dato.unidadMedidaSeleccionadaCalculo &amp;&amp;
+                  &lt;td>{(dato.cantidadnominadotercero == 0) ? dato.cantidadnominadopropio : dato.cantidadnominadotercero}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionadaCalculo == 'M3' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadNominadoM3}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionadaCalculo == 'MBTU' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadNominadoMBTU}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionadaCalculo == 'KPC' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadContratadoKPC}&lt;/td>
+                }
+                &lt;td>&lt;Combo
+                  opciones={this.state.listaUnidadesMedida}
+                  propTexto='uniNombre1'
+                  propValor='uniNombre1'
+                  name='unidadMedidaCalculo'
+                  value={dato.unidadMedidaSeleccionadaCalculo}
+                  onChange={(evento) => {
+                    this.controlarCambioUnidadMedidaCalculada(evento, index)
+                  }}
+                  cols={12}
+                />&lt;/td>
+                &lt;td>{(dato.dispersion.cargoFijo * 12)}&lt;/td>
+                &lt;td>{(dato.dispersion.cargoVariable * 12)}&lt;/td>
+                &lt;td>{(dato.dispersion.cargoAOM * 12)}&lt;/td>
+                &lt;td>{dato.dispersion.imptottePunto}&lt;/td>
+                &lt;td>{dato.dispersion.cuotafomento}&lt;/td>
+                &lt;td>{dato.dispersion.cargoFijo}&lt;/td>
+                &lt;td>{dato.dispersion.cargoVariable}&lt;/td>
+                &lt;td>{dato.dispersion.cargoAOM}&lt;/td>
+                &lt;td>{dato.dispersion.subTotal}&lt;/td>
+                &lt;td>{dato.dispersion.totalCostoTransporte}&lt;/td>
+                &lt;td>{dato.dispersion.copkpc}&lt;/td>
+                &lt;td>{dato.dispersion.copM3}&lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos eds
+   * @returns {Array}
+   */
+  renderTablaDispercion = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Punto de Salida&lt;/th>
+            &lt;th>Selección &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaPuntosSalidaAgregados.map((dato, index) => {
+            return (
+              &lt;tr key={`punto_${dato.puntoNombre}`}>
+                &lt;td>{dato.puntoNombre}&lt;/td>
+                &lt;td>
+                  &lt;button className='btn btn-info' onClick={(evento) => {
+                    this.seleccionarPunto(index)
+                  }}>Seleccionar&lt;/button>
+                &lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de controlar el cambio al ingresar nuevos valores a los compuestos
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   * @param {number} index Posición que se esta modificando
+   */
+  controlarCambioUnidadMedidaCalculada = (evento, index) => {
+    const puntos = [...this.state.listaPuntosConsumo];
+    puntos[index].unidadMedidaSeleccionadaCalculo = evento.target.value;
+    this.setState({ puntos });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al ingresar nuevos valores a los compuestos
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   * @param {number} index Posición que se esta modificando
+   */
+  controlarCambioUnidadMedida = (evento, index) => {
+    const puntos = [...this.state.listaPuntosConsumo];
+    puntos[index].unidadMedidaSeleccionada = evento.target.value;
+    this.setState({ puntos });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos eds
+   * @returns {Array}
+   */
+  renderTablaEDS = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>EDS&lt;/th>
+            &lt;th>Punto de Consumo&lt;/th>
+            &lt;th>Cantidad Contratada&lt;/th>
+            &lt;th>Unidad de Medida&lt;/th>
+            &lt;th>MBTU Nominado &lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {this.state.listaPuntosConsumo.map((dato, index) => {
+            return (
+              &lt;tr key={`punto_${dato.puntoconsumoNombre}`}>
+                &lt;td>{dato.tggnombre}&lt;/td>
+                &lt;td>{dato.puntoconsumoNombre}&lt;/td>
+                {dato.unidadMedidaSeleccionada === 'Seleccione una Opción' &amp;&amp;
+                  &lt;td>{dato.cantidadcontratada}&lt;/td>
+                }
+                {!dato.unidadMedidaSeleccionada &amp;&amp;
+                  &lt;td>{dato.cantidadcontratada}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionada == 'M3' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadContratadoM3}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionada == 'MBTU' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadContratadoMBTU}&lt;/td>
+                }
+                {dato.unidadMedidaSeleccionada == 'KPC' &amp;&amp;
+                  &lt;td>{dato.dispersion.cantidadContratadoKPC}&lt;/td>
+                }
+                &lt;td>&lt;Combo
+                  opciones={this.state.listaUnidadesMedida}
+                  propTexto='uniNombre1'
+                  propValor='uniNombre1'
+                  name='unidadMedida'
+                  value={dato.unidadMedidaSeleccionada}
+                  onChange={(evento) => {
+                    this.controlarCambioUnidadMedida(evento, index)
+                  }}
+                />&lt;/td>
+                &lt;td>{dato.dispersion.cantidadNominadoMBTU}&lt;/td>
+              &lt;/tr>
+            );
+          })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de generar el reporte para el proceso de disperción
+   * @returns {bool}
+   */
+  generarReporte = () => {
+    const { fecha, puntoSeleccionado, listaPuntosSalidaAgregados, contratoSeleccionado, listaPuntosConsumo, listaContratos } = this.state;
+    if (fecha === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el periodo');
+      return false;
+    }
+    if (puntoSeleccionado === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar al cual le desea generar el reporte');
+      return false;
+    }
+    const punto = listaPuntosSalidaAgregados.find(p => p.puntoNombre == puntoSeleccionado);
+    const parametros = {
+      idPuntosalida: punto.idPuntoSalida,
+      anio: fecha.substr(0, 4),
+      mes: fecha.substr(6, 1),
+      idContrato: punto.idContrato
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_REVISION_FACTURAS.GENERAR_DOCUMENTO_DISPERCION, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let a = document.createElement('a');
+          a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+          a.download = "Reporte.xls";
+          a.target = '_blank';
+          a.click();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de obtener el identificador de los contratos seleccionados
+   * @returns {Array}
+   */
+  obtenerContratos = () => {
+    const { contratoSeleccionado, listaContratos } = this.state;
+    let lista = contratoSeleccionado;
+    if (listaContratos.length > 0) {
+      return listaContratos.map((dato, index) => {
+        return {
+          cntIderegistro: dato.cntIderegistro
+        }
+      });
+      return;
+    }
+    return lista.map((dato, index) => {
+      return {
+        cntIderegistro: dato.cntIderegistro
+      }
+    });
+  };
+
+  /**
+   * Método encargado de hacer el calculo de la disperción para el punto seleccionado
+   * @returns {bool}
+   */
+  calcularDispercion = () => {
+    const { fecha, eds, puntoSeleccionado, listaPuntosSalidaAgregados, contratoSeleccionado, listaPuntosSalidaCalculados, listaPuntosConsumo } = this.state;
+    if (eds === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el EDS');
+      return false;
+    }
+    if (fecha === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el periodo');
+      return false;
+    }
+    if (puntoSeleccionado === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el punto que desea calcular');
+      return false;
+    }
+    const punto = listaPuntosSalidaAgregados.find(p => p.puntoNombre == puntoSeleccionado);
+    const objetoEnviar = {
+      puntoSalida:
+        { ptsaIderegistro: punto.idPuntoSalida },
+      anio: fecha.substr(0, 4),
+      mes: fecha.substr(5, 2),
+      propio: eds,
+      listacontrato: this.obtenerContratos(),
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_REVISION_FACTURAS.CALCULAR_DISPERCION, objetoEnviar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaPuntosConsumo: respuesta.data.datos,
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario para el proceso de disperción
+   * @returns {Object}
+   */
+  renderDispercion = () => {
+    return (
+      &lt;div className='conf-general row mt-5'>
+        &lt;Combo
+          opciones={listaEDS}
+          propTexto='texto'
+          propValor='id'
+          label='EDS:'
+          name='eds'
+          value={this.state.eds}
+          onChange={this.controlarCambio}
+        />
+        &lt;TextoNumerico
+          aceptaDecimales={false}
+          aceptaNegativos={false}
+          label='Punto Seleccionado'
+          value={this.state.puntoSeleccionado}
+          name='puntoSeleccionado'
+          extra={{ disabled: true, readOnly: true }}
+        />
+        &lt;div className='botonFacturas'>
+          &lt;button className='btn btn-primary' onClick={this.calcularDispercion}>Calcular&lt;/button>
+        &lt;/div>
+        {this.state.listaPuntosConsumo.length > 0 &amp;&amp;
+          this.renderTablaEDS()
+        }
+        {this.state.listaPuntosConsumo.length > 0 &amp;&amp;
+          this.renderTablaEDSCalculos()
+        }
+      &lt;/div>
+    )
+  };
+
+  /**
+   * Método encargado de validar los puntos agregados
+   * @param {number} idPunto Identificador del punto de salida que se quiere agregar
+   */
+  validarPuntoRepetido = (idPunto) => {
+    const lista = [...this.state.listaPuntosSalidaAgregados];
+    const index = lista.findIndex(p => p.idPuntoSalida == idPunto);
+    return index >= 0;
+  };
+
+  /**
+   * Método encargado de obtener los tipos del contrato y retornar un string
+   * @param {Object} contratoSeleccionado Datos del contrato seleccionado
+   */
+  obtenerTipos = (contratoSeleccionado) => {
+    if (contratoSeleccionado === '') {
+      return false;
+    }
+    const listaTipos = contratoSeleccionado.listaTipos;
+    if (!Array.isArray(listaTipos) || listaTipos.length == 0) {
+      return 'Indefinido';
+    }
+    return listaTipos.map(tipo => {
+      return tipo.uniIdetipocontrato.uniNombre1;
+    }).join(',');
+  };
+
+  /**
+   * Método encargado de agregar el punto de salida seleccionado a la lista
+   * @returns {bool}
+   */
+  agregarSeleccionado = () => {
+    const { contratoSeleccionado, puntoSalida, listaPuntosSalidaAgregados, listaPuntosSalida, proceso } = this.state;
+    if (puntoSalida &lt;= 0) {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar el punto de salida que desea agregar');
+      return false;
+    }
+    if (this.validarPuntoRepetido(puntoSalida)) {
+      this.props.mostrarAlerta('Atención', 'El punto que esta intentado agregar ya se encuentra en la lista');
+      return false;
+    }
+    const puntoSeleccionado = listaPuntosSalida.find(p => p.ptsaIderegistro == puntoSalida);
+    const contrato = contratoSeleccionado[0];
+    listaPuntosSalidaAgregados.push({
+      nombreAgente: (contrato) ? contrato.terIdeagente.terNomcompleto : '',
+      numeroContrato: (contrato) ? contrato.cntNumero : '',
+      fechaIni: (contrato) ? contrato.cntFechainicio : '',
+      fechaFin: (contrato) ? contrato.cntFechafin : '',
+      puntoNombre: puntoSeleccionado.ptsaNombre,
+      tipos: this.obtenerTipos((contrato) ? contrato : ''),
+      idPuntoSalida: puntoSeleccionado.ptsaIderegistro,
+      idContrato: (contrato) ? contrato.cntIderegistro : puntoSeleccionado.idContrato,
+    });
+    this.setState({
+      listaPuntosSalidaAgregados: listaPuntosSalidaAgregados
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    let numeroContrato = getProp(this.state, 'contratoSeleccionado', null);
+    numeroContrato = Util.validarArreglo(numeroContrato) ? numeroContrato[0].cntNumero : null;
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={listaProcesos}
+            propTexto='texto'
+            propValor='id'
+            label='Proceso:'
+            name='proceso'
+            value={this.state.proceso}
+            onChange={this.controlarCambio}
+            extra={{ disabled: this.state.estado, readOnly: this.state.estado }}
+          />
+          &lt;div className='form-group col-4'>
+            &lt;label>Contrato:&lt;/label>
+            &lt;div className='input-group'>
+              &lt;input type='text' className='form-control' value={numeroContrato ? numeroContrato : 'Seleccionar Contrato'} disabled='true' />
+              &lt;button className='btn btn-primary' onClick={this.consultarContrato}>
+                &lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>
+              &lt;/button>
+            &lt;/div>
+          &lt;/div>
+          &lt;Fecha
+            label='Periodo:'
+            name='fecha'
+            fecha={this.state.fecha}
+            sinDia={true}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.listaPuntosSalida}
+            propTexto='ptsaNombre'
+            propValor='ptsaIderegistro'
+            label='Punto de Salida:'
+            name='puntoSalida'
+            value={this.state.puntoSalida}
+            onChange={this.controlarCambio}
+          />
+          &lt;div className='col-12'>
+            &lt;button className='btn btn-primary botonFacturas' onClick={this.agregarSeleccionado}>&lt;i className='fa fa-fw fa-plus'>&lt;/i> Agregar Punto Salida&lt;/button>
+          &lt;/div>
+          {this.state.proceso === 'V' &amp;&amp;
+            this.renderValidacion()
+          }
+
+        &lt;/div>
+        {this.state.proceso === 'DP' &amp;&amp;
+          this.renderTablaDispercion()
+        }
+        {this.state.proceso === 'DP' &amp;&amp;
+          this.renderDispercion()
+        }
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionRevisionFacturas.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionRevisionFacturas);
+
+export { VistaRedux as RGestionRevisionFacturas };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}Constructoras: Generar Agendas - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div id="Contenedor">
+        <fieldset><legend>Generar Agendas </legend>
+            <div class="campoBusqueda" >
+                <select   id="cboContrato" >
+                    <option value="">Seleccione contrato a Generar Agendas</option> 
+                    {% for informacioncontratos in contratos %}
+                        <option value ={{informacioncontratos.idRegistro}}>{{ 
+                                         informacioncontratos.nit ~ ' - ' 
+                                         ~ ' ' ~  informacioncontratos.nombreConstructora 
+                                         ~ ' Contrato: ' ~  informacioncontratos.contrato 
+                                         ~ ' Licencia: '~  informacioncontratos.licencia
+                                         ~ ' Municipio: ' ~  informacioncontratos.nombreMunicipio
+                                         ~ ' Barrio:' ~  informacioncontratos.nombreBarrio
+                        }}</option>>
+                        {% endfor %}
+                </select>
+            </div>
+            <div class="campoMitad">
+                <input type="button" value="Generar Agenda" id="btnGenerarAgenda" class="btnSimple" />
+            </div>
+        </fieldset>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/GenerarAgenda/generarAgenda.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/GenerarAgenda/generarAgenda.vista.js')}}"></script>
+{% endblock %}

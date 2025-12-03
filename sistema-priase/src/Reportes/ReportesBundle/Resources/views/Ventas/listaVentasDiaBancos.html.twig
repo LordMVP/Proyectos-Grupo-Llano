@@ -1,0 +1,105 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Lista Ventas Día -Bancos -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="VentasDiaBancosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Parametros del reporte Ventas Día</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta1.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta2.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Estado Venta</label>
+                                        <select id="estado" name="estado" ng-model="info.estado" class="form-control">
+                                            <option value="1">Todos</option>
+                                            <option value="2">Aprobada</option>
+                                            <option value="3">Pendiente</option>
+                                            <option value="4">Facturada</option>
+                                            <option value="5">Eliminada</option>
+                                        </select>
+                                        
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Facturado</label>
+                                        <select id="facturado" name="facturado" ng-model="info.facturado" class="form-control">                                            
+                                            <option value="1">Todos</option>
+                                            <option value="2">Si</option>
+                                             <option value="3">No</option>
+                                        </select>
+                                        
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Bancos</label>
+                                        <select type="text" name="banco" id="banco" ng-model="info.banco" class="form-control input-sm">
+                                            <option value="-1">Todos los bancos</option>
+                                            <option ng-repeat="item in bancos" ng-value="item.ide">{[{item.nombre}]}</option>                                            
+                                        </select>
+                                        
+                                </div>
+                            </div>
+                           
+                                                             
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Generar reporte formato xlsx.
+                                </div>  
+                            </div>
+                            
+                            <div class="btn-group col-md-3">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-gears fa-lg"></i> Reporte Ventas  <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">                                                                              
+                                        <li>
+                                            <a ng-click="download=true;generarReporte()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Ventas Día
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="download=true;generarReporte2()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Ventas Banco
+                                            </a>
+                                        </li>                                                                              
+                                    </ul>
+                                </div> 
+                            
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/ventas/ventasDia.bancos.angular.js')}}"></script>
+{% endblock %}

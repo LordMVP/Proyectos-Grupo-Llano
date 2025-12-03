@@ -1,0 +1,86 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Informacion Usuarios Tarifas -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ContribucionController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Informacion Usuarios Tarifas</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                 
+                            <div class="row">
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Periodo Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                   
+                                </div>
+                                
+                                <div class="form-group col-md-3" show-errors>
+                                        <label>Reporte</label>
+                                        <select type="text" name="tipoReporte" id="tipoReporte" ng-model="info.tipoReporte" required="true" class="form-control input-sm">
+                                            <option ng-value="1">Residencial-Comercial</option>
+                                            <option ng-value="2">Industrial</option>                                            
+                                            <option ng-value="3">Contribuciones Tarifas</option>                                            
+                                            <option ng-value="4">Subsidios Tarifas</option>                                            
+                                            <option ng-value="5">Reporte F1</option>                                            
+                                            <option ng-value="6">Anexo F1</option>                                            
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipoReporte.$error.required">
+                                            La seleccion del Reporte es requerido.
+                                        </p>
+                                </div>                                                     
+                                    
+                            </div>  
+                            </div> 
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-12">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            
+                          {#  <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2(1)" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Residencial-Comercial
+                                </button>
+                            </div> #} 
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Reporte
+                                </button>
+                            </div> 
+                            {#<div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2(2)" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Contribuciones
+                                </button>
+                            </div> 
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2(3)" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Subsidios
+                                </button>
+                            </div> #}
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/contribucion.angular.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/ConsultaContratos.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/ConsultaContratos.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { SelectorMultiple } from '../utils/SelectorMultiple';
+import axios from 'axios';
+import Modal from 'react-bootstrap4-modal';
+import { CLASES_UNIDADES } from '../../global/constantes';
+import { parsearJSONUniPropiedad, esObjetoVacio } from '../../global/util_nominaciones';
+import { Input, Botonera, Combo, TextoNumerico, Fecha, Util } from 'appfuture-react';
+import RUTAS_API from '../../global/rutas_api';
+import RUTAS_VISTA from '../../global/rutas_vista';
+import { TECLAS } from '../../global/constantes';
+import ConsultaGenerica from '../../hoc/consultaGenerica/ConsultaGenerica';
+
+const tiposAgente = [
+  { valor: 'V', texto: 'Cliente' }, //Si cntTiponegocio es V es cliente
+  { valor: 'C', texto: 'Proveedor' } //Si cntTiponegocio es C es proveedor
+];
+
+const opcionesTakeOrPay = [
+  { valor: 'S', texto: 'Sí' },
+  { valor: 'N', texto: 'No' }
+];
+
+const tiposGarantia = [
+  { texto: 'No Aplica', valor: 'NA' },
+  { texto: 'Garantía Bancaria', valor: 'GB' },
+  { texto: 'Garantía Prepago', valor: 'PR' },
+  { texto: 'Poliza Contratos', valor: 'PO' },
+];
+
+class ConsultaContratos extends Component {
+
+
+  state = {
+    criterio: '',
+    tiposDeUso: [],
+    tiposMercado: [],
+    tiposContrato: [],
+    estadosContrato: [],
+    tiposModalidadContrato: [],
+    interfazGestion: RUTAS_VISTA.GESTION_CONTRATOS.url,
+    seleccion: false,
+    mostrarEstados: false,
+    estadoContrato: '',
+    seleccionMultiple: false,
+    tipoAgente: (this.props.tipoNegocio) ? this.props.tipoNegocio : '',
+    estadosContratoProps: this.props.estadosContrato,
+    mostrarTablaSeleccionados: (this.props.mostrarTablaSeleccionados) ? this.props.mostrarTablaSeleccionados : false
+  };
+
+  consultaGenerica = null;
+
+  columnas = [
+    {
+      Header: 'Consulta contratos',
+      columns: [
+        {
+          Header: 'Tipo Agente/Tercero',
+          accessor: 'cntTiponegocio',
+          Cell: (props) => this.obtenerTipoNegocio(props, this)
+        },
+        {
+          Header: 'Agente/Tercero',
+          accessor: 'terIdeagente.terNomcompleto'
+        },
+        {
+          Header: 'No. Contrato',
+          accessor: 'cntNumero'
+        },
+        {
+          Header: 'Tipo contrato',
+          accessor: 'listaTipos',
+          Cell: (props) => this.obtenerTiposContrato(props, this)
+        },
+        {
+          Header: 'Fecha inicio',
+          accessor: 'cntFechainicio',
+        },
+        {
+          Header: 'Fecha Fin',
+          accessor: 'cntFechafin',
+        },
+        {
+          Header: 'Estado',
+          accessor: 'uniIdeestado.uniNombre1'
+        }
+      ]
+    }
+  ];
+
+  /**
+   * Obtiene los tipos de contrato de las propiedades que recibe de la tabla.
+   * @return {string}
+   */
+  obtenerTiposContrato = (props) => {
+    const { original, column } = props;
+    const listaTipos = original[column.id];
+    if (!Array.isArray(listaTipos) || listaTipos.length == 0) {
+      return 'Indefinido';
+    }
+    return listaTipos.map(tipo => {
+      return tipo.uniIdetipocontrato.uniNombre1;
+    }).join(',');
+  };
+
+  /**
+   * Obtiene la fecha en string de las propiedades que recibe de la tabla.
+   * @return {string}
+   */
+  convertirFecha = (props) => {
+    const { original, column } = props;
+    const fecha = new Date(original[column.id]);
+    const anio = fecha.getFullYear();
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth() + 1;
+    return `${((dia &lt; 9) ? '0' : '')}${dia}/${(mes &lt; 9) ? '0' : ''}${mes}/${anio}`;
+  };
+
+  /**
+   * Obtiene el tipo de agente/tercero en base al tipo de negocio.
+   * @return {string}
+   */
+  obtenerTipoNegocio = (props) => {
+    const { original } = props;
+    const cntTiponegocio = original.cntTiponegocio;
+    return (cntTiponegocio === 'V') ? 'Cliente' : 'Proveedor';
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    this.cargarDatosAplicacion();
+    if (!this.props.history) {
+      return;
+    }
+    const { state } = this.props.location;
+    if (state &amp;&amp; state.interfazGestion) {
+      this.cargarDatos(state);
+    }
+  }
+
+  /**
+   * Método encargado de cargar los datos de un componente externo
+   * @param {Object} entidad Datos componente externo
+   */
+  cargarDatos = (state) => {
+    this.setState({
+      interfazGestion: state.interfazGestion,
+      seleccion: true,
+      estadoContrato: state.estadoContrato,
+      tipoGarantia: state.tipoGarantia,
+      tipoGarantiaDisabled: (state.tipoGarantia) ? true : false,
+      estadoContratoDisabled: (state.estadoContrato || state.estadoContratoDisabled) ? true : false,
+      tipoContrato: (state.tipoContrato) ? state.tipoContrato : -1,
+      seleccionMultiple: (state.seleccionMultiple),
+      estadosContratoProps: state.estadosContrato,
+      mostrarTablaSeleccionados: state.mostrarTablaSeleccionados,
+      tiposContratoProps: state.tiposContrato,
+      autoconsultar: state.autoconsultar,
+      ocultarFiltros: state.ocultarFiltros,
+      takeOrPay: state.takeOrPay,
+      takeOrPayDisabled: state.takeOrPayDisabled,
+      tiposContratoDisabled: state.tiposContratoDisabled,
+      inhabilitarEstado: state.inhabilitarEstado,
+      tipoAgente: state.tipoAgente,
+      inhabilitarTercero: state.inhabilitarTercero
+    });
+  };
+
+  /**
+   * Cargará la información principal del módulo, en este caso consultará las listas necesariaas y demás información que necesite del servidor para empezar.
+   * @returns {Boolean}
+   */
+  cargarDatosAplicacion = () => {
+    //Si las listas necesarias vienen en los props, se toman y se retorna.
+    if (this.validarPropsPrograma()) {
+      this.setState({
+        tiposDeUso: this.props.tiposUso,
+        tiposMercado: this.props.tiposMercado,
+        tiposContrato: this.props.tiposContrato,
+        tiposModalidadContrato: this.props.tiposModalidadContrato
+      });
+      return;
+    }
+
+    const params = { criterio: '' };
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_USO_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_MERCADO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPO_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.TIPOS_MODALIDAD_CONTRATO }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { ...params, idClase: CLASES_UNIDADES.ESTADOS_CONTRATO }),
+    ];
+    axios.all(peticiones)
+      .then(
+        axios.spread((tiposUso, tiposMercado, tiposContrato, tiposModalidadContrato, estadosContrato) => {
+          this.setState({
+            tiposDeUso: parsearJSONUniPropiedad(tiposUso.data.datos),
+            tiposMercado: parsearJSONUniPropiedad(tiposMercado.data.datos),
+            tiposContrato: this.autoseleccionarTiposContrato(tiposContrato.data.datos),
+            tiposModalidadContrato: parsearJSONUniPropiedad(tiposModalidadContrato.data.datos),
+            estadosContrato: this.autoseleccionarEstado(parsearJSONUniPropiedad(estadosContrato.data.datos)),
+          }, this.autoConsultar);
+        }), (err) => {
+          console.log(err);
+        }
+      );
+  };
+
+  /**
+   * Si se ha configurado la autoconsulta este método invocará la consulta de los contratos tras haber consultado los datos necesarios para mostrar la interfaz.
+   */
+  autoConsultar = () => {
+    if (this.props.autoconsultar || this.state.autoconsultar) {
+      this.onBuscar();
+    }
+  };
+
+  /**
+   * Método encargado de seleccionar los tipos de un contrato ya parametrizado
+   * @param {Array} listaTiposContrato Lista de tipos del contrato seleccionado
+   * @returns {Array}
+   */
+  autoseleccionarTiposContrato = (listaTiposContrato) => {
+    listaTiposContrato = parsearJSONUniPropiedad(listaTiposContrato);
+    let tiposContratoSeleccionados = Util.validarArreglo(this.props.tiposContrato) ? this.props.tiposContrato : [];
+    if (!Util.validarArreglo(tiposContratoSeleccionados)) {
+      tiposContratoSeleccionados = (Util.validarArreglo(this.state.tiposContratoProps)) ? this.state.tiposContratoProps : [];
+    }
+    return listaTiposContrato.map(tipoContrato => {
+      tiposContratoSeleccionados.forEach(codigoTipoContrato => {
+        if (tipoContrato.uniPropiedad.tipocontrato === codigoTipoContrato) {
+          tipoContrato.seleccionado = true;
+        }
+      });
+      return tipoContrato;
+    });
+  };
+
+  /**
+   * Busca los estados en la lista y autoselecciona el estado recibido...
+   * @param {Array} listaEstados Lista de estados del contrato seleccionado
+   * @return {array}
+   */
+  autoseleccionarEstado = (listaEstados) => {
+    const estados = this.props.estadoContrato ? [this.props.estadoContrato] : (Util.validarArreglo(this.state.estadosContratoProps) ? this.state.estadosContratoProps : []);
+    return listaEstados.map(estado => {
+      estados.forEach(idEstado => {
+        if (estado.uniIderegistro == idEstado || estado.uniPropiedad.codigo == idEstado || estado.uniPropiedad.estado == idEstado) {
+          estado.seleccionado = true;
+        }
+      });
+      return estado;
+    });
+  };
+
+  /**
+   * Método encargado de mostrar los botones del componente Botonera
+   * @returns {Array}
+   */
+  obtenerFunciones = () => {
+    let funciones = [{ texto: 'Consultar', callback: this.onBuscar }];
+    if ((this.state.seleccionMultiple) ? this.state.seleccionMultiple : this.props.seleccionMultiple) {
+      funciones.push({ texto: 'Seleccionar Datos', callback: this.onSeleccionarEntidades });
+    }
+
+    if (this.state.interfazGestion != RUTAS_VISTA.GESTION_CONTRATOS.url) {
+      funciones.push({ texto: 'Cancelar', callback: this.cancelar });
+    }
+    funciones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return funciones;
+  };
+
+  /**
+   * Valida si las listas requeridas y demás información necesaria viene en los props.
+   * @returns {Boolean}
+   */
+  validarPropsPrograma = () => {
+    const { tiposDeUso, tiposMercado, tiposContrato, tiposModalidadContrato } = this.props;
+    return (
+      Util.validarArreglo(tiposDeUso) &amp;&amp;
+      Util.validarArreglo(tiposMercado) &amp;&amp;
+      Util.validarArreglo(tiposContrato) &amp;&amp;
+      Util.validarArreglo(tiposModalidadContrato) &amp;&amp;
+      true
+    );
+  };
+
+  /**
+   * Controla el cambio de los componentes y lo setea en el state.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Obtiene un arreglo de ids de los estados seleccionados.
+   * @return {Array}
+   */
+  obtenerEstadosSeleccionados = () => {
+    return this.state.estadosContrato.filter(estado => estado.seleccionado).map(estado => {
+      return estado.uniIderegistro;
+    });
+  };
+
+  /**
+   * Obtiene un arreglo de ids de los tipos de contrato seleccionados.
+   * @return {Array}
+   */
+  obtenerListaTiposContrato = () => {
+    return this.state.tiposContrato.filter(tipocontrato => tipocontrato.seleccionado).map(tipocontrato => {
+      return tipocontrato.uniIderegistro;
+    });
+  };
+
+  /**
+   * Método encargado de realizar la busqueda con los filtros seleccionados
+   */
+  onBuscar = () => {
+    const { identificacion, tipoAgente, nombreAgente, tipoContrato, tipoGarantia, tipoMercado, numeroContrato, tipoUso, modalidad, fechaInicio, fechaFin, takeOrPay } = this.state;
+    let estadosSeleccionados = this.obtenerEstadosSeleccionados();
+    this.consultaGenerica.getWrappedInstance()._buscar(
+      {
+        criterio: this.state.criterio,
+        nombreCompleto: nombreAgente,
+        listaTiposContratos: this.obtenerListaTiposContrato(),
+        documento: identificacion,
+        tipoTercero: (tipoAgente == '-1') ? '' : tipoAgente,
+        numeroContrato: numeroContrato,
+        idTipoMercado: tipoMercado,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        idModalidadContrato: modalidad,
+        idTipoUsoContrato: tipoUso,
+        takeOrPay: takeOrPay,
+        tipoGarantia: tipoGarantia,
+        estadosContrato: estadosSeleccionados.join(',')
+      }
+    );
+  };
+
+  /**
+   * Método encargado de realizar la lista de contratos seleccionados
+   * @returns {Boolean}
+   */
+  onSeleccionarEntidades = () => {
+    const lista = this.consultaGenerica.getWrappedInstance()._obtenerEntidades();
+    if (this.props.esModal) {
+      this.props.seleccionarEntidades(lista);
+      return;
+    }
+    this.props.history.push({
+      pathname: this.state.interfazGestion,
+      state: {
+        listaContratos: lista
+      }
+    });
+    //this.props.seleccionarEntidades();
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      criterio: '',
+      tipoAgente: '',
+      indentificacion: '',
+      nombreAgente: '',
+      tipoMercado: '',
+      numeroContrato: '',
+      tipoUso: '',
+      modalidad: '',
+      fechaInicio: '',
+      fechaFin: '',
+      takeOrPay: '',
+      tipoGarantia: '',
+      tiposContrato: this.eliminarSeleccionContratos(),
+      estadosContrato: this.eliminarSeleccionEstados()
+    });
+    this.consultaGenerica.getWrappedInstance()._limpiarFormulario();
+  };
+
+  cancelar = () => {
+    this.consultaGenerica.getWrappedInstance()._cancelar();
+  };
+
+  onCriterioChange = (event) => {
+    this.setState({ criterio: event.target.value });
+  };
+
+  onKeyPress = (evento) => {
+    if (evento.charCode === TECLAS.ENTER) {
+      this.onBuscar();
+    }
+  };
+
+  /**
+  * Recibe un timestamp númerico y lo convierte en un objeto Date...
+  * @param {numeric} fecha Fecha en formato unix
+  * @return {Date}
+  */
+  parsearFecha = (fecha) => {
+    return new Date(fecha);
+  };
+
+  /**
+   * Renderiza el modal pera seleccionar las estados...
+   * @returns {JSX}
+   */
+  renderModalestados = () => {
+    return (
+      &lt;Modal visible={this.state.mostrarEstados}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>Seleccionar estados&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los estados&lt;/p>
+            {
+              this.state.estadosContrato.map(r => {
+                return (
+                  &lt;div key={`estados_${r.uniIderegistro}`}>
+                    &lt;label>
+                      &lt;input type="checkbox" value={r.uniIderegistro} checked={r.seleccionado || false} onChange={this.seleccionarEstado} />
+                      &lt;span> {r.uniNombre1}&lt;/span>
+                    &lt;/label>
+                  &lt;/div>
+                );
+              })
+            }
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarEstados: false }) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+
+  /**
+   * Recibe el evento change de los selectores de las estados y setea un atributo llamado seleccionado = true, en el medidor específico.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarEstado = (event) => {
+    const estados = [...this.state.estadosContrato];
+    const idEstado = parseInt(event.target.value);
+    const index = estados.findIndex(r => r.uniIderegistro === idEstado);
+    estados[index].seleccionado = event.target.checked;
+    this.setState({ estadosContrato: [...estados] });
+  };
+
+  /**
+   * Eliminará los estados seleccionados de la lista.
+   * @returns {Array}
+   */
+  eliminarSeleccionEstados = () => {
+    return this.state.estadosContrato.map(estado => {
+      estado.seleccionado = false;
+      return estado;
+    });
+  };
+
+  /**
+   * Eliminará los estados seleccionados de la lista.
+   * @returns {Array}
+   */
+  eliminarSeleccionContratos = () => {
+    return this.state.tiposContrato.map(tipoContrato => {
+      tipoContrato.seleccionado = false;
+      return tipoContrato;
+    });
+  };
+
+  /**
+   * Renderiza el componente selector de estados.
+   * @returns {JSX}
+   */
+  renderSelectorEstados = () => {
+    const textoEstados = '';
+    const estadosSeleccionados = this.state.estadosContrato.reduce((total, tipo) => { return total + (tipo.seleccionado ? 1 : 0) }, 0);
+    const placeholder = `(${estadosSeleccionados}) seleccionados`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>Estados:&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={textoEstados} disabled={true} type="text" className="form-control" placeholder={placeholder} />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador input-group-btn"
+              title='Seleccionar Estados'
+              disabled={this.state.estadoContratoDisabled || this.state.inhabilitarEstado}
+              onClick={() => this.setState({ mostrarEstados: true })}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Marca como seleccionado un item de la lista de tipos contrato.
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  seleccionarContrato = (evento) => {
+    const tiposContrato = this.state.tiposContrato;
+    const value = evento.target.value;
+    const index = tiposContrato.findIndex(c => c.uniIderegistro == value);
+    tiposContrato[index].seleccionado = evento.target.checked;
+    this.setState({ tiposContrato: tiposContrato });
+  };
+
+  /**
+   * Renderiza los componentes de los filtros del componente.
+   * @return {Component}
+   */
+  renderFiltros = () => {
+    return (
+      &lt;div className='row'>
+        &lt;Combo
+          opciones={tiposAgente}
+          propTexto='texto'
+          propValor='valor'
+          label='Tipo de Agente o tercero:'
+          name='tipoAgente'
+          value={this.state.tipoAgente}
+          onChange={this.controlarCambio}
+          extra={{ disabled: this.state.inhabilitarTercero }}
+        />
+        &lt;Input
+          label='Identificación:'
+          value={this.state.indentificacion}
+          onChange={this.controlarCambio}
+          name='indentificacion'
+        />
+        &lt;Combo
+          opciones={tiposGarantia}
+          propTexto='texto'
+          propValor='valor'
+          label='Seleccione el tipo garantia:'
+          name='tipoGarantia'
+          value={this.state.tipoGarantia}
+          onChange={this.controlarCambio}
+          extra={{ disabled: this.state.tipoGarantiaDisabled }}
+        />
+        &lt;Input
+          label='Nombre del Agente o Tercero:'
+          value={this.state.nombreAgente}
+          onChange={this.controlarCambio}
+          name='nombreAgente'
+        />
+        &lt;Combo
+          opciones={this.state.tiposMercado}
+          propTexto='uniNombre1'
+          propValor='uniIderegistro'
+          label='Tipo Mercado:'
+          name='tipoMercado'
+          value={this.state.tipoMercado}
+          onChange={this.controlarCambio}
+        />
+        &lt;Input
+          label='No. Contrato:'
+          value={this.state.numeroContrato}
+          onChange={this.controlarCambio}
+          name='numeroContrato'
+        />
+        &lt;Combo
+          opciones={this.state.tiposDeUso}
+          propTexto='uniNombre1'
+          propValor='uniIderegistro'
+          label='Tipos Uso:'
+          name='tipoUso'
+          value={this.state.tipoUso}
+          onChange={this.controlarCambio}
+        />
+        &lt;SelectorMultiple
+          lista={this.state.tiposContrato}
+          propValor='uniIderegistro'
+          propTexto='uniNombre1'
+          titulo='Tipos Contrato'
+          seleccionarItem={this.seleccionarContrato}
+          cols={4}
+          extra={{ disabled: this.state.tiposContratoDisabled }}
+        />
+        &lt;Combo
+          opciones={this.state.tiposModalidadContrato}
+          propTexto='uniNombre1'
+          propValor='uniIderegistro'
+          label='Modalidad:'
+          name='modalidad'
+          value={this.state.modalidad}
+          onChange={this.controlarCambio}
+        />
+        {this.renderSelectorEstados()}
+        &lt;Fecha
+          label='Fecha inicio:'
+          name='fechaInicio'
+          fecha={this.state.fechaInicio}
+          onChange={this.controlarCambio}
+        />
+        &lt;Fecha
+          label='Fecha Finalización:'
+          name='fechaFin'
+          fecha={this.state.fechaFin}
+          onChange={this.controlarCambio}
+        />
+        &lt;Combo
+          opciones={opcionesTakeOrPay}
+          propTexto='texto'
+          propValor='valor'
+          label='Take Or Pay:'
+          name='takeOrPay'
+          value={this.state.takeOrPay}
+          onChange={this.controlarCambio}
+          extra={{ disabled: this.state.takeOrPayDisabled }}
+        />
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='consulta-tramos'>
+        &lt;div className={`d-flex justify-content-center pt-3 ${(this.props.ocultarFiltros === true || this.state.ocultarFiltros === true) ? '' : 'mb-5'}`}>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        {
+          this.props.ocultarFiltros != true &amp;&amp; this.renderFiltros()
+        }
+
+        {this.renderModalestados()}
+        &lt;div className='row'>
+          &lt;div className='col-md-12'>
+            &lt;ConsultaGenerica
+              {...this.props}
+              idEntidad='cntIderegistro'
+              columnas={this.columnas}
+              ref={ref => this.consultaGenerica = ref}
+              interfazGestion={this.state.interfazGestion}
+              seleccion={this.state.seleccion}
+              rutaConsulta={RUTAS_API.CONTRATOS.CONSULTAR_CONTRATOS}
+              seleccionMultiple={(this.state.seleccionMultiple) ? (this.state.seleccionMultiple) : this.props.seleccionMultiple}
+              mostrarTablaSeleccionados={this.state.mostrarTablaSeleccionados}
+            />
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+}
+
+ConsultaContratos.propTypes = {
+  history: PropTypes.object,
+  esModal: PropTypes.bool,
+  seleccionMultiple: PropTypes.bool,
+  seleccionarEntidad: PropTypes.func,
+  seleccionarEntidades: PropTypes.func,
+  entidadesSeleccionadas: PropTypes.array,
+  tipoContrato: PropTypes.number,
+  estadosContrato: PropTypes.array,
+  tipoNegocio: PropTypes.string,
+  inhabilitarEstado: PropTypes.bool
+};
+
+ConsultaContratos.defaultProps = {
+  esModal: false,
+  seleccionMultiple: false,
+  entidadesSeleccionadas: [],
+  estadosContratoProps: [],
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({}, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConsultaContratos);
+
+export { VistaRedux as RConsultaContratos };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

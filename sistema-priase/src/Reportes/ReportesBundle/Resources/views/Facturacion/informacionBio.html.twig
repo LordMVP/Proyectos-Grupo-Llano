@@ -1,0 +1,121 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Información Bioagricola {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="informacionBioController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Usuario Homologados Bioagricola Sin Factura de Aseo</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                
+                                <div class="form-group col-md-6" show-errors>
+                                    <label for="idciclo">Ciclo: </label>
+                                    <select id=idciclo" ng-change="actualizarPeriodos()" name="idciclo" ng-model="info.idciclo" class="form-control input-sm">
+                                         <option value="-1">Todos Ciclos</option>
+                                        <option ng-repeat="ciclo in ciclos" ng-value="ciclo.idciclo">{[{ciclo.ciclo}]}</option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.ciclo.$error.required">
+                                        El ciclo es requerido
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-6" show-errors>
+                                    <label for="txtperiodo">Período: </label>
+                                    <select id="periodo" name="periodo" ng-model="info.periodo" class="form-control input-sm">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.periodo">
+                                            {[{periodo.periodo_nombre}]}
+                                        </option>
+                                    </select>
+                                    <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                        El período es obligatorio.
+                                    </p>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion será generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte 
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+            <fieldset>
+                <legend>Usuario Nuevos Gas Para Reportar a Bio</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                
+                                <div class="row">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                 <div class="form-group col-md-4" show-errors>
+                                    <label for="fechaConsulta2">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta2" id="fechaConsulta2" name="fechaConsulta2" />
+                                    <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                        <label>Proyecto</label>
+                                        <select id="proyecto" name="proyecto" ng-model="info.proyecto" class="form-control">
+                                            <option ng-repeat="proyecto in proyectos" ng-value="proyecto.proyecto_id">
+                                                {[{proyecto.proyecto_nombre}]}
+                                            </option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                            El proyecto es requerido.
+                                        </p>
+                                    </div>    
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion será generada en un archivo .csv
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte 
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/informacion.bio.angular.js')}}"></script>
+{% endblock %}

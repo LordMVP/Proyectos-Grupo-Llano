@@ -1,0 +1,11 @@
+parameters:
+#    reportes.example.class: Reportes\ReportesBundle\Example
+
+services:
+    reportes.base:
+        class: Reportes\ReportesBundle\Controller\ReporteBaseController
+        arguments: [@service_container]
+    admin.reportes:
+        class: Reportes\ReportesBundle\JasperBridge\AdminReports
+        arguments: [@kernel]    
+#        arguments: [@service_id, "plain_value", %parameter%]

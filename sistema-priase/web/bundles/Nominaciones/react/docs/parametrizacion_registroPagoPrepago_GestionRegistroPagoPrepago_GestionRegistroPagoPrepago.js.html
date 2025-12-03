@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/registroPagoPrepago/GestionRegistroPagoPrepago/GestionRegistroPagoPrepago.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/registroPagoPrepago/GestionRegistroPagoPrepago/GestionRegistroPagoPrepago.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { RConsultaPrepago } from '../ConsultaPrepagos';
+import RUTAS_API from '../../../../global/rutas_api';
+import { formatearArray } from '../../../../global/util_nominaciones';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+
+import './GestionRegistroPagoPrepago.scss';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { get as getProp } from 'object-path';
+
+const ESTADO_ACTIVO = 'A';
+
+class GestionRegistroPagoPrepago extends Component {
+  state = {
+    // Datos de la entidad
+    fecha: '',
+    mesServicio: '',
+    noAnticipo: '',
+    valorPrepago: '',
+    contrato: '',
+    saldo: '',
+    valorPago: '',
+    idRecaudo: null,
+    fechaInicio: '',
+    fechaFin: '',
+    tipoUso: '',
+    agente: '',
+    nombreAdjunto: '',
+    listaContratos: [],
+    listaAdjuntos: [],
+    // Estado de la aplicacion
+    mostrarModalConsulta: false,
+    consultaPrepago: true
+
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    this.consultarListaEstados((listaEstados) => {
+      this.setState({
+        listaEstados: listaEstados.data.datos,
+      });
+    });
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de cargar los datos de un componente externo
+   * @param {Object} entidad Datos componente externo
+   */
+  cargarDatos = (entidad) => {
+    this.asignarDatosContrato(entidad);
+  };
+
+  /**
+  * Consulta la lista de los estados...
+  */
+  consultarListaEstados = (callback) => {
+    const peticiones = [
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_ESTADOS, { criterio: '', idClase: CLASES_UNIDADES.ESTADOS_CONTRATO }),
+    ];
+
+    axios.all(peticiones)
+      .then(
+        axios.spread((listaEstados) => {
+          callback(listaEstados);
+        })
+      );
+  };
+
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      fecha: ' ',
+      mesServicio: ' ',
+      valorPrepago: '',
+      idContrato: '',
+      saldo: '',
+      valorPago: '',
+      fechaInicio: '',
+      fechaFin: '',
+      tipoUso: '',
+      agente: '',
+      nombreAdjunto: '',
+      listaAdjuntos: [],
+      idContrato: null,
+      noAnticipo: '',
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+      consultaPrepago: false,
+    });
+  };
+
+  /**
+   * Método encargado de consultar el anticipo al momento de guardar
+   */
+  consultarDatos = () => {
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PAGO_PREPAGO.CONSULTAR_ANTICIPO),
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PAGO_PREPAGO.CONSULTAR_CONTRATOS),
+    ];
+    axios.all(peticiones)
+
+      .then(axios.spread((anticipo, contratos) => {
+        const datosAplicacion = {
+          noAnticipo: '',
+          listaContratos: [],
+        };
+        if (anticipo.data.codigo > 0) {
+          datosAplicacion.noAnticipo = anticipo.data.datos;
+        }
+        if (contratos.data.codigo > 0) {
+          datosAplicacion.listaContratos = formatearArray(contratos.data.datos);
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Buscar Contrato', callback: this.buscarContrato },
+      { texto: ((!this.state.consultaPrepago) ? 'Guardar' : 'Anular'), callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { fecha, mesServicio, idContrato, valorPago, listaAdjuntos } = this.state;
+    //Validaciones
+    if (!idContrato) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un contrato.' } };
+    }
+
+    if (fecha.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha.' } };
+    }
+
+    if (mesServicio.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el mes de servicio.' } };
+    }
+
+    if (valorPago.toString().trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el valor pago' } };
+    }
+
+    if (isNaN(valorPago)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El valor pago solo puede ser un número' } };
+    }
+
+    if (valorPago &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'El valor no puede ser menor o igual a 0' } };
+    }
+
+    if (!Util.validarArreglo(listaAdjuntos)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe adjuntar el soporte de pago' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar un string con el los valores de los archivos adjuntos
+   * @returns {string}
+   */
+  obtenerAdjuntos = () => {
+    if (!Util.validarArreglo(this.state.listaAdjuntos)) {
+      return;
+    }
+    return JSON.stringify(this.state.listaAdjuntos);
+  };
+
+  /**
+   * Método encargado de generar el objeto para guardar
+   * @returns {Object}
+   */
+  obtenerDatos = () => {
+    const { fecha, mesServicio, idContrato, valorPago, idRecaudo, contrato } = this.state;
+    const mes = mesServicio.substr(5, 2) + "/" + mesServicio.substr(0, 4);
+    const objetoDevolver = {
+      rccIderegistro: idRecaudo,
+      rccFecharecaudo: this.parsearFechaServidor(fecha),
+      rccValor: valorPago,
+      cntIdecontrato: {
+        cntIderegistro: idContrato,
+        cntNumero: contrato.cntNumero,
+      },
+      rccSoporte: this.obtenerAdjuntos(),
+      rccPeriodo: mes,
+    };
+    return objetoDevolver;
+  };
+
+  /**
+   * Método encargado de convertir la fecha ingresada a Date
+   * @param {string} fecha fecha seleccionada por el usuario
+   * @returns {String}
+   */
+  parsearFechaServidor = (fecha) => {
+    fecha = new Date(fecha);
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth() + 1;
+    const anio = fecha.getFullYear();
+    return anio + '-' + ((mes &lt; 9) ? '0' + mes : mes) + '-' + ((dia &lt; 9) ? '0' + dia : dia);
+  };
+
+  /**
+   * Método encargado de convertir la fecha ingresada a Date
+   * @param {string} fecha fecha seleccionada por el usuario
+   * @returns {String}
+   */
+  parsearFechaCliente = (fecha) => {
+    return fecha.replace(/\-/g, '/');
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerDatos();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PAGO_PREPAGO.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.props.mostrarAlerta('Correcto', (this.state.consultaPrepago) ? 'Se anuló el pago con número: ' : 'Se registró el pago con número: ' + respuesta.data.datos);
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del botón de consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    change[name] = value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de convertir la fecha ingresada a Date
+   * @param {string} fechaContrato fecha seleccionada por el usuario
+   * @returns {String}
+   */
+  obtenerFecha = (fechaContrato) => {
+    let fecha = new Date(fechaContrato);
+    fecha = (fecha.getFullYear() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getDate());
+    return fecha;
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario
+   */
+  limpiarDatosContrato = () => {
+    this.setState({
+      saldo: '',
+      valorPrepago: '',
+      fechaInicio: '',
+      fechaFin: '',
+      tipoUso: '',
+      agente: '',
+      idContrato: null,
+      contrato: null,
+      consultaPrepago: false,
+      idRecaudo: null,
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos de un prepago seleccionado
+   * @param {Object} entidad Datos de la entidad
+   */
+  cargarDatosConsultaPrepago = (entidad) => {
+    const adjuntos = (entidad.rccSoporte) ? JSON.parse(entidad.rccSoporte) : [];
+    const adjunto = adjuntos[0];
+    this.setState({
+      saldo: entidad.cntIdecontrato.saldo,
+      valorPrepago: entidad.rccValor,
+      fechaInicio: this.obtenerFecha(entidad.cntIdecontrato.cntFechainicio),
+      fechaFin: this.obtenerFecha(entidad.cntIdecontrato.cntFechafin),
+      tipoUso: entidad.cntIdecontrato.uniIdetipouso.uniNombre1,
+      agente: entidad.cntIdecontrato.terIdeagente.terNomcompleto,
+      idContrato: entidad.cntIdecontrato.cntIderegistro,
+      idRegistro: entidad.rccIderegistro,
+      noAnticipo: entidad.rccIderegistro,
+      fecha: this.obtenerFecha(entidad.rccFecha),
+      valorPago: entidad.rccValor,
+      mesServicio: (entidad.rccPeriodo) ? entidad.rccPeriodo.split('/').reverse().join('/') : '',
+      contrato: entidad.cntIdecontrato,
+      mostrarModalConsulta: false,
+      listaAdjuntos: adjuntos,
+      nombreAdjunto: adjunto.nombreOriginal,
+      consultaPrepago: true,
+      idRecaudo: entidad.rccIderegistro
+    });
+  };
+
+  /**
+   * Método encargadode consultrar los datos de un contrato por identificador
+   * @param {Object} entidad Datos del contrato
+   */
+  consultarContrato = (entidad) => {
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PAGO_PREPAGO.CONSULTAR_CONTRATOS, { idContrato: entidad.cntIderegistro })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          const datos = respuesta.data.datos;
+          const contrato = datos.contrato;
+          this.setState({
+            saldo: datos.saldo,
+            valorPrepago: contrato.cntPrecio,
+            fechaInicio: this.obtenerFecha(contrato.cntFechainicio),
+            fechaFin: this.obtenerFecha(contrato.cntFechafin),
+            tipoUso: contrato.uniIdetipouso.uniNombre1,
+            agente: contrato.terIdeagente.terNomcompleto,
+            idContrato: entidad.cntIderegistro,
+            contrato: contrato,
+            mostrarModalConsulta: false,
+            consultaPrepago: false,
+            idRecaudo: null
+          });
+          return;
+        }
+        this.limpiarDatosContrato();
+      });
+  };
+
+  /**
+   * Método encargado de traer los datos requeridos del contrato seleccionado
+   * @param {number} idContrato Identificador del contrato seleccionado
+   * @returns {bool}
+   */
+  asignarDatosContrato = (entidad) => {
+    if (!entidad) {
+      this.limpiarDatosContrato();
+      return;
+    }
+    if (entidad.rccIderegistro) {
+      this.cargarDatosConsultaPrepago(entidad);
+      return;
+    }
+
+    this.consultarContrato(entidad);
+
+  };
+
+  /**
+   * Método encargado de abrir el selector de archivos
+   */
+  abrirSelectorArchivo = () => {
+    this.selectorArchivo.click();
+  };
+
+  /**
+   * Método encargado de subir el archivo adjunto
+   * @param {Array} adjunto Contiene los datos del adjunto seleccionado
+   * @returns {bool}
+   */
+  subirArchivo = (adjunto) => {
+    const lista = [...this.state.listaAdjuntos];
+    if (lista.length > 0) {
+      this.props.mostrarAlerta('Error', 'Solo puede adjuntar un archivo');
+      return;
+    }
+    const data = new FormData();
+    data.append('archivo[]', adjunto);
+    const configuracion = { headers: { 'Content-Type': 'multipart/form-data' } };
+    axios.post(RUTAS_API.GLOBAL.SUBIR_ARCHIVOS, data, configuracion)
+      .then((respuesta) => {
+        this.procesarArchivo(respuesta.data.datos);
+      });
+  };
+
+  /**
+   * Método encargado de agregar el adjunto seleccionado a una lista
+   * @param {Array} adjunto Contiene los datos del adjunto seleccionado
+   */
+  procesarArchivo = (adjunto) => {
+    adjunto = adjunto[0];
+    let { listaAdjuntos } = this.state;
+    listaAdjuntos.push(adjunto);
+    this.setState({ listaAdjuntos: listaAdjuntos, nombreAdjunto: adjunto.nombreOriginal });
+  };
+
+  /**
+   * Método encargado de controlar el cambio al seleccionar un adjunto
+   * @param {Event} evento El evento que se ejecuta en el control de usuario.
+   * @returns {bool}
+   */
+  controlarCambioArchivo = (evento) => {
+    if (evento.target.files.length === 0) {
+      return;
+    }
+    const adjunto = evento.target.files[0];
+    this.subirArchivo(adjunto);
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del botón de consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false,
+    });
+  };
+
+  /**
+   * Obtiene el id específico del estado contrato finalizado.
+   * @return {number}
+   */
+  obtenerIdEstado = (codigoEstado) => {
+    const { listaEstados } = this.state;
+    if (!Util.validarArreglo(listaEstados)) {
+      return 0;
+    }
+    const estado = listaEstados.filter(e => (JSON.parse(e.uniPropiedad).estado == codigoEstado));
+    if (!Array.isArray(estado)) {
+      return 0;
+    }
+    return JSON.parse(estado[0].uniPropiedad).estado;
+  };
+
+
+  /**
+   * Redireccionará al módulo de la consulta de contratos.
+   * @returns {Boolean}
+   */
+  buscarContrato = () => {
+    const estado = this.obtenerIdEstado(ESTADO_ACTIVO);
+    if (estado === 0) {
+      this.props.mostrarAlerta('Error de Configuración', 'Debe configurar los estados del programa para poder ejecutar la petición solicitada');
+      return;
+    }
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_PAGO_PREPAGO.url,
+        estadosContrato: [estado],
+        tipoGarantia: 'PR',
+      }
+    });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    const saldo = (typeof this.state.saldo == 'number') ? this.state.saldo : 0;
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Input
+            label='No. Anticipo:'
+            value={this.state.noAnticipo}
+            name='noAnticipo'
+            extra={{ disabled: true, readOnly: true }}
+            onChange={this.controlarCambio}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Valor Prepago:'
+            value={this.state.valorPrepago}
+            extra={{ disabled: true, readOnly: true }}
+            name='valorPrepago'
+            onChange={this.controlarCambio}
+          />
+          &lt;Input
+            label='Agente:'
+            value={this.state.agente}
+            extra={{ disabled: true, readOnly: true }}
+            name='agente'
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label="Fecha Inicio:"
+            name='fechaInicio'
+            formato='YYYY/MM/dd'
+            fecha={this.state.fechaInicio}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Fecha
+            label="Fecha Fin:"
+            name='fechaFin'
+            formato='YYYY/MM/dd'
+            fecha={this.state.fechaFin}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true }}
+          />
+          &lt;Input
+            label='Tipo de uso:'
+            value={this.state.tipoUso}
+            onChange={this.controlarCambio}
+            extra={{ disabled: true, readOnly: true }}
+            name='tipoUso'
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label={`Saldo ${(saldo &lt; 0) ? 'a favor' : 'pendiente por pagar'}:`}
+            value={Math.abs(saldo)}
+            name='saldo'
+            onChange={this.controlarCambio}
+            extra={{ disabled: true, readOnly: true }}
+          />
+          &lt;Fecha
+            label="Fecha:"
+            name='fecha'
+            formato='YYYY/MM/dd'
+            fecha={this.state.fecha}
+            onChange={this.controlarCambio}
+            extra={{ disabled: this.state.consultaPrepago }}
+          />
+          &lt;Fecha
+            label="Mes de Servicio"
+            onChange={this.controlarCambio}
+            name='mesServicio'
+            fecha={this.state.mesServicio}
+            sinDia={true}
+            extra={{ disabled: this.state.consultaPrepago }}
+          />
+          &lt;TextoNumerico
+            aceptaDecimales={true}
+            aceptaNegativos={false}
+            label='Valor Pago:'
+            value={this.state.valorPago}
+            onChange={this.controlarCambio}
+            name='valorPago'
+            extra={{ disabled: this.state.consultaPrepago }}
+          />
+        &lt;/div>
+        &lt;div className='card col-8'>
+          &lt;div className='card-header bg-dark text-white row'>
+            &lt;h5>Adjuntar documento&lt;/h5>
+          &lt;/div>
+          &lt;div className='card-body row'>
+            &lt;div className='form-group col-12'>
+              &lt;div className='input-group'>
+                &lt;input type="text"
+                  className='form-control'
+                  disabled={true}
+                  name='nombreAdjunto'
+                  value={this.state.nombreAdjunto}
+                />
+                &lt;div className='input-group-btn'>
+                  &lt;button className='btn btn-primary'
+                    onClick={this.abrirSelectorArchivo}
+                    disabled={this.state.consultaPrepago}
+                  >&lt;i className='fa fa-fw fa-paperclip'>&lt;/i> Seleccionar Archivo&lt;/button>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;input
+          type='file'
+          id='selectorArchivo'
+          accept='application/pdf'
+          ref={ref => (this.selectorArchivo = ref)}
+          className='contratos-adjunto hidden'
+          onChange={this.controlarCambioArchivo}
+        />
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo={'Consultar Prepagos'}
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaPrepago esModal seleccionarEntidad={this.cargarDatos} />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionRegistroPagoPrepago.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionRegistroPagoPrepago);
+
+export { VistaRedux as RGestionRegistroPagoPrepago };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

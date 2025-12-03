@@ -1,0 +1,38 @@
+.group-section{
+  display: block;
+  border: 1px solid #76a8dd;
+  border-radius: 3px;
+  padding: 25px;
+  position: relative;
+}
+
+.group-section .legend-section{
+  position: absolute;
+  top: -15px;
+  background: #FFFFFF;
+  padding: 3px 10px;
+  font-size: 13px;
+  color: #5d96d1;
+  font-weight: bold;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.tab-pane{
+  padding: 25px;
+  border: 1px solid #5d96d1;
+  border-top: 0px;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{
+  border-color: #5d96d1;
+}
+
+.nav-tabs {
+  border-color: #5d96d1;
+}
+
+.title-panel{
+  color: #333333;
+  margin-bottom: 15px;
+}

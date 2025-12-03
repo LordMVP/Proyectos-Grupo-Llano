@@ -1,0 +1,76 @@
+/**********Estilo para la tabla****************/
+@page {
+    margin: 2cm;
+}
+@page :first {
+    margin-top: 2cm;
+}
+#divTemplateContrato table{
+    page-break-after: always;
+}
+
+#divTbl div table {page-break-inside: avoid;  }
+thead {display: table-header-group;}
+tr{page-break-inside: avoid;  }
+#divTbl #tbody div {
+    margin-top: -7px;
+    font-size: 12px;
+}
+#divTbl #tbody div:nth-child(2n){
+    background-color: #DDD;
+}
+#divTbl #tbody div:nth-last-child(1){
+    border-bottom: solid 1px #408BC4;
+}
+
+#divTbl #tbody div table{
+    border-top: none !important;
+    border-bottom: none !important;
+}
+#divTbl #tbody div table tr td{
+    border: none !important;
+}
+/*#divTbl tbody tr.tr-imprimir-salto{
+    display: block;
+}*/
+#divTbl tbody tr td{
+    text-align: right;
+    font-size: 9px; 
+}
+body{
+    font-family: sans-serif, verdana, tahoma;
+    color:#666;
+}
+#contenido{
+    border: 0px;
+}
+
+
+.campo{
+    padding: 10px;
+}
+#btnCalcular{
+    display: none;
+}
+h2{
+    color:#408BC4;
+    text-align: left;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 5px;
+}
+.inputImpresion{
+    background-color: inherit;
+    border:none;
+    border-bottom: solid 1px #999;
+}
+.inputImpresion,
+.campoCorto input[type="text"],
+.campo input[type="text"],
+.campoBusqueda input[type="text"]{
+    background-color: inherit;
+    border:none;
+    border-radius:0px;
+    border-bottom: solid 1px #999;
+}

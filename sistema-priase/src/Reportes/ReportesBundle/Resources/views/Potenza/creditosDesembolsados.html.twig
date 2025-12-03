@@ -1,0 +1,111 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Créditos Desembolsados {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="creditosDesembolsadosController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Búsqueda de créditos </legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaInicio">Fecha Inicio:</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechainicio" id="fechaInicio" name="fechaInicio"/>
+                                    <p class="help-block" >
+                                        Debe seleccionar fecha inicial del rango de fechas
+                                    </p>
+                                </div> 
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaFin">Fecha Fin:</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechafin" id="fechaFin" name="fechaFin"/>
+                                    <p class="help-block" >
+                                        Debe seleccionar fecha final del rango de fechas
+                                    </p>
+                                </div> 
+                                <div class="form-group col-md-4">
+                                    <label for="txtPlazo">Plazo: </label>
+                                    <input type="number" id="txtPlazo" ng-model="plazo" class="form-control" >
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtMontoInicial">Monto Inicio: </label>
+                                    <input type="number" id="txtMontoInicial" name="txtMontoInicial" ng-model="rangoinicio" class="form-control" ng-focus="validarRangoMonto()" >
+                                    <p class="help-block" ng-show="rangoinicioincorrecto">Debe seleccionar el valor del monto inicial</p>
+                                    <p class="help-block" ng-show="rangoincorrecto">El rango no es correcto</p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtMontoFinal">Monto Fin: </label>
+                                    <input type="number" id="txtMontoFinal" name="txtMontoFinal" ng-model="rangofin" class="form-control" ng-focus="validarRangoMonto()">
+                                    <p class="help-block" ng-show="rangofinincorrecto">
+                                        Debe seleccionar el valor del monto final
+                                    </p>
+                                    <p class="help-block" ng-show="rangoincorrecto">El rango no es correcto</p>
+                                </div>
+
+                                <div class="form-group col-md-4">
+                                    <label for="cmbConvenio">Convenio: </label>
+                                    <select id="cmbConvenio" ng-model="idconvenio" class="form-control">
+                                        <option value="-1"> Seleccione una opción </option>
+                                        {% for convenio in convenios %}
+                                            <option value="{{convenio.idtercero}}">{{convenio.nombretercero}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group col-md-4">
+                                    <label for="txtDocumento">Documento cliente: </label>
+                                    <input type="number" id="txtDocumento" ng-model="documentocliente" class="form-control">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="cmbBanco">Banco: </label>
+                                    <select required="true" id="cmbidbanco" ng-model="idbanco" class="form-control">
+                                        <option value="" selected="true"> Seleccione una opción </option>                                    
+                                            <option value="1">Banco de Bogota</option>
+                                            <option value="2">Banco Davivienda</option>                                    
+                                    </select>
+                                    <p class="help-block" >
+                                        Debe seleccionar un Banco
+                                    </p>
+                                </div>
+                            </div>                            
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div class="alert-box info">
+                                    Toda la informacion será generada en un archivo .xlsx o .TXT
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte desembolsados
+                                </button>
+                            </div>               
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReportePlano()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Plano desembolsados
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/potenza/creditosDesembolsados.angular.js')}}"></script>
+{% endblock %}

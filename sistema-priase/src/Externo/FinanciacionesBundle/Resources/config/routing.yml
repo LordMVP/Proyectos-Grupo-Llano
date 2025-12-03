@@ -1,0 +1,139 @@
+externo_financiaciones_consultar_empresas:
+    pattern:  /empresas/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:Seguridad:consultarEmpresas } 
+    
+externo_financiaciones_autenticar:
+    pattern:  /usuario/autenticar
+    defaults: { _controller: ExternoFinanciacionesBundle:Seguridad:autenticar }
+    
+externo_comprobar_sesion:
+    pattern:  /usuario/comprobarsesion
+    defaults: { _controller: ExternoFinanciacionesBundle:Generico:comprobarSesion }
+
+    
+#SuscripcionExternoController
+
+externo_financiaciones_suscripcion_consultar:
+    pattern:  /suscripcion/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:SuscripcionExterno:consultarSuscripcion }
+
+#finaliza SuscripcionExternoController
+
+
+#VentasExternoController
+
+externo_financiaciones_venta_empresas_consultar:
+    pattern:  /info/empresas/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarEmpresas }
+
+externo_financiaciones_venta_firmas_funcionarios:
+    pattern:  /venta/firma/funcionarios
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarFuncionarioFirma }
+
+externo_financiaciones_venta_tiposdocumentos:
+    pattern:  /venta/tiposdocumentos/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarTiposDocumentos }
+
+externo_financiaciones_venta_documentos:
+    pattern:  /venta/documentos/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarDocumentos }
+    
+externo_venta_adjuntar_archivo:
+    pattern:  /venta/archivo/adjuntar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:adjuntarArchivo }
+
+externo_financiaciones_venta_liquidaciones:
+    pattern:  /venta/liquidaciones/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarLiquidaciones }
+
+externo_financiaciones_venta_conceptos:
+    pattern:  /venta/conceptos/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarConceptos }
+
+externo_financiaciones_venta_liquidar:
+    pattern:  /venta/liquidar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:liquidar }
+        
+externo_financiaciones_venta_guardar:
+    pattern:  /venta/guardar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:guardar }
+    
+externo_financiaciones_venta_consultar:
+    pattern:  /venta/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarVenta}
+
+externo_financiaciones_venta_consultar_detalle:
+    pattern:  /venta/detalle
+    defaults: { _controller: ExternoFinanciacionesBundle:VentasExterno:consultarDetalleVenta}
+    
+#fin Ventas Externo controller
+
+
+#FinanciacionExternoController
+
+externo_financiaciones_credito_liquidaciones:
+    pattern:  /venta/financiacion/credito/liquidaciones
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarLiquidacionesCredito }
+
+externo_financiaciones_credito_calificacion_variables:
+    pattern:  /venta/financiacion/calificacion/variables
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarVariablesCalificacion }
+
+externo_financiaciones_credito_calificacion_calificar:
+    pattern:  /venta/financiacion/calificar
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:calificar}
+
+externo_financiaciones_solicitante_tercero:
+    pattern:  /venta/financiacion/tercero/consultar
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarTercero}
+    
+externo_financiaciones_solicitante_tercero_por_documento:
+    pattern:  /venta/financiacion/tercero/consultarpordocumento
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarTerceroPorDocumento}
+    
+externo_financiaciones_solicitante_tercero_ciudadesexpediciondocumento:
+    pattern:  /venta/financiacion/tercero/ciudadesexpediciondocumento
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarCiudadesExpedicionDocumento}
+    
+externo_financiaciones_solicitante_tercero_tiposdocumento:
+    pattern:  /venta/financiacion/tercero/consultartiposdocumento
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarTiposDocumento}
+    
+externo_financiaciones_solicitante_tercero_tipostercero:
+    pattern:  /venta/financiacion/tercero/consultartipostercero
+    defaults: { _controller: ExternoFinanciacionesBundle:FinanciacionExterno:consultarTiposTercero}
+    
+#fin FinanciacionExternoController
+
+#Inicio contrato
+externo_financiaciones_contrato:
+    pattern:  /venta/financiacion/contrato/generar
+    defaults: { _controller: ExternoFinanciacionesBundle:ContratoExterno:index}
+    
+externo_financiaciones_contrato_generar_contrato:
+    pattern:  /venta/financiacion/contrato/generarcontrato
+    defaults: { _controller: ExternoFinanciacionesBundle:ContratoExterno:generarContrato}
+    
+externo_financiaciones_contrato_consultar_contrato:
+    pattern:  /venta/financiacion/contrato/consultarcontrato
+    defaults: { _controller: ExternoFinanciacionesBundle:ContratoExterno:consultarContrato}
+    
+externo_financiaciones_consultarempresas:
+    pattern:  /venta/financiacion/contrato/consultarEmpresas
+    defaults: { _controller: ExternoFinanciacionesBundle:ContratoExterno:consultarEmpresas}
+    
+externo_financiaciones_contrato_generar_reporte_contrato:
+    pattern:  /venta/financiacion/contrato/generarreportecontrato
+    defaults: { _controller: ExternoFinanciacionesBundle:ContratoExterno:generarReporteContrato}
+#Fin contrato
+
+#Inicio Reporte ventas externo
+externo_financiaciones_reporteventasexterno:
+    pattern:  /venta/financiacion/reporteventasexterno/generar
+    defaults: { _controller: ExternoFinanciacionesBundle:ReporteVentasExterno:index}
+
+externo_financiaciones_reporteventasexterno_procesar:
+    pattern:  /venta/financiacion/reporteventasexterno/procesar
+    defaults: { _controller: ExternoFinanciacionesBundle:ReporteVentasExterno:procesar}
+#Fin Reporte ventas externo
+

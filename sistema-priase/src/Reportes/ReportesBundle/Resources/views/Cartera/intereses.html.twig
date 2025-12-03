@@ -1,0 +1,96 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte de valor recaudado y facturado por intereses corriente y mora por tipo concepto -{{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="InteresesController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtros de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+
+                                <div class="form-group col-md-4" show-errors>
+                                    <label>Año</label>
+                                    <select required="true" id="anos"  name="anos" ng-model="info.anos" class="form-control">
+                                        <option ng-repeat="ano in anos" ng-value="ano.anos">{[{ano.anos}]}</option>
+                                    </select>   
+                                    <p class="help-block" ng-if="reporte.anos.$error.required">
+                                        * El años es obligatorio
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors >
+                                    <label>Periodo</label>
+                                    <select required="true" id="periodo"  name="periodo" ng-model="info.idordenperiodo"  class="form-control">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.idorden">{[{periodo.nombre}]}</option>
+                                    </select> 
+                                    <p class="help-block" ng-if="reporte.anos.$error.required">
+                                        * El periodo es obligatorio
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <button style="margin-top: 25px" class="btn btn-primary" ng-click="abrirDialogoCiclos()">Seleccionar Ciclos</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+
+        <script type="text/ng-template" id="ciclos.html">
+            <div class="modal fade">
+            <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+            <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Selecione los ciclos a consultar</h4>
+            </div>
+            <div class="modal-body" style="max-height:200px; overflow-y:auto;">
+            <div ng-repeat="ciclo in modelo.ciclos" class="standard" flex="50">
+            <label>
+            <input type="checkbox" ng-click="onCicloSeleccionado($event, ciclo.idciclo)" ng-checked="exists(ciclo.idciclo)"/>
+            {[{ciclo.ciclo}]}
+            </label>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" ng-click="close(false)" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            <button type="button" ng-click="close(true)" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+            </div>
+            </div>
+            </div>
+        </script>
+
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/cartera/intereses.angular.js')}}"></script>
+{% endblock %}

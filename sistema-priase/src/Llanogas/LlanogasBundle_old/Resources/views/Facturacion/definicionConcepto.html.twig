@@ -1,0 +1,610 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+<link href="{{asset('bundles/Llanogas/css/facturacion/definicionConcepto.css')}}" media="screen" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}Definición de conceptos- {{empresa}}  {% endblock %}
+
+{% block body %}
+
+<div id="divComandos">
+    <div class="divBotones" style="margin-bottom:15px;">
+        <button id="btnNuevo" class="btn">nuevo</button>
+        <button id="btnBuscar" class="btn">buscar</button>
+        <button id="btnGrabar" class="btn">grabar</button>
+        <button id="btnCancelar" class="btn">cancelar</button>
+    </div>
+</div>
+
+<div id="divConceptoPrincipal" class="divContenedorColapsable">
+    <div class="divColapsable">
+        <h3 class="tituloColapsable">Concepto Principal</h3>
+        <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+    </div>
+    <div class="contenidoColapsable">
+        <div class="campo">
+            <label for="txtConcepto">Concepto: </label>
+            <input type="text" id="txtConcepto" disabled="disabled"/>
+            <select id="cmbConceptosNuevos" style="display:none;"></select>
+        </div>
+
+        <div class="campo">
+            <label for="txtAlias">Alias: </label>
+            <input type="text" disabled="disabled" maxlength="10" data-prop="alias" required="required" id="txtAlias"/>
+        </div>
+
+        <div class="campo">
+            <label for="txtAbreviatura">Abreviatura: </label>
+            <input type="text" disabled="disabled" maxlength="20" data-prop="abreviatura" required="required" id="txtAbreviatura"/>
+        </div>
+
+        <div class="campo">
+            <label for="cmbTipoCalculo">Tipo cálculo: </label>
+            <select id="cmbTipoCalculo" disabled="disabled" data-prop="tipcalculo" required="required">
+                <option value="-1">Seleccione una opción</option>
+                <option value="V" selected>Valor</option>
+                <option value="F">Fórmula</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="txtValor">Valor: </label>
+            <input type="text" id="txtValor" disabled="disabled"  />
+        </div>
+
+        <div class="campo">
+            <label for="cmbOperacion">Operación: </label>
+            <select id="cmbOperacion" disabled="disabled" required="required" data-prop="operacion">
+                <option value="-1">Seleccione una opción</option>
+                <option value="I">Informe</option>
+                <option value="S">Suma</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbPreliquidar">Liquidar: </label>
+            <select id="cmbPreliquidar" disabled="disabled" required="required" data-prop="preliquidar">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbAnticipo">Anticipo: </label>
+            <select id="cmbAnticipo" disabled="disabled" required="required" data-prop="anticipo">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbConceptoInteres">Concepto Interés: </label>
+            <select id="cmbConceptoInteres" disabled="disabled" required="required" data-prop="interesfinanciacion">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbSuspende">Suspende: </label>
+            <select id="cmbSuspende" disabled="disabled" required="required" data-prop="permitesuspender">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbPrioridad">Prioridad de pago: </label>
+            <select id="cmbPrioridad" disabled="disabled" required="required" data-prop="pagprioridad">
+                <option value="-1">Seleccione una opción</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbFinanciable">Financiable: </label>
+            <select id="cmbFinanciable" disabled="disabled" required="required" data-prop="financiable">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbNulo">Obligatorio: </label>
+            <select id="cmbNulo" disabled="disabled" required="required" data-prop="nulo">
+                <option value="-1">Seleccione una opción</option>
+                <option value="S" selected>No</option>
+                <option value="N">Si</option>
+                <option value="I">Indiferente</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbCondonable">Condonable: </label>
+            <select id="cmbCondonable" disabled="disabled" required="required" data-prop="condonable">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No</option>
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbAplica">Aplica programa: </label>
+            <select id="cmbAplica" disabled="disabled" required="required" data-prop="idprograma">
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbFuncionConcepto">Función:</label>
+            <select id="cmbFuncionConcepto" disabled="disabled" required="required" data-prop="idfuncion"></select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbConcepto">Tipo Valor: </label>
+            <select id="cmbConcepto" disabled="disabled" required="required" data-prop="campoconcepto">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N" selected>No aplica</option>
+                <option value="U">Valor unitario</option>
+                <option value="C">Cantidad</option>
+                <option value="T">Valor total</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbAjuste">Tipo de Ajuste:</label>
+            <select name="" id="cmbAjuste" disabled="disabled" required="required" data-prop="ajuste">
+                <option value="-1">Seleccione una opción</option>
+                <option value="T">Truncar</option>
+                <option value="R">Redondear</option>
+                <option value="N">No Ajustar</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="cmbPrecision">Precisión:</label>
+            <select id="cmbPrecision" disabled="disabled" required="required" data-prop="precision">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+        </div>
+
+          <div class="campo">
+            <label for="cmbDeshabitado">Deshabitado </label>
+            <select id="cmbDeshabitado" disabled="disabled" required="required" data-prop="deshabitado">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N">No Aplica</option>                
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+            <div class="campo">
+            <label for="cmbPuertaPuerta">Puerta a Puerta </label>
+            <select id="cmbPuertaPuerta" disabled="disabled" required="required" required="required" data-prop="puertapuerta">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N">No Aplica</option>                
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+            <div class="campo">
+            <label for="cmbTarifaPlena">Tarifa Plena </label>
+            <select id="cmbTarifaPlena" disabled="disabled" required="required" data-prop="tarifaplena">
+                <option value="-1">Seleccione una opción</option>                
+                <option value="N">No Aplica</option>                
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+            <div class="campo">
+            <label for="cmbHomologacion">Homologacion </label>
+            <select id="cmbHomologacion" disabled="disabled" required="required" data-prop="homologacion">
+                <option value="-1">Seleccione una opción</option>                
+                <option value="N">No Aplica</option>
+                <option value="A">Aseo /Gas </option>
+                <option value="E">Energia</option>
+            </select>
+        </div>
+
+            <div class="campo">
+            <label for="cmbAforadoaseo">Aforado Aseo </label>
+            <select id="cmbAforadoaseo" disabled="disabled" required="required" data-prop="aforadoaseo">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N">No Aplica</option>
+                <option value="X">No Aforado</option>
+                <option value="S">Aforado</option>
+                
+            </select>
+        </div>
+
+               <div class="campo">
+            <label for="cmbAforadoTercero">Aforado Tercero </label>
+            <select id="cmbAforadoTercero" disabled="disabled" required="required" data-prop="aforadotercero">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N">No Aplica</option>                
+                <option value="S">Si</option>
+            </select>
+        </div>
+
+                <div class="campo">
+            <label for="cmbAplicaDINC">DINC  </label>
+            <select id="cmbAplicaDINC" disabled="disabled" required="required" data-prop="aplicadinc">
+                <option value="-1">Seleccione una opción</option>
+                <option value="N">No Aplica</option>
+                <option value="X">Aplica sin DINC</option>
+                <option value="S">Aplica con DINC</option>
+            </select>
+        </div>
+
+                <div class="campo">
+            <label for="cmbEstado">Estado: </label>
+            <select id="cmbEstado" disabled="disabled" required="required" data-prop="estado">
+                <option value="-1">Seleccione una opción</option>
+                <option value="A" selected>Activo</option>
+                <option value="E">Eliminado</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaInicial">Fecha inicial vigencia: </label>
+            <input type="text" id="txtFechaInicial" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaFinal">Fecha final vigencia: </label>
+            <input type="text" id="txtFechaFinal" disabled="disabled"/>
+        </div>
+    </div>
+</div>
+
+<div id="divConstructor" class="divContenedorColapsable" style="display:none">
+    <div class="divColapsable">
+        <h3 class="tituloColapsable">Constructor de fórmula</h3>
+        <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+    </div>
+    <div class="contenidoColapsable">
+        <table id="tblAgregarConcepto" class="tabla"></table>
+        <div id="divPanelFormula">
+            <div>
+                <label>Fórmula</label>
+                <div class="divFormula">
+                </div>
+            </div>
+            <div style="display:table; width:98%; margin-top:10px;">
+                <div class="operadoresFormula">
+                    <div class="panel panelOperadores">
+                        <label>Operadores:</label>
+                        <div class="botonesOperaciones divBotones">
+                            <button class="btn btnOperador">+</button>
+                            <button class="btn btnOperador">-</button>
+                            <button class="btn btnOperador">*</button>
+                            <button class="btn btnOperador">/</button>
+
+                        </div>
+                        <div class="divParentesis divBotones">
+                            <button class="btn btnOperador">(</button>
+                            <button class="btn btnOperador">)</button>
+                        </div>
+                        <div>
+                            <div style="display: inline-block;">
+                                <button class="btnSimple btnCE" style="margin-top:25px;"><strong>CE</strong></button>
+                            </div>
+                            <div class="campoBusqueda">
+                                <label>Valor númerico: </label>
+                                <input type="text" class="txtValorNumerico" />
+                                <button class="btnAgregaValor"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panelConceptos">
+                        <label>Conceptos:</label>
+                        <select class="cmbConceptos" size="5"></select>
+                        <button class="btnAgregarConcepto btnSimple">Agregar Concepto</button>
+                    </div>
+                    <div class="panel panelFunciones">
+                        <label>Funciones: </label>
+                        <select class="cmbFunciones" size="5">
+                        </select>
+                        <button class="btnAgregarFuncion btnSimple">Agregar Función</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <button id="btnAgregarFormula" class="btnSimple">Validar fórmula y asociar conceptos</button>
+        </div>
+        <div id="divConceptosRelacionados" class="divContenedorColapsable" style="display:none; margin-top:10px; margin-right:10px;">
+            <div class="divColapsable">
+                <h3 class="tituloColapsable">Conceptos Relacionados</h3>
+                <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+            </div>
+            <div class="contenidoColapsable">
+                <table id="tblConceptosSeleccinados" class="tabla"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divRangos" class="divContenedorColapsable" style="display:none">
+    <div class="divColapsable">
+        <h3 class="tituloColapsable">Rangos</h3>
+        <div class="btnColapsable"><a href="" class="fa fa-minus"></a></div>
+    </div>
+    <div class="contenidoColapsable">
+        <div class="campo">
+            <label for="txtConceptoRango">Concepto: </label>
+            <input type="text" id="txtConceptoRango" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtRangoInicial">Rango inicial: </label>
+            <input type="text" id="txtRangoInicial" />
+        </div>
+        <div class="campo">
+            <label for="txtRangoFinal">Rango final: </label>
+            <input type="text" id="txtRangoFinal" />
+        </div>
+        <div class="campo">
+            <label for="cmbAccionRango">Acción: </label>
+            <select id="cmbAccionRango" required="required">
+                <option value="-1">Seleccione una opción</option>
+                <option value="V" selected>Valor</option>
+                <option value="F">Fórmula</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtValorFormula" id="lblValorFormula">Valor: </label>
+            <input type="text" id="txtValorFormula" data-text="" />
+        </div>
+        <div class="campo">
+            <label></label>
+            <button id="btnEditarFormulaRango" style="display:none;" data-accion="I" class="btnSimple">Agregar o Editar Fórmula</button>
+        </div>
+        <p id="pMensajeRango" class="pMensaje"></p>
+        <button class="btnSimple" id="btnAgregarRango">Agregar Nuevo Rango</button>
+        <button class="btnSimple" id="btnActualizarRango" style="display: none;">Actualizar Rango</button>
+        <button class="btnSimple" id="btnCancelarActualizarRango" style="display: none;">Cancelar Edición</button>
+        <div style="padding:10px;">
+            <table class="tabla" id="tblRangos"></table>
+        </div>
+    </div>
+</div>
+
+<div id="divConstructorFormulaModal" style="display: none;">
+    <div>
+        <label>Fórmula</label>
+        <div class="divFormula"></div>
+    </div>
+    <div style="display:table; width:98%; margin-top:10px;">
+        <div class="operadoresFormula">
+            <div class="panel panelOperadores">
+                <label>Operadores:</label>
+                <div class="botonesOperaciones divBotones">
+                    <button class="btn btnOperador">+</button>
+                    <button class="btn btnOperador">-</button>
+                    <button class="btn btnOperador">*</button>
+                    <button class="btn btnOperador">/</button>
+
+                </div>
+                <div class="divParentesis divBotones">
+                    <button class="btn btnOperador">(</button>
+                    <button class="btn btnOperador">)</button>
+                </div>
+                <div>
+                    <div style="display: inline-block;">
+                        <button class="btnSimple btnCE" style="margin-top:25px;"><strong>CE</strong></button>
+                    </div>
+                    <div class="campoBusqueda">
+                        <label>Valor númerico: </label>
+                        <input type="text" class="txtValorNumerico" />
+                        <button class="btnAgregaValor"><i class="fa fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panelConceptos">
+                <label>Conceptos:</label>
+                <select class="cmbConceptos" size="5"></select>
+                <button class="btnAgregarConcepto btnSimple">Agregar Concepto</button>
+            </div>
+            <div class="panel panelFunciones">
+                <label>Funciones: </label>
+                <select class="cmbFunciones" size="5">
+                </select>
+                <button class="btnAgregarFuncion btnSimple">Agregar Función</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="divEditarConcepto" style="display: none;">
+    <div class="campo">
+        <label for="txtIdConcepto">Id concepto: </label>
+        <input type="text" id="txtIdConcepto" disabled="disabled"/>
+    </div>
+    <div class="campo">
+        <label for="txtNombreConcepto">Nombre del concepto: </label>
+        <input type="text" id="txtNombreConcepto" disabled="disabled"/>
+    </div>
+    <div class="campo">
+        <label for="cmbAcumula">Como acumula: </label>
+        <select id="cmbAcumula">
+        </select>
+    </div>
+    <div class="campo">
+        <label for="txtCantAcumula">Cantidad que acumula: </label>
+        <input type="text" id="txtCantAcumula"/>
+    </div>
+    <div class="campo">
+        <label for="cmbTablaOrigenSeleccionado">Tabla origen: </label>
+        <select id="cmbTablaOrigenSeleccionado"></select>
+    </div>
+    <div class="campo">
+        <label for="cmbCampoSeleccionado">Campo: </label>
+        <select id="cmbCampoSeleccionado"></select>
+    </div>
+    <div class="campo">
+        <label for="cmbLiquidacion">Liquidación: </label>
+        <select id="cmbLiquidacion"></select>
+    </div>
+    <div class="campo">
+        <label for="cmDocumento">Documento: </label>
+        <select id="cmDocumento"></select>
+    </div>
+    <div class="campo">
+        <label for="cmbTipoDocumento">Tipo documento: </label>
+        <select id="cmbTipoDocumento"></select>
+    </div>
+    <p class="pMensaje" id="pErrorEditar"></p>
+    <p class="pMensaje" id="pNotificacion"></p>
+</div>
+
+<div id="divAgregarContabilizacionModal" style="display: none">
+
+    <div class="campo">
+        <label for="cmbDocumentoContabilizacion">Documento:</label>
+        <select id="cmbDocumentoContabilizacion"></select>
+    </div>
+    <div class="campo">
+        <label for="cmbTipoDocumentoContabilizacion">Tipo documento: </label>
+        <select id="cmbTipoDocumentoContabilizacion"></select>
+    </div>
+
+    <div class="campo">
+        <label for="txtCodCuentaCZ">Código cuenta: </label>
+        <input type="text" id="txtCodCuentaCZ" />
+    </div>
+    <div class="campo">
+        <label for="txtNombreCuentaCZ">Nombre cuenta: </label>
+        <input type="text" id="txtNombreCuentaCZ" />
+    </div>
+
+    <div class="campo">
+        <label for="cmbNaturaleza">Naturaleza: </label>
+        <select id="cmbNaturaleza">
+            <option value="-1">Seleccione una opción</option>
+            <option value="D">Débito</option>
+            <option value="C">Crédito</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="txtPorcentaje">Porcentaje: </label>
+        <input type="text" id="txtPorcentaje" value="100"/>
+    </div>
+    <p id="pMensajeContabilizacion" class="pMensaje"></p>
+</div>
+
+<div id="divAgregarAreaModal" style="display: none">
+    <div class="campo">
+        <label for="cmbTipoSuscripcionAN">Tipo suscripción: </label>
+        <select id="cmbTipoSuscripcionAN"></select>
+    </div>
+    <div class="campo">
+        <label for="txtAreaAN">Código Área: </label>
+        <input type="text" id="txtAreaAN" />
+    </div>
+    <div class="campo">
+        <label for="txtNombreAreaAN">Nombre Área: </label>
+        <input type="text" id="txtNombreAreaAN" />
+    </div>
+    <div class="campo">
+        <label for="txtPorcentajeAN">Porcentaje: </label>
+        <input type="text" id="txtPorcentajeAN" value="100"/>
+    </div>
+</div>
+
+<div id="divAgregarDepartamentoModal" style="display: none">
+    <div class="campo">
+        <label for="txtDepartamento">Departamento empresa: </label>
+        <input type="text" id="txtDepartamento" disabled="disabled"/>
+    </div>
+    <div class="campo">
+        <label for="txtCodEmpresa">Código empresa:</label>
+        <input type="text" id="txtCodEmpresa" />
+    </div>
+    <div class="campo">
+        <label for="txtNombreEmpresa">Nombre empresa:</label>
+        <input type="text" id="txtNombreEmpresa" />
+    </div>
+    <div class="campo">
+        <label for="txtPorcentajeDEP">Porcentaje</label>
+        <input type="text" id="txtPorcentajeDEP" value="100"/>
+    </div>
+</div>
+
+<div id="divAgregarContabilizacionCruceModal" style="display: none">
+
+    <div class="campo">
+        <label for="cmbDocumentoConCruce">Documento:</label>
+        <select id="cmbDocumentoConCruce"></select>
+    </div>
+    <div class="campo">
+        <label for="cmbTipoDocumentoConCruce">Tipo documento: </label>
+        <select id="cmbTipoDocumentoConCruce"></select>
+    </div>
+
+    <div class="campo">
+        <label for="cmbMedioPagoConCruce">Medio de Pago:</label>
+        <select id="cmbMedioPagoConCruce"></select>
+    </div>
+
+    <div class="campo">
+        <label for="txtCodCuentaConCruce">Código cuenta: </label>
+        <input type="text" id="txtCodCuentaConCruce" />
+    </div>
+    <div class="campo">
+        <label for="txtNombreCuentaConCruce">Nombre cuenta: </label>
+        <input type="text" id="txtNombreCuentaConCruce" />
+    </div>
+
+    <div class="campo">
+        <label for="cmbNaturalezaConCruce">Naturaleza: </label>
+        <select id="cmbNaturalezaConCruce">
+            <option value="-1">Seleccione una opción</option>
+            <option value="D">Débito</option>
+            <option value="C">Crédito</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="txtPorcentajeConCruce">Porcentaje: </label>
+        <input type="text" id="txtPorcentajeConCruce" value="100"/>
+    </div>
+    <p id="pMensajeContabilizacion" class="pMensaje"></p>
+</div>
+
+
+<div id="divConfirmaRango" style="display: none;">
+    <p>Se borrará el rango, ¿Desea continuar?</p>
+</div>
+<div id="divConfirmCancelar" style="display: none;">
+    <p>Se cancelará la operación actual ¿Desea continuar?</p>
+</div>
+<div id="divConfimacionQuitarConcepto" style="display:none;">
+    <p></p>
+</div>
+
+
+<div id="divErrores"></div>
+<div id="divFiltroConceptos"></div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/definicionConcepto/definicionConcepto.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/definicionConcepto/definicionConcepto.modelo.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/definicionConcepto/definicionConcepto.vista.js')}}"></script>
+{% endblock %}

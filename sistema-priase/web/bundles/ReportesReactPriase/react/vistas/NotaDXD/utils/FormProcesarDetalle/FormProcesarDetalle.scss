@@ -1,0 +1,25 @@
+.process-btn {
+  width: 150px;
+}
+
+.process-btn-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: end;
+}
+
+.div-check-eliminar-suscrip {
+  display: flex;
+  align-items: center;
+  border: 1px solid #007bff;
+  padding: 6px;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.check-eliminar-suscrip {
+  margin-top: 0;
+  margin-bottom: 1px;
+  margin-left: 0;
+  margin-right: 8px;
+}

@@ -1,0 +1,126 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Notas -{{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="NotasReporteControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtros de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12" > 
+                                    <div class="col-md-4 form-group" show-errors>
+                                        <label for="fechaInicial">Fecha Inicial Consulta (yyyy-mm-dd):</label>
+                                        <input class="form-control datepicker input-sm" ng-model="info.fechaInicial" id="fechaInicial" name="fechaInicial" required="true" />
+                                        <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                            La fecha de consulta es requerida
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 form-group" show-errors>
+                                        <label for="fechaFinal">Fecha Final Consulta (yyyy-mm-dd):</label>
+                                        <input class="form-control datepicker input-sm" ng-model="info.fechaFinal" id="fechaFinal" name="fechaFinal" required="true" />
+                                        <p class="help-block" ng-if="reporte.fechaConsulta.$error.required" >
+                                            La fecha de consulta es requerida
+                                        </p>
+                                    </div>  
+                                    <div class="form-group col-md-4" >
+                                        <label>Municipio</label>
+                                        <select  id="municipio" name="municipio" ng-model="info.municipio" class="form-control">
+                                            <option ng-repeat="municipio in municipios" ng-value="municipio.idmunicipio">
+                                                {[{municipio.municipio}]}
+                                            </option>
+                                        </select>                                        
+                                    </div>   
+                                </div>   
+                                <div class="col-md-12" > 
+                                    <div class="form-group col-md-4">
+                                        <label>Estado</label>
+                                        <select id="estado" name="estado" ng-model="info.estado" class="form-control"  >
+                                            <option value="-1">Seleccione una opción</option>
+                                            <option value="A">Activa</option>
+                                            <option value="U">Suspensión Usuario</option>
+                                            <option value="E">Eliminada</option>
+                                            <option value="R">Suspensión Remodelación</option>
+                                        </select>
+                                    </div>      
+                                    <div class="form-group col-md-4" >
+                                        <label>Id Suscripcion</label>
+                                        <input type="text" id="txtSuscripcion" pattern="[0-9]*" ng-model="info.idsuscripcion" name="txtSuscripcion" class="form-control">
+                                    </div>   
+                                    
+                                    <div class="col-md-4 form-group" show-errors>
+                                        <label>Documento</label>
+                                        <select multiple id="documento" name="documento" ng-model="info.documento" class="form-control">                  
+                                            <option ng-repeat="doc in documentos" ng-value="doc.id">
+                                                {[{doc.nombre}]}
+                                            </option>
+                                        </select>                                        
+                                    </div>
+                                </div>
+                                <div class="col-md-12" > 
+                                    <div class="form-group col-md-4" >
+                                        <button class="btn btn-primary" style="margin-top: 25px" ng-click="abrirDialogoCiclos()">Seleccionar Ciclos</button>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte regulados
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+
+        <script type="text/ng-template" id="ciclos.html">
+            <div class="modal fade">
+            <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+            <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Selecione los ciclos a consultar</h4>
+            </div>
+            <div class="modal-body" style="max-height:200px; overflow-y:auto;">
+            <div ng-repeat="ciclo in modelo.ciclos" class="standard" flex="50">
+            <label>
+            <input type="checkbox" ng-click="onCicloSeleccionado($event, ciclo.idciclo)" ng-checked="exists(ciclo.idciclo)"/>
+            {[{ciclo.ciclo}]}
+            </label>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" ng-click="close(false)" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            <button type="button" ng-click="close(true)" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+            </div>
+            </div>
+            </div>
+        </script>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/notasReporte.angular.js')}}"></script>
+{% endblock %}

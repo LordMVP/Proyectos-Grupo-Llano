@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: calcularTarifas/GestionCalculoTarifasMensuales/GestionCalculoTarifasMensuales.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: calcularTarifas/GestionCalculoTarifasMensuales/GestionCalculoTarifasMensuales.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../global/rutas_api';
+import { formatearArray } from '../../../global/util_nominaciones';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+import './GestionCalculoTarifasMensuales.scss';
+
+// Variable para validar si se consultan variables mensuales o semestrales
+const SEMESTRAL = true;
+
+const CALCULADO = 'CALCULADO';
+
+class GestionCalculoTarifasMensuales extends Component {
+
+  state = {
+    // Datos de la entidad
+    panelActivo: 'VC',
+    areaPrestacion: '',
+    periodo: '',
+    listaAreaPrestacion: [],
+    listaPeriodo: [],
+    listaVariablesCalculadas: [],
+    listaVariablesSemestrales: [],
+  };
+
+  /**
+   * Método encargado de ejecutar una o varias acciones al momento de cargar el componente.
+   */
+  componentDidMount() {
+    this.consultarAreaPrestacion();
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  };
+
+  /**
+   * Método encargado de consultar las área de prestación
+   */
+  consultarAreaPrestacion = async () => {
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.AREAS_PRESTACION.FILTRO, { criterio: '' });
+    if (respuesta.data.codigo > 0) {
+      this.setState({ listaAreaPrestacion: formatearArray(respuesta.data.datos) });
+    }
+  };
+
+  /**
+   * Método encargado de contruir un objeto con los periodos consultados.
+   * @param {Object} periodos Datos de los periodos consultados.
+   * @returns {Object}
+   */
+  construirObjetoPeriodos = (periodos) => {
+    let anio;
+    const lista = periodos.map((dato) => {
+      anio = new Date(dato.perIderegistro.perFecinicial).getFullYear();
+      return {
+        idRegistro: dato.perIderegistro.perIderegistro,
+        titulo: `${dato.perIderegistro.perNombre}-${anio}`,
+        perIdepadre: dato.perIdepadre.perIderegistro
+      }
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      areaPrestacion: '',
+      periodo: '',
+      panelActivo: 'VC',
+      listaBalanceMasas: [],
+      listaVariablesCalculadas: [],
+      listaVariablesSemestrales: [],
+    });
+  };
+
+  /**
+   * Método encargado de limpiar los datos del formulario al momneto de cambiar de interfaz.
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Consultar', callback: this.consultarVariables },
+      { texto: 'Calcular', callback: this.calcularEntidad },
+      { texto: 'Aprobar', callback: this.aprobarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de consultar las variables semestrales y las variables calculadas
+   */
+  consultarVariables = () => {
+    const { areaPrestacion, periodo } = this.state;
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const parametros = {
+      idArea: areaPrestacion,
+      idPeriodo: periodo
+    }
+    this.consultarVariablesCalculadas(parametros, SEMESTRAL);
+    this.consultarVariablesCalculadas(parametros);
+  };
+
+  /**
+   * Método encargado de consultar las variables calculadas
+   * @param {Object} parametros Parametros necesarios para realizar la petición
+   */
+  consultarVariablesCalculadas = (parametros, semestre = null) => {
+    if (semestre != null) {
+      const { areaPrestacion, periodo, listaPeriodo } = this.state;
+      const periodoPadre = listaPeriodo.find(p => p.idRegistro == periodo);
+      parametros = {
+        idArea: areaPrestacion,
+        idPeriodo: periodoPadre.perIdepadre
+      }
+    }
+    axios.post(RUTAS_API.CALCULO_TARIFAS.CALCULO_SEMESTRAL.CONSULTAR_VARIABLES_CALCULADAS, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          if (semestre != null) {
+            this.setState({ listaVariablesSemestrales: respuesta.data.datos });
+            return;
+          }
+          this.setState({ listaVariablesCalculadas: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { areaPrestacion, periodo } = this.state;
+    if (!areaPrestacion || areaPrestacion == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un área de prestación.' } };
+    }
+    if (!periodo || periodo == '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe un periodo semestral.' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+     * Método encargado de certificar las variables
+     * @returns {bool}
+     */
+  aprobarEntidad = () => {
+    const { areaPrestacion, periodo } = this.state;
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const parametros = {
+      idArea: areaPrestacion,
+      idPeriodo: periodo
+    }
+
+    axios.post(RUTAS_API.CALCULO_TARIFAS.CALCULO_SEMESTRAL.CERTIFICAR_VARIABLES, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaVariablesCalculadas: [] });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  calcularEntidad = () => {
+    const { areaPrestacion, periodo, listaPeriodo } = this.state;
+    const periodoPadre = listaPeriodo.find(p => p.idRegistro == periodo);
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const parametros = {
+      idArea: areaPrestacion,
+      idPeriodo: periodo,
+      idPeriodoPadre: periodoPadre.perIdepadre
+    }
+
+    axios.post(RUTAS_API.CALCULO_TARIFAS.CALCULO_SEMESTRAL.CALCULAR, parametros)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.consultarVariablesCalculadas(parametros);
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de la barra de navegación.
+   */
+  controlCambioNavTabs = (evento) => {
+    const control = evento.target;
+    const panel = control.attributes['data-panel'].value;
+    this.setState({ panelActivo: panel });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let { name, value } = evento.target;
+    let change = {};
+    change[name] = value;
+    if (name == 'areaPrestacion') {
+      this.consultarPeriodos(value);
+    }
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar los periodos semestrales por área de prestación.
+   * @param {Number} idArea Identificador del área de prestación.
+   */
+  consultarPeriodos = async (idArea) => {
+    const respuesta = await axios.post(RUTAS_API.PARAMETRIZACION.CARGAR_PERIODOS.CONSULTAR_PERIODOS, { idArea: idArea });
+    if (respuesta.data.codigo > 0) {
+      this.setState({ listaPeriodo: formatearArray(this.construirObjetoPeriodos(respuesta.data.datos)) });
+    }
+  };
+
+  /**
+   * Método encargado de convertir la fecha ingresada a Date
+   * @param {string} fechaContrato fecha seleccionada por el usuario
+   * @returns {Date}
+   */
+  obtenerFecha = (fechaContrato) => {
+    let fecha = new Date(fechaContrato);
+    fecha = (fecha.getFullYear() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getDate());
+    return fecha;
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con las variables calculadas
+   * @returns {Component}
+   */
+  renderSeccionVariablesCalculadas = (semestre = null) => {
+    let lista = this.state.listaVariablesCalculadas;
+    if (semestre != null) {
+      lista = this.state.listaVariablesSemestrales;
+    }
+    if (!Util.validarArreglo(lista)) {
+      return &lt;div className='text-center'>Sin resultados&lt;/div>
+    }
+    return (
+      &lt;table className='table-normaliced table table-condensed table-bordered'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th className='text-center'>Variable&lt;/th>
+            &lt;th className='text-center'>Fecha Grabación&lt;/th>
+            &lt;th className='text-center'>Valor&lt;/th>
+            &lt;th className='text-center'>Estado&lt;/th>
+            &lt;th colSpan={2} className='text-center'>Datos Rango&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {Util.validarArreglo(lista) &amp;&amp; (
+            lista.map((dato, index) => {
+              let tamanioFilas = 1;
+              if (Util.validarArreglo(dato.listaRangos)) {
+                dato.listaRangos.forEach(rango => {
+                  tamanioFilas++;
+                });
+              }
+              return (
+                &lt;Fragment key={(dato.conIderegistro.uniConcepto.uniIderegistro)}>
+                  &lt;tr key={(dato.conIderegistro.uniConcepto.uniIderegistro)}>
+                    &lt;td rowSpan={tamanioFilas}>{dato.conIderegistro.conNombre}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{this.obtenerFecha(dato.varprFecgrabacion)}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{dato.varprValor}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{CALCULADO}&lt;/td>
+                    {(dato.listaRangos.length &lt;= 0) &amp;&amp;
+                      &lt;td colSpan='2'>&lt;i className='fa fa-fw fa-warning'>&lt;/i>La variable no presenta rangos&lt;/td>
+                    }
+                    {(dato.listaRangos &amp;&amp; dato.listaRangos.length > 0) &amp;&amp;
+                      (
+                        &lt;Fragment>
+                          &lt;td className='th-sub bg-dark text-white'>Rango Inicial&lt;/td>
+                          &lt;td className='th-sub bg-dark text-white'>Rango Final&lt;/td>
+                        &lt;/Fragment>
+                      )
+                    }
+                  &lt;/tr>
+                  {
+                    Util.validarArreglo(dato.listaRangos) &amp;&amp; (
+                      dato.listaRangos.map((rango, indexRango) => {
+                        return (
+                          &lt;Fragment key={(rango.racoIderegistro.racoIderegistr + indexRango)}>
+                            &lt;tr key={(rango.racoIderegistro.racoIderegistr + indexRango + 'TR')}>
+                              &lt;td>{rango.racoIderegistro.racoRaninicial}&lt;/td>
+                              &lt;td>{rango.racoIderegistro.racoRanfinal}&lt;/td>
+                            &lt;/tr>
+                          &lt;/Fragment>
+                        );
+                      })
+                    )
+                  }
+                &lt;/Fragment>
+              );
+            })
+          )}
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la barra de navegación
+   * @returns {Object}
+   */
+  renderSeccionTabs = () => {
+    return (
+      &lt;Fragment>
+        &lt;nav>
+          &lt;div className="nav nav-tabs" id="nav-tab" role="tablist">
+            &lt;a className={`nav-item nav-link ${(this.state.panelActivo === 'VC') ? 'active' : ''}`} data-panel='VC' onClick={this.controlCambioNavTabs}>Variables Calculadas&lt;/a>
+            &lt;a className={`nav-item nav-link ${(this.state.panelActivo === 'VS') ? 'active' : ''}`} data-panel='VS' onClick={this.controlCambioNavTabs}>Variables Semestrales&lt;/a>
+          &lt;/div>
+        &lt;/nav>
+        &lt;div className="tab-content" id="nav-tabContent">
+          &lt;div className="tab-pane fade show active" >
+            {(this.state.panelActivo === 'VC') &amp;&amp; (this.renderSeccionVariablesCalculadas())}
+            {(this.state.panelActivo === 'VS') &amp;&amp; (this.renderSeccionVariablesCalculadas(SEMESTRAL))}
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    )
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaAreaPrestacion}
+            propTexto='arprNombre'
+            propValor='arprIderegistro'
+            label='Área de Prestación:'
+            name='areaPrestacion'
+            value={this.state.areaPrestacion}
+            onChange={this.controlarCambio}
+            cols={6}
+          />
+          &lt;Combo
+            opciones={this.state.listaPeriodo}
+            propTexto='titulo'
+            propValor='idRegistro'
+            label='Periodo:'
+            name='periodo'
+            value={this.state.periodo}
+            onChange={this.controlarCambio}
+            cols={6}
+          />
+        &lt;/div>
+        &lt;div className='col-12 mt-5'>
+          {this.renderSeccionTabs()}
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCalculoTarifasMensuales.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCalculoTarifasMensuales);
+
+export { VistaRedux as RGestionCalculoTarifasMensuales };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#estadoConsulta">estadoConsulta</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:43:08 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

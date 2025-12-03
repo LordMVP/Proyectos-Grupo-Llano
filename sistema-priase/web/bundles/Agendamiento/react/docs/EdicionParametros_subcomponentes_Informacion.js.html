@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: EdicionParametros/subcomponentes/Informacion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: EdicionParametros/subcomponentes/Informacion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input, Interruptor } from 'appfuture-react'
+
+//opciones por defecto
+import * as defaultOptions from '../defaultOptions'
+
+//api
+//Rutas entre la vista Edición Actividades y Symfony-EdicionActividadesController
+import URL from '../../../global/rutas_api'
+//LLamado de la petición por POST o GET empleando AXIOS
+import Peticion from '../../Assets/util/peticion'
+//Componente de Prueba Autocompletado
+import Autocompletado from '../../Assets/componentes/Autocompletado'
+//Carga de funciones
+import { Util } from '../../Assets/util/Util'
+//Usar componente modal
+import Modal from '../../Assets/componentes/Modal'
+
+
+/**
+ *
+ *
+ * @class Informacion
+ * @extends {Component}
+ */
+class Informacion extends Component {
+    //inicialización de variables
+
+     /**
+     *Define estados iniciales
+     * @memberof Informacion
+     */  
+    state = {
+        habilitarEstado: true,
+        mostarTipoValor: false,
+        requerido: false,
+        mostrarAmbitoValor: 'combo',
+        codigoUnidad: '',
+        descripcion: '',
+        ambito: '-1',
+        ambitoValor: '-1',
+        unidadTiempo: '-1',
+        tipo: '-1',
+        tipoValor: '-1',
+        desde: '',
+        hasta: '',
+        origenDatos: '-1',
+        referenciaModelo: '-1',
+        tipoSalida: '-1',
+    }
+
+    peticion = new Peticion(this)
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+
+    async componentDidMount() {
+        await this.peticion.get({
+            url: URL.EDICIONPARAMETROS.LISTAR_PARAMETROS_MODELO,
+            config: ['llave', 'valor'],
+            json: 'referenciaModeloJson',
+            value: 'referenciaModelo',
+        })
+    }
+
+    /**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @param {Object} prepProps - Cargar atributos del componente
+     * @async
+     */
+
+    async componentDidUpdate(prevProps) {
+        if (this.props.limpieza !== prevProps.limpieza) {
+            if (this.props.limpieza) {
+                this.setState({
+                    codigoUnidad: '',
+                    descripcion: '',
+                    ambito: '-1',
+                    ambitoValor: '',
+                    unidadTiempo: '',
+                    tipo: '-1',
+                    tipoValor:'',
+                    desde: '',
+                    hasta: '',
+                    origenDatos: '-1',
+                    referenciaModelo: '-1',
+                    tipoSalida: '-1',
+                    requerido: false,
+                    autocompletado: '-1',
+                })
+                this.props.onChange({
+                    target: { id: 'limpieza', value: false },
+                })
+            }
+        }
+        if (this.props.value !== prevProps.value) {
+            const {
+                codigoUnidad,
+                descripcion,
+                ambito,
+                ambitoValor,
+                unidadTiempo,
+                tipo,
+                tipoValor,
+                desde,
+                hasta,
+                origenDatos,
+                referenciaModelo,
+                tipoSalida,
+                requerido,
+            } = this.props.value
+            await this.setState(
+                {
+                    codigoUnidad,
+                    descripcion,
+                    unidadTiempo,
+                    desde,
+                    hasta,
+                    origenDatos:
+                        origenDatos === 'P'
+                            ? 'Parámetros'
+                            : origenDatos === 'R'
+                            ? 'Reglas'
+                            : 'Proceso',
+                    tipoSalida:
+                        tipoSalida === 'U'
+                            ? 'Valor Único'
+                            : tipoSalida === 'M'
+                            ? 'Valor Múltiple'
+                            : tipoSalida === 'NA'
+                            ? 'No aplica'
+                            : '',
+                    requerido: requerido === 'S' ? true : false,
+                },
+                () => {
+                    let referenciaM = this.state.referenciaModeloJson.filter(
+                        (fila) => Util.obtenerId(fila.texto) == referenciaModelo
+                    )
+
+                    referenciaM =
+                        referenciaM.length > 0
+                            ? Util.limpiarDato(referenciaM)
+                            : '-1'
+                    this.setState({
+                        referenciaModelo: referenciaM,
+                    })
+                    this.change({ target: { id: 'ambito', value: ambito } })
+                        .then((e) => {
+                            let ambitoV = this.state.ambitoValorJson.filter(
+                                (fila) =>
+                                    Util.obtenerId(fila.texto) == ambitoValor
+                            )
+
+                            ambitoV =
+                                ambitoV.length > 0
+                                    ? Util.limpiarDato(ambitoV)
+                                    : '-1'
+                            this.setState({
+                                ambitoValor: ambitoV,
+                            })
+                        })
+                        .then((e) => {
+                            this.change({ target: { id: 'tipo', value: tipo } })
+                                .then((e) => {
+                                    if (tipo != 'Valor') {
+                                        let tipoV = this.state.tipoValorJson.filter(
+                                            (fila) =>
+                                                Util.obtenerId(fila.texto) ==
+                                                tipoValor
+                                        )
+                                        tipoV =
+                                            tipoV.length > 0
+                                                ? Util.limpiarDato(tipoV)
+                                                : ''
+
+                                        this.setState({
+                                            tipoValor: tipoV,
+                                        })
+                                    } else {
+                                        this.setState({
+                                            tipoValor,
+                                        })
+                                    }
+                                })
+                                .then((e) => {
+                                    this.props.onChange({
+                                        target: {
+                                            id: 'informacion',
+                                            value: this.state,
+                                        },
+                                    })
+                                })
+                        })
+                }
+            )
+        }
+    }
+
+    /**
+     *
+     *Modificar componente dependiendo del TipoValor
+     *@method
+     *@return {jsx} Componente - Input o Combo
+     */
+    tipoValor = () => {
+        return this.state.mostrarTipoValor ? (
+            &lt;Input
+                id="tipoValor"
+                label="tipo valor"
+                value={this.state.tipoValor}
+                onChange={this.change}
+            />
+        ) : (
+            &lt;Combo
+                propTexto="texto"
+                propValor="id"
+                id="tipoValor"
+                label="tipo valor"
+                opciones={this.state.tipoValorJson}
+                name="tipo valor"
+                value={this.state.tipoValor}
+                onChange={this.change}
+            />
+        )
+    }
+
+    /**
+     *
+     *Modificar componente dependiendo del TipoValor
+     *@method
+     *@return {jsx} Componente - Input o Autocompletado
+     */
+    ambitoValor = () => {
+        return this.state.mostrarAmbitoValor == 'combo' ? (
+            &lt;Combo
+                propTexto="texto"
+                propValor="id"
+                id="ambitoValor"
+                label="ámbito valor"
+                opciones={this.state.ambitoValorJson}
+                value={this.state.ambitoValor}
+                onChange={this.change}
+            />
+        ) : this.state.mostrarAmbitoValor == 'municipio' ? (
+            &lt;Autocompletado
+                id="ambitoValor"
+                label="ámbito valor"
+                marcaAgua={'Escriba el código o el municipio'}
+                opciones={this.state.ambitoValorJson}
+                onChange={this.change}
+                value={this.state.autocompletado}
+            />
+        ) : (
+            &lt;div>&lt;/div>
+        )
+    }
+
+    /**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+
+    change = async ({ target: { id, value } }) => {
+        await this.setState({ [id]: value })
+        this.props.onChange({
+            target: { id: 'informacion', value: this.state },
+        })
+
+        switch (id) {
+            case 'ambito':
+                switch (value) {
+                    case 'Proceso':
+                        this.setState({ mostrarAmbitoValor: 'combo' })
+                        const resProceso = await this.peticion.get({
+                            url: URL.EDICIONPARAMETROS.PROCESO,
+                            config: ['uniProceso', 'prcDescripcion'],
+                            json: 'ambitoValorJson',
+                            value: 'ambitoValor',
+                        })
+                        break
+                    case 'Actividad':
+                        this.setState({ mostrarAmbitoValor: 'combo' })
+                        const resActividad = await this.peticion.get({
+                            url: URL.EDICIONPARAMETROS.CONSULTAR_ACTIVIDADES,
+                            config: ['proaIderegistro', 'agendaservicioCod'],
+                            json: 'ambitoValorJson',
+                            value: 'ambitoValor',
+                        })
+                        break
+                    case 'Municipio':
+                        this.setState({ mostrarAmbitoValor: 'municipio' })
+                        const resMunicipio = await this.peticion.get({
+                            url: URL.EDICIONPARAMETROS.CONSULTAR_CIUDADES,
+                            config: ['ciudadCod', 'ciudadNom'],
+                            json: 'ambitoValorJson',
+                            value: 'ambitoValor',
+                        })
+                        break
+                    case 'Contratista':
+                        this.setState({ mostrarAmbitoValor: 'combo' })
+                        const resContratista = await this.peticion.get({
+                            url: URL.EDICIONPARAMETROS.CONSULTAR_CONTRATISTA,
+                            config: ['empresaCod', 'empresaNom'],
+                            json: 'ambitoValorJson',
+                            value: 'ambitoValor',
+                        })
+                        break
+                    case 'Unidad Responsable':
+                        this.setState({ mostrarAmbitoValor: 'combo' })
+                        const resUnidadResponsable = await this.peticion.get({
+                            url: URL.EDICIONPARAMETROS.UNIDADES_RESPONSABLES,
+                            config: ['cuadrillaCod', 'cuadrillaNom'],
+                            json: 'ambitoValorJson',
+                            value: 'ambitoValor',
+                        })
+                        break
+                    case 'Genérica':
+                        this.setState({ mostrarAmbitoValor: 'input' })
+                        break
+                }
+
+                break
+            case 'tipo':
+                if (value == 'Valor') {
+                    this.setState({
+                        mostrarTipoValor: true,
+                        tipoValor: '',
+                    })
+                } else if (value != '-1') {
+                    this.setState({
+                        mostrarTipoValor: false,
+                        tipoValor: '-1',
+                        tipoValorJson: [],
+                    })
+                    const tipoFuncion =
+                        value === 'Función SQL'
+                            ? 'SQL'
+                            : value === 'Función PHP'
+                            ? 'PHP'
+                            : value === 'Fórmula'
+                            ? 'F'
+                            : ''
+                    await this.peticion.post({
+                        url: URL.EDICIONPARAMETROS.CONSULTAR_FUNCIONES,
+                        parametros: {
+                            tipo: tipoFuncion,
+                        },
+                        config: ['afnIderegistro', 'afnNombre'],
+                        json: 'tipoValorJson',
+                        value: 'tipoValor',
+                    })
+                } else {
+                    this.setState({
+                        mostrarTipoValor: false,
+                        tipoValor: '-1',
+                        tipoValorJson: [],
+                    })
+                }
+                break
+        }
+    }
+
+    /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */
+
+    render() {
+        return (
+            &lt;div className="caja columna">
+                &lt;label className="tag">Informacion básica&lt;/label>
+
+                &lt;Input
+                    id="codigoUnidad"
+                    label="codigo unidad"
+                    value={this.state.codigoUnidad}
+                    name="código unidad"
+                    extra={{ disabled: true }}
+                    onChange={this.change}
+                />
+
+                &lt;Input
+                    id="descripcion"
+                    label="descripcion"
+                    value={this.state.descripcion}
+                    onChange={this.change}
+                />
+
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="ambito"
+                    label="ámbito"
+                    opciones={defaultOptions.opcionesAmbito}
+                    value={this.state.ambito}
+                    onChange={this.change}
+                />
+
+                &lt;this.ambitoValor />
+
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="unidadTiempo"
+                    label="unidad tiempo"
+                    opciones={defaultOptions.opcionesUnidadTiempo}
+                    name="unidad de tiempo"
+                    value={this.state.unidadTiempo}
+                    onChange={this.change}
+                />
+
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="tipo"
+                    label="tipo"
+                    opciones={defaultOptions.opcionesTipo}
+                    value={this.state.tipo}
+                    onChange={this.change}
+                />
+
+                &lt;this.tipoValor />
+
+                &lt;div className="contenedor caja">
+                    &lt;label className="tag">vigencia&lt;/label>
+
+                    &lt;div className="fila">
+                        &lt;Input
+                            id="desde"
+                            label="desde"
+                            type="date"
+                            value={this.state.desde}
+                            onChange={this.change}
+                        />
+
+                        &lt;Input
+                            id="hasta"
+                            label="hasta"
+                            type="date"
+                            value={this.state.hasta}
+                            onChange={this.change}
+                        />
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="origenDatos"
+                    label="oriden de datos"
+                    opciones={defaultOptions.opcionesOrigenDatos}
+                    value={this.state.origenDatos}
+                    onChange={this.change}
+                />
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="referenciaModelo"
+                    label="referencia modelo"
+                    opciones={this.state.referenciaModeloJson}
+                    value={this.state.referenciaModelo}
+                    onChange={this.change}
+                />
+                &lt;Combo
+                    propTexto="texto"
+                    propValor="id"
+                    id="tipoSalida"
+                    label="tipoSalida"
+                    value={this.state.tipoSalida}
+                    opciones={defaultOptions.opcionesTipoSalida}
+                    onChange={this.change}
+                />
+                &lt;Interruptor
+                    id="requerido"
+                    label="requerido"
+                    value={this.state.requerido}
+                    onChange={() =>
+                        this.change({
+                            target: {
+                                id: 'requerido',
+                                value: !this.state.requerido,
+                            },
+                        })
+                    }
+                />
+            &lt;/div>
+        )
+    }
+}
+
+export default Informacion
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

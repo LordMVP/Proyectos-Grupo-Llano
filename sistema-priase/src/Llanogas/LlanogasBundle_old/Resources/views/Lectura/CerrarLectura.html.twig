@@ -1,0 +1,198 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Cerrar Lectura  {% endblock %}
+{% block body %}
+    <form action="cargar/" method="post" enctype="multipart/form-data">
+
+
+
+
+        <div id="divPanelContenedor">
+            <fieldset>
+                <legend>Información</legend>
+
+                <div class="campoMitad"  >
+                    <label>Ciclo</label>
+                    <select id="cboCiclo">
+                        <option value="-1"> Seleccione una opción</option>
+                        {% for ciclo in ciclos %}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <input type="button" value="Cerrar Lecturas" id="btnCerrarLecturas" class="btnSimple">
+
+            </fieldset>
+        </div>
+
+        <div>
+            <h3 id="h3InformacionProceso"></h3>
+        </div>
+        <div id="divCargando" style="margin-bottom: 25px; display:none;"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Cerrando lecturas, <br>esto puede tardar unos minutos...</p>                
+        </div>
+
+        <div>
+            <table id="tblResumen" class="tabla"></table>
+        </div>
+    </form>
+
+    <!-- Confirmación de cancelación -->
+    <div id="divConfirmProceso" style="display:none;">
+        <p>Hay lecturas en trámite ¿desea continuar?</p>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script>
+        (function () {
+
+            var interval = null;
+            var apptable = null;
+            $('#btnCerrarLecturas').on('click', onCerrarLectura);
+
+            function validarEstadoProceso() {
+                __cnn.ajax({
+                    'url': 'obtener/estado/',
+                    'completado': onValidarEstadoCompleto
+                });
+            }
+
+
+            function onCerrarLectura() {
+                if ($('#cboCiclo').val() === '-1') {
+                    __dom.lanzarAlerta('Debe seleccionar un ciclo', __app.mensajes.atencion);
+                    return;
+                }
+                __cnn.ajax({
+                    'url': 'validar/',
+                    'data': {'idciclo': $('#cboCiclo').val()},
+                    'completado': onValidarCicloCopleto
+                });
+            }
+
+
+            function onValidarEstadoCompleto(data) {
+                if (!data.estado) {
+                    consultarResumen();
+                    clearInterval(interval);
+                    interval = null;
+                } else {
+                    $('#divCargando').show();
+                    $('#h3InformacionProceso').html('Proceso ejecutado por: ' + data.estado.estado.usuario + ' - Desde el: ' + data.estado.estado.fechaInicio.split('.')[0]);
+                    $('#btnCerrarLecturas').attr('disabled', 'disabled');
+                    $('#divPanelContenedor').slideUp('fast');
+                    if (interval === null) {
+                        interval = setInterval(validarEstadoProceso, 10000);
+                    }
+                }
+            }
+
+            function consultarResumen() {
+                __cnn.ajax({
+                    'url': 'obtener/resumen/',
+                    completado: onProcesoTerminado
+                });
+                $('#divCargando').hide();
+                $('#tblResumen').empty();
+                $('#divPanelContenedor').slideDown('fast');
+                $('#btnCerrarLecturas').removeAttr('disabled');
+                $('#h3InformacionProceso').text('');
+            }
+
+
+
+            function onValidarCicloCopleto(data) {
+                switch (data.codigoRespuesta) {
+                    case -3:
+                        $('#divConfirmProceso').dialog({
+                            resizable: false,
+                            heigth: 140,
+                            modal: true,
+                            title: 'Confirmación',
+                            buttons: {
+                                "Aceptar": function () {
+                                    //enviar la otra peticiòn
+                                    $(this).dialog("close");
+                                    __cnn.ajax({
+                                        'url': 'procesar/',
+                                        'data': {'idciclo': $('#cboCiclo').val()},
+                                        'completado': onValidarCicloCopleto
+                                    });
+                                }, Cancelar: function () {
+                                    $(this).dialog("close");
+                                    __dom.ocultarCargador();
+                                }
+                            }
+                        });
+                        break;
+                    case -1:
+                        __dom.ocultarCargador();
+                        __dom.ocultarToast();
+                        __dom.lanzarAlerta(data.mensajeError, __app.mensajes.atencion);
+                        break;
+                    case 4:
+                        __cnn.ajax({
+                            'url': 'procesar/',
+                            'data': {'idciclo': $('#cboCiclo').val()},
+                            'completado': onValidarCicloCopleto
+                        });
+                        break;
+                    case 1:
+                        __dom.ocultarCargador();
+                        var fxRecargar = function () {
+                            location.reload();
+                        };
+                        __dom.lanzarAlerta(data.mensaje, 'Información de Ciclo', fxRecargar, false, fxRecargar);
+                        break;
+                }
+            }
+
+            function onProcesoTerminado(data) {
+                if (data.codigoRespuesta === 0) {
+                    if (that.apptable) {
+                        that.apptable.destroy();
+                    }
+                    return;
+                }
+                var columnaResumen = [
+                    {type: 'text', text: 'Descripción', headers: 'thDescripcion', data: 'descripcion', 'sortType': 'string'},
+                    {type: 'text', text: 'Programa', headers: 'thPrograma', data: 'programa', sortType: 'number'},
+                    {'headers': 'thEstado', 'text': 'Estado', 'data': 'estado', 'type': 'text', 'sortType': 'string'},
+                    {'headers': 'thSuscripcion', 'text': 'Suscripción', 'data': 'suscripcion', 'type': 'text', 'sortType': 'number'},
+                    {'headers': 'thFilasAfectadas', 'text': 'Filas Afectdas', 'data': 'filasafectadas', 'type': 'text', 'sortType': 'number'},
+                    {'headers': 'thFecha', 'text': 'Fecha', 'data': 'fecha', 'type': 'text', 'sortType': 'string'}
+                ];
+
+                var config = {
+                    pagination: true,
+                    searchable: false,
+                    cellNavigable: false,
+                    columns: columnaResumen,
+                    title: 'Resumen del último proceso',
+                    linesPageRange: [10, 20, 30, 50],
+                    lg: lenguajeTabla
+                };
+
+                if (apptable) {
+                    apptable.destroy();
+                }
+                apptable = new Apptable('#tblResumen', config, data.resumen);
+                apptable.container.find('button').on('click', __app.cancelarEvento);
+            }
+            validarEstadoProceso();
+
+        })();
+    </script>
+{% endblock %}

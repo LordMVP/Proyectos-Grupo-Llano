@@ -1,0 +1,89 @@
+<script id="tplpagarejuridico" type="text/template">
+	<div>
+		<h2>PAGARÉ PERSONA JURÍDICA Nº {{modulo}}{{numeropagare}}</h2>
+		<p>
+			______________________________________, identificado con cédula de ciudadanía No.  ____________ expedida en  _________, actuando en calidad de Gerente y Representante Legal de _____________________________________, persona jurídica de derecho privado, identificada con NIT N° _________________________________, con domicilio en la ciudad de __________________, en calidad de deudor, y/o ____________________________________________________ identificado con cédula de ciudadanía  No. ________________________________en calidad de codeudor, ________________; por medio del presente escrito DECLARAMOS que por virtud del presente título valor pagaré incondicionalmente, a la orden de GASES DEL LLANO S.A. EMPRESA DE SERVICIOS PÚBLICOS, en adelante {{empresa}}, persona jurídica de derecho privado, identificada con el NIT {{nitempresa}}, con domicilio en la ciudad de {{municipioempresa}}, o a quien represente sus derechos, en la ciudad de Villavicencio el día { ___________ (___) del mes de _______ del año _____(____), la suma de _______________________________________ PESOS ($_________) MONEDA LEGAL, que reconozco tener a titulo de deuda, más la suma de ______________________________PESOS ($__________) MONEDA LEGAL que a la fecha adeudo por concepto de intereses, que pagaré a la tasa máxima legalmente permitida.
+		</p>
+		<p>
+			En caso de incumplimiento en el pago, la obligación se hará exigible en su totalidad, sin necesidad de requerimiento previo. En el evento de un convenio para la prórroga del término del pago, subsistirá la obligación durante el nuevo plazo.
+		</p>
+		<p>
+			En tal caso, <span><b>{{empresa}}</b> o cualquier tenedor legítimo del presente titulo valor, podrá cobrar judicial o extrajudicialmente la totalidad del saldo, más los intereses y gastos de cobranza, incluyendo honorarios de abogado, efecto para el cual renuncio a requerimientos judiciales o privados.
+			<br/>
+			Será de nuestro cargo el pago del impuesto de timbre que cause este Pagaré.
+		</p>
+		<p>
+			El presente pagaré se suscribe en blanco, y autorizo irrevocablemente a <span><b>{{empresa}}</b>, de conformidad con el artículo 622 del Código de Comercio para llenar, sin previo aviso, y en cualquier tiempo los espacios que figuran en blanco en el presente titulo valor, de acuerdo con las instrucciones estipuladas en la carta de instrucciones que se anexa.
+		</p>
+	</div>
+	<div class="primeradoble">	
+		<div class="firmas">
+			<hr align="center" />
+			<strong>Firma deudor </strong>
+			<p>Nombre: <span>{{{nombre}}}</span></p>
+			<p>Cédula de ciudadanía: <span>{{cedula}}</span></p>
+
+		</div>
+		<div class="firmas">
+			<hr align="center" />
+			<strong> Firma codeudor </strong>
+			<p>Nombre: <span>{{{codeudor}}}</span></p>
+			<p>Cédula de ciudadanía: <span>{{cedulacodeudor}}</span></p>
+		</div>
+	</div>
+	
+	<div>
+		<h2>CARTA DE INSTRUCCIONES</h2>
+		<h6>Señores: </h6>
+        <h4>{{empresa}}</h4>
+        <h6>Ciudad: <span>{{municipio}}</span></h6>
+        <h6>Respetados Señores: </h6>
+		<p>
+			 ____________________________, identificado con cédula de ciudadanía No. ____________ expedida en _________, actuando en calidad de Gerente y Representante Legal de ____________________________, persona jurídica de derecho privado, identificada con NIT N° __________, con domicilio en la ciudad de __________________, por medio de la presente autorizo expresamente a GASES DEL LLANO S.A. EMPRESA DE SERVICIOS PUBLICOS, en lo adelante LLANOGAS  S.A. E.S.P, o cualquier tenedor legítimo del presente titulo valor, para que haciendo uso de sus facultades conferidas por el Art. 622 del Código de Comercio llene sin previo aviso los espacios que se han dejado en blanco en el Pagaré Nº <span>{{modulo}} {{numero}}</span> adjunto, cuando exista cualquier obligación a mí cargo, para lo cual deberá ceñirse a las siguientes instrucciones:
+		</p>
+		<ul>
+			<li>
+				<span><b>{{empresa}}</b></span> podrá llenar y utilizar dicho Pagaré cuando a su juicio fuere necesario, para efectuar el cobro de cualquier suma de dinero que resulte deber por concepto de incumplimiento de las obligaciones derivadas del crédito otorgado por  concepto de vinculación al servicio de gas natural domiciliario por red y/o consumo del mismo servicio.
+			</li>
+			<li>
+				La cuantía del Pagaré por concepto de capital será igual al monto total o parcial del valor de las obligaciones exigibles que a nuestro cargo y a favor de <span><b>{{empresa}}</b></span> existan al momento de ser llenado, incluidos pero no limitados al valor principal, portes, impuestos, incluido el de timbre, gastos de cobranza, mantenimiento, seguros, multas, contribuciones, sanciones y los costos legales para cobro de dichos instrumentos, y cualquier otra suma diferente a intereses, que llegáramos a adeudar a <span><b>{{empresa}}</b></span> en razón al crédito otorgado para  vinculación al servicio de gas natural domiciliario por red y/o consumo del mismo servicio, y que estén insolutas a la fecha de llenarse el Pagaré por cualquier motivo, de conformidad con el documento que contenga la liquidación efectuada por <span><b>{{empresa}}</b></span>.
+			</li>
+			<li>
+				 La tasa de los intereses de mora será la máxima permitida por las disposiciones vigentes el día que se diligencie el título.
+			</li>
+			<li>
+				La fecha de vencimiento será la misma en que sea llenado el documento adjunto, y serán exigibles inmediatamente todas las obligaciones a mi cargo, sin necesidad que me requieran judicial o extrajudicialmente, para su cumplimiento. 
+			</li>
+			<li>
+				 Si en la fecha de diligenciamiento del Pagaré existieren intereses causados y no pagados, correspondientes a cualquiera de las obligaciones a mi cargo, autorizo a <span><b>{{empresa}}</b></span> para incluir el monto total que resulte por este concepto, de conformidad con el documento que contenga la liquidación efectuada para tal fin, en el espacio que para el efecto se encuentra previsto en el Pagaré. Sobre dichas sumas no se liquidarán intereses, sin perjuicios de que <span><b>{{empresa}}</b></span> ejerza los derechos que le confiere el artículo 886 del código de comercio.
+			</li>
+			<li>
+				El pago del impuesto de timbre a que haya lugar cuando el título sea llenado, correrá por cuenta mía (nuestra) y si <span><b>{{empresa}}</b></span> lo cancela, su monto puede ser cobrado a mi(nosotros) junto con las demás obligaciones, incorporando la suma pagada dentro del Pagaré respectivo.
+			</li>
+			<li>
+				El pagaré así llenado presta mérito ejecutivo, pudiendo <span><b>{{empresa}}</b></span>  o su tenedor legítimo exigir su cancelación, sin perjuicio de las demás acciones que pueda ejercer.
+			</li>
+			<li>
+				 Que las presentes instrucciones las impartimos de conformidad con lo expuesto en el artículo 622, inciso 2º del Código de Comercio y para todos los efectos allí previstos.
+			</li>
+			<li>
+				 Hacemos expreso reconocimiento que hemos leído y conservamos copia de estas instrucciones, y que en señal de conformidad las suscribimos.
+			</li>
+		</ul>
+		<p>
+			INCORPORACION DEL PAGARE: Se adjunta al presente documento el Pagaré en blanco arriba enunciado, el cual <span><b>{{empresa}}</b></span> declara haber recibido, comprometiéndose a custodiarlo y a utilizarlo conforme a lo aquí dispuesto
+			<br />
+			Se deja constancia que el Pagaré en blanco corresponde al Número
+			<br />
+			En la fecha he recibido copia de esta carta de instrucciones y la acepto sin reserva alguna.
+		</p>
+		<h6>Atentamente</h6>
+	</div>
+	<div class="firma">
+		<hr align="center" />
+		<strong>Firma</strong>
+		<p>Nombre: <span>{{{nombre}}}</span></p>
+		<p>Cédula de ciudadanía: <span>{{cedula}}</span></p>
+
+	</div>
+</script>

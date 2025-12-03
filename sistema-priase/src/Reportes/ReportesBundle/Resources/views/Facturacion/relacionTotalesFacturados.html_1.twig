@@ -1,0 +1,62 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Relacion de totales facturados por consumo - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="facturacionController">
+        <div id="divPanelContenedor">
+            <form novalidate name="formReporte">
+                <fieldset id="fieldCabecera">
+                    <legend>Informacion del ciclo y periodo</legend>
+                    <div class="col-md-12">
+                        <div class="col-md-4 form-group " ng-class="(formReporte.$submitted&&formReporte.ciclo.$error.required)?'has-error':''">
+                            <label for="ciclo">Ciclo:</label>
+                            <select required="true" ng-change="buscarPeriodos()" name="ciclo" id="ciclo" ng-model="info.ciclo" class="form-control">
+                                {% for ciclo in ciclosActivos %}
+                                    <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                                {% endfor %}
+                            </select>
+                            <p class="help-block" ng-show="formReporte.$submitted && formReporte.ciclo.$error.required" >
+                                El ciclo es requerido
+                            </p>
+                        </div>
+                        <div class="col-md-4 form-group" ng-class="(formReporte.$submitted&&formReporte.periodo.$error.required)?'has-error':''">
+                            <label for="periodo">Periodo:</label>
+                            <select required="true" name="periodo" id="periodo" ng-model="info.periodo" class="form-control"> 
+                                <option ng-repeat="periodo in periodos" ng-value="periodo.id_periodo">
+                                    {[{periodo.periodo_nombre}]}
+                                </option>
+                            </select>
+                            <p class="help-block" ng-show="formReporte.$submitted && formReporte.periodo.$error.required" >
+                                El periodo es requerido
+                            </p>
+                        </div>
+                        <div class="col-md-4 form-group " ng-class="(formReporte.$submitted&&formReporte.cicloAnno.$error.required)?'has-error':''">
+                            <label for="cicloAnno">Año</label>
+                            <input name="cicloAnno" id="cicloAnno" ng-model="info.cicloAnno" required="true" class="form-control"/>
+                            <p class="help-block" ng-show="formReporte.$submitted && formReporte.cicloAnno.$error.required" >
+                                El año es requerido
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <hr/>
+                    <div class="col-md-2 pull-right">
+                        <button ng-click="generarReporte()" class="btnSimple" style="margin-bottom:  10px">Generar reporte</button>
+                    </div>
+                    <br/>
+                </fieldset>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}    
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/facturacion.control_1.js')}}"></script>
+{% endblock %}

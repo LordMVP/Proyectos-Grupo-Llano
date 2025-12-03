@@ -1,0 +1,7 @@
+parameters:
+#    externo_financiaciones.example.class: Externo\FinanciacionesBundle\Example
+
+services:
+#    externo_financiaciones.example:
+#        class: %externo_financiaciones.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

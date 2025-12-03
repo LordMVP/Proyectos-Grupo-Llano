@@ -1,0 +1,100 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Modificación Usuarios {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="modificacionUsuarioController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtros de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="cmbNovedad">Novedad: </label>
+                                    <select required="required" ng-model="idnovedad" name="idnovedad" class="form-control" ng-change="limpiarCampos()">
+                                        <option value="CTU">Cambio tipo de uso </option>
+                                        <option value="CD">Cambio dirección </option>
+                                        <option value="ST_SR">Suspensión temporal y remodelación</option>
+                                        <option value="R">Reconexión</option>
+                                        <option value="CE">Cambio de estrato</option>
+                                        <option value="CEI">Cambio de estrato ICBF</option>
+                                        <option value="C">Exención de contribución</option>
+                                        <option value="CM">Cambio número de medidor</option>
+                                    </select>
+                                    <p class="help-block">
+                                        Debe seleccionar la novedad del cambio de la suscripción
+                                    </p>
+                                </div>  
+                                <div class="form-group col-md-4" id="divCmbMunicipio">
+                                    <label for="cmbMunicipio">Municipio: </label>
+                                    <select id="cmbMunicipio" ng-model="idmunicipio" name="idmunicipio" class="form-control">
+                                        <option value="-1">Seleccione una opción </option>
+                                        <option ng-repeat="municipio in municipios" ng-value="municipio.idmunicipio">
+                                            {[{municipio.municipio}]}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtSuscripcion">Suscripción: </label>
+                                    <input type="text" id="txtSuscripcion" pattern="[0-9]*" ng-model="idsuscripcion" name="txtSuscripcion" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtCodigoAnterior">Código anterior: </label>
+                                    <input type="text" id="txtCodigoAnterior" pattern="[0-9]*" ng-model="codigoanterior" name="txtCodigoAnterior" class="form-control">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="txtFechaInicial">Fecha inicial: </label>
+                                    <input type="text" id="txtFechaInicial" ng-model="fechainicio" name="txtFechaInicial" class="form-control datepicker" ng-change="validarFechaFinal()">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="txtFechaFin">Fecha final: </label>
+                                    <input type="text" id="txtFechaFin" ng-model="fechafin" name="txtFechaFin" class="form-control datepicker">
+                                </div>
+
+                            </div>
+                            <div class="col-md-12 text-right">
+                                <button type="button" ng-click="validarInformacion()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-search fa-1x"></i> Consultar Suscripciones
+                                </button>
+                            </div>
+
+                            <div class="row" ng-show="listaSuscripciones.length > 0">
+                                <h2>Resultados de la búsqueda</h2>
+                                <hr>
+
+                                <div class="col-md-12">                                    
+                                    <table ng-table-dynamic="tablaSuscripcion with columnas" class="table table-striped" >
+                                        <tr ng-repeat="fila in $data" id="tr_{[{fila.idsuscripcion}]}" >
+                                            <td ng-repeat="col in $columns" sortable="{[{col.field}]}" header-class="text-center" > <span>{[{setValueTd(fila, col)}]} </span></td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/modificacionUsuario.angular.js')}}"></script>
+{% endblock %}

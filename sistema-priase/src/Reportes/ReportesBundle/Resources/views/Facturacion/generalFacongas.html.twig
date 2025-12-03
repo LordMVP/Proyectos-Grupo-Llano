@@ -1,0 +1,74 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte Facongas -{{empresa}} {% endblock %}
+
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ProvisionGeneralController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reporte Facongas</legend>
+                <div class="col-md-12">
+                    
+                <legend>Reporte Mes</legend>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                 <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Periodo Consulta (yyyy-mm-dd):</label>
+                                    <input class="form-control datepicker input-sm" ng-model="info.fechaConsulta1" id="fechaConsulta1" name="fechaConsulta1" required="true"/>
+                                    <p class="help-block" ng-if="reporte.fechaConsulta1.$error.required" >
+                                        La fecha de consulta es requerida
+                                    </p>
+                                </div>
+                                    
+                            </div>          
+                                                       
+                           
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm pull-right" ng-click="generarReporteUnico()" >
+                                        <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                    </button>
+                                    <!--ul class="dropdown-menu">                          
+                                                             
+                                        <li>
+                                            <a ng-click="download=true;generarReporte6()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Mercados
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a ng-click="download=true;generarReporte7()">
+                                                <i class="fa fa-file-excel-o fa-lg"></i> Industrial
+                                            </a>
+                                        </li>
+                                    </ul-->
+                                </div> 
+                            </div>  
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>    
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/general.facongas.angular.js')}}"></script>
+{% endblock %}

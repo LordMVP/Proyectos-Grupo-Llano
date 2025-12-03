@@ -1,0 +1,302 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylsheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/financiacion_impresion.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/contratos.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <style type="text/css">
+        div.conceptos{
+            display: inline-block;
+            width: 49%;
+            vertical-align: top;
+        }
+        .label-enlinea{
+            display: inline !important;
+            margin-right: 15px;
+        }
+        .campodoble{
+            display: inline-block;
+            width: 65%
+        }
+        .no-close .ui-dialog-titlebar-close {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}  Simulador de Financiación - {{empresa}}  {% endblock %}
+{% block body %}
+
+
+    <div id="divPanelContenedor">
+        
+
+        <fieldset>
+            <legend> Detalles de la financiación </legend>
+            <table class="tabla" id="tblConceptoNoFinanciable"></table>
+            <div id="divFinanciaciones">
+                <div class='campo'>
+                    <label for='cmbTipoFinanciacion'>Tipos de Financiación</label>
+                    <select id="cmbTipoFinanciacion" class="tipofinanciacion" >
+                                     
+                           <option value="-1">Seleccione una opción </option>
+                           {% for liquidacion in liquidaciones %}
+                               <option value="{{liquidacion.idliquidacion}}">{{liquidacion.liquidacion}}</option>
+                           {% endfor %}
+                       
+                    </select>
+                </div>
+                <div class='campo'>
+                    <label for='txtIntereses'>Interes</label>
+                    <input type='text' id='txtIntereses' class="interesfinanciacion">
+                </div>
+                
+                 <div class='campo'>
+                    <label for='txtVlrFinanciable'>Valor Financiable</label>
+                    <input type='text' id='txtCapitalInicial' class="valorafinanciar">
+                </div>
+                
+                
+                
+                <div class='campo'>
+                    <label for='txtNumeroCuotas'>Numero de Cuotas</label>
+                    <input type='text' id='txtNumeroCuotas'>
+                </div>
+            </div>
+
+
+          
+            <div class="campo">
+                <button class="btnSimple" id="btnVerSimulador" >Ver simulador financiaciones</button>
+            </div>
+        </fieldset>
+
+
+        <div id="divInfoFinanciera" style="display: none;">
+            <div id="divNatural">
+                <ul>
+                    <li><a href="#divLaboral">Laboral</a></li>
+                    <li><a href="#divJuridica">Jurídica</a></li>
+                    <li><a href="#divFinanciera">Financiera</a></li>
+                </ul>
+               
+              
+            </div>
+        </div>
+
+      
+    </div>
+
+
+
+    <!--División para buscar una venta -->
+    <div id="divBuscarVenta" style="display:none">
+        <div class="campo">
+            <label for="txtFiltroNombreTercero">Nombre Tercero:</label>
+            <input type="text" id="txtFiltroNombreTercero" data-attr="nombreTercero"/>
+            <input type="hidden" id="idTercero" data-attr="idTercero"/>
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDocumento">Nit/CC :</label>
+            <input type="text" id="txtFiltroDocumento" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodigoAnterior">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodigoAnterior" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFiltroNumVenta">Núm. venta:</label>
+            <input type="text" id="txtFiltroNumVenta" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroIdPropiedad">Id Propiedad:</label>
+            <input type="text" id="txtFiltroIdPropiedad" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroIdSuscripcion">Id Suscripción:</label>
+            <input type="text" id="txtFiltroIdSuscripcion" />
+        </div>
+        <div class="campo">
+            <fieldset>
+                <legend>Rango fechas</legend>
+                <div class="campo">
+                    <label for="txtFiltroFechaInicio">Inicio: </label>
+                    <input id="txtFiltroFechaInicio" type="text"/>
+                </div>
+                <div class="campo">
+                    <label for="txtFiltroFechaFin">Fin: </label>
+                    <input id="txtFiltroFechaFin" type="text"/>
+                </div>
+            </fieldset>
+        </div>
+        <div class="campo">
+            <button class="btnSimple" id="btnBuscarVenta">Buscar</button>
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <div id="divListaSelección" style="max-height: 200px; overflow: auto;"></div>
+    </div>
+
+    <div id="divDetalleVenta" style="display:none">
+        <div class="campo">
+            <label for="txtNumeroVentaDetalle">Número Venta:</label>
+            <input id="txtNumeroVentaDetalle" type="text" disabled="disabled"/>
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaAprobacion">Fecha Aprobación:</label>
+            <input id="txtFechaAprobacion" type="text" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtFechaEliminado">Fecha Eliminado:</label>
+            <input id="txtFechaEliminado" type="text" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtTipoVentaDetalle">Tipo Venta:</label>
+            <input id="txtTipoVentaDetalle" type="text" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtTipoDocumentoDetalleVenta">Tipo Documento:</label>
+            <input id="txtTipoDocumentoDetalleVenta" type="text" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtDocumentoDetalleVenta">Documento:</label>
+            <input id="txtDocumentoDetalleVenta" type="text" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtObservacionVenta">Observaciones:</label>
+            <input id="txtObservacionVenta" type="text" disabled="disabled"/>
+        </div>
+
+        <div class="campo">
+            <label for="txtMetodoPago">Método Pago:</label>
+            <select id="txtMetodoPago" disabled="disabled">
+                <option value="-1">Seleccione una opción</option>
+                <option value="C">Contado</option>
+                <option value="F">Financiado</option>
+            </select>
+        </div>
+    </div>
+    <div id="divDetallesFactura" style="display:none;">
+
+        <div class="campo">
+            <label for="txtDetNumFactura">Núm. Factura:</label>
+            <input type="text" id="txtDetNumFactura" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtDetValorFinanciable">Total Financiable:</label>
+            <input type="text" id="txtDetValorFinanciable" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtDetValorNoFinanciable">Total No Financiable:</label>
+            <input type="text" id="txtDetValorNoFinanciable" disabled="disabled" />
+        </div>
+
+        
+
+
+        <p class="pMensaje" id="pMensajeFactura"></p>
+    </div>
+
+
+    <!-- Division para simulador -->
+    <div id="divSimulador" style="display:none;" >
+        <div class="campo" style="display: none;">
+            <label for="txtCapitalInicial" >Capital Inicial:</label>
+            <input type="text" id="txtCapitalInicial" placeholder="Capital inicial" class="inputImpresion" disabled="disabled"/>
+        </div>
+
+        <div class="campo" style="display: none;">
+            <label for="txtIntereses">Intereses: </label>
+            <input type="text" id="txtIntereses" maxlength="10" class="inputImpresion" disabled="disabled"/>
+        </div>
+
+        <div class="campo" style="display: none;">
+            <label for="txtNumeroCuotas">Número de cuotas:</label>
+            <input type="text" id="txtNumeroCuotas" maxlength="2" disabled="disabled" placeholder="Número cuotas"  value="10" class="inputImpresion"/>
+        </div>
+
+        <p class="pMensaje" style="font-size: 14px;"><strong>Nota:</strong> Los valores de la cuota son aproximados ya que la tasa de interés varía trimestralmente.</p>
+        <p class="pMensaje" style="font-size: 14px;"><strong>Cláusula Aceleratoria:</strong> Conforme con lo establecido en el artículo 69 de la ley 45 de 1990, ante el incumplimiento por parte del deudor del pago de tres o mas de los instalamentos o cuotas debidas, se hará exigible la totalidad de la obligación en la factura emitida.</p>
+        <div id="divTabFinanciaciones" style="margin-top: 20px; ">
+            <ul></ul>
+        </div> 
+    </div>
+
+    <div id="divConfirmCancelar" style="display:none">
+        <p>Se cancelará la finaciación de la venta, ¿Desea continuar?</p>
+    </div>
+    <div id="divEliminarArchivo" style="display: none">
+        <p>Se eliminará el archivo ¿Desea continuar?</p>
+    </div>
+
+    <div id="contentFrame" style="display:none;">
+        <iframe src="/achagua/sistema/web/bundles/Llanogas/templates/simuladoramortizador.html" frameborder="0" id="iframePrint"></iframe>
+    </div>
+    <div id="divImpresionAmortizaciones" style="display:none">
+<!--
+        <div class="campo">
+            <label for="txtIdSuscripcionImpresion">Id. Suscripción: </label>
+            <input type="text" class="inputImpresion" id="txtIdSuscripcionImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="NombrePropietarioImpresion">Nombre Propietario</label>
+            <input type="text" class="inputImpresion" id="NombrePropietarioImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtDireccionImpresion">Dirección:</label>
+            <input type="text" class="inputImpresion" id="txtDireccionImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtFechaActualImpresion">Fecha Actual:</label>
+            <input type="text" class="inputImpresion" id="txtFechaActualImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtValorVentaImpresion">Valor Venta:</label>
+            <input type="text" class="inputImpresion" id="txtValorVentaImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtValorCuotaImpresion">Cuota Inicial:</label>
+            <input type="text" class="inputImpresion" id="txtValorCuotaImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtNumCuotasImpresion">Núm. de Cuotas: </label>
+            <input type="text" class="inputImpresion" id="txtNumCuotasImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtVlrAproxCuotaImpresion">Valor Aprox. Cuota Mensual:</label>
+            <input type="text" class="inputImpresion" id="txtVlrAproxCuotaImpresion" disabled="disabled"/>
+        </div>
+        <div class="campo">
+            <label for="txtVlrAproxPrimerCuotaImpresion">Valor Aprox. Primer Cuota:</label>
+            <input type="text" class="inputImpresion" id="txtVlrAproxPrimerCuotaImpresion" disabled="disabled"/>
+        </div>
+-->
+        <div id="divTablasAmortizacion"></div>
+    </div>
+
+
+    <div id="divAlertaConceptoRepetido" style="display: none;">
+        <p>
+            El concepto <b id="spanNombreConcepto"></b> se ecuentra seleccionado en la financiación 
+            <b id="spanNombreFinanciacion"></b>, ¿Desea financiarlo con el tipo de financiación <b id="spanNombreLiquidacion"></b>? 
+        </p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/amortizador.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/financiacion/convertirPrecios.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/impresionformatos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/financiarventassimulador/financiarventassimulador.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/financiarventassimulador/financiarventassimulador.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/financiarventassimulador/financiarventassimulador.vista.js')}}"></script>
+
+{% endblock %}

@@ -1,0 +1,178 @@
+/**********Estilo para la tabla****************/
+#divCargador{
+    display: none !important;
+}
+
+.tabla{
+    width: 100%;
+    border:solid 1px #408BC4;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 0 auto;
+    margin-bottom: 7px;
+    
+}
+
+    .tabla tr{
+        border: solid 1px #AAA;
+    }
+
+
+    .tabla thead tr{
+        background-color:#6EA9D5;
+        color:#AAA;
+        height: 25px;
+    }
+
+    .tabla tbody tr:nth-child(2n){
+        background-color: #D9F3FF !important;
+    }
+
+    .tabla td, .tabla th{
+        padding:5px;
+        border-right: solid 1px #AAA;
+    }
+
+    .tabla thead tr th{
+        vertical-align: middle;
+    }
+
+div#divTitulo h1{
+    text-align: center !important;
+}
+
+div#contenedor{
+    /*width: 100%;*/
+    width: 95%;
+    border:none;
+    padding: 7px 5px 10px 5px; 
+    border-radius:0px;
+    box-shadow: none;
+    margin-top: 10px;
+}
+
+fieldset{
+    border:none;
+}
+
+legend{
+    margin-left: -20px;
+    position: relative;
+}
+
+div#menu{
+    display:none;
+    float: none;
+}
+
+div#divGeneral{
+    display:block;
+    margin:0 auto;
+    border-left: none;
+    width: 100%;
+    float: none;
+}
+
+.inputImpresion,
+.campoCorto input[type="text"],
+.campo input[type="text"],
+.campoBusqueda input[type="text"]{
+    background-color: inherit;
+    border:none;
+    border-radius:0px;
+    border-bottom: solid 1px #999;
+    margin-bottom: 7px;
+}
+
+.campo-impresion-10pto{
+    width: 10% !important;
+}
+
+.campo-impresion-20pto{
+    width: 18% !important;
+}
+
+.campo-impresion-30pto{
+    width: 24% !important;
+}
+
+.campo-impresion-40pto{
+    width: 34% !important;
+}
+
+.campo-impresion-50pto{
+    width: 44% !important;
+}
+
+.campo-impresion-60pto{
+    width: 54% !important;
+}
+
+.campo-impresion-70pto{
+    width: 66% !important;
+}
+
+.campo-impresion-100pto{
+    width: 96% !important;
+}
+
+
+
+.campo-impresion-10pto input[type="text"],
+.campo-impresion-30pto input[type="text"],
+.campo-impresion-50pto input[type="text"],
+.campo-impresion-70pto input[type="text"],
+.campo-impresion-100pto input[type="text"]{
+    width: 95%;
+}
+
+
+
+.campoBusqueda button{
+    display: none;
+}
+
+h2{
+    color:#408BC4;
+    text-align: left;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 5px;
+}
+
+.btnSimple, #divComandos{
+    display : none;
+}
+
+
+#btnImprimir, #divComandos, #btnCargarFinanciaciones, 
+#divTotal, #btnVerFormasPago, #btnCargarSimulador, 
+#divLiquidacion, .btnSimple
+{
+    display:none;
+}
+#tblFacturas tbody tr:not(.selected),
+.tabla td[header="thSimulador"] .tabla #thSimulador,
+.tabla td[header="thSeleccion"] .tabla #thSeleccion,
+.tabla td[header="thDetallesFactura"], #thDetallesFactura
+{
+    display:none;
+}
+
+#tblFinanciaciones tbody tr:not(.selected), 
+#tblFacturas tbody tr:not(.selected), 
+#tblFinanciaciones td[header="thSimulador"],#tblFinanciaciones #thSimulador,
+#tblReestructuracion td[header="thSimulador"],#tblReestructuracion #thSimulador,
+#tblFinanciaciones td[header="thConcepto"],#tblFinanciaciones #thConcepto,
+td[header="thSeleccion"], #thSeleccion, #tblReestructuracion td[header="thNuevaLiquidacion"],
+#tblReestructuracion #thNuevaLiquidacion
+{
+    display:none;
+}
+
+.tabla input[type="text"], .tabla input[type="number"], .tabla select{
+    border:none;
+    border-radius:0px;
+}
+#tblConceptosImprimir{display: table;}

@@ -1,0 +1,2 @@
+Id Transacción,id factura,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Digite el Numero de Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+4088715446,-,2022-12-02 18:20:04,18419,APROBADA,PSE,37863173	Colpatria,1747029955,1,myriamguevara50@gmail.com,MYRIAM GUEVARA DE CUBILLOS,181.52.213.194

@@ -1,0 +1,40 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/suscripciones/gestionar.estilo.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+
+<style type="text/css">
+	#btnVerConceptos{
+		display: none !important;
+	}
+
+	.listaSeleccion{
+		max-height: 200px;
+		overflow-y:auto;
+	}
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %} Gestionar Suscripción - {{empresa}} {% endblock %}
+
+{% block body %}
+<div id="divComandos">
+
+    <div class="divBotones">
+        <input type="button" value="nuevo" id="btnNuevo" class="btn" />
+        <input type="button" value="buscar" id="btnBuscar" class="btn" />
+        <input type="button" value="grabar" id="btnGrabar" class="btn" />
+        <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+    </div>
+</div>
+{% include "LlanogasLlanogasBundle:Suscripcion:registrarSuscripcion.html.twig" %}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ReporteAgendamiento/ReporteAgendamiento.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ReporteAgendamiento/ReporteAgendamiento.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Botonera, Combo, Fecha, Util } from 'appfuture-react';
+import axios from 'axios';
+
+import RUTAS_API from '../../global/rutas_api';
+import { mostrarAlerta } from '../../store/actions/AplicacionAcciones';
+
+class ReporteAgendamiento extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    listaEmpresas: [],
+    listaUnidadesResponsables: [],
+    listaProcesos: [],
+    listaMunicipios: [],
+    listaUggi: []
+  };
+
+  componentDidMount() {
+    this.ejecutarConsultas();
+  }
+
+  /**
+ * Comprueba una respuesta de una petición y retorna los datos que de la misma.
+ * @param {Object} response
+ * @param {Object|Array} defaultData
+ * @return {Object|Array}
+ */
+  obtenerDatos = (response, defaultData = []) => {
+    return Array.isArray(response.data) ? response.data : defaultData;
+  };
+
+  /**
+   * Consultará las empresas...
+   */
+  listarEmpresas = () => {
+    axios.get(RUTAS_API.REPORTE_AGENDAMIENTO.LISTAR_EMPRESAS)
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        console.log(datos, respuesta);
+        this.setState({ listaEmpresas: datos });
+      });
+  };
+
+  /**
+   * Consultará los procesos...
+   */
+  listarProcesos = () => {
+    axios.get(RUTAS_API.REPORTE_AGENDAMIENTO.LISTAR_PROCESO)
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ listaProcesos: datos });
+      })
+  }
+
+  /**
+   * Consultará los municipios...
+   */
+  listarMunicipios = () => {
+    axios.get(RUTAS_API.REPORTE_AGENDAMIENTO.LISTAR_MUNICIPIOS)
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ listaMunicipios: datos });
+      })
+  }
+
+  /**
+   * Listará las unidades responsables...
+   */
+  listarUnidadesResponsables = () => {
+    const { proceso, empresa } = this.state;
+    axios.get(RUTAS_API.REPORTE_AGENDAMIENTO.LISTAR_UNIDADES_RESPONSABLES, {
+      proceso: proceso,
+      empresa: empresa
+    })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ listaUnidadesResponsables: datos });
+      })
+  };
+
+  /**
+   * Ejecutará las consultas...
+   */
+  ejecutarConsultas = () => {
+    this.listarEmpresas();
+    this.listarProcesos();
+    this.listarMunicipios();
+    this.listarUnidadesResponsables();
+  };
+
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      listaUggi: [],
+      empresa: '',
+      proceso: '',
+      municipio: '',
+      unidadResponsable: '',
+      fechaInicial: '',
+      fechaFinal: '',
+    });
+  };
+
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Obtiene las opciones de la sección menú del programa.
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Limpiar Formulario', callback: this.limpiarFormulario }
+    ];
+  };
+
+
+  /**
+   * Valida que un valor sea diferente de vacio o -1.
+   * @return {Boolean}
+   */
+  validarValor = (valor) => {
+    return !valor || valor == '' || valor == '-1';
+  }
+
+  /**
+   * Validará el formulario
+   * @return {Object}
+   */
+  validarFormulario = () => {
+    const { empresa, proceso, fechaInicial, fechaFinal } = this.state;
+    if (this.validarValor(empresa)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar una empresa.' };
+    }
+    if (this.validarValor(proceso)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar un proceso.' };
+    }
+    if (this.validarValor(fechaInicial)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar una fecha inicial.' };
+    }
+    if (this.validarValor(fechaFinal)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar una fecha final.' };
+    }
+    return { respuesta: true };
+  };
+
+
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    change[name] = value;
+    this.setState(change, () => {
+      this.validarConsultas(name, value);
+    });
+  };
+
+  /**
+  * Valida las consultas y procesos que debe ejecutar cuando cambia el valor de un componente.
+  */
+  validarConsultas = (name, value) => {
+    switch (name) {
+      case 'proceso':
+      case 'empresa':
+        this.listarUnidadesResponsables();
+        break;
+    }
+  }
+
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  consultar = () => {
+    const respuesta = this.validarFormulario();
+    if (!respuesta.respuesta) {
+      this.props.mostrarAlerta('Información', respuesta.mensaje);
+      return;
+    }
+    const { empresa, proceso, fechaInicial, fechaFinal } = this.state;
+    axios.post(RUTAS_API.REPORTE_AGENDAMIENTO.CONSULTAR_UGUII, {
+      "empresa": empresa,
+      "proceso": proceso,
+      "fechaini": fechaInicial,
+      "fechafin": fechaFinal,
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        this.setState({ listaUggi: respuesta.data.datos.ugii });
+      } else {
+        this.props.mostrarAlerta('Error', 'Lo sentimos no ha se encontrado información disponible.');
+      }
+    });
+  };
+
+  /**
+   * Escribe el archivo y ejecuta la descarga...
+   */
+  generarArchivo = (respuesta) => {
+    let a = document.createElement('a');
+    a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+    a.download = "Agendamiento_Ugii.xls";
+    a.target = '_blank';
+    a.click();
+  };
+
+  /**
+   * Consulta el reporte en el sistema y ejecuta la función de descarga...
+   */
+  descargarReporte = () => {
+    const respuesta = this.validarFormulario();
+    if (!respuesta.respuesta) {
+      this.props.mostrarAlerta('Información', respuesta.mensaje);
+      return;
+    }
+    const { empresa, proceso, fechaInicial, fechaFinal, municipio, unidadResponsable } = this.state;
+    axios.post(RUTAS_API.REPORTE_AGENDAMIENTO.EXPORTAR_REPORTE, {
+      "empresa": empresa,
+      "proceso": proceso,
+      "fechaInicial": fechaInicial,
+      "fechaFinal": fechaFinal,
+      "nombreReporte": "Agendamiento_Ugii",
+      "municipio": municipio,
+      "unidadResponsble": unidadResponsable
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        this.generarArchivo(respuesta);
+      } else {
+        this.props.mostrarAlerta('Error', 'Lo sentimos, no hemos podido generar el reporte.');
+      }
+    });
+  }
+
+  /**
+   * Ordena las fechas de la tabla uguui.
+   * @returns {Array}
+   */
+  ordenarFechas = (listaFechas) => {
+    let fechas = listaFechas.map(fecha => {
+      return (new Date(fecha.agauFechaasigancion)).getTime();
+    });
+    let listaFinal = [];
+    fechas = fechas.sort();
+    fechas.forEach((fecha, index) => {
+      const item = listaFechas.find(f => {
+        if ((new Date(f.agauFechaasigancion)).getTime() == fecha) {
+          return f;
+        }
+      });
+      if (item != null) {
+        listaFinal.push(item);
+      }
+    });
+    return listaFinal;
+  };
+
+  /**
+   * Parsea una fecha en el formato estandar usado en el sistema.
+   * @return {String}
+   */
+  parsearFecha = (fecha) => {
+    const date = new Date(fecha);
+    let dia = date.getDate();
+    let mes = date.getMonth() + 1;
+    let anio = date.getFullYear();
+    if (dia &lt; 10) {
+      dia = '0' + dia;
+    }
+    if (mes &lt; 10) {
+      mes = '0' + mes;
+    }
+    return `${dia}/${mes}/${anio}`;
+  };
+
+  /**
+   * Crea los grupos de la consulta que ha generado la consulta Ugii y ordena las fechas...
+   * @return {Array} listaFechas
+   * @return {Array} grupos
+   */
+  obtenerGruposYFechasOrdenadas = (lista) => {
+    let listaFechas = [];
+    let grupos = [];
+    lista.forEach((item, index) => {
+      const indice = listaFechas.findIndex(i => i.agauFechaasigancion == item.agauFechaasigancion);
+      if (indice &lt; 0) {
+        listaFechas.push(item);
+      }
+      let indiceGrupo = grupos.findIndex(g => g.name == item.proyectoNom);
+      if (indiceGrupo &lt; 0) {
+        grupos.push({ name: item.proyectoNom, array: [] });
+        indiceGrupo = 0;
+      }
+      grupos[indiceGrupo].array.push(item);
+    });
+
+    listaFechas = this.ordenarFechas(listaFechas);
+
+    return { listaFechas, grupos };
+  };
+
+  /**
+   * Renderiza la tabla Ugii
+   * @return {Component}
+   */
+  renderTablaUgii = () => {
+    const lista = this.state.listaUggi;
+    if (!Util.validarArreglo(lista)) {
+      return null;
+    }
+
+    const { listaFechas, grupos } = this.obtenerGruposYFechasOrdenadas(lista);
+
+    return (
+      &lt;div className='table-responsive'>
+        &lt;table className='table table-striped table-bordered table-hover table-condensed'>
+          &lt;thead className='text-center'>
+            &lt;tr>
+              &lt;th>Municipio&lt;/th>
+              {
+                listaFechas.map(item => {
+                  return &lt;th>{this.parsearFecha(item.agauFechaasigancion)}&lt;/th>
+                })
+              }
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody className='text-center'>
+            {
+              grupos.map(grupo => {
+                return (
+                  &lt;tr key={grupo.name}>
+                    &lt;td>{grupo.name}&lt;/td>
+                    {
+                      listaFechas.map(itemFecha => {
+                        const item = grupo.array.find(i => i.agauFechaasigancion == itemFecha.agauFechaasigancion);
+                        const valor = (item) ? item.catindad : '---';
+                        return (&lt;td>{valor}&lt;/td>);
+                      })
+                    }
+                  &lt;/tr>
+                )
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/div>
+    )
+  }
+
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;h1>Reporte Agendamiento&lt;/h1>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='caja contenedor'>
+          &lt;label className='tag'>Filtro&lt;/label>
+          &lt;div className='formulario'>
+            &lt;Combo
+              opciones={this.state.listaEmpresas}
+              propTexto='empresaNom'
+              propValor='empresaCod'
+              label='Empresa: *'
+              name='empresa'
+              value={this.state.empresa}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.listaProcesos}
+              propTexto='prcDescripcion'
+              propValor='uniProceso'
+              label='Proceso: *'
+              name='proceso'
+              value={this.state.proceso}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.listaUnidadesResponsables}
+              propTexto='cuadrillaNom'
+              propValor='cuadrillaCod'
+              label='Unidad Responsable:'
+              name='unidadResponsable'
+              value={this.state.unidadResponsable}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.listaMunicipios}
+              propTexto='ciudadNom'
+              propValor='ciudadCod'
+              label='Municipio:'
+              name='municipio'
+              value={this.state.municipio}
+              onChange={this.controlarCambio}
+            />
+            &lt;Fecha
+              label='Fecha Inicial: *'
+              name='fechaInicial'
+              fecha={this.state.fechaInicial}
+              onChange={this.controlarCambio}
+            />
+            &lt;Fecha
+              label='Fecha Final: *'
+              name='fechaFinal'
+              fecha={this.state.fechaFinal}
+              onChange={this.controlarCambio}
+            />
+            &lt;div className='col-md-12'>
+              &lt;button className='btn btn-primary mr-3' onClick={this.consultar}>Consultar&lt;/button>
+              &lt;button className='btn btn-primary' onClick={this.descargarReporte}>Descargar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='row pl-3 pr-3 pt-5'>
+          &lt;div className='col-md-12'>
+            {this.renderTablaUgii()}
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  }
+}
+
+ReporteAgendamiento.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ReporteAgendamiento);
+
+export { VistaRedux as RReporteAgendamiento };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Reporte maestro de lecturas - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="facturacionController">
+        <form name="reporte" novalidate >
+            <div id="divPanelContenedor">
+                <fieldset>  
+                    <legend> <span class="glyphicon glyphicon-time"></span> Generacion de reporte de novedades de lectura</legend>
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-body"> 
+                                <div class="row">
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Fecha inicial</label>
+                                        <input type="text" ng-model="info.fechaInicial" name="fechaInicial" required="true" class="form-control input-sm datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaInicial.$error.required">
+                                            La fecha inicial es requerida 
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Fecha final</label>
+                                        <input type="text" ng-model="info.fechaFinal" name="fechaFinal" required="true" class="form-control input-sm datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaFinal.$error.required">
+                                            La fecha final es requerida 
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6" show-errors>
+                                        <label>Condicion de consumo</label>
+                                        <select ng-model="info.operador" name="operador" class="form-control input-sm" required="true" >
+                                            <option value="=">Igual a</option>
+                                            <option value=">=">Mayor o igual</option>
+                                            <option value="<=">Menor o igual</option>
+                                            <option value=">">Mayor que</option>
+                                            <option value="<">Menor que</option>
+                                            <option value="!=">Diferente de</option>                                                
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.operador.$error.required">
+                                            La condicion de consumo es requerida 
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Valor del consumo</label>
+                                        <input type="number" min="0" ng-model="info.consumo" name="concumo" required="true" class="form-control input-sm"/>
+                                        <p class="help-block" ng-if="reporte.consumo.$error.required">
+                                            El valor del consumo es requerido 
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12" show-errors>
+                                        <label>Novedad</label>
+                                        <select ng-model="info.novedad" name="novedad" required="false" class="form-control input-sm" placeholder="Seleccione la novedad">
+                                            <option value="-1" selected="true">Todas las novedades</option>
+                                            <option ng-repeat="novedad in novedades" ng-value="novedad.novedad_id">{[{novedad.novedad_nombre}]}</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.novedad.$error.required">
+                                            La novedad es requerida. 
+                                        </p>
+                                    </div>
+                                </div>    
+                                <div class="row">
+                                    <div class="form-group col-md-12" show-errors>
+                                        <label>Tipo de uso</label>
+                                        <select ng-model="info.tipoUso" name="tipoUso" required="false" class="form-control input-sm" placeholder="Seleccione el tipo de uso">
+                                            <option value="-1" selected="true">Todas los tipos de uso</option>
+                                            <option ng-repeat="tipoUso in tiposUso" ng-value="tipoUso.tipo_uso_id">{[{tipoUso.tipo_uso_nombre}]}</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.tipoUso.$error.required">
+                                            El tipo de uso es requerido
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-12" show-errors>
+                                        <label>Proyecto</label>
+                                        <select ng-model="info.proyecto" name="proyecto" required="false" class="form-control input-sm" placeholder="Seleccione el proyecto">
+                                            <option value="-1" selected="true">Todos los proyectos</option>
+                                            <option ng-repeat="proyecto in proyectos" ng-value="proyecto.idmunicipio">{[{proyecto.municipio}]}</option>
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.proyecto.$error.required">
+                                            El proyecto es requerido
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>                            
+                            <div class="panel-footer">
+                                <div class="col-md-8">
+                                    <div class="alert-box info">
+                                        Para generar este reporte de click el boton, generar reporte, este sera presentado en formato Excel.<br/>
+                                        La generacion de este reporte puede tomar algun tiempo.
+                                    </div>  
+                                </div>
+                                <div class="col-md-4">
+                                    <button ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-gears fa-1x"></i> Generar Reporte
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>                
+                </fieldset>
+            </div>
+        </form>        
+    </div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/listadoMaestroLecturas.control.angular.js')}}"></script>
+{% endblock %}

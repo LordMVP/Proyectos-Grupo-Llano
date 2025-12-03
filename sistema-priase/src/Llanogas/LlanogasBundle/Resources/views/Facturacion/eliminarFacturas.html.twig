@@ -1,0 +1,111 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Facturación: Eliminar Facturas - {{empresa}}  {% endblock %}
+{% block body %}
+
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnNuevo" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <div class="divIzquierda">
+                <fieldset>
+                    <legend>Información del Suscriptor</legend>
+                    <div class="campoCorto">
+                        <label for="txtIdSuscriptor">Suscriptor:</label>
+                        <input type="text" id="txtIdSuscriptor" disabled="disabled" />
+                    </div>
+
+                    <div class="campo">
+                        <label for="txtNombre">Nombre:</label>
+                        <input type="text" id="txtNombre" disabled="disabled" />
+                    </div>
+
+                    <div class="campoCorto">
+                        <label for="txtDocumento">NIT/CC:</label>
+                        <input type="text" id="txtDocumento" disabled="disabled" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtConvenio">Convenio:</label>
+                        <input type="text" id="txtConvenio" disabled="disabled" />
+                    </div>
+                </fieldset>
+                <div id="divDetalles">
+                    <table id="tblSuscripciones" class="tabla"></table>
+                    <button id="btnCargarFacturas" class="btnSimple">Cargar Facturas</button>
+                    <div id="divFacturas">
+                        <table id="tblFacturas" class="tabla"></table>
+
+                        <div>
+                            <div class="campo">
+                                <label for="txtSaldoActual">Saldo Actual:</label>
+                                <input type="text" id="txtSaldoActual" disabled="disabled" />
+                            </div>
+
+                        </div>
+
+                        <table id="tblConceptos" class="tabla">
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <hr class="limpiar" />
+
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDoc">Cédula/NIT:</label>
+            <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+        </div>
+        <div> 
+            <label for="txtSuscripciones">Id Suscripciones:</label>
+            <textarea  rows="3" id="txtSuscripciones" placeholder="Ingrese las Suscripciones a Liquidar separados por coma (,)."></textarea>
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <button id="btnBuscar" class="btnSimple">Buscar</button>
+    </div>
+
+    <!-- Confirmación de cancelación -->
+    <div id="divConfirmCancelar">
+        <p>Se eliminará el Facturas ¿Desea continuar?</p>
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/eliminarFactura/eliminarfactura.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/eliminarFactura/eliminarfactura.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/eliminarFactura/eliminarfactura.vista.js')}}"></script>
+{% endblock %}

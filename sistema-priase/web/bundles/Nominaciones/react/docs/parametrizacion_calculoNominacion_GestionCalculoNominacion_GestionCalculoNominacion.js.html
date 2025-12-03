@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calculoNominacion/GestionCalculoNominacion/GestionCalculoNominacion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calculoNominacion/GestionCalculoNominacion/GestionCalculoNominacion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { get as getProp } from 'object-path';
+import Modal from 'react-bootstrap4-modal';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionCalculoNominacion.scss';
+import { toUnicode } from 'punycode';
+import { RDetalle } from '../Detalle';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+import { RGridTable } from '../../../utils/GridTable';
+
+const VISTAS = [
+  { id: 0, titulo: 'Nominación', componente: 'obtenerNominacion' },
+  { id: 1, titulo: 'Desvios', componente: 'obtenerDesvios' },
+  { id: 2, titulo: 'Resumen', componente: 'obtenerResumen' },
+];
+
+const listaResumen = [
+  { id: 'TO', texto: 'Resumen Totales' },
+  { id: 'TR', texto: 'Resumen Tramos' },
+  { id: 'ME', texto: 'Resumen Medidores' },
+  { id: 'FS', texto: 'Resumen Fuente de Suministro' },
+];
+
+const listaTipoContrato = [
+  { texto: 'Transporte', id: 'Transporte' },
+  { texto: 'Suministro', id: 'Suministro' },
+];
+
+const ESTADO_ACTIVO = 'A';
+
+class GestionCalculoNominacion extends Component {
+
+  state = {
+    // Datos de la entidad
+    listaPuntos: [],
+    listaEstados: [],
+    listaTotales: [],
+    listaCalculo: [],
+    puntoConsumo: '',
+    fechaNominar: '',
+    tipoContrato: '',
+    horaLimite: '',
+    tiempoRestante: '',
+    idRegistro: '',
+    resumen: '',
+    // Estado de la aplicacion
+    mostrarModalConsulta: false,
+    visibilidadBoton: false,
+    mostrarAlertaActividad: false,
+    mostrarModalDetalle: false,
+    estado: true,
+    // Programa Actual
+    programaActual: 0,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.consultarListas();
+  };
+
+  /**
+   * Consulta las listas necesarias para usar la interfaz...
+   */
+  consultarListas = () => {
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_PUNTOS_CONSUMO.CONSULTAR_PUNTOS_CONSUMO, { criterio: '' }),
+      axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.ESTADOS_CONTRATO }),
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_DESVIOS.CONSULTAR_DESVIOS, { criterio: '' })
+    ];
+    axios.all(peticiones)
+      .then(axios.spread((puntosConsumo, estadosContrato, listaDesvios) => {
+        const datosAplicacion = {
+          listaPuntos: [],
+          listaEstados: [],
+        };
+        if (puntosConsumo.data.codigo > 0) {
+          datosAplicacion.listaPuntos = puntosConsumo.data.datos;
+        }
+        if (estadosContrato.data.codigo > 0) {
+          datosAplicacion.listaEstados = estadosContrato.data.datos;
+        }
+        if (listaDesvios.data.codigo > 0) {
+          datosAplicacion.listaDesvios = listaDesvios.data.datos;
+        }
+        // datosAplicacion.listaCalculo = this.getObject();
+        this.setState({ ...datosAplicacion });
+      }));
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      fechaNominar: '',
+      puntoConsumo: '',
+      tipoContrato: '',
+      horaLimite: '',
+      tiempoRestante: '',
+      listaCalculo: [],
+      listaTotales: [],
+      resumen: '',
+      // Estado de la aplicacion
+      mostrarModalConsulta: false,
+      visibilidadBoton: false,
+      mostrarAlertaActividad: false,
+      mostrarModalDetalle: false,
+      estado: true,
+      // Programa Actual
+      programaActual: 0,
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario },
+      { texto: 'Detalle', callback: this.renderDetalle }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { listaCalculo } = this.state;
+    if (!Util.validarArreglo(listaCalculo)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe realizar el calculo de al menos 1 punto.' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener el objeto para guardar la nominación
+   * @returns {Object}
+   */
+  obtenerObjetoGuardar = () => {
+    const { listaCalculo } = this.state;
+    const lista = listaCalculo.map(punto => {
+      const medidores = getProp(punto.nominacionDetalleDTO, 'medidores', null);
+      const fuentes = getProp(punto.nominacionDetalleDTO, 'fuenteSuministro', null);
+      const tramos = getProp(punto.nominacionDetalleDTO, 'tramos', null);
+      if (medidores != null &amp;&amp; Object.keys(medidores).length == 0) {
+        punto.nominacionDetalleDTO.medidores = null;
+      }
+      if (fuentes != null &amp;&amp; Object.keys(fuentes).length == 0) {
+        punto.nominacionDetalleDTO.fuenteSuministro = null;
+      }
+      if (tramos != null &amp;&amp; Object.keys(tramos).length == 0) {
+        punto.nominacionDetalleDTO.tramos = null;
+      }
+      return punto;
+    });
+    return lista;
+  };
+
+  /**
+   * Método encargado de validar el campo de nominación en la tabla de puntos seleccionados.
+   * @returns {bool}
+   */
+  validarTablaDesvios = () => {
+    for (let i = 0; i &lt; this.state.listaCalculo.length; i++) {
+      const punto = this.state.listaCalculo[i];
+      for (let index = 0; index &lt; punto.listaDesvios.length; index++) {
+        const desvio = punto.listaDesvios[index];
+        if (!desvio.desCapacidadmaxima || desvio.desCapacidadmaxima === '') {
+          this.props.mostrarAlerta('Datos incompletos', 'Debe ingresar un valor para el desvio');
+          return false;
+        }
+      }
+    };
+    return true;
+  };
+
+  /**
+   * Método encargado de agregar los ids a los puntos de consumo consultados
+   */
+  procesarIds = (listaIds) => {
+    const { listaPuntosSeleccionados } = this.state;
+    let lista = [];
+    for (let index = 0; index &lt; listaPuntosSeleccionados.length; index++) {
+      const punto = listaPuntosSeleccionados[index];
+      for (let pos = 0; pos &lt; listaIds.length; pos++) {
+        const id = listaIds[pos];
+        if (punto.idPuntoConsumo.ptcIderegistro == id.idPuntoConsumo) {
+          punto.idNomincacion = id.idNomincacion;
+          lista.push(punto);
+        }
+      }
+    }
+    this.setState({
+      listaPuntosSeleccionados: lista
+    });
+  };
+
+  /**
+   * Método encargado de guardar al momento de hacer el calculo
+   */
+  guardarTemporal = () => {
+    // const entidadGuardar = this.obtenerObjetoGuardar();
+    // axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.GUARDAR, entidadGuardar)
+    //   .then(respuesta => {
+    //     if (respuesta.data.codigo > 0) {
+    //       this.procesarIds(respuesta.data.datos);
+    //     }
+    //   });
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerObjetoGuardar();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Obtiene el id específico del estado del contrato.
+   * @return {number}
+   */
+  obtenerIdEstado = (codigoEstado) => {
+    const { listaEstados } = this.state;
+    if (!Util.validarArreglo(listaEstados)) {
+      return 0;
+    }
+    const estado = listaEstados.filter(e => (JSON.parse(e.uniPropiedad).estado == codigoEstado));
+    if (!Array.isArray(estado)) {
+      return 0;
+    }
+    return estado[0].uniIderegistro;
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    let { name, value } = evento.target;
+    if (name === 'tipoContrato') {
+      this.consultarHorario(value)
+    }
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar el horario para nominar dependiendo del tipo de contrato.
+   * @param {string} tipoContrato Tipo de contrato seleccionado
+   */
+  consultarHorario = (tipoContrato) => {
+    let { visibilidadBoton } = this.state;
+    if (tipoContrato != '-1') {
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.CONSULTAR_HORARIO_NOMINACION, { tipoContrato: tipoContrato })
+        .then(respuesta => {
+          if (respuesta.data.codigo > 0) {
+            const hora = respuesta.data.datos[0];
+            let tiempo = (parseFloat(respuesta.data.datos[1]) * -1);
+            tiempo = tiempo.toFixed(2);
+            if (tiempo > 0) {
+              visibilidadBoton = true;
+            }
+            const tRestante = `${tiempo} horas`;
+            this.setState({
+              tipoContrato: tipoContrato,
+              horaLimite: hora,
+              tiempoRestante: tRestante,
+              mostrarAlertaActividad: true,
+              visibilidadBoton: visibilidadBoton
+            });
+          }
+        });
+      return;
+    }
+    this.setState({
+      tipoContrato: tipoContrato,
+      mostrarAlertaActividad: false,
+      visibilidadBoton: false,
+    });
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del boton consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false,
+      mostrarModalDetalle: false,
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos de la ventana modal de consulta
+   * @param {Object} entidad Datos seleccionados de la consulta
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      // Cargar datos de la entidad
+      // ...
+    });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de la nominación en caso de que se deseé cambiar
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   * @param {number} posicion Posición del arreglo que se desea modificar
+   */
+  controlarCambioNominacion = (evento, index) => {
+    const lista = [...this.state.listaPuntosSeleccionados];
+    lista[index].cantidadNominacion = evento.target.value;
+    this.setState({ listaPuntosSeleccionados: [...lista] });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  // renderTablaPuntos = () => {
+  //   return (
+  //     &lt;table className='table table-striped'>
+  //       &lt;thead>
+  //         &lt;tr>
+  //           &lt;th>Contrato&lt;/th>
+  //           &lt;th>Punto De Consumo&lt;/th>
+  //           &lt;th>Automático&lt;/th>
+  //           &lt;th>Pronóstico/Nominación&lt;/th>
+  //           &lt;th>Evento Eximente&lt;/th>
+  //           &lt;th>Cuenta Balance&lt;/th>
+  //           &lt;th>Capacidad Máxima &lt;/th>
+  //           &lt;th>Tipo de Contrato&lt;/th>
+  //           &lt;th>Hora Nominación&lt;/th>
+  //           &lt;th>Tercero&lt;/th>
+  //           &lt;th>Nominación&lt;/th>
+  //           &lt;th>Total Nominación&lt;/th>
+  //         &lt;/tr>
+  //       &lt;/thead>
+  //       &lt;tbody>
+  //         {this.state.listaPuntosSeleccionados.map((dato, index) => {
+  //           return (
+  //             &lt;tr key={dato.idPuntoConsumo.ptcIderegistro}>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato.idPuntoConsumo.ptcoNombre}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato.fecha}&lt;/td>
+  //               &lt;td>{(dato.eveEventoEximente.eveIderegistro) ? 'Si' : 'No'}&lt;/td>
+  //               &lt;td>{dato.listaTipoContratos.map((tipo, index) => {
+  //                 return tipo.uniNombre1
+  //               }).join(',')}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>{dato}&lt;/td>
+  //               &lt;td>&lt;TextoNumerico
+  //                 aceptaDecimales={false}
+  //                 aceptaNegativos={false}
+  //                 cols={12}
+  //                 value={dato.cantidadNominacion}
+  //                 onChange={(evento) => {
+  //                   this.controlarCambioNominacion(evento, index)
+  //                 }}
+  //                 name='nominacion'
+  //                 extra={{ disabled: this.state.estado }}
+  //               />&lt;/td>
+  //             &lt;/tr>
+  //           )
+  //         })
+  //         }
+  //       &lt;/tbody>
+  //     &lt;/table>
+  //   )
+  // };
+
+
+
+  /**
+   * Método encargado de mostrar el nombre del punto de consumo.
+   * @param {number} idPunto Identificador del punto de consumo.
+   * @returns {string}
+   */
+  obtenerPunto = (idPunto) => {
+    const { listaPuntos } = this.state;
+    const punto = listaPuntos.find(p => p.ptcIderegistro == idPunto);
+    return punto.ptcoNombre;
+  };
+
+  /**
+   * Método encargado de convertir la fecha del desvio a formato DD/MM/YYYY
+   * @param {number} fechaNumero Fecha parseada a número
+   * @returns {string}
+   */
+  obtenerFecha = (fechaNumero) => {
+    let fecha = new Date(fechaNumero);
+    const anio = fecha.getFullYear();
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth();
+    fecha = `${anio}/${(mes &lt; 10) ? '0' : ''}${mes + 1}/${(dia &lt; 10) ? '0' : ''}${dia}`;
+    return fecha;
+  };
+
+  /**
+   * Método encargado de controlar el cambio de la nominación en caso de que se deseé cambiar
+   * @param {Event} posicionLista Posición del arreglo que se desea modificar
+   * @param {number} posicionListaDesvios Posición del arreglo que se desea modificar
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioDesvio = (posicionLista, posicionListaDesvios, evento) => {
+    const lista = [...this.state.listaCalculo];
+    lista[posicionLista].listaDesvios[posicionListaDesvios].desCapacidadmaxima = evento.target.value;
+    this.setState({ listaCalculo: [...lista] });
+  };
+
+  /**
+   * Método encargado de obtener la capacidad total de los medidores por punto.
+   * @param {number} posicionC Posición en la lista.
+   * @returns {number}
+   */
+  obtenerTotalMedidor = (posicionC) => {
+    const { listaCalculo } = this.state;
+    let total = 0;
+    for (let index = 0; index &lt; listaCalculo[posicionC].listaMedidores.length; index++) {
+      const medidor = listaCalculo[posicionC].listaMedidores[index];
+      total += medidor.mesuCapacidadmaxima;
+    }
+    return total;
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  renderTablaMedidores = () => {
+    if (this.state.listaCalculo.length &lt;= 0) {
+      return &lt;div className='text-center'>No se ha realizado el calculo&lt;/div>
+    }
+    return (
+      &lt;table className='table table-striped mt-10'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Punto De Consumo&lt;/th>
+            &lt;th>Medidores&lt;/th>
+            &lt;th>Capacidad de Suministro&lt;/th>
+            &lt;th>Total&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        {
+          &lt;tbody>
+            {
+              this.state.listaCalculo.map((dato, index) => {
+
+                let listaMedidores = [];
+                if (typeof listaMedidores == 'object') {
+                  for (const key in dato.medidores) {
+                    if (dato.medidores.hasOwnProperty(key)) {
+                      const valor = dato.medidores[key];
+                      listaMedidores.push({ texto: key, valor: valor })
+                    }
+                  }
+                }
+                let tamanioFilas = listaMedidores.length + 1;
+                return (
+                  &lt;Fragment>
+                    &lt;tr key={(dato.ptcIderegistro + '_punto')}>
+                      &lt;td rowSpan={tamanioFilas}>{getProp(dato, 'puntoNombre', 'Indefinido')}&lt;/td>
+                      {
+                        !Util.validarArreglo(listaMedidores) &amp;&amp; (
+                          &lt;Fragment>
+                            &lt;td colSpan={3}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros.&lt;/td>
+                          &lt;/Fragment>
+                        )
+                      }
+                    &lt;/tr>
+                    {
+                      Util.validarArreglo(listaMedidores) &amp;&amp; listaMedidores.map((medidor, index) => {
+                        return (
+                          &lt;tr key={(medidor.texto + '_medidor')}>
+                            &lt;td>{getProp(medidor, 'texto')}&lt;/td>
+                            &lt;td>{getProp(medidor, 'valor')}&lt;/td>
+                            &lt;td>{getProp(dato, 'nominacionDetalleDTO.totalMedidores')}&lt;/td>
+                          &lt;/tr>
+                        )
+                      })
+                    }
+                  &lt;/Fragment>
+                )
+              })
+            }
+          &lt;/tbody>
+        }
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  renderTablaTotales = () => {
+    if (this.state.listaCalculo.length &lt;= 0) {
+      return &lt;div className='text-center'>No se ha realizado el calculo&lt;/div>
+    }
+    return (
+      &lt;table className='table table-striped mt-10'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Ciudad&lt;/th>
+            &lt;th>Total&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            !Util.validarArreglo(this.state.listaCalculo) &amp;&amp; (
+              &lt;tr>
+                &lt;td colSpan={2}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros.&lt;/td>
+              &lt;/tr>
+            )
+          }
+          {
+            Util.validarArreglo(this.state.listaCalculo) &amp;&amp; this.state.listaCalculo.map((dato, index) => {
+              return (
+                &lt;tr key={(dato.ptcIderegistro + '_totales')}>
+                  &lt;td>{getProp(dato, 'nominacionDetalleDTO.nombreCiudad', 'Indefinido')}&lt;/td>
+                  &lt;td>{getProp(dato, 'nominacionDetalleDTO.totalValor', 'Indefinido')}&lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+
+  getObject = () => {
+    let obj = {
+      "codigo": 1,
+      "mensaje": "Petición ejecutada correctamente",
+      "datos": [
+        {
+          "fechaNominar": "2019-08-15",
+          "ptcIderegistro": 41,
+          "puntoNombre": "TEST",
+          "automatico": "N",
+          "pronostico": 0,
+          "cuentaBalance": null,
+          "cantidadMaxima": 123,
+          "listaDesvios": [],
+          "distribucion": [
+            {
+              "tipocontrato": [
+                "Suministro",
+                "Transporte"
+              ],
+              "horaNominacion": null,
+              "numeroContrato": "TR-KKJH12",
+              "tercero": "PEREZ GAMBOA CARLOS ALBERTO",
+              "capacidadMaxima": 1015,
+              "eventoEximente": 0,
+              "nominacion": null,
+              "info": null
+            }
+          ],
+          "totalNominacion": null,
+          "nominacionDetalleDTO": {
+            "nombreCiudad": null,
+            "totalValor": null,
+            "medidores": {
+              "Medidor prueba": 15
+            },
+            "totalMedidores": 15,
+            "fuenteSuministro": {
+              "APIAY": 1015
+            },
+            "tramos": {
+              "trmIderegistro": 1,
+              "trmNombre": "cusiana-apiay",
+              "trmCodgestor": "TRC00345",
+              "trmFecha": 1554110990562,
+              "usuIderegistro": 288,
+              "empIderegistro": {
+                "empresaSevemp": 322
+              },
+              "cantidadTransportada": 1200
+            },
+            "info": null
+          },
+          "info": null
+        },
+        {
+          "fechaNominar": "2019-08-15",
+          "ptcIderegistro": 48,
+          "puntoNombre": "Villavicencio_IND_Reg",
+          "automatico": "N",
+          "pronostico": 0,
+          "cuentaBalance": null,
+          "cantidadMaxima": 1000,
+          "listaDesvios": [],
+          "distribucion": [],
+          "totalNominacion": null,
+          "nominacionDetalleDTO": {
+            "nombreCiudad": null,
+            "totalValor": null,
+            "medidores": {},
+            "totalMedidores": 0,
+            "fuenteSuministro": {},
+            "tramos": {
+              "trmIderegistro": 1,
+              "trmNombre": "cusiana-apiay",
+              "trmCodgestor": "TRC00345",
+              "trmFecha": 1554110990562,
+              "usuIderegistro": 288,
+              "empIderegistro": {
+                "empresaSevemp": 322
+              },
+              "cantidadTransportada": 1200
+            },
+            "info": null
+          },
+          "info": null
+        },
+        {
+          "fechaNominar": "2019-08-15",
+          "ptcIderegistro": 1,
+          "puntoNombre": "Punto Prueba",
+          "automatico": "N",
+          "pronostico": 0,
+          "cuentaBalance": null,
+          "cantidadMaxima": 6000,
+          "listaDesvios": [],
+          "distribucion": [],
+          "totalNominacion": null,
+          "nominacionDetalleDTO": {
+            "nombreCiudad": null,
+            "totalValor": null,
+            "medidores": {},
+            "totalMedidores": 0,
+            "fuenteSuministro": {},
+            "tramos": {
+              "trmIderegistro": 1,
+              "trmNombre": "cusiana-apiay",
+              "trmCodgestor": "TRC00345",
+              "trmFecha": 1554110990562,
+              "usuIderegistro": 288,
+              "empIderegistro": {
+                "empresaSevemp": 322
+              },
+              "cantidadTransportada": 184672.3532
+            },
+            "info": null
+          },
+          "info": null
+        }
+      ]
+    };
+    return obj.datos;
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  renderTablaFuentes = () => {
+    if (this.state.listaCalculo.length &lt;= 0) {
+      return &lt;div className='text-center'>No se ha realizado el calculo&lt;/div>
+    }
+    return (
+      &lt;table className='table table-striped mt-10'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Punto De Consumo&lt;/th>
+            &lt;th>Fuente de Suministro&lt;/th>
+            &lt;th>Capacidad Contratada&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.listaCalculo.map((dato, index) => {
+              let listaFuentes = [];
+              const fuentes = getProp(dato, 'nominacionDetalleDTO.fuenteSuministro', {});
+              for (const key in fuentes) {
+                if (fuentes.hasOwnProperty(key)) {
+                  const valor = fuentes[key];
+                  listaFuentes.push({ texto: key, valor: valor });
+                }
+              }
+              let numeroFilas = listaFuentes.length + 1;
+              return (
+                &lt;Fragment>
+                  &lt;tr key={(dato.ptcIderegistro + '_punto_consumo_fuente')}>
+                    &lt;td rowSpan={numeroFilas}>{getProp(dato, 'puntoNombre', 'Indefinido')}&lt;/td>
+                    {
+                      !Util.validarArreglo(listaFuentes) &amp;&amp; (
+                        &lt;td colSpan={2}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros&lt;/td>
+                      )
+                    }
+                  &lt;/tr>
+                  {
+                    Util.validarArreglo(listaFuentes) &amp;&amp; listaFuentes.map((fuente, index) => {
+                      return (
+                        &lt;Fragment>
+                          &lt;tr key={(fuente.texto + '_fuente')}>
+                            &lt;td>{getProp(fuente, 'texto', 'Indefinido')}&lt;/td>
+                            &lt;td>{getProp(fuente, 'valor', '0')}&lt;/td>
+                          &lt;/tr>
+                        &lt;/Fragment>
+                      )
+                    })
+                  }
+                &lt;/Fragment>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de mostrar  la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  renderTablaTramos = () => {
+    if (this.state.listaCalculo.length &lt;= 0) {
+      return &lt;div className='text-center'>No se ha realizado el calculo&lt;/div>
+    }
+
+    //Agrupamos los tramos...
+    let puntosPorTramo = [];
+    const listaCalculo = this.state.listaCalculo;
+    listaCalculo.forEach(punto => {
+      const tramo = getProp(punto, 'nominacionDetalleDTO.tramos', null);
+      if (tramo != null) {
+        const indexTramo = puntosPorTramo.findIndex(t => t.trmIderegistro == tramo.trmIderegistro);
+        if (indexTramo &lt; 0) {
+          tramo.listaPuntos = [];
+          tramo.listaPuntos.push(punto);
+          puntosPorTramo.push(tramo);
+        } else {
+          puntosPorTramo[indexTramo].listaPuntos.push(punto);
+        }
+      }
+    });
+
+    return (
+      &lt;table className='table table-striped mt-10'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th>Punto de Consumo&lt;/th>
+            &lt;th>Capacidad Transportada&lt;/th>
+            &lt;th>Total&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            Util.validarArreglo(puntosPorTramo) &amp;&amp; puntosPorTramo.map((tramo, indexTramo) => {
+              const numFilas = tramo.listaPuntos.length + 1;
+              return (
+                &lt;Fragment>
+                  &lt;tr key={(tramo.trmIderegistro)}>
+                    &lt;td rowSpan={numFilas}>{tramo.trmNombre}&lt;/td>
+                  &lt;/tr>
+
+                  {!Util.validarArreglo(tramo.listaPuntos) &amp;&amp; (
+                    &lt;tr>
+                      &lt;td colSpan={3}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros&lt;/td>
+                    &lt;/tr>
+                  )}
+                  {
+                    Util.validarArreglo(tramo.listaPuntos) &amp;&amp; tramo.listaPuntos.map((punto, indexPunto) => {
+                      return (
+                        &lt;tr key={('tramo_' + punto.ptcIderegistro)}>
+                          &lt;td>{punto.puntoNombre}&lt;/td>
+                          &lt;td>{tramo.cantidadTransportada}&lt;/td>
+                          &lt;td>{tramo.cantidadTransportada}&lt;/td>
+                        &lt;/tr>
+                      );
+                    })
+                  }
+                &lt;/Fragment>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal para generar el detalle
+   */
+  renderDetalle = () => {
+    const { listaEstados } = this.state;
+    const estado = this.obtenerIdEstado(ESTADO_ACTIVO);
+    axios.post(RUTAS_API.CONTRATOS.CONSULTAR_CONTRATOS, { criterio: '', estadosContrato: estado })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaContrato: respuesta.data.datos,
+            mostrarModalDetalle: true
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de obtener el objeto que se debe enviar para realizar el calculo de la nominación
+   * @param {Object} listaSeleccionados Puntos seleccionados para la nominación
+   * @returns {Object}
+   */
+  obtenerObjeto = (listaSeleccionados) => {
+    let objeto = {};
+    objeto.listaPuntosConsumo = listaSeleccionados.map((dato, index) => {
+      return {
+        ptcIderegistro: dato.idPuntoConsumo.ptcIderegistro
+      }
+    })
+    return objeto;
+  };
+
+  /**
+   *
+   */
+  reCalcular = () => {
+
+  };
+
+  /**
+   * Método encargado de realizar el calculo para los puntos seleccionados del tipo de contrato seleccionado
+   * @returns {bool}
+   */
+  calcular = () => {
+    const { listaPuntosSeleccionados, tipoContrato, fechaNominar } = this.state;
+    if (fechaNominar.trim() === '') {
+      this.props.mostrarAlerta('Datos Incompletos', 'Debe seleccionar la fecha a nominar');
+      return false;
+    }
+    // const objeto = this.obtenerObjeto(listaSeleccionados);
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.CALCULAR_NOMINACION, { fecha: fechaNominar })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaCalculo: respuesta.data.datos,
+            estado: false,
+            visibilidadBoton: false,
+          }, this.guardarTemporal);
+        }
+      })
+  };
+
+  /**
+   * Método encargado de procesar el total para agregarlo a la lista
+   */
+  procesarTotal = (total) => {
+    const objeto = {};
+    let division = total.split(',');
+    const ciudad = division[0].slice(1);
+    const totalFinal = division[1].substr(0, (division[1].length - 1));
+    objeto.ciudad = ciudad;
+    objeto.totalFinal = totalFinal;
+    return objeto;
+  };
+
+  /**
+   * Método encargado de consultar la nominación para el punto seleccionado
+   * @param {Object} datosPuntoConsumo Objecto con los datos del punto de consumo seleccionado
+   */
+  consultarNominacion = (datosPuntoConsumo) => {
+    const { listaPuntosSeleccionados, listaTotales } = this.state;
+    let listaT = [];
+    let objeto = {};
+    listaT.push(datosPuntoConsumo);
+    objeto.listaPuntoConsumo = listaT.map((dato, index) => {
+      return {
+        ptcIderegistro: dato.idPuntoConsumo.ptcIderegistro
+      }
+    })
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.CONSULTAR_NOMINACION_PUNTO, objeto)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          const datos = respuesta.data.datos[0];
+          datosPuntoConsumo.cantidadNominacion = datos.nominacion
+          const total = this.procesarTotal(datos.total);
+          listaTotales.push(total);
+          listaPuntosSeleccionados.push(datosPuntoConsumo);
+          this.setState({
+            listaPuntosSeleccionados: listaPuntosSeleccionados,
+            listaTotales: listaTotales
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de llevar el control de las pestañas.
+   * @param {Event} evento Evento ejecutado en el control de usuario.
+   */
+  navegar = (evento) => {
+    const tipo = evento.target.name;
+    const programaActual = parseInt(this.state.programaActual);
+    const incremento = tipo === 'btn-anterior' ? -1 : 1;
+    const nuevoIndice = programaActual + incremento;
+    if (VISTAS[nuevoIndice]) {
+      this.setState({ programaActual: nuevoIndice });
+    }
+  };
+
+  /**
+   * Método encargado de cargar el titulo de las vistas.+
+   * @param {Event} evento Evento ejecutado en el control de usuario.
+   */
+  cargarVista = (evento) => {
+    this.setState({ programaActual: evento.target.value });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos seleccionados
+   * @returns {Arrat}
+   */
+  obtenerDesvios = () => {
+    if (!Util.validarArreglo(this.state.listaDesvios)) {
+      return (&lt;div className='text-center'>No se ha realizado el calculo&lt;/div>);
+    }
+    return (
+      &lt;div>
+        &lt;table className='table table-striped mt-10'>
+          &lt;thead className='bg-dark bg-white'>
+            &lt;tr>
+              &lt;th>Punto De Consumo&lt;/th>
+              &lt;th>Desvio&lt;/th>
+              &lt;th>No. Contrato&lt;/th>
+              &lt;th>Tercero&lt;/th>
+              &lt;th>Fecha&lt;/th>
+              &lt;th>Punto Origen &lt;/th>
+              &lt;th>Punto Destino &lt;/th>
+              &lt;th>Capacidad Asignada Desvio &lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {
+              this.state.listaDesvios.map((desvio, index) => {
+                return (
+                  &lt;tr key={(index)}>
+                    &lt;td>{(getProp(desvio, 'desvio.ptcIdepuntoinicial.ptcoNombre', -1))}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvio.desNombre')}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvioContrato.cntIdecontrato.cntNumero')}&lt;/td>
+                    &lt;td>{this.obtenerFecha(getProp(desvio, 'desvio.desFecha', 0))}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvioContrato.cntIdecontrato.terIdeagente.terNombre', 'Indefinido')}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvio.ptcIdepuntoinicial.ptcoNombre', 'Indefinido')}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvio.ptcIdepuntofinal.ptcoNombre', 'Indefinido')}&lt;/td>
+                    &lt;td>{getProp(desvio, 'desvio.desCapacidadmaxima', 0)}&lt;/td>
+                  &lt;/tr>
+                );
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+        {/* &lt;button className='btn btn-primary botonFacturas centrado' onClick={this.reCalcular}>Re calcular&lt;/button> */}
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de retornar la vista con el resumen de la nominación
+   * @returns {Object}
+   */
+  obtenerResumen = () => {
+    return (
+      &lt;div>
+        &lt;Combo
+          opciones={listaResumen}
+          propTexto='texto'
+          propValor='id'
+          label='Resumen:'
+          name='resumen'
+          value={this.state.resumen}
+          onChange={this.controlarCambio}
+        />
+        {this.state.resumen === 'TO' &amp;&amp;
+          this.renderTablaTotales()
+        }
+        {this.state.resumen === 'TR' &amp;&amp;
+          this.renderTablaTramos()
+        }
+        {this.state.resumen === 'ME' &amp;&amp;
+          this.renderTablaMedidores()
+        }
+        {this.state.resumen === 'FS' &amp;&amp;
+          this.renderTablaFuentes()
+        }
+      &lt;/div>
+    );
+  };
+
+  controlarCambioTabla = (evento) => {
+    const control = evento.target;
+    const nombrePropiedad = control.name;
+    const indexPunto = control.attributes['data-indexpuntoconsumo'].value;
+    const indexDistribucion = control.attributes['data-indexdistribucion'].value;
+    if (nombrePropiedad === 'nominacion') {
+      const listaCalculo = this.state.listaCalculo.map((punto, index) => {
+        const p = { ...punto };
+        if (index == indexPunto) {
+          p.distribucion = p.distribucion.map((dis, indexDist) => {
+            const distribucion = { ...dis };
+            if (indexDist == indexDistribucion) {
+              distribucion.nominacion = control.value;
+            }
+            return distribucion;
+          });
+        }
+        // listaCalculo[indexPunto].distribucion[indexDistribucion].nominacion = control.value;
+        return p;
+      });
+      this.setState({ listaCalculo: listaCalculo }, () => {
+        control.focus();
+      });
+    }
+  };
+
+  renderTablaCalculo = () => {
+    const lista = this.state.listaCalculo;
+    if (!Util.validarArreglo(lista)) {
+      return null;
+    }
+    return (
+      &lt;table className='table-normaliced table table-condensed table-bordered'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th className='text-center'>Punto Consumo&lt;/th>
+            &lt;th className='text-center'>Automático&lt;/th>
+            &lt;th className='text-center'>Pronóstico&lt;/th>
+            &lt;th className='text-center'>Cuenta Balance&lt;/th>
+            &lt;th className='text-center'>Cantidad Máxima&lt;/th>
+            &lt;th colSpan={8} className='text-center'>Distribución Nominación&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {Util.validarArreglo(lista) &amp;&amp; (
+            lista.map((puntoConsumo, index) => {
+              //Calculamos el tamaño de las filas...
+              const listaDistribucion = puntoConsumo.distribucion;
+              let tamanioFilas = 1;
+              listaDistribucion.forEach(distribucion => {
+                tamanioFilas++;
+              });
+
+              if (Util.validarArreglo(puntoConsumo.listaDesvios)) {
+                tamanioFilas++;
+                puntoConsumo.listaDesvios.forEach(desvio => {
+                  tamanioFilas++;
+                });
+              }
+
+              return (
+                &lt;Fragment key={(puntoConsumo.ptcIderegistro + '_f_ptc')}>
+                  &lt;tr key={(puntoConsumo.ptcIderegistro + 'punto_consumo_calculo')}>
+                    &lt;td rowSpan={tamanioFilas}>{puntoConsumo.puntoNombre}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{(puntoConsumo.automatico == 'S' ? 'Sí' : 'NO')}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{puntoConsumo.pronostico}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{puntoConsumo.cuentaBalance}&lt;/td>
+                    &lt;td rowSpan={tamanioFilas}>{puntoConsumo.cantidadMaxima}&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Tipo Contrato&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Hora Nominación&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>No Contrato&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Tercero&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Capacidad Máxima&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Evento Eximente&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Nominación&lt;/td>
+                    &lt;td className='th-sub bg-dark text-white'>Total Nominación&lt;/td>
+                  &lt;/tr>
+                  {
+                    puntoConsumo.distribucion.map((distribucion, indexDistribucion) => {
+                      let nominacion = getProp(distribucion, 'nominacion', 0);
+                      nominacion = (nominacion) ? nominacion : 0;
+                      return (
+                        &lt;Fragment key={(distribucion.numeroContrato + '_f_distribucion2')}>
+                          &lt;tr key={(distribucion.numeroContrato + 'distribucion_2')}>
+                            &lt;td>{distribucion.tipocontrato.join(',')}&lt;/td>
+                            &lt;td>{distribucion.horaNominacion}&lt;/td>
+                            &lt;td>{distribucion.numeroContrato}&lt;/td>
+                            &lt;td>{distribucion.tercero}&lt;/td>
+                            &lt;td>{distribucion.capacidadMaxima}&lt;/td>
+                            &lt;td>{distribucion.eventoEximente}&lt;/td>
+                            &lt;td>
+                              &lt;div className='form-group col-12 no-label input-table'>
+                                &lt;TextoNumerico
+                                  aceptaDecimales={false}
+                                  aceptaNegativos={false}
+                                  cols={12}
+                                  value={nominacion}
+                                  onChange={this.controlarCambioTabla}
+                                  name='nominacion'
+                                  extra={{ 'data-indexdistribucion': indexDistribucion, 'data-indexpuntoconsumo': index }}
+                                />
+                              &lt;/div>
+                            &lt;/td>
+                            {indexDistribucion == 0 &amp;&amp; (&lt;td rowSpan={(tamanioFilas - 1)}>{distribucion.totalFinal}&lt;/td>)}
+                          &lt;/tr>
+                        &lt;/Fragment>
+                      );
+                    })
+                  }
+                  {Util.validarArreglo(puntoConsumo.listaDesvios) &amp;&amp; (
+                    &lt;Fragment key={(puntoConsumo.ptcIderegistro + '_f_desvio_3')}>
+                      &lt;tr key={(puntoConsumo.ptcIderegistro + 'desvio_3')}>
+                        &lt;td colSpan={7} className='bg-dark text-white th-sub'>Desvio&lt;/td>
+                      &lt;/tr>
+                      {
+                        puntoConsumo.listaDesvios.map((desvio, indexDesvio) => {
+                          return (
+                            &lt;tr key={(indexDesvio + 'desvio_4')}>
+                              &lt;td colSpan={6}>{desvio.desNombre}&lt;/td>
+                              &lt;td>{desvio.desCapacidadmaxima}&lt;/td>
+                            &lt;/tr>
+                          )
+                        })
+                      }
+                    &lt;/Fragment>
+                  )}
+                &lt;/Fragment>
+              );
+            })
+          )}
+          {!Util.validarArreglo(lista) &amp;&amp; (&lt;tr>&lt;td colSpan='6'>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros&lt;/td>&lt;/tr>)}
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de retornar la vista de nominación.
+   * @returns {Object}
+   */
+  obtenerNominacion = () => {
+    return (
+      &lt;div className='row'>
+        &lt;Fecha
+          label='Fecha a Nominar:'
+          name='fechaNominar'
+          fecha={this.state.fechaNominar}
+          onChange={this.controlarCambio}
+        />
+        &lt;div className='col-4'>
+          &lt;button className='btn btn-primary m-t-24' onClick={this.calcular}>&lt;i className='fa fa-fw fa-calendar'>&lt;/i> Calcular&lt;/button>
+        &lt;/div>
+        {this.state.listaCalculo.length > 0 &amp;&amp;
+          &lt;div className='col-12'>
+            {this.renderTablaCalculo()}
+          &lt;/div>
+        }
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        {this.state.mostrarAlertaActividad &amp;&amp; (
+          &lt;div className='alerta-actividad'>
+            &lt;div className='header'>
+              &lt;a onClick={() => this.setState({ mostrarAlertaActividad: false })} className='close' >&amp;times;&lt;/a>
+              &lt;label>{this.state.tipoContrato}&lt;/label>
+            &lt;/div>
+            &lt;div className='body'>
+              &lt;span className='icon'>&lt;i className='fa fa-fw fa-clock-o'>&lt;/i>&lt;/span>
+              &lt;span className='detalle'>{`Hora Limite ${this.state.horaLimite}`}&lt;/span>&lt;br>&lt;/br>
+              &lt;span className='icon'>&lt;i className='fa fa-fw fa-clock-o'>&lt;/i>&lt;/span>
+              &lt;span className='detalle'>{`Tiempo Restante ${this.state.tiempoRestante}`}&lt;/span>
+            &lt;/div>
+          &lt;/div>
+        )}
+        &lt;div className='contratos__navegador'>
+          &lt;div className='contratos__navegador__cabecera'>
+            &lt;div className='colum btn-content'>
+              {this.state.programaActual > 0 &amp;&amp; (
+                &lt;button className='contratos__navegador__cabecera-btn' name='btn-anterior' onClick={this.navegar}>Anterior&lt;/button>
+              )}
+            &lt;/div>
+            &lt;div className='colum select-content'>
+              &lt;select name="programaActual" className='contratos__navegador__cabecera-select' onChange={this.cargarVista} value={this.state.programaActual}>
+                {VISTAS.map(p => (&lt;option key={p.id} value={p.id}>{p.titulo}&lt;/option>))}
+              &lt;/select>
+            &lt;/div>
+            &lt;div className='colum btn-content'>
+              {(this.state.programaActual &lt; (VISTAS.length - 1)) &amp;&amp; (
+                &lt;button className='contratos__navegador__cabecera-btn' name='btn-siguiente' onClick={this.navegar}>Siguiente&lt;/button>
+              )}
+            &lt;/div>
+          &lt;/div>
+          &lt;div className="contratos__fragmento">
+            {this[VISTAS[parseInt(this.state.programaActual)].componente]()}
+          &lt;/div>
+        &lt;/div>
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalDetalle}
+          titulo='Generar Detalle'
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RDetalle
+            esModal
+            listaContrato={this.state.listaContrato}
+            mostrarAlerta={this.props.mostrarAlerta}
+          />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCalculoNominacion.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCalculoNominacion);
+
+export { VistaRedux as RGestionCalculoNominacion };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

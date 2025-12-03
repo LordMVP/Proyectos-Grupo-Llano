@@ -1,0 +1,68 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Parametrización de Scoring - {{empresa}}  {% endblock %}
+{% block body %}
+
+<div id="divComandos">
+    <div class="divBotones" style="margin-bottom:15px;">
+        <button id="btnGrabar" class="btn">grabar</button>
+        <button id="btnCancelar" class="btn">cancelar</button>
+    </div>
+</div>
+    <fieldset id="divFormularioGeneral">
+        <legend>Parametrización </legend>
+        <div class="campo">
+            <label for="cmbProductoFinanciero">Producto Financiero: </label>
+            <select id="cmbProductoFinanciero">
+                {% for producto in productofinanciero %}
+                    <option value="{{producto.idunidad}}">{{producto.nombre}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="cmbFormulario">Formulario: </label>
+            <select id="cmbFormulario">
+                <option value="-1"> Seleccione una opción</option>
+                {% for formulario in formularios %}
+                    <option value="{{formulario.idformulario}}">{{formulario.formulario}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="campo">
+            <button class="btnSimple" id="btnAgregarFormulario"><i class="fa fa-plus"></i> Agregar formulario</button>
+        </div>
+        <div id="divVariables">
+            <button class="btnSimple" id="btnAgregarVariable">Agregar Variable</button>
+            <table id="tblVariables" class="tabla" style="margin-top: 15px;"></table>
+        </div>
+
+    </fieldset>
+    <div style="display:none" id="divDialogoFormulario">
+        <div class="campo">
+            <label for="txtFormularioCrear">Formulario: </label>
+            <input id="txtFormularioCrear" type="text">
+        </div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha Inicio: </label>
+            <input id="txtFechaInicio" type="text">
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha Fin:</label>
+            <input type="text" id="txtFechaFin">
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/parametrizacion/parametrizacion.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/parametrizacion/parametrizacion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Libranza/js/parametrizacion/parametrizacion.vista.js')}}"></script>
+{% endblock %}

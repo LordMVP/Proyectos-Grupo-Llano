@@ -1,0 +1,62 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/progreso.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Proceso Cierre de Suspensiones y Reconexiones - {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div id="divCabecera">
+        <fieldset id="fieldCabecera" style="margin: 0 auto; width: 60%;">
+            <div id="divCampos">
+                <legend>Proceso de cierre de suspensiones</legend>
+                <div class="campoMitad">
+                    <label for="cboCiclos">Ciclo:</label>
+                    <select id="cboCiclos">
+                        <option value="-1"> Seleccione una opción</option>
+                        {% for ciclo in ciclos %}
+                            <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <span id="spanProceso" class="pMensaje"></span>
+                    <input type="button" id="btnSuspension" value="Ejecutar Cierre" class="btnSimple"/>
+                </div>
+            </div>
+            {% if procesoActivo != 0  %}
+                <div id="divProgreso">
+                    <legend>Progreso de la aplicación del Recaudo</legend>
+
+                    <p>Fecha de Inicio: {{proceso.fechaInicio}}</p>
+                    <p>Usuario: {{proceso.usuario}}</p>
+                    <p>Número de Registros Procesados: <span id="numeroRegistrosProcesados" >{{proceso.numeroRegistrosProcesados}}</span></p>
+                    <progress id="progress"/>
+                </div>
+            {% endif %}
+        </fieldset>
+    </div>
+    <div id="divDialogoResumen" style="display:none;">
+        <table id="tblResumen" class="tabla"></table>
+        <table id="tblErrores" class="tabla"></table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/cierre/proceso.cierre.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/cierre/proceso.cierre.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/proceso/cierre/proceso.cierre.vista.js')}}"></script>
+    <script type="text/javascript">
+        procesoCierreVista.init({{procesoActivo}});
+    </script>
+{% endblock %}

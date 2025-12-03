@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calculoNominacion/GestionCalculoNominacion/GestionCalculoNominacionnuevo.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calculoNominacion/GestionCalculoNominacion/GestionCalculoNominacionnuevo.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { get as getProp } from 'object-path';
+import Modal from 'react-bootstrap4-modal';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionCalculoNominacion.scss';
+import { CLASES_UNIDADES } from '../../../../global/constantes';
+
+// const VISTAS = [
+//   { id: 0, titulo: 'Nominación', componente: 'obtenerNominacion' },
+//   { id: 1, titulo: 'Desvios', componente: 'obtenerDesvios' },
+//   { id: 2, titulo: 'Resumen', componente: 'obtenerResumen' },
+// ];
+
+class GestionCalculoNominacion extends Component {
+  constructor(props) {
+    super(props);
+    this.referencia = React.createRef();
+  }
+
+  state = {
+    // Datos de la entidad
+    fechaNominar: '',
+    // Listas de la entidad
+    listaPuntosFecha: [],
+    listaDetalle: [],
+    // Estado de la aplicacion
+    // Programa Actual
+    programaActual: 0,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+  };
+
+  /**
+   * Método encargado ejecutar una acción cuando se elimina el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      // Datos de la entidad
+      fechaNominar: '',
+      // Listas de la entidad
+      listaPuntosFecha: [],
+      listaPuntosSuministro: [],
+      listaDetalle: [],
+      // Estado de la aplicacion
+      // Programa Actual
+      programaActual: 0,
+    });
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Limpiar', callback: this.limpiarFormulario },
+      { texto: 'Detalle', callback: this.renderDetalle }
+    ];
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { listaCalculo } = this.state;
+    if (!Util.validarArreglo(listaCalculo)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe realizar el calculo de al menos 1 punto.' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener el objeto para guardar la nominación
+   * @returns {Object}
+   */
+  obtenerObjetoGuardar = () => {
+
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerObjetoGuardar();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de abrir la ventana modal del boton consulta
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Obtiene el id específico del estado del contrato.
+   * @return {number}
+   */
+  obtenerIdEstado = (codigoEstado) => {
+    const { listaEstados } = this.state;
+    if (!Util.validarArreglo(listaEstados)) {
+      return 0;
+    }
+    const estado = listaEstados.filter(e => (JSON.parse(e.uniPropiedad).estado == codigoEstado));
+    if (!Array.isArray(estado)) {
+      return 0;
+    }
+    return estado[0].uniIderegistro;
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    let { name, value } = evento.target;
+    if (name === 'fechaNominar') {
+      this.consultarPuntosNominar(value);
+      return;
+    }
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de consultar la lista de los puntos dependiendo de la fecha seleccionada para nominar
+   * @param {string} fechaNominar Fecha a nominar
+   */
+  consultarPuntosNominar = (fechaNominar) => {
+    if (fechaNominar != '-1') {
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_NOMINACION.CONSULTAR_DETALLE_PUNTOS, { fecha: fechaNominar })
+        .then(respuesta => {
+          if (respuesta.data.codigo > 0) {
+            this.setState({
+              listaPuntosFecha: respuesta.data.datos,
+              fechaNominar: fechaNominar
+            });
+          }
+        });
+      return;
+    }
+    this.setState({
+      listaPuntosFecha: [],
+      fechaNominar: fechaNominar
+    });
+  };
+
+  /**
+   * Método encargado de cerrar la ventana modal del boton consulta
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false,
+      mostrarModalDetalle: false,
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos de la ventana modal de consulta
+   * @param {Object} entidad Datos seleccionados de la consulta
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      // Cargar datos de la entidad
+      // ...
+    });
+  };
+
+  /**
+   * Método encargado de mostrar las tablas resumen
+   * @returns {JSX}
+   */
+  renderTotales = () => {
+    return (
+      &lt;Fragment>
+        &lt;table className='table table-bordered mt-5'>
+          &lt;thead className='bg-dark text-white'>
+            &lt;tr>
+              &lt;td colSpan='3'>Totales&lt;/td>
+            &lt;/tr>
+            &lt;tr>
+              &lt;th className='text-center'>Punto de Salida&lt;/th>
+              &lt;th className='text-center'>Cantidad&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+
+          &lt;/tbody>
+        &lt;/table>
+      &lt;/Fragment>
+    );
+  }
+
+  /**
+   * Método encargado de mostrar las tablas resumen
+   * @returns {JSX}
+   */
+  renderResumen = () => {
+    if (!Util.validarArreglo(lista1)) {
+      return;
+    }
+    if (!Util.validarArreglo(lista2)) {
+      return;
+    }
+    return (
+      &lt;Fragment>
+        &lt;table className='table table-bordered mt-5'>
+          &lt;thead className='bg-dark text-white'>
+            &lt;tr>
+              &lt;td colSpan='4'>Nominación Suministro&lt;/td>
+            &lt;/tr>
+            &lt;tr>
+              &lt;th className='text-center'>Contrato&lt;/th>
+              &lt;th className='text-center'>Resumen Medidor Suministro&lt;/th>
+              &lt;th className='text-center'>Cantidad&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+
+          &lt;/tbody>
+        &lt;/table>
+        &lt;table className='table table-bordered mt-5'>
+          &lt;thead className='bg-dark text-white'>
+            &lt;tr>
+              &lt;td colSpan='4'>Nominación Transporte&lt;/td>
+            &lt;/tr>
+            &lt;tr>
+              &lt;th className='text-center'>Punto de Salida&lt;/th>
+              &lt;th className='text-center'>Contrato&lt;/th>
+              &lt;th className='text-center'>Cantidad&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Selecion&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+
+          &lt;/tbody>
+        &lt;/table>
+        &lt;button className='btn btn-primary'>Generar Detalle&lt;/button>
+      &lt;/Fragment>
+    );
+  }
+
+  /**
+   * Método encargado de controlar los cambios en los valores de la tabla del calculo
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambioTabla = (evento) => {
+    const datos = [...this.state.listaPuntosFecha];
+    const control = evento.target
+    const { name, value } = control;
+    const index = control.attributes['data-index'].value;
+    const indexPunto = control.attributes['data-indexpunto'].value;
+    datos[index].listaPuntos[indexPunto].nominacionCalculo[name] = value;
+    this.setState({ listaPuntosFecha: datos });
+  }
+
+  /**
+   * Método encargado de mostrar la tabla detalle con los puntos de consumo de tipo suministro
+   * @returns {JSX}
+   */
+  renderTablaCalculo = () => {
+    const listaPuntosFecha = [...this.state.listaPuntosFecha];
+    if (!Util.validarArreglo(listaPuntosFecha)) {
+      return;
+    }
+    return (
+      &lt;table className='table table-bordered table-hover table-bordered table-condensed mt-5'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th className='text-center'>Tipo Consumo&lt;/th>
+            &lt;th className='text-center'>Punto de salida&lt;/th>
+            &lt;th className='text-center'>Nominación&lt;/th>
+            &lt;th className='text-center'>U/M&lt;/th>
+            &lt;th className='text-center'>Cantidad Máxima &lt;/th>
+            &lt;th className='text-center'>U/M&lt;/th>
+            &lt;th className='text-center'>Acciones&lt;/th>
+
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            listaPuntosFecha.map((dato, index) => {
+              let tamanioFilas = 1;
+              if (Util.validarArreglo(dato.listaPuntos)) {
+                dato.listaPuntos.forEach(punto => {
+                  tamanioFilas++;
+                });
+              }
+              return (
+                &lt;Fragment key={"tipoConsumo" + dato.tipoConsumo.uniIderegistro}>
+                  &lt;tr>
+                    &lt;td rowSpan={tamanioFilas}>{getProp(dato.tipoConsumo, 'uniNombre1', '')}&lt;/td>
+                  &lt;/tr>
+                  {
+                    Util.validarArreglo(dato.listaPuntos) &amp;&amp; (
+                      dato.listaPuntos.map((punto, indexPunto) => {
+                        return (
+                          &lt;Fragment key={"punto_" + punto.puntoConsumo.ptcIderegistro}>
+                            &lt;tr>
+                              &lt;td>{getProp(punto.puntoConsumo, 'ptcoNombre', '')}&lt;/td>
+                              &lt;td>&lt;TextoNumerico
+                                aceptaDecimales={true}
+                                aceptaNegativos={true}
+                                cols={12}
+                                value={getProp(punto.nominacionCalculo, 'nomCantidad', 0)}
+                                onChange={this.controlarCambioTabla}
+                                extra={{ "data-index": index, "data-indexpunto": indexPunto, disabled: (getProp(punto.nominacionCalculo, 'uniIdemedida.uniNombre1', '--')) === '--' ? true : false }}
+                                name='nomCantidad'
+                              />&lt;/td>
+                              &lt;td>{getProp(punto.nominacionCalculo, 'uniIdemedida.uniNombre1', '--')}&lt;/td>
+                              &lt;td>{getProp(punto.puntoConsumo, 'ptcMaxnominacion', '--')}&lt;/td>
+                              &lt;td>{getProp(punto.puntoConsumo, 'uniIdemedidanomin.uniNombre1', '--')}&lt;/td>
+                              &lt;td>&lt;a href='javascript:;' data-index={index} data-indexpunto={indexPunto} onClick={this.verDetalle}>Ver Detalle&lt;/a>&lt;/td>
+                            &lt;/tr>
+                          &lt;/Fragment>
+                        );
+                      })
+                    )
+                  }
+                &lt;/Fragment>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar los datos del detalle por punto de consumo
+   * @param {Event} evento Evento ejecutado en el control de usuario.
+   */
+  verDetalle = (evento) => {
+    let { listaDetalle } = this.state;
+    let listaPuntosFecha = [...this.state.listaPuntosFecha];
+    const index = evento.target.attributes['data-index'].value;
+    const indexPunto = evento.target.attributes['data-indexpunto'].value;
+    listaPuntosFecha = { ...listaPuntosFecha[index] };
+    listaDetalle = [];
+    listaDetalle.push({
+      festivo: listaPuntosFecha.festivo,
+      punto: listaPuntosFecha.listaPuntos[indexPunto]
+    });
+    this.setState({ listaDetalle: listaDetalle }, this.scroll);
+  };
+
+  /**
+   * Método encargado de hacer scroll a la pantalla al momento
+   */
+  scroll = () => {
+    if (this.referencia.current) {
+      this.referencia.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }
+  }
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos dependiendo se la fecha seleccionada
+   * @returns {JSX}
+   */
+  renderTablaDetalle = () => {
+    const listaDetalle = [...this.state.listaDetalle];
+    if (!Util.validarArreglo(listaDetalle)) {
+      return;
+    }
+    return (
+      &lt;div className='table table-responsive' ref={this.referencia}>
+        &lt;table className='table table-hover table-bordered table-condensed mt-5'>
+          &lt;thead className='bg-dark text-white'>
+            &lt;tr>
+              &lt;th className='text-center'>Punto De Consumo&lt;/th>
+              &lt;th className='text-center'>Festivo&lt;/th>
+              &lt;th className='text-center'>Pronostico/Nominación&lt;/th>
+              &lt;th className='text-center'>Cantidad&lt;/th>
+              &lt;th className='text-center'>Unidad Medida&lt;/th>
+              &lt;th className='text-center'>Desbalance Día&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Desbalance Acumulado&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Capacidad Máxima&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Evento Eximente&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Desvio Saliente&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Desvio Entrante&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+              &lt;th className='text-center'>Total&lt;/th>
+              &lt;th className='text-center'>U/M&lt;/th>
+            &lt;/tr>
+          &lt;/thead>
+          &lt;tbody>
+            {
+              listaDetalle.map((dato, index) => {
+                return (
+                  &lt;Fragment key={dato.punto.puntoConsumo.ptcIderegistro}>
+                    &lt;tr>
+                      &lt;td>{getProp(dato.punto.puntoConsumo, 'ptcoNombre', '--')} &lt;/td>
+                      &lt;td>{(getProp(dato.festivo) == true ? 'Si' : 'No')} &lt;/td>
+                      &lt;td>{(getProp(dato.punto.puntoConsumo, 'ptcAutopronostico') == 'S' ? 'Pronostico' : 'Nominación')}&lt;/td>
+                      &lt;td>
+                        {
+                          (getProp(dato.punto.puntoConsumo, 'ptcAutopronostico') == 'S' ?
+                            getProp(dato.punto.pronostico, 'prnValor', '--')
+                            : getProp(dato.punto.nominacion, 'nomCantidad', '--'))
+                        }
+                      &lt;/td>
+                      &lt;td>
+                        {
+                          (getProp(dato.punto.puntoConsumo, 'ptcAutopronostico') == 'S' ?
+                            getProp(dato.punto.pronostico, 'uniIdemedida.uniNombre1', '--')
+                            : getProp(dato.punto.nominacion, 'uniIdemedida.uniNombre1', '--'))
+                        }
+                      &lt;/td>
+                      &lt;td>{getProp(dato.punto, 'desbalance', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desbalanceAcumulado, 'valor', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desbalanceAcumulado, 'unidadMedida.uniNombre1', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.cantidadContratadaContrato, 'valor', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.cantidadContratadaContrato, 'unidadMedida.uniNombre1', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.cantidadEventoEximente, 'valor', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.cantidadEventoEximente, 'unidadMedida.uniNombre1', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desvioSaliente, 'valor', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desvioSaliente, 'unidadMedida.uniNombre1', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desvioEntrante, 'valor', '--')}&lt;/td>
+                      &lt;td>{getProp(dato.punto.desvioEntrante, 'unidadMedida.uniNombre1', '--')}&lt;/td>
+                    &lt;/tr>
+                  &lt;/Fragment>
+                );
+              })
+            }
+          &lt;/tbody>
+        &lt;/table>
+        &lt;button className='btn btn-primary' onClick={() => { this.setState({ listaDetalle: [] }) }}>Ocultar Detalle&lt;/button>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Fecha
+            label='Fecha a Nominar:'
+            name='fechaNominar'
+            fecha={this.state.fechaNominar}
+            onChange={this.controlarCambio}
+          />
+          {/* &lt;div className='contratos__navegador'>
+            &lt;div className='contratos__navegador__cabecera'>
+              &lt;div className='colum btn-content'>
+                {this.state.programaActual > 0 &amp;&amp; (
+                  &lt;button className='contratos__navegador__cabecera-btn' name='btn-anterior' onClick={this.navegar}>Anterior&lt;/button>
+                )}
+              &lt;/div>
+              &lt;div className='colum select-content'>
+                &lt;select name="programaActual" className='contratos__navegador__cabecera-select' onChange={this.cargarVista} value={this.state.programaActual}>
+                  {VISTAS.map(p => (&lt;option key={p.id} value={p.id}>{p.titulo}&lt;/option>))}
+                &lt;/select>
+              &lt;/div>
+              &lt;div className='colum btn-content'>
+                {(this.state.programaActual &lt; (VISTAS.length - 1)) &amp;&amp; (
+                  &lt;button className='contratos__navegador__cabecera-btn' name='btn-siguiente' onClick={this.navegar}>Siguiente&lt;/button>
+                )}
+              &lt;/div>
+            &lt;/div>
+            &lt;div className="contratos__fragmento">
+              {this[VISTAS[parseInt(this.state.programaActual)].componente]()}
+            &lt;/div>
+          &lt;/div> */}
+          {Util.validarArreglo(this.state.listaPuntosFecha) &amp;&amp;
+            this.renderTablaCalculo()
+          }
+          {Util.validarArreglo(this.state.listaDetalle) &amp;&amp;
+            this.renderTablaDetalle()
+          }
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCalculoNominacion.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCalculoNominacion);
+
+export { VistaRedux as RGestionCalculoNominacionT };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Id Transacción,id factura,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Digite el Numero de Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+5120500710,-,2023-01-12 13:12:17,16620,APROBADA,PSE,438702 Colpatria,1860233281,4,iemarcoantoniofranco@gmail.com,institucion educativa marco antonio franco rodriguez,181.51.34.128
+5120500710,-,2023-01-12 13:12:17,234120,APROBADA,PSE,438952 Colpatria,1860233281,4,iemarcoantoniofranco@gmail.com,institucion educativa marco antonio franco rodriguez,181.51.34.128
+5120500710,-,2023-01-12 13:12:17,64884,APROBADA,PSE,438953 Colpatria,1860233281,4,iemarcoantoniofranco@gmail.com,institucion educativa marco antonio franco rodriguez,181.51.34.128

@@ -1,0 +1,13 @@
+{% extends 'base.react.html.twig' %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+  <div id="root"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src='https://www.google.com/recaptcha/api.js?render=6Lf823MUAAAAACAv-_HLgDVsTTh4MEuYsD8rzF3v'></script>
+    <script src={{ asset('reial.bundle.js') }} type="text/javascript"></script>
+{% endblock %}
+

@@ -1,0 +1,72 @@
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            display: none;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+{% block titulo %}Movimientos Contables - {{empresa}}  {% endblock %}
+{% block body %}
+    <div id="divCabecera" style="margin: 0 auto; width: 60%;">
+
+
+        <fieldset>
+            <legend>Proceso movimiento contable</legend>
+            <div id="divControles">
+                <div class="campo" style="margin-bottom: 10px;">
+                    <label for="cmbCiclo">Seleccione ciclo: </label>
+                    <select id="cmbCiclo">
+                        {% for ciclo in ciclos %}
+                            <option value="{{ciclo.idciclo}}" >{{ciclo.ciclo}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                     <div class="campo" id="cmbPeriodo" style="display:none">
+                        <label for="cmbPeriodos">Periodo: </label>
+                        <select id="cmbPeriodos"></select>   
+                    </div>
+                <button class="btnSimple" id="btnGenerarMovimiento">Generar movimientos contables</button>
+            </div>
+                    <div class="campo">
+                        <input type="checkbox" name="checkServicio" value="" id="checkServicio">Generar Contabilización del Servicio x Ciclo  (Solo Funciona para Facturas de Servicio)
+                    </div>
+                   
+            <div id="divCargando" style="margin-bottom: 25px"> 
+                <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                <p>Contabilizando información, <br>esto puede tardar unos minutos...</p>        		
+            </div>
+            <table id="tblMovimiento" class="tabla"></table>
+            <div style="text-align:center; display:block">
+                <button class="btnSimple" style="display: none;" id="btnRecargar">Finalizar</button>
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="divConfirmar" style="display: none;">
+        <p>Se procesarán los movimientos contables, ¿Desea procesarlos?</p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/contabilizacion/movimientocontable/movimientocontable.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/contabilizacion/movimientocontable/movimientocontable.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/contabilizacion/movimientocontable/movimientocontable.vista.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Pagos Créditos {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="pagosCreditoControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Reportes Pagos Créditos </legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+
+                                <div class="form-group col-md-4" show-errors>
+                                    <label for="txtDocumento">Documentos: </label>
+                                    <input required="true" type="number" id="txtDocumento" ng-model="documento" name="documento" class="form-control">
+                                </div>
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Inicio (yyyy-mm-dd):</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechaInicio" id="fechaInicio" name="fechaInicio" />
+                                </div> 
+                                <div class="col-md-4 form-group" show-errors>
+                                    <label for="fechaConsulta1">Fecha Fin (yyyy-mm-dd):</label>
+                                    <input required="true" class="form-control datepicker input-sm" ng-model="fechaFin" id="fechaFin" name="fechaFin" />
+                                </div>  
+                            </div>
+
+                            <div class="col-md-12 text-right">
+                                <button type="button" ng-click="validarInformacion()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-search fa-1x"></i> Consultar Créditos
+                                </button>
+                            </div>
+                            <div class="row" ng-show="listaCreditos.length > 0">
+                                <h2>Resultados de la búsqueda</h2>
+                                <hr>
+                                <div class="col-md-12">                                    
+                                    <table ng-table-dynamic="tablaCreditos with columnas" class="table table-striped" >
+                                        <tr ng-repeat="fila in $data" ng-click="seleccionar(fila)"  id="tr_{[{fila.idfinanciacion}]}" ng-class="{'row-selected':fila.idfinanciacion===creditoseleccionada.id}" >
+                                            <td>
+                                                <input type="radio" ng-model="creditoseleccionada.id" name="rbtnIdCredito" id="rbtn_{[{fila.idfinanciacion}]}" ng-value="fila.idfinanciacion"/>
+                                                <label style="font-weight: normal;" class="radio-inline" for="rbtn_{[{fila.idfinanciacion}]}">{[{fila.idfinanciacion}]}</label>
+                                            </td>
+                                            <td ng-repeat="col in $columns  | limitTo:-7" sortable="{[{col.field}]}"> {[{fila[col.field]}]}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-6">
+                                <div class="alert-box info">
+                                    Toda la información será generada en un archivo .xlsx
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarPaz_Salvo()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar Paz y Salvo
+                                </button>
+                            </div> 
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" ng-disabled="permitirGenerar" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/ng-table.mod.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/potenza/pagosCredito.angular.js')}}"></script>
+{% endblock %}

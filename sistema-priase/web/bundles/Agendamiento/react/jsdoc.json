@@ -1,0 +1,12 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",   
+        "include": ["./web/bundles/Agendamiento/react/vistas/"],                       
+        "exclude": ["node_modules", "./web/bundles/Agendamiento/react/vistas/Assets"]             
+    },
+    "recurseDepth": 10,                        
+    "opts": {
+        "destination": "./web/bundles/Agendamiento/react/docs/",               
+        "recurse": true                         
+    }
+}

@@ -1,0 +1,180 @@
+{# empty Twig template #}
+{# empty Twig template #}
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+    <style>
+        .boton {
+            width: 50px;
+            display: block;
+        }
+    </style>
+{% endblock %}
+{% block titulo %}Reporte Financiaciones facturadas por ciclo - {{empresa}} {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="veredasControllerAngular">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtros basico</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">   
+                                <div class="form-group col-md-4" show-errors>
+                                    <label>Año</label>
+                                    <select id="anos"  name="anos" ng-model="info.anos" class="form-control" ng-change="cargarPeriodosAno()">
+                                        <option ng-repeat="ano in anos" ng-value="ano.anos">{[{ano.anos}]}</option>
+                                    </select>   
+                                    <p class="help-block" ng-if="reporte.anos.$error.required">
+                                        * El años es obligatorio
+                                    </p>
+                                </div>
+                                <div class="form-group col-md-4" show-errors >
+                                    <label>Periodo</label>
+                                    <select id="periodo"  name="periodo" ng-model="info.idordenperiodo"  class="form-control">
+                                        <option ng-repeat="periodo in periodos" ng-value="periodo.idorden">{[{periodo.nombre}]}</option>
+                                    </select> 
+                                    <p class="help-block" ng-if="reporte.idordenperiodo.$error.required">
+                                        * El periodo es obligatorio
+                                    </p>
+                                </div>
+                            </div>     
+                        </div>     
+                    </div>     
+            </fieldset>
+            <fieldset>
+                <legend>Filtros de búsqueda formato 1</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12">   
+                                <div class="form-group col-md-4" >
+                                    <label>Municipio</label>
+                                    <select  id="municipio" name="municipio" ng-model="info.municipio"  ng-change="cargarBarrosMunicipios()" class="form-control">
+                                        <option ng-repeat="municipio in municipios" ng-value="municipio.idmunicipio">
+                                            {[{municipio.municipio}]}
+                                        </option>
+                                    </select>                                        
+                                </div> 
+                                <div class="form-group col-md-4">
+                                    <label for="txtNombreBarrio"> Nombre barrio:</label>
+                                    <input id="txtNombreBarrio" name="txtNombreBarrio" ng-model="nombreBarrio" class="form-control" />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <button class="btn btn-primary btn-sm" style="position: absolute; top: 23px;" ng-click="consultarBarrioPorNombre()" ><i class="fa fa-search"></i> Buscar</button>
+                                </div>
+                            </div>
+                            <div class="col-md-12" >
+                                <div class="col-md-5" >
+                                    <label> Barrios: </label>
+                                    <ul id="listBarrios" class="list-group" style="overflow-y: auto; max-height:  250px;">
+                                        <li ng-repeat="barrio in barrios" ng-value="barrio.idbarrio" data-value="{[{barrio.idbarrio}]}" class="list-group-item" ng-click="selecionarItem($event,barrio)" >{[{barrio.barrio}]}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-1 text-center" style="padding-top: 90px;">
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('seleccionarTodo','barrio')">
+                                        <i class="fa fa-angle-double-right"></i> 
+                                    </button>
+                                    <button type="button"  class="btn btn-primary boton" ng-click="moverItems('seleccionar','barrio')">
+                                        <i class="fa fa-angle-right"></i> 
+                                    </button>
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('deseleccionar','barrio')">
+                                        <i class="fa fa-angle-left"></i> 
+                                    </button>
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('deseleccionarTodo','barrio')">
+                                        <i class="fa fa-angle-double-left"></i> 
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label> Barrios seleccionados </label>
+                                    <ul id="listBarriosSeleccionados" class="list-group" style="overflow-y: auto; max-height:  250px;">
+                                        <li ng-repeat="barrio in barriosSeleccionados" ng-value="barrio.idbarrio" data-value="{[{barrio.idbarrio}]}" ng-click="selecionarItem($event,barrio)" class="list-group-item" >{[{barrio.barrio}]}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte formato 1
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div> 
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>     
+            </fieldset>
+            <fieldset>
+                <legend>Filtros de búsqueda formato 2</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-12" >
+                                <div class="col-md-5" >
+                                    <label> Municipio: </label>
+                                    <ul id="listMunicipio" class="list-group" style="overflow-y: auto; max-height:  250px;">
+                                        <li ng-repeat="municipio2 in municipiosformato2" ng-value="municipio2.idmunicipio" data-value="{[{municipio2.idmunicipio}]}" class="list-group-item" ng-click="selecionarItem($event,municipio2)" >{[{municipio2.municipio}]}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-1 text-center" style="padding-top: 90px;">
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('seleccionarTodo','municipio')">
+                                        <i class="fa fa-angle-double-right"></i> 
+                                    </button>
+                                    <button type="button"  class="btn btn-primary boton" ng-click="moverItems('seleccionar','municipio')">
+                                        <i class="fa fa-angle-right"></i> 
+                                    </button>
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('deseleccionar','municipio')">
+                                        <i class="fa fa-angle-left"></i> 
+                                    </button>
+                                    <button type="button" class="btn btn-primary boton" ng-click="moverItems('deseleccionarTodo','municipio')">
+                                        <i class="fa fa-angle-double-left"></i> 
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label> Municipios seleccionados </label>
+                                    <ul id="listMunicipioSeleccionados" class="list-group" style="overflow-y: auto; max-height:  250px;">
+                                        <li ng-repeat="municipio2 in municipiosSeleccionados" ng-value="municipio2.idmunicipio" data-value="{[{municipio2.idmunicipio}]}" class="list-group-item" ng-click="selecionarItem($event,municipio2)" >{[{municipio2.municipio}]}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Toda la informacion sera generada en un archivo .xlsx
+                                </div>  
+                            </div>
+
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporteFormato2()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte formato 2
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div> 
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>     
+            </fieldset>
+
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular-modal-service.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/veredas.angular.js')}}"></script>
+{% endblock %}

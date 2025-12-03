@@ -1,0 +1,124 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/estado_cuenta.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Estado de Cuenta  {% endblock %}
+{% block body %}
+
+<div>
+    <fieldset id="divCabecera">
+        <legend>Suscripción</legend>
+        <div class="campoBusqueda">
+            <label for="btnFormaPago">Suscripción:</label>
+            <input type="text" id="txtSuscripcion" disabled="disabled" />
+            <button id="btnSuscripcion" title="Buscar una suscripción"></button>
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtSuscriptor">Suscriptor:</label>
+            <input type="text" id="txtSuscriptor" disabled="disabled" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtCodAnterior">Código anterior:</label>
+            <input type="text" id="txtCodAnterior" disabled="disabled" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtDocumento">NIT/CC:</label>
+            <input type="text" id="txtDocumento" disabled="disabled" />
+        </div>
+
+        <div class="campo">
+            <label for="txtNombre">Nombre completo:</label>
+            <input type="text" id="txtNombre" disabled="disabled" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtFechaCorte">Fecha Corte:</label>
+            <input type="text" id="txtFechaCorte" disabled="disabled" />
+        </div>
+
+    
+        <div class="campo">
+            <label for="txtDiasCarteraNormal">Días Mora Cartera Normal:</label>
+            <input type="text" id="txtDiasCarteraNormal" disabled="disabled">
+        </div>
+        
+        <div class="campo">
+            <label for="txtDiasCarteraFinanciada">Días Mora Cartera Financiada:</label>
+            <input type="text" id="txtDiasCarteraFinanciada" disabled="disabled">
+        </div>
+
+        <div class="campo">
+            <label for="txtValorTotalNormal">Valor Total Cartera Normal:</label>
+            <input type="text" id="txtValorTotalNormal" disabled="disabled">
+        </div>
+
+        <div class="campo">
+            <label for="txtValorTotalFinanciada">Valor Total Cartera Financiada:</label>
+            <input type="text" id="txtValorTotalFinanciada" disabled="disabled">
+        </div>
+        <div class="campo">
+            <label for="txtValorTotalAdeudado">Valor Total Adeudado:</label>
+            <input type="text" id="txtValorTotalAdeudado" disabled="disabled">
+        </div>
+    </fieldset>
+</div>
+<div id="divContenedorEstadoCuenta">
+
+    <fieldset id="fsValoresFinanciada" style="display:none;">
+        <legend>Valores de Financiación</legend>
+        <div id="divValoresFinanciadas"></div>
+    </fieldset>
+
+    <fieldset id="fsCarteraFinanciada" style="display:none;">
+        <legend>Cartera Financiada</legend>
+        <div id="divCarterasFinanciadas"></div>
+    </fieldset>
+
+    <fieldset id="fsCarteraNormal" style="display:none;"> 
+        <legend>Cartera Normal</legend>
+        <div id="divCarterasNormales"></div>
+    </fieldset>
+</div>
+
+<button class="btnSimple" id="btnImprimir" style="display:none;">Imprimir</button>
+
+
+<!-- Division para filtro suscriptor-->
+<div id="divFiltro" style="display:none;">
+    <div class="campo">
+        <label for="txtFiltroFecha">Fecha:</label>
+        <input type="text" id="txtFiltroFecha" data-attr="fecha" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroSus">Suscripción:</label>
+        <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroDoc">Cédula/NIT:</label>
+        <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroCodAnt">Código Anterior:</label>
+        <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+    </div>
+    <span id="spanMensaje" class="pMensaje"></span>
+    <button id="btnBuscarSuscripciones" class="btnSimple">Buscar</button>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.modelo.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/estado_cuenta/estado_cuenta.vista.js')}}"></script>
+{% endblock %}

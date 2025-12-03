@@ -1,0 +1,101 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link media="screen" type="text/css" rel="stylesheet" href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}"  />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/cartera/financiacion.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+{% block titulo %}Cartera: Generar Gestión de Cartera - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="filtrar" id="btnFiltrar" class="btn" />
+            <input type="button" value="generar" id="btnGuardar" class="btn" />
+        </div>
+    </div>
+    <div id="divTablaSuscripciones" style="display:none;">
+        <table id="tblSuscripciones" class="tabla"></table>
+    </div>
+
+
+    <div id="divFiltro">
+        <div class="campo">
+            <label for="txtMunicipio">Municipio:</label>
+            <input type="text" id="txtMunicipio" />
+        </div>
+        <div class="campo">
+            <label for="cmbTipoSuscripcion">Tipo de Suscripción:</label>
+            {{cmbTipoSuscripcion|raw}}
+        </div>
+        <div class="campo">
+            <label for="cmbCicloActivo">Ciclo:</label>
+            <select id="cmbCicloActivo">
+                <option value="-1">Seleccione una opción </option>
+                {% for ciclo in ciclos %}
+                    <option value="{{ciclo.idciclo}}">{{ciclo.ciclo}}</option>
+                {%endfor%}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscripcion">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcion" />
+        </div>
+
+        <div class="campo">
+            <label for="cmbTipoDocumento">Tipo de Documento:</label>
+            {{cmbTipoDocumento|raw}}
+        </div>
+        <div class="campo">
+            <label for="cmbDocumento">Documento:</label>
+            <select id="cmbDocumento"></select>
+        </div>
+
+        <div class="campo">
+            <fieldset>
+                <legend>Morosidad</legend>
+                <div class="campoMitad">
+                    <label for="txtMorosidadInicial">Desde:</label>
+                    <input type="number" id="txtMorosidadInicial" min="0" />
+                </div>
+
+                <div class="campoMitad">
+                    <label for="txtMorosidadFinal">Hasta:</label>
+                    <input type="number" id="txtMorosidadFinal" min="0" max="4"/>
+                </div>
+            </fieldset>
+        </div>
+        <div class="campo">
+            <fieldset>
+                <legend>Saldo</legend>
+                <div class="campo">
+                    <label for="txtSaldoInicial">Desde:</label>
+                    <input type="number" id="txtSaldoInicial" min="1" />
+                </div>
+
+                <div class="campoMitad">
+                    <label for="txtSaldoFinal">Hasta:</label>
+                    <input type="number" id="txtSaldoFinal" min="0" />
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div id="divFacturas" style="display:none;">
+        <table class="tabla" id="tblFacturas"></table>
+    </div>
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generar_gestion/generar.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generar_gestion/generar.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/cartera/generar_gestion/generar.vista.js')}}"></script>
+{% endblock %}

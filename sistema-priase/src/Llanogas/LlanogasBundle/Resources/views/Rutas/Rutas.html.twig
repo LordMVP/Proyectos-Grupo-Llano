@@ -1,0 +1,154 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+    
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="/achagua/js/maskedinput.min.js"></script>
+    <script type="text/javascript" src="/achagua/js/app.tabla.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+
+
+
+{% endblock %}
+
+{% block titulo %}Rutas: Asignacion de Rutas{% endblock %}
+
+{% block body %}
+    <div id="divComandos" align="center">
+        <div class="divBotones">
+            <input type="button" value="Nuevo" id="btnNuevo" class="btn" disabled/>
+            <input type="button" value="Grabar" id="btnGrabar" class="btn" />       
+        </div>
+    </div>
+
+    <div id="Rutas" >
+        <fieldset>
+            <legend>Rutas</legend>
+            <div class="campo">
+                <label for="cboRutas">Rutas:</label>
+                {{cboRutas|raw}}
+            </div>
+
+           {# <div class="campo">
+                <fieldset>
+                    <legend>Tipo de Suscripcion</legend>
+
+                    {{cboTipoSuscripcion|raw}}
+                </fieldset>
+            </div>#}
+          
+           <div align="right">
+                <input type="button" id="btnActualizacionMasiva" value="Actualizacion Masiva Ruta" class="btnSimple"/> 
+                <input type="button" id="btnVerSuscripcionesRuta" value="Ver Suscripciones de Ruta" class="btnSimple"/> 
+            </div>
+            
+        </fieldset>
+    </div>
+
+       <div id="buscaSuscripcion" style="display:none">
+        <fieldset>
+
+            <div class="campo">
+                <label for="txtFiltroideSuscripcion">Ide Suscripcion:</label>
+                <input type="text" id="txtFiltroideSuscripcion" data-attr="ideFiltroSuscripcion" maxlength="15"/>    
+            </div>
+            <div class="campo">
+                <label for="txtFiltroidePropiedad">Ide Propiedad:</label>
+                <input type="text" id="txtFiltroidePropiedad" data-attr="ideFiltroPropiedad" maxlength="15"/>    
+            </div>
+            <div class="campo">
+                <label for="txtFiltroideTercero">Ide Tercero:</label>
+                <input type="text" id="txtFiltroideTercero" data-attr="ideFiltroTercero" maxlength="15"/>    
+            </div>
+            
+            <div align="right">
+                <input type="button" id="btnBuscaSuscripcion" Value="Buscar" class="btnSimple">
+                <input type="button" id="btnTrasladaSuscripcionRuta" Value="Trasladar" class="btnSimple">
+            </div>  
+         <p class="pMensaje"></p>
+        </fieldset>
+    </div>             
+                
+    <div id="detalleRutasSin" style="display:none">
+        <fieldset>
+            <legend>Suscripciones No Ubicadas</legend>
+            <div id="RutasSin" >
+                <table id="tblRutasSin" class="tabla"></table>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Suscripciones Rutas</legend>
+
+            {#            <ul id='sortable2' class='connectedSortable'>#}
+            <div id="RutasAsi">
+                <table id="tblRutasAsi" class="tabla"></table>
+            </div>
+            {#            </ul>#}
+        </fieldset>      
+
+    </div>
+
+    <div id="Suscripcion" style="display:none">
+       
+        <fieldset>
+            <legend>Suscripcion</legend>
+            <div class="campo">
+                <label for="txtideSuscripcion">Ide Suscripcion:</label>
+                <input type="text" id="txtideSuscripcion" data-attr="ideSuscripcion" maxlength="15"/>    
+            </div>
+            <div class="campo">
+                <label for="txtidePropiedad">Ide Propiedad:</label>
+                <input type="text" id="txtidePropiedad" data-attr="idePropiedad" maxlength="15"/>    
+            </div>
+            <div class="campo">
+                <label for="txtideTercero">Ide Tercero:</label>
+                <input type="text" id="txtideTercero" data-attr="ideTercero" maxlength="15"/>    
+            </div>
+
+            <p class="pMensaje"></p>
+        </fieldset>
+
+        <div>
+            <fieldset>
+                <legend>Detalle Suscripcion</legend>
+                <table id="tblSuscriptores" class="tabla">
+                </table>
+            </fieldset>
+        </div>
+    </div> 
+        
+         <div id="divConfirmaActualizar" style="display: none;">
+             <p>Se actualizaran las secuencias de la ruta seleccionada</p>
+        </div>  
+
+    <div id="trasladarSuscripciones" style="display:none">
+        <fieldset>
+            <legend>Trasladar Suscripcion</legend>
+            <table id="tblTrasladaSuscripcion" class="tabla">
+            </table>
+            <div class="campo">
+                <label for="cboTraRutas">Rutas:</label>
+                <div id="ArmcboRutas"></div>
+            		</div>
+               <p class="pMensaje"></p>
+        </fieldset>
+    </div>    
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/rutas/rutas.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/rutas/rutas.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/rutas/rutas.vista.js')}}"></script>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/facturacion/cargarFactorCorreccion.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery.crypt.js"></script>
+{% endblock %}
+
+{% block titulo %} Facturación Tarifas  {% endblock %}
+
+{% block body %}    
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="Buscar" id="btnBuscar" class="btnSimple" />
+        </div>
+    </div>
+    <div id="divFiltro">
+        <fieldset><legend>Validación Tarifas </legend>
+            <div class="campo">
+                <label for="cboCicloActivo"> Mercados </label>   
+                <select id ="mercado">
+                    <option value="-1" >Todos los Mercados</option>
+                    {% for registro in mercados %}
+                        <option value ={{registro.idmercado}}>{{ 
+                                         registro.mercado}} </option>
+                        {% endfor %}
+                </select> 
+            </div>
+            <div class="campoCorto">
+                <label for="periodo"> Periodo </label>   
+                <input type="text" id="periodo" disabled="disabled" value ={{periodo}}  />
+            </div>
+            <a href="../reporte_tarifas/consultar_xls/" target="_blank" disabled="disabled" class="link-archivo" id="lngeneraexcel">
+                <i class="fa fa-file-excel-o fa-2x"></i> Exportar Tarifas
+            </a>
+        </fieldset> 
+    </div>
+    <div id="divResultados"  style="display: none;" >
+        <table id='tablaTarifas' class="tabla"></table>
+    </div>
+    <form id="frmGeneraExcel"  method="post" target="_blank" action="../reporte_tarifas/consultar_xls/">
+        <input type="hidden" id="hmercado" value="">
+        <input type="hidden" id="hperiodo"  value="">
+    </form>         
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/tarifas/reportetarifas.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/tarifas/reportetarifas.control.js')}}"></script>-->
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/tarifas/reportetarifas.vista.js')}}"></script>
+
+{% endblock %}

@@ -1,0 +1,7 @@
+parameters:
+#    agendamiento_agendamiento.example.class: Agendamiento\AgendamientoBundle\Example
+
+services:
+#    agendamiento_agendamiento.example:
+#        class: %agendamiento_agendamiento.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

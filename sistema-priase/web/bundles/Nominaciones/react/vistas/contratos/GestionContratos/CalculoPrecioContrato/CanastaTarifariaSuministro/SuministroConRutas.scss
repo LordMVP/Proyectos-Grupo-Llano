@@ -1,0 +1,110 @@
+.lst-canasta-rangos{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: stretch;
+
+  .lst-canasta-rangos__rutas__fila:nth-of-type(odd) {
+      background-color: rgba(0,0,0,.05);
+  }
+
+  .header{
+    background: #333333 !important;
+    color: #FFFFFF !important;
+    font-weight: bold !important;
+  }
+
+  select, input{
+    height: 28px;
+    padding: 3px;
+  }
+
+  .horas-rango{
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    left: 50%;
+    margin-left: -48px;
+  }
+
+  .btn-eliminar-rango{
+    position: absolute;
+    top: 3px;
+    left: 3px;
+  }
+
+  .linea-alerta{
+    font-size: 13px;
+  }
+
+  &__rango{
+    background: #fff;
+    border: solid 1px #DEDEDE;
+    width: 40%;
+    position: relative;
+  }
+
+  &__rutas{
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: stretch;
+    border: solid 1px #DEDEDE;
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    &__fila {
+      padding: 5px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-content: stretch;
+      border-bottom: solid 1px #dedede;
+
+      label {
+        display: none;
+      }
+
+      input {
+        text-align: right;
+      }
+
+      .col-12 {
+        padding: 0 3px !important;
+      }
+
+      label {
+        display: none;
+      }
+
+      input {
+        text-align: right;
+      }
+
+      .col-12 {
+        padding: 0 3px !important;
+      }
+
+      &__ruta{
+        width: 30%;
+        //padding: 8px 0 0 5px;
+      }
+
+      &__unidad-medida{
+        width: 35%;
+      }
+
+      &__valor{
+        width: 20%;
+      }
+
+      &__porcentaje {
+        width: 14%;
+      }
+
+    }
+  }
+}

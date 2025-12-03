@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: variables/ConsultaVariables.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: variables/ConsultaVariables.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import RUTAS_API from '../../global/rutas_api';
+import { Util, Input, Botonera, Tabla } from 'appfuture-react';
+import RUTAS_VISTA from '../../global/rutas_vista';
+import { TECLAS } from '../../global/constantes';
+
+class ConsultaVariables extends Component {
+
+  state = {
+    variables: [],
+    criterio: '',
+  };
+
+  /**
+   * Metodo encargado de realizar la consulta
+   */
+  onBuscar = () => {
+    axios.post(
+      RUTAS_API.VARIABLES.CONSULTAR_VARIABLES,
+      { 'criterio': this.state.criterio })
+      .then(respuesta => {
+        this.setState({ variables: respuesta.data.datos });
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del criterio
+   * @param {Event} event El evento que se ejecuta en el control de usuario.
+   */
+  onCriterioChange = (event) => {
+    this.setState({ criterio: event.target.value });
+  };
+
+  /**
+   * Método encargado de enviar los datos seleccionados para editar
+   * @param {Object} variable Datos del medidor seleccionado
+   */
+  editarVariable = (variable) => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.GESTION_VARIABLE.url,
+      state: {
+        variableEditar: variable
+      }
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones de editar y seleccionar del componente Tabla
+   * @param {Object} props Propiedades del componente Tabla
+   * @param {Component} contexto Contexto del componente ConsultaVariables
+   * @returns {Object}
+   */
+  renderCeldaAcciones = (props, contexto) => {
+    let iconoAccion = 'fa-edit';
+    let tituloAccion = 'Editar';
+    let funcion = contexto.editarVariable;
+
+    if (contexto.props.esModal) {
+      iconoAccion = 'fa-check';
+      tituloAccion = 'Seleccionar';
+      funcion = contexto.props.seleccionarVariable;
+    }
+
+    return (
+      &lt;span className='consulta-variables__link-accion'>
+        &lt;a
+          href='#' className={`fa ${iconoAccion}`}
+          onClick={(evento) => {
+            Util.detenerEvento(evento);
+            funcion.call(contexto, props.row._original);
+          }}>
+          {tituloAccion}
+        &lt;/a>
+      &lt;/span>
+    );
+  };
+
+  /**
+   * Método encargado de obtener las columnas del componente Tabla
+   * @returns {Object}
+   */
+  obtenerColumnas = () => {
+    const contexto = this;
+    return [
+      {
+        Header: 'Variables',
+        columns: [
+          {
+            Header: 'Acción',
+            accessor: 'uniConcepto',
+            Cell: (props) => contexto.renderCeldaAcciones(props, contexto)
+          },
+          {
+            Header: 'Nombre',
+            accessor: 'uniUnidad.uniNombre1'
+          },
+          {
+            Header: 'Alias',
+            accessor: 'conAlias'
+          },
+          {
+            Header: 'Abreviatura',
+            accessor: 'conAbreviatura'
+          },
+          {
+            Header: 'Estado',
+            accessor: 'conEstado',
+            Cell: (props) => (
+              props.original.conEstado.toUpperCase() === 'A' ? 'Activa' : 'Eliminada'
+            )
+          },
+          {
+            Header: 'Tipo Cálculo',
+            accessor: 'conTipcalculo',
+            Cell: (props) => (
+              props.original.conTipcalculo.toUpperCase() === 'F' ? 'Fórmula' : 'Valor'
+            )
+          }
+        ]
+      }
+    ];
+  };
+
+  /**
+   * Método encargado de generar el componente Tabla
+   * @returns {Component}
+   */
+  renderTabla = () => {
+    if (!Util.validarArreglo(this.state.variables)) {
+      return &lt;div className='text-center '>Sin resultados&lt;/div>;
+    }
+
+    return (
+      &lt;Tabla
+        datos={this.state.variables}
+        columnas={this.obtenerColumnas()}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de limpiar el formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      criterio: '',
+      variables: []
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Consultar', callback: this.onBuscar },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Metodo encargado de realizar la consulta cuando se preciona la tecla enter
+   * @returns {bool}
+   */
+  onKeyPress = (evento) => {
+    if (evento.charCode === TECLAS.ENTER) {
+      this.onBuscar();
+    }
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='consulta-variables'>
+        &lt;div className="d-flex justify-content-center pt-3">
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;Input
+          cols={12}
+          label='Buscar variables por Nombre, Alias o Abreviatura:'
+          onChange={this.onCriterioChange}
+          value={this.state.criterio}
+          className='row mt-3'
+          extra={{ onKeyPress: this.onKeyPress }}
+        />
+
+        &lt;div className='mt-5'>
+          {this.renderTabla()}
+        &lt;/div>
+
+      &lt;/div>
+    );
+  };
+
+}
+
+ConsultaVariables.propTypes = {
+  history: PropTypes.object,
+  esModal: PropTypes.bool,
+  seleccionarVariable: PropTypes.func
+};
+
+ConsultaVariables.defaultProps = {
+  esModal: false
+};
+
+const mapStateToProps = state => {
+  return {
+
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({}, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConsultaVariables);
+
+export { VistaRedux as RConsultaVariables };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

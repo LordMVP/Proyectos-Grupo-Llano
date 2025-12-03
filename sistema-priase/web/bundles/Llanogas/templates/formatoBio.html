@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/theme/jquery.ui.all.css" />
+    <link rel="stylesheet" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo.ui.css" />
+    <link rel="stylesheet" media="print" type="text/css" href="/achagua/sistema/web/bundles/Llanogas/css/estilo_imprimir.css" />
+    <style>
+        #imgLogo{display: inline-block; width: 170px; height: 60px;}
+        header, .firmaHuella{display: flex; justify-content: space-between; margin-top: 10px;}
+        header div{width: 50%;}
+        header div:last-child{display: flex; justify-content: end; flex-direction: column; margin-right: 20px;}
+        header div strong{text-align: end;}
+        .div-sub{display: flex; margin-top: 10px;}
+        .div-sub .subtitle{width: 70%; display: flex;}
+        .div-sub .subtitle p{width: 100%; padding: 3px; color: white; text-indent: 5%; margin-block: 0; background-color: #274E13;  border-bottom: 3px solid #274E13;}
+        .div-sub div:last-child{width: 30%; display: flex; justify-content: end; flex-direction: column; border-bottom: 3px solid #274E13;}
+        .div-contenedor{margin-bottom: 10px;}
+        .div-contenedor div{ display: flex; justify-content: center; margin-top: 3px;}
+        .div-contenedor div p{width: 100%; font-size: smaller;}
+        .div-contenedor div .firmaHuella{display: flex; justify-content: space-between; margin-top: 10px; width: 100%;}
+        .div-contenedor div .firmaHuella .firmaDatos hr{width: 300px; background-color: black; height: 1px;}
+        .div-contenedor div .firmaHuella .firmaDatos{display: flex; flex-direction: column; font-size: smaller;}
+        .div-contenedor div .firmaHuella .inline-block{display: inline-block;}
+        .div-huella{text-align: center; font-size: smaller;}
+        footer{ display: flex; justify-content: center; margin-top: 10px;}
+        footer img{width: 100%;}
+    </style>
+</head>
+
+<body id="divBody">
+    <header>
+        <div>
+            <img id="imgLogo"/>
+        </div>
+        <div class="codigoCalidad">
+            <strong id="codigoCalidad"></strong> 
+            <br>
+            <strong id="fechaImplementacion"></strong>
+        </div>
+    </header>
+    <div id="contenedor-0" style="display: none;">
+        <div class="div-sub">
+            <div class="subtitle">
+                <p id="subtitle0"></p>
+            </div>
+            <div></div>
+        </div>
+        <div class="div-contenedor">
+            <div>
+                <p id="parrafo0"></p>
+            </div>
+        </div>
+    </div>
+    <div class="div-sub">
+        <div class="subtitle">
+            <p id="subtitle1"></p>
+        </div>
+        <div></div>
+    </div>
+    <div class="div-contenedor">
+        <div>
+            <p id="parrafo1"></p>
+        </div>
+        <div style="margin-top: 30px;">
+            <span style="width: 100%;" id="txtParentesco"></span>
+        </div>
+        <div style="margin-top: 20px;">
+            <div class="firmaHuella">
+                <div class="firmaDatos">
+                    <hr>
+                    <span>FIRMA: </span>
+                    <br>
+                    <span id="txtNombreTer1"></span>
+                    <br>
+                    <span id="txtDocumentoTer1"></span>                    
+                </div>
+                <div class="inline-block">
+                    <svg width="150" height="100" viewBox="0 0 150 100">
+                        <rect x="35" y="0" height="100" width="80" style="stroke:#000; fill: #FFFFFF"></rect>
+                    </svg>
+                    <br>
+                    <div class="div-huella">Huella</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="div-sub">
+        <div class="subtitle">
+            <p id="subtitle2"></p>
+        </div>
+        <div></div>
+    </div>
+    <div class="div-contenedor">
+        <div>
+            <p id="parrafo2"></p>
+        </div>
+        <div style="margin-top: 20px;">
+            <div class="firmaHuella">
+                <div class="firmaDatos">
+                    <hr>
+                    <span>FIRMA: </span>
+                    <br>
+                    <span id="txtNombreTer2"></span>
+                    <br>
+                    <span id="txtDocumentoTer2"></span>                    
+                </div>
+                <div class="inline-block">
+                    <svg width="150" height="100" viewBox="0 0 150 100">
+                        <rect x="35" y="0" height="100" width="80" style="stroke:#000; fill: #FFFFFF"></rect>
+                    </svg>
+                    <br>
+                    <div class="div-huella">Huella</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <img id="imgBanner"/>
+    </footer>
+</body>
+
+</html>

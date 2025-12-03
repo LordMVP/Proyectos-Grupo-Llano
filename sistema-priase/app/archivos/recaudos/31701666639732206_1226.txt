@@ -1,0 +1,3 @@
+Id Transacción,id factura,Fecha y Hora,Valor transacción,Estado,Medio de Pago,Número De Factura	Banco Autorizador,No. Autorización,Ciclo ACH,Correo Electrónico,Nombre,IP
+4261316259,2022-10-18 12:47:38,16243,APROBADA,PSE,37861412	Bancolombia,1342777177,1,pamela.aguillon@dollarcity.com,suramerica comercial sas,190.87.160.145
+4261316259,2022-10-18 12:47:38,20000,APROBADA,PSE,37861412	Bancolombia,1342777177,1,pamela.aguillon@dollarcity.com,suramerica comercial sas,190.87.160.145

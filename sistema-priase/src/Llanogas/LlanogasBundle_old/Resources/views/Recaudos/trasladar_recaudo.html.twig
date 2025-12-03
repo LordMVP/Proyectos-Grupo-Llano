@@ -1,0 +1,166 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/pagos.estilo.css')}}" />
+{% endblock %}
+{% block scripts %}
+{% endblock %}
+{% block titulo %}Trasladar Recaudos - {{empresa}}  {% endblock %}
+{% block body %}
+<div id="divComandos">
+    <div class="divBotones">
+        <input type="button" value="buscar" id="btnMostrarFiltroRecaudos" class="btn" />
+        <input type="button" value="grabar" id="btnGrabar" class="btn" />
+        <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+    </div>
+</div>
+
+<div id="divPanelContenedor">
+    <fieldset>
+        <legend>Información del Recaudo</legend>
+        
+        <div>
+            <div class="campoCorto">
+                <label for="txtIdRecaudo">ID del Recaudo:</label>
+                <input type="text" id="txtIdRecaudo" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtFecha">Fecha:</label>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNombreTercero">Nombre del Tercero:</label>
+                <input type="text" id="txtNombreTercero" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtConvenio">Convenio:</label>
+                <input type="text" id="txtConvenio" disabled="disabled" />
+            </div>
+            <div class="campoCorto">
+                <label for="txtValorTotal">Total Recaudo:</label>
+                <input type="text" id="txtValorTotal" disabled="disabled" />
+            </div>
+
+            <button id="btnVerFormasPago" class="btnSimple">Ver Formas de Pago</button>  
+        </div>
+    </fieldset>
+
+    <div id="divSuscripciones">
+        <table id="tblSuscripciones" class="tabla"></table>
+        <table id="tblFacturas" class="tabla"></table>
+    </div>
+
+    <fieldset>
+        <legend>Suscripción de Destino</legend>
+        <div class="campoBusqueda">
+            <label for="txtIdSuscripcionDestino">Id Suscriptor:</label>
+            <input type="text" id="txtIdSuscripcionDestino" disabled="disabled" />    
+            <button id="btnSuscripcion" title="Buscar Suscripción Destino"></button>
+        </div>
+
+        <div class="campo">
+            <label for="txtSuscriptorDestino">Nombre Suscriptor:</label>
+            <input type="text" id="txtSuscriptorDestino" disabled="disabled" />
+        </div>
+        
+        <div class="campo">
+            <label for="txtDocSuscriptor">Documento:</label>
+            <input type="text" id="txtDocSuscriptor" disabled="disabled" />
+        </div>
+        
+        <div style="margin-right:20px;">
+            <table id="tblSuscripcionesTransferir" class="tabla"></table>
+            <div class="campo">
+                <label for="txtTotalDestino">Total Asignado:</label>
+                <input type="text" id="txtTotalDestino" disabled="disabled" />
+            </div>
+        </div>
+        
+    </fieldset>
+</div>
+
+      
+<div id="divFiltro" style="display:none;">
+    <div>
+        <div class="campo">
+            <label for="txtIdRegistroFiltro">Id Recaudo:</label>
+            <input type="text" id="txtIdRegistroFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscripcionFiltro">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcionFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscriptorFiltro">Id Suscriptor:</label>
+            <input type="text" id="txtIdSuscriptorFiltro" />
+        </div>
+    </div>
+    <div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha de Inicio:</label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha de Fin:</label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+    </div>
+    <p class="pMensaje"></p>
+    <button id="btnBuscarRecaudo" class="btnSimple">Buscar</button>
+    <div id="divResultadoFiltro" class="listaSeleccion"></div>
+</div>
+
+<div id="divMotivos" style="display:none;">
+    <label for="cmbMotivo">Motivo de la anulación:</label>
+    {{cmbMotivos|raw}}
+    <label for="txtObservacion">Observaciones:</label>
+    <textarea id="txtObservacion"></textarea>
+</div>
+
+<div id="divFormasPago" style="display:none;">
+    
+</div>
+
+<!-- Division para filtro -->
+<div id="camposBuscarSuscripcion" style="display:none;" >
+    <div class="campo">
+        <label for="txtFiltroSus">Suscripción:</label>
+        <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroDoc">Cédula/NIT:</label>
+        <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+    </div>
+    <div class="campo">
+        <label for="txtFiltroCodAnt">Código Anterior:</label>
+        <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+    </div>
+    <span id="spanMensaje" class="pMensaje"></span>
+    <button id="btnBuscar" class="btnSimple">Buscar</button>
+</div>
+
+<!--División para alerta -->
+
+<div id="divAlertaTotales" style="display:none;">
+    <p>
+        La sumatoria de valores asignados a las suscripciones de destino,debe ser igual al valor del recaudo. <br>
+        <strong>Valor Esperado: </strong> <span id="spanEsperado"></span> - <strong>Valor Recibido: </strong> <span id="spanRecibido"></span>
+    </p>
+</div>
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/recaudos.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/traslado/traslado.model.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/traslado/traslado.control.js')}}"></script>
+<script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/traslado/traslado.vista.js')}}"></script>
+{% endblock %}

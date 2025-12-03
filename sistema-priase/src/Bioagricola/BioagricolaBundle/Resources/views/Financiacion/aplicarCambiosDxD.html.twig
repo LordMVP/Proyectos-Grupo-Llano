@@ -1,0 +1,92 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+
+    <style>
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            margin-right: 55px;
+            display: inline-block;
+            width: 40%;
+            position: relative;
+            top: 16px;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Cambios de Valor Financiación: Aplicar  -  {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="Aplicar" id="btnCargar" class="btn" />
+            <input type="button" value="Descargar Errores" id="btnDescargarErr" class="btn" />
+            <input type="button" value="Descargar Saldos" id="btnDescargarSdo" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <fieldset>
+            <legend>Cambios de Valor Financiaciones Especiales</legend>
+             <div style="width: 100%; display: inline-block; margin-top: 10px;">
+                Este procedimiento busca los cambios de valor sin descargar y que pertencen a financiaciones especiales y los aplica, ingrese "SI" para continuar
+            </div> 
+            <div class="campo">
+                <label for="txtContinuar"> Aplicar Cambios: </label>
+                <input type="text" id="txtContinuar"/>
+            </div>   
+            <div>
+                <div id="divArchivo" style="margin-top: 15px">
+                    <input type="file" id="txtArchivo"/>
+                </div>
+            </div>
+            <div>
+                <div style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumen" class="tabla"></table>
+                </div>
+                <div style="width: 100%; display: inline-block; margin-top: 10px;">
+                    <table id="tblResumenConProblemas" class="tabla"></table>
+                </div>
+                <div style="width: 100%; display: inline-block;">
+                    <button class="btnSimple" id="btnEliminarResumen">Eliminar resumen</button>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <fieldset id="divInfoProceso" style="display:none">
+        <legend> Proceso Actualizar Cambios de Valor DxD </legend>
+        <div id="divCargando"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Se está ejecutando el proceso, <br>esto puede tardar unos minutos...</p>                
+        </div>
+        <table id="tblProceso" class="tabla" style="width: 70%; display: inline-table; margin: 20px 20px;"></table>
+    </fieldset>
+    <div id="divCancelarOpe" style="display: none;">
+        <p>Se cancelará la actualizacion actual, ¿Desea continuar?</p>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/cambiosValor/aplicar.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/cambiosValor/aplicar.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Bioagricola/js/Financiacion/cambiosValor/aplicar.vista.js')}}"></script>
+{% endblock %}

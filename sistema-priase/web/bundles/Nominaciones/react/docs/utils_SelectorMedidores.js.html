@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/SelectorMedidores.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/SelectorMedidores.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Util } from 'appfuture-react';
+import { Combo, Input } from 'appfuture-react';
+import Modal from 'react-bootstrap4-modal';
+
+class SelectorMedidores extends Component {
+
+  state = {
+    mostrarModal: false,
+    medidores: [],
+  };
+
+  /**
+   * Controla el cambio de estado de la propiedad mostrarModal que se usa para mostrar o ocultar el modal de selección.
+   */
+  abrirCerrarModal = (estado) => {
+    this.setState({
+      mostrarModal: estado
+    });
+  };
+
+  /**
+   * Confirma la selección de los puntos de salida, es decir invoca el método del componente padre para actualizar su lista de puntos de salida.
+   */
+  confirmarSeleccionMedidores = (estado) => {
+    this.abrirCerrarModal(estado);
+    const v = this.validarSeleccion();
+    if (v) {
+      this.props.seleccionarItem(this.state.medidores);
+    }
+  };
+
+  /**
+   * Valida la selección de los puntos de salida y sus campos respectivos.
+   * @return {boolean}
+   */
+  validarSeleccion = () => {
+    let respuesta = 0;
+    this.state.medidores.forEach(medidor => {
+      //Verificamos si el medidor seleccionado tiene cargo seleccionado.
+      if (!this.verificarCamposSeleccion(medidor)) {
+        respuesta--;
+      }
+    });
+    return respuesta === 0;
+  };
+
+  /**
+   * Verifica que el usuario haya seleccionado correctamente los campos correspondientes a los puntos de salida que ha configurado.
+   * @return {boolean}
+   */
+  verificarCamposSeleccion = (medidor) => {
+    if (!medidor.seleccionado) {
+      return true;
+    }
+    let respuesta = true;
+    if (!medidor.precioMedidor || medidor.precioMedidor &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe ingresar una cantidad contratada para el punto de salida: "' + medidor[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    if (!medidor.uniIdeMedidor || medidor.uniIdeMedidor &lt; 0) {
+      this.props.mostrarAlerta('Error', 'Debe seleccionar una unidad de medida para el punto de salida: "' + medidor[this.props.propTexto] + '".');
+      respuesta = false;
+    }
+    return respuesta;
+  };
+
+  /**
+   * Elimina la selección de un punto de salida especifico.
+   */
+  quitarSeleccionItem = (medidor) => {
+    const medidores = this.state.medidores.map(ps => {
+      if (ps.idMedidor === medidor.idMedidor) {
+        ps.seleccionado = false;
+      }
+      return ps;
+    });
+    this.setState({ medidores: medidores, mostrarModal: true });
+  };
+
+  componentDidMount() {
+    this.setState({ medidores: this.obtenerListaMedidores() });
+  };
+
+  /**
+   * Devuelve la lista de puntos de salida Actualizada con algunos valores necesarios para que el componente funcione correctamente.
+   * @return {array}
+   */
+  obtenerListaMedidores = () => {
+    const lista = this.props.lista.map(medidor => {
+      medidor.idMedidor = Util.generarIdControl('_idMedidor_' + medidor.mesuIderegistro);
+      medidor.precioMedidor = medidor.precioMedidor ? medidor.precioMedidor : medidor.pstaCapacidad;
+      medidor.uniIdeMedidor = medidor.uniIdeMedidor ? medidor.uniIdeMedidor : medidor.uniIdemedida.uniIderegistro;
+      return medidor;
+    });
+    return lista;
+  };
+
+  actualizarPuntosSalida = () => {
+    this.setState({ medidores: this.obtenerListaMedidores() });
+  };
+
+  /**
+   * Rendierizará el componente selector.
+   * @return {Component}
+   */
+  renderSelector = () => {
+    const texto = '';
+    const seleccionados = this.state.medidores.reduce((total, registro) => { return total + (registro.seleccionado ? 1 : 0) }, 0);
+    const placeholder = `(${seleccionados}) Seleccionados`;
+    return (
+      &lt;div className='col-3 form-group'>
+        &lt;label>{this.props.titulo}&lt;/label>
+        &lt;div className="input-group mb-3">
+          &lt;input value={texto} disabled={true} type="text" className="form-control" placeholder={placeholder} />
+          &lt;div className="input-group-prepend">
+            &lt;button
+              className="btn-primary btn-buscador input-group-btn"
+              title={`Seleccionar ` + this.props.titulo}
+              onClick={() => this.abrirCerrarModal(true)}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Controla el cambio de los componentes...
+   */
+  controlarCambio = (evento) => {
+    const medidores = [...this.state.medidores];
+    const control = evento.target;
+    const idMedidor = control.attributes['data-idmedidor'].value;
+    const index = medidores.findIndex(ps => ps.idMedidor === idMedidor);
+    medidores[index].seleccionado = ((evento.target.name !== 'check_idmedidor')) ? true : evento.target.checked;
+    if ((evento.target.name !== 'check_idmedidor')) {
+      medidores[index][evento.target.name] = evento.target.value;
+    }
+    this.setState({ medidores: medidores });
+  };
+
+  /**
+   * Renderizará el componente modal del selector.
+   * @return {Component}
+   */
+  renderModalSelector = () => {
+    const listaMedidores = this.state.medidores;
+    return (
+      &lt;Modal visible={this.state.mostrarModal}>
+        &lt;div className="modal-header">
+          &lt;h4 className="modal-title">&lt;b>{this.props.titulo}&lt;/b>&lt;/h4>
+        &lt;/div>
+        &lt;div className="modal-body">
+          &lt;div>
+            &lt;p>Seleccione los {this.props.titulo}&lt;/p>
+            &lt;table className='table table-hover table-striped table-bordered table-condensed label-nodisplay'>
+              &lt;thead className='bg-dark text-white'>
+                &lt;tr>&lt;th>Medidor&lt;/th>&lt;th>Precio&lt;/th>&lt;th>Unidad Medida&lt;/th>&lt;/tr>
+              &lt;/thead>
+              &lt;tbody>
+                {
+                  listaMedidores.map(registro => {
+                    return (
+                      &lt;tr key={`item_selector_${registro[this.props.propValor]}`}>
+                        &lt;td className='text-left' style={{ width: '40%' }}>
+                          &lt;label className='text-left display'>
+                            &lt;input name='check_idmedidor' key={Util.generarIdControl('_check_' + registro.trmIderegistro)} data-idmedidor={registro.idMedidor} type="checkbox" checked={registro.seleccionado || false} onChange={this.controlarCambio} />
+                            &lt;span> {registro[this.props.propTexto]}&lt;/span>
+                          &lt;/label>
+                        &lt;/td>
+                        &lt;td>
+                          &lt;Input
+                            label=''
+                            value={(registro.precioMedidor) ? registro.precioMedidor : registro.pstaCapacidad}
+                            onChange={this.controlarCambio}
+                            name='precioMedidor'
+                            cols={12}
+                            extra={{ 'data-idmedidor': registro.idMedidor }}
+                          />
+                        &lt;/td>
+                        &lt;td>
+                          &lt;Combo
+                            opciones={this.props.unidadesMedida}
+                            propTexto='uniNombre1'
+                            propValor='uniIderegistro'
+                            label=''
+                            name='uniIdeMedidor'
+                            cols={12}
+                            value={(registro.uniIdeMedidor) ? registro.uniIdeMedidor : registro.uniIdemedida.uniIderegistro}
+                            onChange={this.controlarCambio}
+                            extra={{ 'data-idmedidor': registro.idMedidor }}
+                          />
+                        &lt;/td>
+                      &lt;/tr>
+                    );
+                  })
+                }
+              &lt;/tbody>
+            &lt;/table>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="modal-footer">
+          &lt;button className='btn btn-primary' onClick={() => { this.confirmarSeleccionMedidores(false) }}>Aceptar&lt;/button>
+        &lt;/div>
+      &lt;/Modal>
+    );
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        {this.renderSelector()}
+        {this.renderModalSelector()}
+      &lt;/Fragment>
+    );
+  }
+}
+
+SelectorMedidores.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func,
+  titulo: PropTypes.string,
+  propValor: PropTypes.string,
+  propTexto: PropTypes.string,
+  seleccionarItem: PropTypes.func,
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+export { SelectorMedidores };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

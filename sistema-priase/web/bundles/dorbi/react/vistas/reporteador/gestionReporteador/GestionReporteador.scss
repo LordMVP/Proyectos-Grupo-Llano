@@ -1,0 +1,19 @@
+.content-grid{
+    display: block;
+    border: 1px solid #76a8dd;
+    border-radius: 3px;
+    padding: 25px;
+    position: relative;
+}
+
+.content-grid .title-grid{
+  position: absolute;
+  top: -15px;
+  background: #FFFFFF;
+  padding: 3px 10px;
+  font-size: 13px;
+  color: #5d96d1;
+  font-weight: bold;
+  border-radius: 3px;
+  text-align: center;
+}

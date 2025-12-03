@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="TerTercero" table="ter_tercero">
+    <id name="terIderegistro" type="smallint" column="ter_ideRegistro">
+      <generator strategy="SEQUENCE"/>
+    </id>
+    <field name="terDocumento" type="string" column="ter_documento" length="20" nullable="false"/>
+    <field name="terNombre" type="string" column="ter_nombre" length="30" nullable="false"/>
+    <field name="terApellido" type="string" column="ter_apellido" length="30" nullable="false"/>
+    <field name="terNomcompleto" type="string" column="ter_nomCompleto" length="60" nullable="false"/>
+    <field name="terSexo" type="string" column="ter_sexo" nullable="false"/>
+    <field name="terTelcelular" type="string" column="ter_telCelular" length="20" nullable="false"/>
+    <field name="terTelfijo" type="string" column="ter_telFijo" length="20" nullable="false"/>
+    <field name="estTiptercero" type="smallint" column="est_tipTercero" nullable="false"/>
+    <field name="uniTiptercero" type="smallint" column="uni_tipTercero" nullable="false"/>
+  </entity>
+</doctrine-mapping>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/cruceCuentaBalance/GestionCuentaBalance/GestionCuentaBalance.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/cruceCuentaBalance/GestionCuentaBalance/GestionCuentaBalance.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import { formatearArray } from '../../../../global/util_nominaciones';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionCuentaBalance.scss';
+
+let listaAnios = [
+];
+
+let listaMes = [
+  { texto: 'Enero', valor: '1' },
+  { texto: 'Febrero', valor: '2' },
+  { texto: 'Marzo', valor: '3' },
+  { texto: 'Abril', valor: '4' },
+  { texto: 'Mayo', valor: '5' },
+  { texto: 'Junio', valor: '6' },
+  { texto: 'Julio', valor: '7' },
+  { texto: 'Agosto', valor: '8' },
+  { texto: 'Septiembre', valor: '9' },
+  { texto: 'Octubre', valor: '10' },
+  { texto: 'Noviembre', valor: '11' },
+  { texto: 'Diciembre', valor: '12' },
+];
+
+class GestionCuentaBalance extends Component {
+
+  state = {
+    // Datos de la entidad
+    listaTramos: [],
+    listaContratos: [],
+    listaPuntosPositivos: [],
+    listaConsulta: [],
+    tramo: '',
+    anio: '',
+    mes: '',
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.obtenerAnios();
+    const peticiones = [
+      axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CUENTA_BALANCE.CONSULTAR_TRAMOS),
+      axios.post(RUTAS_API.CONTRATOS.CONSULTAR_CONTRATOS, { criterio: '' })
+    ];
+
+    axios.all(peticiones)
+      .then(axios.spread((tramos, contratos) => {
+        const datosAplicacion = {
+          listaTramos: [],
+          listaContratos: [],
+        };
+
+        if (tramos.data.codigo > 0) {
+          datosAplicacion.listaTramos = tramos.data.datos;
+        }
+
+        if (contratos.data.codigo > 0) {
+          datosAplicacion.listaContratos = contratos.data.datos;
+        }
+        this.setState({ ...datosAplicacion });
+      }));
+
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      tramo: '-1',
+      anio: '',
+      mes: '',
+      listaConsulta: [],
+      listaPuntosPositivos: [],
+    });
+  };
+
+  /**
+   * Método encargado de llenar el combo de años
+   */
+  obtenerAnios = () => {
+    const fechaActual = new Date();
+    const anioActual = fechaActual.getFullYear();
+    const anioInicial = anioActual - 100;
+    for (let i = anioActual; i > anioInicial; i--) {
+      listaAnios.push({ texto: i, valor: i });
+    }
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de cambiar de interfaz
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Agregar Tramo', callback: this.agregarTramo },
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Generar Documento', callback: this.generarDocumento },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de validar los campos de la tabla de negativos
+   * @returns {Object}
+   */
+  validarTablaNegativos = () => {
+    const { listaPuntosPositivos } = this.state;
+    for (let index = 0; index &lt; listaPuntosPositivos.length; index++) {
+      const puntoValidar = listaPuntosPositivos[index];
+      if ((!puntoValidar.puntoNegativo) || (!puntoValidar.puntoNegativo.numeroContrato || puntoValidar.puntoNegativo.numeroContrato &lt;= 0)) {
+        return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: `Debe seleccionar un contrato para el punto negativo: ${puntoValidar.puntoNegativo.ptsaNombre}` } };
+      }
+
+      if (!puntoValidar.puntoNegativo.descripcion || puntoValidar.puntoNegativo.descripcion.trim() === '') {
+        return { respuesta: false, mensaje: { titulo: 'Datos Incompletos', mensaje: `Debe seleccionar una descripción para el punto negativo: ${puntoValidar.puntoNegativo.ptsaNombre}` } };
+      }
+    };
+    return { respuesta: true }
+  };
+
+  /**
+   * Método encargado de validar las variables necesarias para consultar los datos del cruce en el tramo seleccionado
+   * @returns {Object}
+   */
+  validarFormularioAgregarTramo = () => {
+    const { mes, anio, tramo } = this.state;
+    if (tramo &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el tramo' } };
+    }
+
+    if (anio &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el año' } };
+    }
+
+    if (mes &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el mes' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar las variables necesarias para guardar
+   */
+  validarFormulario = () => {
+    const { listaPuntosPositivos } = this.state;
+    const listaFiltrada = listaPuntosPositivos.filter(p => p.puntoNegativo != null &amp;&amp; p.puntosPositivos != null);
+    if (!Util.validarArreglo(listaPuntosPositivos)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe agregar al menos 1 tramo' } };
+    }
+
+    if (!Util.validarArreglo(listaFiltrada)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe agregar al menos 1 tramo que tenga cruce' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario para generar el documento de cruces
+   * @returns {Object}
+   */
+  validarFormularioDocumento = () => {
+    const { mes, anio } = this.state;
+    // Validaciones
+    if (anio &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el año' } };
+    }
+
+    if (mes &lt;= 0) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar el mes' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de generar el documento del cruce
+   * @returns {bool}
+   */
+  generarDocumento = () => {
+    const validarDocumento = this.validarFormularioDocumento();
+    if (!validarDocumento.respuesta) {
+      this.props.mostrarAlerta(validarDocumento.mensaje.titulo, validarDocumento.mensaje.mensaje);
+      return false;
+    }
+    const { mes, anio } = this.state;
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CUENTA_BALANCE.GENERAR_DOCUMENTO, { mes: mes, anio: anio })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          let a = document.createElement('a');
+          a.href = 'data:' + { type: "Content-Type: application/vnd.ms-excel" } + ';base64,' + respuesta.data.datos;
+          a.download = "Reporte Cruce Cuenta Balance.xls";
+          a.target = '_blank';
+          a.click();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de generar un objeto para guardar el cruce o cruces
+   * @returns {Object}
+   */
+  obtenerObjetoGuardar = () => {
+    const { listaPuntosPositivos, mes, anio } = this.state;
+    const listaFiltrada = listaPuntosPositivos.filter(p => p.puntoNegativo != null &amp;&amp; p.puntosPositivos != null);
+    const lista = listaFiltrada.map((dato, index) => {
+      return {
+        'cntIdecontrato': { 'cntIderegistro': dato.puntoNegativo.numeroContrato },
+        'ptsaIdepositivo': { 'ptsaIderegistro': dato.puntosPositivos.ptsaIderegistro },
+        'ptsaIdenegativo': { 'ptsaIderegistro': dato.puntoNegativo.ptsaIderegistro },
+        'uniIdemedida': { 'uniIderegistro': dato.unidadMedida.uniIderegistro },
+        'ctbSaldopositivo': dato.ctbSaldopositivo,
+        'ctbSaldonegativo': dato.ctbSaldonegativo,
+        'ctbNuevosaldo': dato.ctbNuevosaldo,
+        'ctbFechacruce': `${anio}-${mes}`,
+        'ctbDescripcion': dato.puntoNegativo.descripcion,
+      }
+    });
+    const objetoEnviar = {
+      cruceCuentaLista: lista,
+    };
+    return objetoEnviar;
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+   * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    const validacionTabla = this.validarTablaNegativos();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    if (!validacionTabla.respuesta) {
+      this.props.mostrarAlerta(validacionTabla.mensaje.titulo, validacionTabla.mensaje.mensaje);
+      return false;
+    }
+
+    const entidadGuardar = this.obtenerObjetoGuardar();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CUENTA_BALANCE.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   * @param {number} index Posición que se esta modificando
+   */
+  controlarCambioNumeroContrato = (evento, index) => {
+    let puntos = [...this.state.listaPuntosPositivos];
+    puntos[index].puntoNegativo.numeroContrato = evento.target.value;
+    this.setState({ listaPuntosPositivos: puntos });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+   * @param {Event} evento El evento que se ejecuta en el control de usuario
+   * @param {number} index Posición que se esta modificando
+   */
+  controlarCambioDescripcion = (evento, index) => {
+    let puntos = [...this.state.listaPuntosPositivos];
+    puntos[index].puntoNegativo.descripcion = evento.target.value;
+    this.setState({ listaPuntosPositivos: puntos });
+  };
+
+  /**
+   * Obtiene la lista de contratos que tienen fuente.
+   * @return {array}
+   */
+  obtenerContratosConFuente = () => {
+    return this.state.listaContratos.filter(contrato => {
+      if (contrato.uniIdefuente &amp;&amp; contrato.uniIdefuente.uniIderegistro) {
+        return contrato;
+      }
+    }).map(contrato => {
+      contrato.nombre = contrato.cntNumero + ' - ' + contrato.terIdeagente.terNomcompleto;
+      return contrato;
+    });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los tramos y puntos negativos agregados
+   * @returns {Object}
+   */
+  renderTablaNegativos = () => {
+    const { listaPuntosPositivos } = this.state
+    let lista = listaPuntosPositivos.filter(p => p.puntoNegativo != null);
+    return (
+      &lt;table className='table table-striped mt28'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Lista Puntos Negativos&lt;/th>
+          &lt;/tr>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th>Punto de Salida&lt;/th>
+            &lt;th>Saldo&lt;/th>
+            &lt;th>Saldo Cruzado&lt;/th>
+            &lt;th>Nuevo Saldo&lt;/th>
+            &lt;th>U/M&lt;/th>
+            &lt;th>Número de contrato&lt;/th>
+            &lt;th>Detalle&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            lista.map((dato, index) => {
+              return (
+                &lt;tr key={`"punto_"${dato.puntoNegativo.ptsaNombre}`}>
+                  &lt;td>{dato.tramo.trmNombre}&lt;/td>
+                  &lt;td>{dato.puntoNegativo.ptsaNombre}&lt;/td>
+                  &lt;td>{dato.ctbSaldonegativo}&lt;/td>
+                  &lt;td>{dato.ctbNuevosaldo}&lt;/td>
+                  &lt;td>{dato.ctbNuevosaldo}&lt;/td>
+                  &lt;td>{dato.unidadMedida.uniNombre1}&lt;/td>
+                  &lt;td>
+                    &lt;Combo
+                      opciones={this.obtenerContratosConFuente()}
+                      propTexto='nombre'
+                      propValor='cntIderegistro'
+                      name='contrato'
+                      cols={12}
+                      value={dato.puntoNegativo.numeroContrato}
+                      onChange={(evento) => {
+                        this.controlarCambioNumeroContrato(evento, index)
+                      }}
+                    />
+                  &lt;/td>
+                  &lt;td>
+                    &lt;Input
+                      value={dato.puntoNegativo.descripcion}
+                      cols={12}
+                      onChange={(evento) => {
+                        this.controlarCambioDescripcion(evento, index)
+                      }}
+                      name='descripcion'
+                    />
+                  &lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los puntos positivos agregados
+   * @returns {Object}
+   */
+  renderTablaPositivos = () => {
+    const { listaPuntosPositivos } = this.state
+    let lista = listaPuntosPositivos.filter(p => p.puntosPositivos != null);
+    return (
+      &lt;table className='table table-striped'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Lista Puntos Positivos&lt;/th>
+          &lt;/tr>
+          &lt;tr>
+            &lt;th>Tramo&lt;/th>
+            &lt;th>Punto de Salida&lt;/th>
+            &lt;th>Desbalance positivo&lt;/th>
+            &lt;th>U/M&lt;/th>
+            &lt;th>Nuevo Saldo&lt;/th>
+            &lt;th>Estado&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            lista.map((dato, index) => {
+              return (
+                &lt;tr key={dato.puntosPositivos.ptsaIderegistro}>
+                  &lt;td>{dato.tramo.trmNombre}&lt;/td>
+                  &lt;td>{dato.puntosPositivos.ptsaNombre}&lt;/td>
+                  &lt;td>{dato.ctbSaldopositivo}&lt;/td>
+                  &lt;td>{dato.unidadMedida.uniNombre1}&lt;/td>
+                  &lt;td>{dato.ctbNuevosaldo}&lt;/td>
+                  &lt;td>Pendiente&lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de validar que no se seleccione dos veces el mismo tramo
+   * @param {number} idTramo Identificador del tramo seleccionado
+   * @returns {number}
+   */
+  validarRepetido = (idTramo) => {
+    const lista = [...this.state.listaConsulta];
+    const index = lista.findIndex(p => p.trmIderegistro.trim() == idTramo.trim());
+    return index >= 0
+  };
+
+  /**
+   * Método engargado de generar un objeto con los datos para consultar el cruce
+   * @returns {Object}
+   */
+  obtenerDatosGenerar = () => {
+    const { tramo, mes, anio } = this.state;
+    let { listaConsulta } = this.state;
+    let objetoDevolver = {
+      mes: parseInt(mes),
+      anio: parseInt(anio),
+    };
+    listaConsulta.push({ trmIderegistro: tramo });
+    const lista = listaConsulta.map(dato => {
+      return {
+        trmIderegistro: dato.trmIderegistro
+      }
+    });
+    objetoDevolver.listaTramo = lista;
+    return objetoDevolver;
+  };
+
+  /**
+   * Metodo encargado de llenar la lista con el punto negativo o positivo consultado
+   * @param {Object} datos Datos de los puntos consultados
+   */
+  pushDatosSinCruce = (datos) => {
+    const { tramo, listaTramos } = this.state;
+    const { listaConsulta } = this.state;
+    const index = listaConsulta.findIndex(p => p.trmtrmIderegistro == tramo);
+    listaConsulta.splice(index, 1);
+    let tramoSeleccionado = listaTramos.find(p => p.trmIderegistro == tramo);
+    const lista = [...this.state.listaPuntosPositivos];
+    for (let index = 0; index &lt; datos.length; index++) {
+      const dato = datos[index];
+      const punto = lista.find(p => p.puntosPositivos &amp;&amp; p.puntosPositivos.ptsaIderegistro == dato.puntoSalida);
+      if (dato.desbalance > 0) {
+        if (punto) {
+          this.props.mostrarAlerta('Ateción', `El punto ${dato.nombrePuntoSalida} ya se encuentra en la lista de puntos positivos`);
+          return;
+        } else {
+          lista.push({
+            puntosPositivos: {
+              ptsaIderegistro: dato.puntoSalida,
+              ptsaNombre: dato.nombrePuntoSalida,
+            },
+            ctbSaldopositivo: dato.desbalance,
+            ctbSaldonegativo: 0,
+            ctbNuevosaldo: 0,
+            unidadMedida: {
+              uniNombre1: 'MBTU',
+            },
+            tramo: tramoSeleccionado,
+            puntoNegativo: null,
+          });
+        }
+      } else {
+        lista.push({
+          puntosPositivos: null,
+          ctbSaldopositivo: 0,
+          ctbSaldonegativo: dato.desbalance,
+          ctbNuevosaldo: 0,
+          unidadMedida: {
+            uniNombre1: 'MBTU',
+          },
+          tramo: tramoSeleccionado,
+          puntoNegativo: {
+            ptsaIderegistro: dato.puntoSalida,
+            ptsaNombre: dato.nombrePuntoSalida,
+          },
+        });
+      }
+    }
+    this.setState({ listaPuntosPositivos: lista, listaConsulta: listaConsulta });
+  };
+
+  /**
+   * Método encargado de llenar la lista con los puntos positivos en el cruce
+   * @param {Object} datos Datos del cruce
+   */
+  pushDatosPuntosPositivos = (datos) => {
+    const { tramo, listaTramos } = this.state;
+    let tramoSeleccionado = listaTramos.find(p => p.trmIderegistro == tramo);
+    const lista = [...this.state.listaPuntosPositivos];
+    for (let index = 0; index &lt; datos.length; index++) {
+      const dato = datos[index];
+      const punto = lista.find(p => p.puntosPositivos.ptsaIderegistro == dato.cruceCuenta.ptsaIdepositivo.ptsaIderegistro);
+      const posicion = lista.findIndex(p => p.puntosPositivos.ptsaIderegistro == dato.cruceCuenta.ptsaIdepositivo.ptsaIderegistro);
+      if (lista.length > 0) {
+        if (punto) {
+          if (punto.puntoNegativo == null) {
+            lista.splice(posicion, 1);
+            lista.push({
+              puntosPositivos: dato.cruceCuenta.ptsaIdepositivo,
+              ctbSaldopositivo: dato.cruceCuenta.ctbSaldopositivo,
+              ctbSaldonegativo: dato.cruceCuenta.ctbSaldonegativo,
+              ctbNuevosaldo: dato.cruceCuenta.ctbNuevosaldo,
+              unidadMedida: dato.cruceCuenta.uniIdemedida,
+              tramo: tramoSeleccionado,
+              puntoNegativo: dato.cruceCuenta.ptsaIdenegativo,
+            });
+          }
+          continue;
+        } else {
+          lista.push({
+            puntosPositivos: dato.cruceCuenta.ptsaIdepositivo,
+            ctbSaldopositivo: dato.cruceCuenta.ctbSaldopositivo,
+            ctbSaldonegativo: dato.cruceCuenta.ctbSaldonegativo,
+            ctbNuevosaldo: dato.cruceCuenta.ctbNuevosaldo,
+            unidadMedida: dato.cruceCuenta.uniIdemedida,
+            tramo: tramoSeleccionado,
+            puntoNegativo: dato.cruceCuenta.ptsaIdenegativo,
+          });
+        }
+      } else {
+        lista.push({
+          puntosPositivos: dato.cruceCuenta.ptsaIdepositivo,
+          ctbSaldopositivo: dato.cruceCuenta.ctbSaldopositivo,
+          ctbSaldonegativo: dato.cruceCuenta.ctbSaldonegativo,
+          ctbNuevosaldo: dato.cruceCuenta.ctbNuevosaldo,
+          unidadMedida: dato.cruceCuenta.uniIdemedida,
+          tramo: tramoSeleccionado,
+          puntoNegativo: dato.cruceCuenta.ptsaIdenegativo,
+        });
+      }
+    }
+    this.setState({ listaPuntosPositivos: lista });
+  };
+
+  /**
+   * Método encargado de consultar los puntos positivos y negativos del tramo seleccionado
+   * @returns {bool}
+   */
+  agregarTramo = () => {
+    const { tramo } = this.state;
+    if (this.validarRepetido(tramo)) {
+      this.props.mostrarAlerta('Atención', 'Este tramo ya se encuentra agregado');
+      return false;
+    }
+    const validar = this.validarFormularioAgregarTramo();
+    if (!validar.respuesta) {
+      this.props.mostrarAlerta(validar.mensaje.titulo, validar.mensaje.mensaje);
+      return;
+    }
+
+    const entidadGenerar = this.obtenerDatosGenerar();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CUENTA_BALANCE.CONSULTAR_CRUCE, entidadGenerar)
+      .then(respuesta => {
+        if (respuesta.data.codigo &lt;= 0) {
+          this.setState({ listaConsulta: [] });
+          return;
+        }
+        if (respuesta.data.datos[0].cruceCuenta) {
+          this.pushDatosPuntosPositivos(respuesta.data.datos);
+          return;
+        }
+        this.pushDatosSinCruce(respuesta.data.datos);
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaTramos}
+            propTexto='trmNombre'
+            propValor='trmIderegistro'
+            label='Tramos:'
+            name='tramo'
+            value={this.state.tramo}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={listaAnios}
+            propTexto='texto'
+            propValor='valor'
+            label='Años:'
+            name='anio'
+            value={this.state.anio}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={listaMes}
+            propTexto='texto'
+            propValor='valor'
+            label='Mes:'
+            name='mes'
+            value={this.state.mes}
+            onChange={this.controlarCambio}
+          />
+          {this.state.listaPuntosPositivos.length > 0 &amp;&amp;
+            this.renderTablaPositivos()
+          }
+          {
+            this.state.listaPuntosPositivos.length > 0 &amp;&amp;
+            this.renderTablaNegativos()
+          }
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCuentaBalance.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCuentaBalance);
+
+export { VistaRedux as RGestionCuentaBalance };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

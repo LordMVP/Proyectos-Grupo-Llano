@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="MosuMotsuspen" table="mosu_motSuspen">
+    <id name="uniMotsuspen" type="smallint" column="uni_motSuspen">
+      <generator strategy="SEQUENCE"/>
+    </id>
+    <field name="mosuNombre" type="string" column="mosu_nombre" length="30" nullable="false"/>
+    <field name="mosuProceso" type="string" column="mosu_proceso" nullable="false"/>
+    <field name="estMotsuspen" type="smallint" column="est_motSuspen" nullable="false"/>
+  </entity>
+</doctrine-mapping>

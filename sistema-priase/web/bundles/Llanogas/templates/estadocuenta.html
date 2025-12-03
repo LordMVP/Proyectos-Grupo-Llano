@@ -1,0 +1,97 @@
+<!-- TEMPLATE PARA MOSTRAR LA INFORMACIÓN DE LA CARTERA FINANCIADA : ESTADO DE CUENTA -->
+
+<div id="templateCarteraFinanciada">
+    {{#financiaciones}}
+    <h2>Financiación {{idfinanciacion}}</h2>
+    <div class="divFinanciacion">
+        <div class="campoCorto">
+            <label for="txtIdFinanciacion_{{idfinanciacion}}">ID Financiación:</label>
+            <input type="text" id="txtIdFinanciacion_{{idfinanciacion}}" value="{{idfinanciacion}}" disabled="disabled" class="inputImpresion" />
+        </div>
+
+        <div class="campo">
+            <label for="txtFechaFinanciacion_{{idfinanciacion}}">Fecha:</label>
+            <input type="text" id="txtFechaFinanciacion_{{idfinanciacion}}" value="{{fecha}}" disabled="disabled" class="inputImpresion" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtCapitaInicial_{{idfinanciacion}}">Capital Inicial:</label>
+            <input type="text" id="txtCapitaInicial_{{idfinanciacion}}" value="{{capitalinicial}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+        <div class="campoCorto">
+            <label for="txtSaldoCapital_{{idfinanciacion}}">Saldo capital:</label>
+            <input type="text" id="txtSaldoCapital_{{idfinanciacion}}" value="{{saldofinanciacion}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+
+        <div class="campoCorto">
+            <label for="txtValorAmortizado_{{idfinanciacion}}">Valor Amortizado:</label>
+            <input type="text" id="txtValorAmortizado_{{idfinanciacion}}" value="{{valoramortizado}}" disabled="disabled" class="inputImpresion txt-currency" />
+        </div>
+
+
+
+        <div class="detallesFinanciacion">
+            <h2>Detalles</h2>  
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th id="thDocumentoFin">Documento</th>
+                        <th id="thTipoDocFin">Tipo de Documento</th>
+                        <th id="thValorInicialFin">Valor Inicial</th>
+                        <th id="thValorPagadpFin">Valor Pagado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#detalle}}
+                    <tr>
+                        <td headers="thDocumentoFin" data-id="{{iddocumento}}">{{documento}}</td>
+                        <td headers="thTipoDocFin" data-id="{{idtipodocumento}}">{{tipodocumento}}</td>
+                        <td headers="thValorInicialFin" class="td-currency">{{valorinicial}}</td>
+                        <td headers="thValorPagadpFin" class="td-currency">{{valorpagado}}</td>
+
+                    </tr>
+                    {{/detalle}}
+                    {{^detalle}}
+                    <tr>
+                        <td colspan="4" style="text-align:center">No se encontraron detalles</td>
+                    </tr>
+                    {{/detalle}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detallesFinanciacion">
+            <h2>Pagos</h2>  
+            
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th id="thIdRecaudo">Recaudo</th>
+                        <th id="thDocumentoRec">Documento</th>
+                        <th id="thTipoDocRec">Tipo de Documento</th>
+                        <th id="thValorPagadpRec">Valor Pagado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#pagos}}
+                    <tr>
+                        <td headers="thIdRecaudo">{{idrecaudo}}</td>
+                        <td headers="thDocumentoRec" data-id="{{iddocumento}}">{{documento}}</td>
+                        <td headers="thTipoDocRec" data-id="{{idtipodocumento}}">{{tipodocumento}}</td>
+                        <td headers="thValorPagadpRec" class="td-currency">{{valorpagado}}</td>
+                    </tr>
+                    {{/pagos}}
+                    {{^pagos}}
+                    <tr>
+                        <td colspan="4" style="text-align:center">No se encontraron pagos</td>
+                    </tr>
+                    {{/pagos}}
+                </tbody>
+            </table>
+        </div>
+
+        <hr />
+    </div>
+    {{/financiaciones}}
+</div>
+

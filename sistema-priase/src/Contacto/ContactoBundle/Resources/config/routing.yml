@@ -1,0 +1,11 @@
+contacto_contacto_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: ContactoContactoBundle:Default:api }
+
+contacto_contacto_index:
+    pattern:  /{ruta}
+    defaults: { _controller: ContactoContactoBundle:Default:index }
+
+contacto_contacto_todas:
+    pattern:  /
+    defaults: { _controller: ContactoContactoBundle:Default:index }

@@ -1,0 +1,12 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "include": ["./web/bundles/Dorbi/react/vistas/"],
+        "exclude": ["node_modules"]
+    },
+    "recurseDepth": 10,
+    "opts": {
+        "destination": "./web/bundles/Dorbi/react/docs/",
+        "recurse": true
+    }
+}

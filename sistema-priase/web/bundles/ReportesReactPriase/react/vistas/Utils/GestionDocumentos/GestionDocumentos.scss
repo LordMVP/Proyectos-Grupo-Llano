@@ -1,0 +1,41 @@
+.gestion-documentos {
+	&__input-file {
+		display: none;
+	}
+	
+	&__btn-archivo{
+		margin: 1.5rem auto 0 auto;
+	}
+	
+	&__tabla-archivos {
+		margin-top: 20px;
+	}
+}
+
+.grupo-campos {
+	border: 1px solid #478cff;
+	border-radius: 3px;
+	padding: 15px;
+	position: relative;
+}
+
+legend.title {
+	background-color: #478cff;
+	border-radius: 5px;
+	color: #ffffff;
+	display: block;
+	font-size: 14px;
+	left: 5px;
+	padding: 1px 6px;
+	position: absolute;
+	top: -11px;
+	width: min-content;
+}
+
+.grupo-campos .form-group {
+	margin: 0;
+}
+
+.grupo-campos .form-group label {
+	font-size: 12px;
+}

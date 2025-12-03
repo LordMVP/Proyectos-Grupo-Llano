@@ -1,0 +1,17 @@
+liquidacion_notas_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: LiquidacionyNotasLiquidacionyNotasBundle:Default:api }
+
+liquidacion_notas_index:
+    pattern:  /{ruta}
+    defaults: { _controller: LiquidacionyNotasLiquidacionyNotasBundle:Default:index }
+    requirements:
+        ruta: .+
+
+liquidacion_notas_kio:
+    pattern:  /kio/{ruta}
+    defaults: { _controller: LiquidacionyNotasLiquidacionyNotasBundle:Default:kio }    
+
+liquidacion_notas_todas:
+    pattern:  /
+    defaults: { _controller: LiquidacionyNotasLiquidacionyNotasBundle:Default:index }

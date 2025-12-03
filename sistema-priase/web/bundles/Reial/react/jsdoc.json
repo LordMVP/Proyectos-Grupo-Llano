@@ -1,0 +1,12 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "include": ["./web/bundles/Reial/react/vistas/"],
+        "exclude": ["node_modules", "./web/bundles/Reial/react/vistas/Assets"]
+    },
+    "recurseDepth": 10,
+    "opts": {
+        "destination": "./web/bundles/Reial/react/docs/",
+        "recurse": true
+    }
+}

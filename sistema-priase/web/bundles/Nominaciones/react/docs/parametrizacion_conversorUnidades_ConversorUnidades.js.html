@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/conversorUnidades/ConversorUnidades.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/conversorUnidades/ConversorUnidades.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import { formatearArray } from '../../../global/util_nominaciones'
+import PropTypes from 'prop-types';
+import { Combo, TextoNumerico, Util, Botonera } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+
+
+class ConversorUnidades extends Component {
+
+  state = {
+    listaUnidadesOrigen: [],
+    listaUnidadesDestino: [],
+    idUnidadMedidaOrigen: '-1',
+    idUnidadMedidaDestino: '-1',
+    valor: '',
+    resultado: '',
+    valorPoderCalorifico: '0.0',
+    consultasTerminadas: false,
+    visibilidadPoderCalorifico: false,
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    //Se consulta todas las unidades que están configurados en el conversor de unidades
+    axios.post(RUTAS_API.PARAMETRIZACION.CONVERSOR.CONSULTAR_UNIDADES_ORIGEN)
+      .then(resultado => {
+        if (resultado.data.codigo >= 0) {
+          const listaUnidades = resultado.data.datos;
+          this.setState({ listaUnidadesOrigen: formatearArray(listaUnidades), consultasTerminadas: true });
+        }
+      });
+  };
+
+  /**
+  * Métodoe encargado de validar si la unidad de medida de origen es MBU
+  * @returns {bool}
+  */
+  validarPoderCalorifico = () => {
+    const unidadOrigen = this.state.listaUnidadesOrigen.find(p => p.uniIderegistro == this.state.idUnidadMedidaOrigen);
+    const unidadDestino = this.state.listaUnidadesDestino.find(p => p.uniIderegistro == this.state.idUnidadMedidaDestino);
+    const obj = {
+      visibilidadPoderCalorifico: true
+    };
+    if ((unidadOrigen &amp;&amp; unidadOrigen.uniNombre1 === 'MBTU') || (unidadDestino &amp;&amp; unidadDestino.uniNombre1 == 'MBTU')) {
+      this.setState(obj);
+      return;
+    }
+    obj.visibilidadPoderCalorifico = false;
+    obj.valorPoderCalorifico = '0.0';
+    this.setState(obj);
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    if (evento.target.name === 'idUnidadMedidaOrigen') {
+      const idUnidadMedida = evento.target.value;
+      this.consultarUnidadesDestino(idUnidadMedida);
+    }
+    change[evento.target.name] = evento.target.value;
+    this.setState(change, this.validarPoderCalorifico);
+  };
+
+  /**
+   * Método encargado de consultar las unidades a las que se puede convertir la unidad de medida seleccionada
+   * @param {number} idUnidadMedidaOrigen Identificador de la unidad de medida seleccionada
+   */
+  consultarUnidadesDestino = (idUnidadMedidaOrigen) => {
+    const parametros = {
+      idUnidadOrigen: idUnidadMedidaOrigen
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.CONVERSOR.CONSULTAR_UNIDADES_CONVERTIR, parametros)
+      .then(resultado => {
+        if (resultado.data.codigo > 0) {
+          this.setState({
+            listaUnidadesDestino: resultado.data.datos
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de realizar la conversión de unidades
+   * @returns {bool}
+   */
+  obtenerConversion = () => {
+    const { idUnidadMedidaOrigen, idUnidadMedidaDestino, valor, valorPoderCalorifico, visibilidadPoderCalorifico } = this.state;
+    if (idUnidadMedidaOrigen === '-1') {
+      this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar una unidad de medida origen');
+      return false;
+    }
+
+    if (idUnidadMedidaDestino === '-1') {
+      this.props.mostrarAlerta('Datos incompletos', 'Debe seleccionar una unidad de medida destino');
+      return false;
+    }
+
+    if (visibilidadPoderCalorifico) {
+      if (valorPoderCalorifico.trim() === '') {
+        this.props.mostrarAlerta('Datos incompletos', 'El valor del poder calorifico es obligatorio para esta conversión');
+        return false;
+      }
+      if (isNaN(valorPoderCalorifico)) {
+        this.props.mostrarAlerta('Datos incompletos', 'El valor del poder calorifico debe ser númerico');
+        return false;
+      }
+    }
+
+    if (valor === '') {
+      this.props.mostrarAlerta('Datos incompletos', 'El valor es obligatorio');
+      return false;
+    }
+
+    if (isNaN(valor)) {
+      this.props.mostrarAlerta('Datos incompletos', 'El valor debe ser un número');
+      return false;
+    }
+
+    const parametros = {
+      idUnidadOrigen: idUnidadMedidaOrigen,
+      idUnidadDestino: idUnidadMedidaDestino,
+      poderCalorifico: valorPoderCalorifico,
+      valor: valor
+    };
+    axios.post(RUTAS_API.PARAMETRIZACION.CONVERSOR.CALCULAR, parametros)
+      .then(resultado => {
+        const respuesta = resultado.data;
+        if (respuesta.codigo > 0) {
+          this.setState({ resultado: respuesta.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      listaUnidadesDestino: [],
+      idUnidadMedidaOrigen: '-1',
+      idUnidadMedidaDestino: '-1',
+      valor: '',
+      resultado: '',
+      visibilidadPoderCalorifico: false,
+      valorPoderCalorifico: '0.0'
+    });
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Convertir', callback: this.obtenerConversion },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+	 * @returns {Object}
+   */
+  render() {
+    if (!this.state.consultasTerminadas) {
+      return (&lt;p className='text-center'>Cargando...&lt;/p>);
+    }
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaUnidadesOrigen}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            cols={4}
+            label='Unidad de Medida Inicial:'
+            value={this.state.idUnidadMedidaOrigen}
+            onChange={this.controlarCambio}
+            name="idUnidadMedidaOrigen"
+          />
+
+          &lt;Combo
+            opciones={this.state.listaUnidadesDestino}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            cols={4}
+            label='Unidad de Medida Destino:'
+            value={this.state.idUnidadMedidaDestino}
+            name="idUnidadMedidaDestino"
+            onChange={this.controlarCambio}
+          />
+          {this.state.visibilidadPoderCalorifico &amp;&amp;
+            &lt;TextoNumerico
+              aceptaDecimales={true}
+              aceptaNegativos={false}
+              label='Poder Calorifico:'
+              value={this.state.valorPoderCalorifico}
+              onChange={this.controlarCambio}
+              name='valorPoderCalorifico'
+            />
+          }
+          &lt;TextoNumerico
+            label='Valor a Convertir:'
+            cols={4}
+            value={this.state.valor}
+            name="valor"
+            extra={{ autoComplete: 'off' }}
+            onChange={this.controlarCambio}
+          />
+
+          &lt;div className='conversor-unidades__resultado container text-center mt-3'>
+            &lt;h2 className="text-center">{this.state.resultado}&lt;/h2>
+          &lt;/div>
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+
+}
+
+ConversorUnidades.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConversorUnidades);
+
+export { VistaRedux as RConversorUnidades };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

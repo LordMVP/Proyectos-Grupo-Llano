@@ -1,0 +1,68 @@
+
+
+#divArchivosContrato{
+    display: block;
+    padding:10px;
+    margin-top: 10px;
+}
+#divArchivosContrato div.archivoSubido .btnSimple
+{
+    width: 35px !important;
+    height: 23px !important;
+    min-width: 30px !important;
+}
+#divArchivosContrato div.archivoSubido{
+    height: 30px;
+    border-bottom: solid 1px #DEDEDE;
+    padding: 3px 10px 4px 5px;
+}
+
+#divArchivosContrato div.archivoSubido i.fa-file-text{
+    margin-right: 5px;
+    color: #408BC4;
+}
+
+#divArchivosContrato div.archivoSubido strong{
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+#divArchivosContrato div.archivoSubido a:hover{
+    text-decoration: underline;
+}
+
+
+#divArchivosPagare{
+    display: block;
+    padding:10px;
+    margin-top: 10px;
+}
+#divArchivosPagare div.archivoSubido .btnSimple
+{
+    width: 35px !important;
+    height: 23px !important;
+    min-width: 30px !important;
+}
+#divArchivosPagare div.archivoSubido{
+    height: 30px;
+    border-bottom: solid 1px #DEDEDE;
+    padding: 3px 10px 4px 5px;
+}
+
+#divArchivosPagare div.archivoSubido i.fa-file-text{
+    margin-right: 5px;
+    color: #408BC4;
+}
+
+#divArchivosPagare div.archivoSubido strong{
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+#divArchivosPagare div.archivoSubido a:hover{
+    text-decoration: underline;
+}

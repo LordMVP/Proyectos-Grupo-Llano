@@ -1,0 +1,74 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />    
+{% endblock %}
+{% block titulo %}Generacion de informe para ministerio de minas {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ventasController">
+        <form name="reporte" novalidate >
+            <div id="divPanelContenedor">
+                <fieldset>  
+                    <legend>Reporte de ministerio de minas</legend>
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3> Parametros necesarios para la generacion del reporte</h3>
+                            </div>
+                            <div class="panel-body"> 
+                                <div class="row">
+                                    <div class="form-group col-md-3" show-errors>
+                                        <label>Fecha inicial</label>
+                                        <input type="text" name="fechaInicial" id="fechaInicial" ng-model="info.fechaInicial" required="true" class="form-control input-sm datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaInicial.$error.required">
+                                            La fecha inicial es requerida
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-3" show-errors>
+                                        <label>Fecha final</label>
+                                        <input type="text" name="fechaFinal" id="fechaFinal" ng-model="info.fechaFinal" required="true" class="form-control input-sm datepicker"/>
+                                        <p class="help-block" ng-if="reporte.fechaFinal.$error.required">
+                                            La fecha final es requerida
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-3" show-errors>
+                                        <label>Liquidacion</label>
+                                        <select type="text" name="liquidacion" id="liquidacion" ng-model="info.liquidacion" required="true" class="form-control input-sm">
+                                            
+                                            <option ng-repeat="item in liquidaciones" ng-value="item.id">{[{item.label}]}</option>                                            
+                                        </select>
+                                        <p class="help-block" ng-if="reporte.liquidacion.$error.required">
+                                            La liquidacion es requerida
+                                        </p>
+                                    </div>                                    
+                                </div>                                
+                            </div>                            
+                            <div class="panel-footer">          
+                                <div class="col-md-9">
+                                    <div class="alert-box info">
+                                        Ingrese los datos necesarios en el formulario superior, seguido de clic en el boton Generar Reporte.
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-gears fa-1x"></i> Generar Reporte
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>                
+                </fieldset>
+            </div>
+        </form>        
+    </div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/ventas/ministerioMinas.control.angular.js')}}"></script>
+{% endblock %}

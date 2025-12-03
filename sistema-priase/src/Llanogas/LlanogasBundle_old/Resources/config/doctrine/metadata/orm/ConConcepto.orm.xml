@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="ConConcepto" table="con_concepto">
+    <id name="uniConcepto" type="smallint" column="uni_concepto">
+      <generator strategy="SEQUENCE"/>
+    </id>
+    <field name="estConcepto" type="smallint" column="est_concepto" nullable="false"/>
+    <field name="conNombre" type="string" column="con_nombre" length="30" nullable="false"/>
+    <field name="conAlias" type="string" column="con_alias" length="10" nullable="false"/>
+    <field name="conAbreviatura" type="string" column="con_abreviatura" length="20" nullable="false"/>
+    <field name="conTipcalculo" type="string" column="con_tipCalculo" nullable="false"/>
+    <field name="conValor" type="decimal" column="con_valor" nullable="true"/>
+    <field name="conFormula" type="text" column="con_formula" nullable="true"/>
+    <field name="conOperacion" type="string" column="con_operacion" nullable="false"/>
+    <field name="conNaturaleza" type="string" column="con_naturaleza" nullable="true"/>
+    <field name="conPreliquidar" type="string" column="con_preliquidar" nullable="false"/>
+    <field name="conAnticipo" type="string" column="con_anticipo" nullable="false"/>
+    <field name="conPagpriori" type="smallint" column="con_pagPriori" nullable="true"/>
+    <field name="conFinanciable" type="string" column="con_financiable" nullable="false"/>
+    <field name="torNomtabla" type="string" column="tor_nomTabla" length="20" nullable="false"/>
+    <field name="funNombre" type="string" column="fun_nombre" length="20" nullable="true"/>
+    <field name="conInivigencia" type="datetime" column="con_iniVigencia" nullable="true"/>
+    <field name="conFinvigencia" type="datetime" column="con_finVigencia" nullable="true"/>
+    <field name="conEstado" type="string" column="con_estado" nullable="false"/>
+  </entity>
+</doctrine-mapping>

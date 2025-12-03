@@ -1,0 +1,325 @@
+import React, { Component } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, TextoNumerico, Combo } from 'appfuture-react';
+import RUTAS_API from '../../../global/rutas_api';
+import RUTAS_VISTA from '../../../global/rutas_vista';
+import { TECLAS } from '../../../global/constantes';
+import ConsultaGenerica from '../../../hoc/consultaGenerica/ConsultaGenerica';
+
+const listaTipo = [
+  { texto: 'Venta', valor: 'V' },
+  { texto: 'Compra', valor: 'C' },
+];
+
+/**
+ * COMPRA = PROVEDOR VENTA = CLIENTE
+ */
+class ConsultaTerceros extends Component {
+
+  state = {
+    interfazGestion: RUTAS_VISTA.GESTION_AGENTES_TERCEROS.url,
+    criterio: '',
+    nombreTercero: '',
+    idTercero: '',
+    telefono: '',
+    direccion: '',
+    tipo: '',
+    codGestor: '',
+  };
+
+  consultaGenerica = null;
+  columnas = [
+    {
+      Header: 'Agentes Terceros',
+      columns: [
+        {
+          Header: 'Nombre del Tercero',
+          accessor: 'terNomcompleto'
+        },
+        {
+          Header: 'Identificación Tercero',
+          accessor: 'terDocumento'
+        },
+        {
+          Header: 'Teléfono Celular',
+          accessor: 'terTelcelular'
+        },
+        {
+          Header: 'Dirección',
+          accessor: 'terInfoadicional.direccion',
+          Cell: (props) => this.obtenerDireccion(props, this)
+        },
+        {
+          Header: 'Tipo de Tercero',
+          accessor: 'info',
+          Cell: (props) => this.obtenerTiposTercero(props, this)
+        },
+        {
+          Header: 'Codigo GestorF',
+          accessor: 'terInfoadicional.codigoGestor',
+          Cell: (props) => this.obtenerCodigoGestor(props, this)
+        },
+      ]
+    }
+  ];
+
+  /**
+   * Método encargado de ejecutar acciones al momento de que carga el componente
+   * @param {Boolean}
+   */
+  componentDidMount() {
+    if (!this.props.history) {
+      return;
+    }
+    const { state } = this.props.location;
+    if (state && state.interfazGestion) {
+      this.cargarDatos(state);
+    }
+  };
+
+  /**
+   * Método encargado de controlar la interfaz a la cual se redireccionara
+   * @param {Object} state Datos que vienen de otro componente
+   */
+  cargarDatos = (state) => {
+    this.setState({
+      interfazGestion: state.interfazGestion,
+    });
+  }
+
+  /**
+   * Método encargado de obtener la direccion de la información adicional
+   * @param {Object} props Propiedades del componente Tabla
+   */
+  obtenerDireccion = (props) => {
+    const datos = JSON.parse(props.row._original.terInfoadicional);
+    return (datos.direccion) ? datos.direccion : '';
+  };
+
+
+  /**
+   * Obtiene los tipos de contrato de las propiedades que recibe de la tabla.
+   * @return {string}
+   */
+  obtenerTiposTercero = (props) => {
+    const listaTipos = JSON.parse(props.row._original.info);
+    if (!Array.isArray(listaTipos) || listaTipos.length == 0) {
+      return 'Indefinido';
+    }
+    return listaTipos.map(tipo => {
+      if (tipo == 'C') {
+        tipo = 'Provedor';
+      }
+      if (tipo == 'V') {
+        tipo = 'Cliente';
+      }
+      return tipo;
+    }).join(',');
+  };
+
+  /**
+   * Método encargado de obtener el tipo de negocio de la información adicional
+   * @param {Object} props Propiedades del componente Tabla
+   */
+  obtenerTipoDeNegocio = (props) => {
+    const datos = JSON.parse(props.row._original.terInfoadicional);
+    return (datos.tipoNegocio) ? datos.tipoNegocio : '';
+  };
+
+  /**
+   * Método encargado de obtener la codigo gestor de la información adicional
+   * @param {Object} props Propiedades del componente Tabla
+   */
+  obtenerCodigoGestor = (props) => {
+    const datos = JSON.parse(props.row._original.terInfoadicional);
+    return (datos.codigoGestor) ? datos.codigoGestor : '';
+  };
+
+  /**
+   * Método encargado de verificar si se abre como ventana modal y de seleccion multiple
+   * @param {Object} props Propiedades del componente Tabla
+   * @param {Component} contexto Contexto del componente ConsultaAgentesTerceros
+   */
+  renderCeldaAcciones = (props, contexto) => {
+    //Se verifica si el programa se abre como modal y de selección múltiple.
+    if (contexto.props.seleccionMultiple && this.contexto.props.esModal) {
+      return (
+        <span className='consulta-tramos__link-accion'>
+          <label><input type='checkbox' onChange={contexto.onCheckEntidad} /> Seleccionar</label>
+        </span>
+      )
+    }
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+   * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    let funciones = [{ texto: 'Consultar', callback: this.onBuscar }];
+    if (this.props.esModal && this.props.seleccionMultiple) {
+      funciones.push({ texto: 'Seleccionar Datos', callback: this.onSeleccionarEntidades });
+    }
+    funciones.push({ texto: 'Limpiar', callback: this.limpiarFormulario });
+    return funciones;
+  };
+
+  /**
+   * Controla el cambio de los componentes y lo setea en el state.
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de obtener los datos adicionales del tercero
+   * @returns {JSON}
+   */
+  obtenerObjeto = () => {
+    const { tipo, codGestor, direccion } = this.state;
+    let objeto = {
+      codigoGestor: (codGestor == '' || codGestor == '-1') ? null : codGestor,
+      direccion: direccion,
+      tipoNegocio: (tipo == '' || tipo == '-1') ? null : tipo
+    }
+    return JSON.stringify(objeto);
+  }
+
+  /**
+   * Metodo encargado de realizar la consulta
+   * @returns {bool}
+   */
+  onBuscar = () => {
+    const { nombreTercero, idTercero, telefono, } = this.state;
+    this.consultaGenerica.getWrappedInstance()._buscar({
+      terNomcompleto: nombreTercero,
+      terDocumento: idTercero,
+      terTelcelular: telefono,
+      terInfoadicional: this.obtenerObjeto(),
+    });
+  };
+
+  /**
+   * Método encargado de obtener los datos seleccionados
+   */
+  onSeleccionarEntidades = () => {
+    this.props.seleccionarEntidades(this.consultaGenerica._obtenerEntidades());
+  };
+
+  /**
+   * Método encargado de limpiar el formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      criterio: '',
+      nombreTercero: '',
+      idTercero: '',
+      telefono: '',
+      direccion: '',
+      tipo: '',
+      codGestor: '',
+    });
+    this.consultaGenerica.getWrappedInstance()._limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      <div className='consulta-tramos'>
+        <div className='d-flex justify-content-center pt-3'>
+          <Botonera funciones={this.obtenerFunciones()} />
+        </div>
+        <div className='row mt-5'>
+          <Input
+            label='Nombre del Tercero'
+            onChange={this.controlarCambio}
+            value={this.state.nombreTercero}
+            name='nombreTercero'
+          />
+          <TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Identificación del Tercero (Cédula o Nit):'
+            value={this.state.idTercero}
+            onChange={this.controlarCambio}
+            name='idTercero'
+          />
+          <TextoNumerico
+            aceptaDecimales={false}
+            aceptaNegativos={false}
+            label='Teléfono:'
+            value={this.state.telefono}
+            onChange={this.controlarCambio}
+            name='telefono'
+          />
+          <Input
+            label='Dirección:'
+            value={this.state.direccion}
+            onChange={this.controlarCambio}
+            name='direccion'
+          />
+          <Combo
+            opciones={listaTipo}
+            propTexto='texto'
+            propValor='valor'
+            label='Tipo:'
+            name='tipo'
+            value={this.state.tipo}
+            onChange={this.controlarCambio}
+          />
+          <Input
+            label='Codigo Gestor:'
+            value={this.state.codGestor}
+            onChange={this.controlarCambio}
+            name='codGestor'
+          />
+
+        </div>
+        <ConsultaGenerica
+          {...this.props}
+          idEntidad='idRegistro'
+          columnas={this.columnas}
+          seleccionMultiple={false}
+          seleccion={false}
+          ref={ref => this.consultaGenerica = ref}
+          interfazGestion={this.state.interfazGestion}
+          rutaConsulta={RUTAS_API.PARAMETRIZACION.GESTION_AGENTES_TERCEROS.CONSULTA_FILTRO_TERCEROS}
+        />
+      </div>
+    );
+  };
+}
+
+ConsultaTerceros.propTypes = {
+  history: PropTypes.object,
+  esModal: PropTypes.bool,
+  seleccionMultiple: PropTypes.bool,
+  seleccionarEntidad: PropTypes.func,
+  seleccionarEntidades: PropTypes.func,
+  entidadesSeleccionadas: PropTypes.array
+};
+
+ConsultaTerceros.defaultProps = {
+  esModal: false,
+  seleccionMultiple: false,
+  entidadesSeleccionadas: []
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({}, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(ConsultaTerceros);
+
+export { VistaRedux as RConsultaTerceros };

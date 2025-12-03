@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/CanastaHorariaSuministro.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contratos/GestionContratos/CalculoPrecioContrato/CanastaTarifariaSuministro/CanastaHorariaSuministro.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
+import { TextoNumerico, Combo, Util } from 'appfuture-react';
+
+// Util
+import { get as getProp } from 'object-path';
+
+import './CanastaHorariaSuministro.scss';
+import { ComboHoras } from '../Componentes/ComboHoras';
+import { SuministroSinRuta } from './SuministroSinRutas';
+import { SuministroConRuta } from './SuministroConRutas';
+
+const usaRutasGNC = [
+  { texto: 'Sí', valor: 'S' },
+  { texto: 'No', valor: 'N' }
+];
+
+class CanastaHorariaSuministro extends Component {
+
+  state = {
+    horaFin: '',
+    valor: '',
+    unidadMedida: '',
+    nombreUnidadMedida: '',
+    porcentaje: '',
+    idRangoSinRuta: null,
+    idRangoConRuta: null,
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  actualizarState = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    this.setState(cambio);
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let cambio = {};
+    const target = evento.target;
+    cambio[target.name] = target.value;
+    if (target.name === 'unidadMedida') {
+      cambio['nombreUnidadMedida'] = target.text;
+    }
+    this.actualizarEstadoRedux(cambio);
+  };
+
+  /**
+   * Método encargado de actualizar el objeto redux
+   * @param {Event} cambio Cambio a realizar
+   */
+  actualizarEstadoRedux = (cambio) => {
+    this.props.actualizarTipoCalculoContrato({ canastaHorariaSuministro: { ...this.props.canastaHorariaSuministro, ...cambio } });
+  };
+
+  /**
+   * Método encargado de validar los campos del formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { unidadMedida, valor, porcentaje, horaFin } = this.state;
+
+    if (unidadMedida === '' || unidadMedida === '-1') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar una unidad de medida.' } };
+    }
+
+    if (valor.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar el valor.' } };
+    }
+
+    if (this.validarNumero(porcentaje) &amp;&amp; porcentaje > 100) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe ingresar un porcentaje válido menor o igual 100%.' } };
+    }
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar que un valor sea un número
+   * @param {Number} numero Valor del número
+   * @returns {Boolean}
+   */
+  validarNumero = (numero) => {
+    return !/^([0-9.])*$/.test(numero);
+  };
+
+  /**
+   * Método encargado de mostrar el formulario con rutas
+   * @returns {Component}
+   */
+  renderFormularioConRutas = () => {
+    const { canastaHorariaSuministro, actualizarTipoCalculoContrato, actualizarListaContratos, listaUnidadesMedida, mostrarAlerta, rutasGNC, listaTiposContrato, valorUnidad } = this.props;
+    return (
+      &lt;SuministroConRuta
+        canastaHorariaSuministro={canastaHorariaSuministro}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        actualizarListaContratos={actualizarListaContratos}
+        listaTiposContrato={listaTiposContrato}
+        listaUnidadesMedida={listaUnidadesMedida}
+        rutasGNC={rutasGNC}
+        mostrarAlerta={mostrarAlerta}
+        actualizarCabeceraRedux={this.props.actualizarCabeceraRedux}
+        valorUnidad={valorUnidad}
+      />
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario sin rutas
+   * @returns {Component}
+   */
+  renderFormularioSinRutas = () => {
+    const { canastaHorariaSuministro, actualizarTipoCalculoContrato, listaUnidadesMedida, mostrarAlerta } = this.props;
+    return (
+      &lt;SuministroSinRuta
+        canastaHorariaSuministro={canastaHorariaSuministro}
+        actualizarTipoCalculoContrato={actualizarTipoCalculoContrato}
+        listaUnidadesMedida={listaUnidadesMedida}
+        mostrarAlerta={mostrarAlerta}
+        actualizarCabeceraRedux={this.props.actualizarCabeceraRedux}
+      />
+    );
+  };
+
+  /**
+   * Método encargado validar que componente mostrar
+   * @returns {Component}
+   */
+  renderFormularioPorRuta = () => {
+    const usaRutasGNC = getProp(this.props, 'canastaHorariaSuministro.usaRutasGNC', 'N');
+    if (usaRutasGNC === 'N') {
+      return this.renderFormularioSinRutas();
+    }
+    return this.renderFormularioConRutas();
+  };
+
+  /**
+   * Método encargado de validar el tipo de contato para actualizar el formulario
+   */
+  validarTipoContrato = () => {
+    const tiposContrato = this.props.listaTiposContrato;
+    const tipos = tiposContrato.filter(tipoContrato => {
+      const esConexion = tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'CNX';
+      const esGNC = tipoContrato.seleccionado &amp;&amp; tipoContrato.uniPropiedad &amp;&amp; tipoContrato.uniPropiedad.tipocontrato === 'GNC';
+      if (esConexion || esGNC) {
+        return tipoContrato;
+      }
+    });
+    const res = (tipos.length === 0);
+    const estado = res ? 'N' : 'S';
+    const estadoActual = getProp(this.props, 'canastaHorariaSuministro.usaRutasGNC', null);
+    if (estado != estadoActual) {
+      this.actualizarEstadoRedux({ usaRutasGNC: estado });
+    }
+    return res;
+  };
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;div className='canasta-horaria container'>
+        &lt;div className='mt-3 card box-shadow'>
+          &lt;div className='card-header'>Canasta Tarifa Horaria&lt;/div>
+          &lt;div className='card-body'>
+            &lt;div>
+              &lt;h3 className='bold text-center'>Rangos Horarios para contrato Tipo Suministro&lt;/h3>
+            &lt;/div>
+            &lt;div className='row'>
+              &lt;Combo
+                opciones={usaRutasGNC}
+                propTexto='texto'
+                propValor='valor'
+                label='Rutas GNC:'
+                name='usaRutasGNC'
+                cols={3}
+                mostrarOpcionPorDefecto={false}
+                value={getProp(this.props, 'canastaHorariaSuministro.usaRutasGNC', this.validarTipoContrato() ? 'N' : 'S')}
+                onChange={this.controlarCambio}
+              />
+            &lt;/div>
+            {this.renderFormularioPorRuta()}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    );
+  }
+
+}
+
+
+CanastaHorariaSuministro.propTypes = {
+  mostrarAlerta: PropTypes.func,
+  listaUnidadesMedida: PropTypes.array,
+  rutasGNC: PropTypes.array,
+  actualizarTipoCalculoContrato: PropTypes.func,
+  actualizarListaContratos: PropTypes.func,
+  canastaHorariaSuministro: PropTypes.object,
+  actualizarCabeceraRedux: PropTypes.func,
+};
+
+CanastaHorariaSuministro.defaultProps = {
+  canastaHorariaSuministro: {}
+};
+
+export { CanastaHorariaSuministro };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

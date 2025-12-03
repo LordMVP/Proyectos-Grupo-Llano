@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="DsyrDetsuspen" table="dsyr_detSuspen">
+    <field name="dsyrIderegistr" type="bigint" column="dsyr_ideRegistr" nullable="false"/>
+    <field name="dsyrEstado" type="string" column="dsyr_estado" nullable="false"/>
+    <field name="dsyrFecha" type="datetime" column="dsyr_fecha" nullable="false"/>
+    <field name="dsyrFecprgsusp" type="datetime" column="dsyr_fecPrgSusp" nullable="true"/>
+    <field name="dsyrFecejesusp" type="datetime" column="dsyr_fecEjeSusp" nullable="true"/>
+    <field name="dsyrFecprgreco" type="datetime" column="dsyr_fecPrgReco" nullable="true"/>
+    <field name="dsyrFecejereco" type="datetime" column="dsyr_fecEjeReco" nullable="true"/>
+    <field name="dsyrFecaprobac" type="datetime" column="dsyr_fecAprobac" nullable="true"/>
+    <field name="dsyrLectura" type="decimal" column="dsyr_lectura" nullable="true"/>
+    <field name="dsyrObservacio" type="string" column="dsyr_observacio" length="255" nullable="true"/>
+    <field name="dsyrCantidad" type="decimal" column="dsyr_cantidad" nullable="true"/>
+    <field name="dsyrVlrunitari" type="decimal" column="dsyr_vlrUnitari" nullable="true"/>
+    <field name="dsyrVlrtotal" type="decimal" column="dsyr_vlrTotal" nullable="true"/>
+    <field name="uniMotsuspen" type="smallint" column="uni_motSuspen" nullable="true"/>
+    <field name="uniNovsuspen" type="smallint" column="uni_novSuspen" nullable="true"/>
+    <field name="uniTipsuspen" type="smallint" column="uni_tipSuspen" nullable="true"/>
+    <field name="uniNovreconex" type="smallint" column="uni_novReconex" nullable="true"/>
+    <field name="syrIderegistro" type="bigint" column="syr_ideRegistro" nullable="false"/>
+    <field name="terEjesuspen" type="smallint" column="ter_EjeSuspen" nullable="true"/>
+    <field name="uniConcepto" type="smallint" column="uni_concepto" nullable="true"/>
+    <field name="terEjereconex" type="smallint" column="ter_EjeReconex" nullable="true"/>
+    <field name="empIderegistro" type="smallint" column="emp_ideRegistro" nullable="true"/>
+    <field name="estMotsuspen" type="smallint" column="est_motSuspen" nullable="true"/>
+    <field name="estTipsuspen" type="smallint" column="est_tipSuspen" nullable="true"/>
+    <field name="estNovsuspen" type="smallint" column="est_novSuspen" nullable="true"/>
+    <field name="estNovreconex" type="smallint" column="est_novReconex" nullable="true"/>
+    <field name="estConcepto" type="smallint" column="est_concepto" nullable="true"/>
+  </entity>
+</doctrine-mapping>

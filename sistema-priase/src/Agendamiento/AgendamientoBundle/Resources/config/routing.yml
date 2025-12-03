@@ -1,0 +1,9 @@
+agendamiento_agendamiento_homepage:
+    pattern:  /
+    defaults: { _controller: AgendamientoAgendamientoBundle:Default:index }
+agendamiento_agendamiento_ruta:
+    pattern:  /{ruta}
+    defaults: { _controller: AgendamientoAgendamientoBundle:Default:index }    
+agendamiento_agendamiento_api_ruta:
+    pattern:  /api/{ruta}
+    defaults: { _controller: AgendamientoAgendamientoBundle:Default:api}   

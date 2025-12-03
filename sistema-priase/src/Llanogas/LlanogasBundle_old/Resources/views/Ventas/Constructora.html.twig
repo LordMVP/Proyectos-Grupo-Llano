@@ -1,0 +1,504 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+    <link type="text/css" rel="stylesheet" href="{{asset('bundles/Llanogas/css/recaudos/fileinput.min.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block titulo %}Constructoras: Gestión - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="Nuevo" id="btnNuevo" class="btn" />
+            <input type="button" value="Filtrar" id="btnFiltrar" class="btn" />
+            <input type="button" value="Modificar" id="btnModificar" class="btn" />
+            <input type="button" value="Grabar" id="btnGrabar" class="btn" />
+        </div>
+    </div>
+    <div id="divPanelContenedor">
+        <div id="divCabecera">
+            <!-- Div Constructora --> 
+            <div id="divConstructora">
+                <fieldset>
+                    <legend>Constructora</legend>
+                    <div class="campo" >
+                        <label for="txtNit">Nit:</label>
+                        <input type="text" id="txtNit" disabled="disabled" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtNombreConstructora">Nombre Constructora:</label>
+                        <input type="text" id="txtNombreConstructora" disabled="disabled" />
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="cmbProyectoSeven">Proyecto SEVEN</label>
+                        <select id="cmbProyectoSeven" disabled="disabled">
+                            {% for cuenta in cuentas %}
+                                <option value="{{cuenta.id}}">{{cuenta.nombre}}</option>
+                            {% endfor %}                              
+                        </select>
+                    </div>
+                        
+                    <div class="campo">
+                        <label for="cmbClasifiLiq">Clasificación Liquidación:</label>
+                        <select id="cmbClasifiLiq" disabled="disabled">
+                            {% for clasi in clasificacion %}
+                                <option value="{{clasi.codigo}}">{{clasi.nombre}}</option>
+                            {% endfor %}                              
+                        </select>
+                    </div>
+                    
+                </fieldset>
+            </div>
+        </div >
+        <!-- Division Mostrar Información Contactos -->
+        <div id ="divInformacionContactos">  
+            <!-- <fieldset style="padding-right: 15px"> 
+                 <legend>Información Contactos</legend> -->
+            <table id="tblContactos" class="tabla"></table>
+            <!--   </fieldset> -->
+        </div>     
+        <div class="campo">
+            <input type="button" id="btnAdicionarContacto" value="Agregar Contacto" class="btnSimple" />
+        </div>
+        <!-- Division Adicionar Información Contactos -->       
+        <div id ="divAdicionarContactos" style="display:none;" >
+            <p id="pMensajeInfoconceptos" class="pMensaje"></p>
+            <div class="campo">
+                <label for="txtNombre">Nombre</label>
+                <input type="text" id="txtNombre" disabled="disabled" required="required"   />
+            </div>
+            <div class="campo">
+                <label for="txtCargo">Cargo</label>
+                <input type="text" id="txtCargo" disabled="disabled" required="required"  />
+            </div>
+            <div class="campo">
+                <label for="txtTelefonoFijo">Telefono Fijo</label>
+                <input type="text" id="txtTelefonoFijo" disabled="disabled"  />
+            </div>
+            <div class="campo">
+                <label for="txtTelefonoCelular">Telefono Celular</label>
+                <input type="text" id="txtTelefonoCelular" disabled="disabled" required="required"  />
+            </div>
+            <div class="campo">
+                <label for="txtCorreo">Correo</label>
+                <input type="text" id="txtCorreo" disabled="disabled" required="required" />
+            </div>
+
+        </div>    
+        <!-- Division Mostrar Información Contracactual -->        
+        <div id="divInformacionContraActual">
+            <fieldset>
+                <legend id="legidcontrato">Información Contractual</legend>
+                <p id="pMensajeInfocontraactual" class="pMensaje"></p>
+                <div class="campo">
+                    <label for="txtContrato">Contrato:</label>
+                    <input type="text" id="txtContrato" disabled="disabled" required="required"  />
+                </div>  
+
+
+                <div class="campo">
+                    <label for="txtVigenciaDesde">Contrato Vigente Desde</label>
+                    <input type="text" id="txtVigenciaDesde" disabled="disabled" required="required" />
+                </div>
+                <div class="campo">
+                    <label for="txtVigenciaHasta">Contrato Vigente Hasta</label>
+                    <input type="text" id="txtVigenciaHasta" disabled="disabled" required="required" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtLicencia">Licencia:</label>
+                    <input type="text" id="txtLicencia" disabled="disabled" required="required"  />
+                </div>
+
+                <div class="campo">
+                    <label for="txtLicenciaVigenciaDesde">Licencia Vigente Desde</label>
+                    <input type="text" id="txtLicenciaVigenciaDesde" disabled="disabled" required="required" />
+                </div>
+                <div class="campo">
+                    <label for="txtLicenciaVigenciaHasta">Licencia Vigencia Hasta</label>
+                    <input type="text" id="txtLicenciaVigenciaHasta" disabled="disabled" required="required" />
+                </div>
+
+                <div class="campo">
+                    <label for="txtNumeroActaInicio">Número Acta Inicio</label>
+                    <input type="text" id="txtNumeroActaInicio" disabled="disabled" required="required" />
+                </div>
+                <div class="campo">
+                    <label for="txtFechaActaIncio">Fecha Acta Incio</label>
+                    <input type="text" id="txtFechaActaIncio" disabled="disabled"  />
+                </div>
+                <div class="campo">
+                    <label for="txtNumeroActaFin">Número Acta Fin</label>
+                    <input type="text" id="txtNumeroActaFin" disabled="disabled" />
+                </div>
+                <div class="campo">
+                    <label for="txtFechaActaFin">Fecha Acta Fin</label>
+                    <input type="text" id="txtFechaActaFin" disabled="disabled" />
+                </div>
+
+                <div class="campo">
+                    <label for="EstadoContrato">EstadoContrato:</label>
+                    <select id="EstadoContrato" disabled="disabled" required="required">
+                        <option value="-1">Seleccione Estado</option>
+                        <option value="A">Activo</option>
+                        <option value="I">Inactivo</option>
+                        <option value="T">Trasladado a Agenda</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="textMunicipio">Municipio</label>
+                    <input type="text" id="textMunicipio" disabled="disabled" required="required"/>
+                </div>
+                <div class="campo">
+                    <label for="textBarrio">Barrio</label>
+                    <input type="text" id="textBarrio" disabled="disabled" required="required" />
+                </div>
+                <div class="campo">
+                    <label for="textDireccion">Dirección</label>
+                    <input type="text" id="textDireccion" disabled="disabled" required="required" />
+                </div>
+                <div class="campo">
+                    <label for="txtinfoFacturaSeven">Información Factura Seven</label>
+                    <input type="text" id="txtinfoFacturaSeven" disabled="disabled"/>
+                </div>
+                 <div class="campo">
+                    <label for="diaActivacion">Días Activación:</label>
+                    <select id="diaActivacion" disabled="disabled" required="required">
+                        <option value="0">0</option>
+                        <option value="30">30</option>
+                        <option value="60">60</option>
+                        <option value="90">90</option>
+                        <option value="120">120</option>
+                        <option value="150">150</option>
+                        <option value="180">180</option>
+                        <option value="210">210</option>
+                        <option value="240">240</option>
+                        <option value="270">270</option>
+                        <option value="300">300</option>
+                        <option value="330">330</option>
+                        <option value="360">360</option>
+                    </select>
+                </div>
+                <fieldset class="subfieldset"><legend>Valor contrato y forma de pago</legend>
+                    <p id="pMensajevalorcontrato" class="pMensaje"></p>
+                    <div class="campo">
+                        <label for="txtvalorAntesIva">Valor Antes de IVA</label>
+                        <input type="text" id="txtvalorAntesIva" disabled="disabled" required="required"/>
+                    </div>
+                    <div class="campo">
+                        <label for="txtvalorIva"> IVA</label>
+                        <input type="text" id="txtvalorIva" disabled="disabled" required="required" />
+                    </div>
+                    <div class="campo">
+                        <label for="txtvalorProyecto">Total Contratado</label>
+                        <input type="text" id="txtvalorProyecto" disabled="disabled" required="required" />
+                    </div>
+                    <div class="campo">
+                        <label>Detalle Pago</label>
+                    </div>
+                    <table class="tabla" >
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th>% Pactado De Pago</th>
+                                <th>% Pactado De Avance</th>
+                                <th>Valor Del Pago</th>
+                                <th>Fecha Factura</th>
+                                <th>Factura Seven</th>
+                            </tr> 
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Anticipo</td>
+                                <td><input type="number" id="txtPorcentajePagoAnticipo" disabled="disabled" required="required"/></td>
+                                <td><input type="number" id="txtPorcentajeAvanceAnticipo" disabled="disabled" required="required"/></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoAnticipo" disabled="disabled"/></td>
+                                <td><input class="novalidar" type="text" id="txtFecFacturaAnticipo" disabled="disabled" required="required"/></td>
+                                <td><input class="novalidar" type="text" id="txtFacSevenAnticipo" disabled="disabled" required="required"/></td>
+                            </tr>
+                            <tr>
+                                <td>Primer Pargo Parcial</td>
+                                <td><input type="number" id="txtPorcentajePagoPagoParcial1" disabled="disabled" required="required"  /></td>
+                                <td><input type="number" id="txtPorcentajeAvancePagoParcial1" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoPagoParcial1" disabled="disabled"/></td>
+                                <td><input class="novalidar" type="text" id="txtFecFacturaPagoParcial1" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtFacSevenPagoParcial1" disabled="disabled" required="required"  /></td>
+                            </tr>
+                            <tr>
+                                <td>Segundo Pargo Parcial</td>
+                                <td><input type="number" id="txtPorcentajePagoPagoParcial2" disabled="disabled" required="required"  /></td>
+                                <td><input type="number" id="txtPorcentajeAvancePagoParcial2" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoPagoParcial2" disabled="disabled"/></td>
+                                <td><input class="novalidar" type="text" id="txtFecFacturaPagoParcial2" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtFacSevenPagoParcial2" disabled="disabled" required="required"  /></td>
+                            </tr>
+                            <tr>
+                                <td>Tercer Pargo Parcial</td>
+                                <td><input type="number" id="txtPorcentajePagoPagoParcial3" disabled="disabled" required="required"  /></td>
+                                <td><input type="number" id="txtPorcentajeAvancePagoParcial3" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoPagoParcial3" disabled="disabled"/></td>
+                                <td><input class="novalidar" type="text" id="txtFecFacturaPagoParcial3" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtFacSevenPagoParcial3" disabled="disabled" required="required"  /></td>
+                            </tr>
+                            <tr>
+                                <td>Pago Final</td>
+                                <td> <input type="number" id="txtPorcentajePagoPagoFinal" disabled="disabled" required="required"  /></td>
+                                <td> <input type="number" id="txtPorcentajeAvancePagoFinal" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoFinal" disabled="disabled"/></td>
+                                <td><input class="novalidar" type="text" id="txtFecFacturaPagoFinal" disabled="disabled" required="required"  /></td>
+                                <td><input class="novalidar" type="text" id="txtFacSevenPagoFinal" disabled="disabled" required="required"  /></td>
+                            </tr>
+                            <tr>
+                                <td>TOTAL</td>
+                                <td><input type="number" id="txtPorcentajePagoTotal" disabled="disabled"required="required" /> </td>
+                                <td><input type="number" id="txtPorcentajeAvanceTotal" disabled="disabled" required="required"/></td>
+                                <td><input class="novalidar" type="text" id="txtVlrPagoTotal" disabled="disabled"/></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </fieldset>
+
+
+                <label for="txtObjeto">Objeto del Contrato</label>
+                <textarea id="txtObjeto" disabled="disabled" required="required"></textarea>
+                <div class="campo">
+                    <input type="button" id="btnInformacionGeneral" value="Información General" class="btnSimple" />
+                </div>
+
+            </fieldset>
+        </div>       
+
+        <hr class="limpiar" /> 
+        <!-- Division para filtro de Contratos Constructoras -->
+        <div id="camposBuscarContratosConstructoras" style="display:none;" >
+            <div class="campo">
+                <label for="txtFiltroTercero">Constructora:</label>
+                <input type="text" id="txtFiltroTercero" data-attr="tercero" maxlength="15" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroContrato">Numero Contrato</label>
+                <input type="text" id="txtFiltroContrato" data-attr="contrato" maxlength="20" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroMunicipio">Municipio</label>
+                <input type="text" id="txtFiltroMunicipio" data-attr="municipio" maxlength="30" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroBarrio">Barrio</label>
+                <input type="text" id="txtFiltroBarrio" data-attr="barrio" maxlength="30" />
+            </div>
+
+            <div class="campo">
+                <label for="cboFiltroEstado">Estado:</label>
+                <select id="cboFiltroEstado">
+                    <option value="-1">Seleccione</option> 
+                    <option value="A">Activo</option> 
+                    <option value="I">Inactivo</option> 
+                    <option value="T">Trasladado a Agenda</option> 
+                </select>
+            </div>
+            <div class="campo">
+                <fieldset>
+                    <legend>Vigencia</legend>
+                    <div class="campoMitad"> 
+                        <input type="text" id="txtFiltroVigenciaInicio" data-attr="vigenciaInicio" maxlength="30" placeholder="Inicio" maxlength="15" />
+                    </div>
+                    <div class="campoMitad"> 
+                        <input type="text" id="txtFiltroVigenciaFin" data-attr="vigenciafin" placeholder="Fin" maxlength="30" maxlength="15" />
+                    </div>
+                </fieldset>
+            </div>
+            <div class="campo">
+                <input type="button" id="btnBuscar" class="btnSimple" value="Buscar"/>
+            </div>
+            <div id="divResultadosFiltro" style="display:none;">
+                <table id="tblResultadoFiltro" class="tabla"></table>    
+            </div>
+            <p id="pMensaje" class="pMensaje">  </p>
+        </div>
+        <!-- Div Informacon General divInformacionGeneral  -->
+        <div id="divInformacionGeneral" style="display:none;">
+            <div id="tabs" >
+                <ul>
+                    <li><a href="#tabPolizas"><i class="fa fa-check fa-1x"></i>Pólizas</a></li>
+                    <li><a href="#tabSuscripciones"><i class="fa fa-check fa-1x"></i>Suscripciones</a></li>
+                    <li><a href="#tabServiciosContratados"><i class="fa fa-check fa-1x"></i>Servicios Contratados</a></li>
+                        {#                    <li><a href="#tabAmortizacion"><i class="fa fa-check fa-1x"></i>Amortizacion</a></li>#}
+                </ul>    
+
+                <div id="tabPolizas" >
+                    <div id="tabPolizasTabla">
+                        <table id="tblPolizas" class="tabla"></table>
+                    </div>
+                    <input type="button" id="btnAdicionarPoliza" value="Adicionar"  class="btnSimple" />
+                </div>
+                <div id="tabSuscripciones">
+                    <div id="tabSuscripcionesSuscriptorVinculado" style="display:none;" >
+                        <fieldset>
+                            <legend>Suscriptor Vinculado</legend>
+                            <div class="campo">
+                                <input type="text" id="txtIdeSuscriptor"  maxlength="30"  disabled="disabled" />
+                            </div>
+                            <div class="campo">
+                                <input type="text" id="txtDesSuscriptor" maxlength="30" disabled="disabled" />
+                            </div>
+                            <input type="button" id="btnVerSuscripciones" value="Ver Suscripciones"  class="btnSimple" />
+                        </fieldset>
+                    </div>
+                    <div id="tabSuscripcionesTablaSuscripciones" style="display:none;">
+                        <table id="tblSuscripciones" class="tabla"></table>
+                    </div>
+                    <div id="tabSuscripcionesVincularSuscriptor">
+                        <fieldset><legend>Vincular Suscriptor</legend>        
+                            <div class="campo">
+                                <select id="cboSuscriptor" disabled="disabled">
+                                    <option value="">Seleccione Suscriptor </option>
+                                </select>
+                            </div>
+                            <input type="button" id="btnVincularSuscriptor" value="Vincular Suscriptor"  class="btnSimple" />
+                        </fieldset> 
+                    </div>
+                </div>
+                <div id="tabServiciosContratados">
+                    <table id="tblServiciosContratados" class="tabla"></table>
+                    <input type="button" id="btnAdicionarServicioContratados" value="Adicionar"  class="btnSimple" />
+                </div>
+            </div>
+        </div>
+
+        <div id="tabAdicionarServiciosContratadosDialogo"  style="display:none;">
+                <div id="tabServiciosContratadosAdicionar">
+                    <div class="campo">
+                        <label for="txtLiquidacion">Liquidacion:</label>
+                        <input type="text" id="txtLiquidacion"  />
+                    </div>   
+                    <div class="campo">
+                        <label for="txtDocumento">Documento:</label>
+                        <input type="text" id="txtDocumento" disabled="disabled" />
+                    </div>   
+                    <div class="campo">
+                        <label for="txtTipoDocumento">Tipo Documento:</label>
+                        <input type="text" id="txtTipoDocumento" disabled="disabled" />
+                    </div>   
+                    <div class="campo">
+                        <label for="cboMetodConstructivo">Metodo Constructivo:</label>
+                        <select id="cboMetodConstructivo"  >
+                        </select>
+                    </div>   
+                    <div class="campo">
+                        <label for="cboAgenda">Agenda:</label>
+                        <select id="cboAgenda"  >
+                        </select>
+                    </div>   
+                    <div class="campo">
+                        <label for="txtpeso">Peso:</label>
+                        <input type="number" id="txtpeso"  />
+                    </div> 
+               <div id="tabs">
+                 <ul>
+                    <li><a href="#tabServiciosContratosAdicionarServiciosTablaSuscripciones"><i class="fa fa-check fa-1x"></i>Asignadas</a></li>
+                    <li><a href="#tabServiciosContratosAdicionarServicios"><i class="fa fa-check fa-1x"></i>Sin Asignar</a></li>
+                </ul>  
+                    <div id="tabServiciosContratosAdicionarServiciosTablaSuscripciones" style="height: 600px; overflow: auto;">
+                        <fieldset><legend>Suscripciones Vinculadas</legend>
+                            <table id="tblServiciosContratadosSuscripcionEditar" class="tabla"></table>
+                        </fieldset>
+                    </div>
+                    <div id="tabServiciosContratosAdicionarServicios" style="height: 600px; overflow: auto; display:none;">
+                        <fieldset><legend>Suscripciones No Vinculadas</legend>
+                            <table id="tblvinvularSuscripciones" class="tabla" ></table>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>    
+            </div>
+        <!-- Div Informacion General Adicionar Polizas  -->
+        <div id="divInformacionGeneralAdicionarPoliza" style="display:none;">
+            <div id="DivmensajesPolizas">
+                <p id="pmensajePolizas" class ="pMensaje"></p>  
+            </div>
+            <div class="campo">
+                <label for="txtnroPoliza">Nro Póliza:</label>
+                <input type="text" id="txtnroPoliza"  />
+            </div>           
+            <div class="campo">
+                <label for="txtAseguradora">Aseguradora:</label>
+                <input type="text" id="txtAseguradora" />
+            </div>           
+            <div class="campo">
+                <label for="txtaseguradoraValor">Valor asegurado:</label>
+                <input type="text" id="txtaseguradoraValor" />
+            </div>           
+            <div>
+                <label for="txtobjetoPoliza">Amparo:</label>
+                <textarea  rows="4" cols="50" id="txtobjetoPoliza"></textarea>
+            </div>           
+            <div class="campo">
+                <label for="txtVigenteDesde">Vigente desde:</label>
+                <input type="text" id="txtVigenteDesde"/>
+            </div>           
+            <div class="campo">
+                <label for="txtVigenteHasta">Vigente hasta:</label>
+                <input type="text" id="txtVigenteHasta"/>
+            </div>           
+
+        </div>
+        <div id="divInformacionServiciosContratadosVer" style="display:none;">
+            <table id="tblServiciosContratadosverSuscripcion" class="tabla"></table>
+        </div>    
+        <div id="divInformacionAdicionalLiquidacion" style="display:none;">
+            <p id="pMensajeInformacionAdicional"></p>
+        </div>
+        <div id="ArchivosAdjuntos" style="display:none;">
+            <fieldset id="divArchivo">
+                <legend>Archivos adjuntos</legend>
+                <input type="file" id="txtArchivo" multiple/>
+                <div id="divArchivos"></div>
+
+            </fieldset>
+        </div>
+        <div id="divTablaConceptosliquidacionServiciosContratados" style="display:none;">
+            <p id="pmensajeConceptosliquidacion" class ="pMensaje"></p>
+            <div class="campo">
+                <label for="txtLiquidacionSeleccionada">Liquidación:</label>
+                <input type="text" id="txtLiquidacionSeleccionada" disabled="disabled"/>
+            </div>  
+            <div class="campo">
+                <label for="txtsumaporcentajeDistribucion">Total :</label>
+                <input type="number" id="txtsumaporcentajeDistribucion" disabled="disabled"/>
+            </div>  
+            <div class="campo">
+                <label for="txtporcentajeDistribucionmaximo">Total Maximo:</label>
+                <input type="number" id="txtporcentajeDistribucionmaximo" disabled="disabled"/>
+            </div>  
+            <table id ="tblconceptosliquidacionServiciosContratados" class="tabla"></table>
+        </div>
+        <div id="divEliminarArchivo" style="display: none">
+            <p>¿Está seguro de eliminar el archivo?</p>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/js/inputmask.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/js/inputmask.dependencyLib.jquery.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/js/inputmask.numeric.extensions.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/js/jquery.inputmask.bundle.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consignaciones/fileinput.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/constructoras.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/constructoras.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/Constructoras/constructoras.vista.js')}}"></script>
+
+{% endblock %}

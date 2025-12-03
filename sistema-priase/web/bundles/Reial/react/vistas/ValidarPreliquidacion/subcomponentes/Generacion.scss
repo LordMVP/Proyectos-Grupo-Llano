@@ -1,0 +1,24 @@
+.content-progress{
+  padding: 15px;
+  width: 60%; max-width: 500px;
+  display: block;
+  margin: 0 auto;
+}
+.content-progress label{
+  font-weight: bold;
+  text-align: center;
+  display: block;
+}
+.content-progress label.descripcion{
+  margin-top: 15px;
+}
+.content-progress label.descripcion.errores{
+  margin-top: 10px;
+}
+
+.content-progress i.fa-spinner{
+  font-size: 30px;
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+}

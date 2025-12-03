@@ -1,0 +1,198 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+
+$color: #408BC4;
+$gris: #CCC;
+$degradado: linear-gradient(#8AB6D9, #71A7D3);
+
+@import './normalize';
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+
+::before, ::after { box-sizing: border-box }
+
+// predefinidos
+
+body {
+    font-family: 'Roboto', sans-serif !important;
+    font-size: 11pt;
+    user-select: none;
+    overflow-y: scroll;
+    /*padding: 3em;*/
+}
+
+h1,h2,h3,h4,h5,h6 {
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+}
+
+h1 { font-size: 1.6rem }
+h2 { font-size: 1.5rem }
+h3 { font-size: 1.4rem }
+h4 { font-size: 1.3rem }
+h5 { font-size: 1.2rem }
+h6 { font-size: 1.1rem }
+
+li {
+    padding: .25em 0;
+    list-style: none;
+}
+
+select {
+    width: 100%;
+    height: 2.5em;
+    padding: .4em .8em;
+    border: solid 1px $gris;
+    border-radius: .2em;
+    font: inherit;
+    text-transform: capitalize;
+    position: relative;
+    border-radius: .2em;
+}
+
+a { color: #8AB6D9 }
+
+select, table { width: 100% }
+
+[type="submit"], button, select { cursor: pointer }
+
+label { text-transform: capitalize }
+
+input[type="datetime-local"],
+input[type="password"],
+input[type="number"],
+input[type="mail"],
+input[type="text"],
+input[type="time"],
+input[type="date"],
+input[type="tel"],
+.form-control,
+textarea,
+input {
+    width: 100%;
+    height: 2.5em;
+    padding: 0 .8em;
+    border: solid 1px $gris;
+    border-radius: .2em;
+    font: inherit;
+
+    &:disabled {
+        background: fade-out($gris, .8);
+        user-select: none;
+    }
+}
+
+textarea {
+    resize: vertical;
+    min-height: 10em;
+}
+
+button, [type="submit"], .btn {
+    min-width: 6em;
+    height: 2.5em;
+    font: inherit;
+    background: $degradado;
+    padding: .4em .8em;
+    border: solid 1px #408BC4;
+    text-transform: capitalize;
+    color: white;
+    border-radius: .4em;
+
+    &:hover { background: linear-gradient(#B7D1E8, #8AB6D9) }
+
+    &.opcion { margin: 0 }
+
+    &:disabled {
+        $gris: fade-out($gris, .6);
+
+        background: $gris;
+        border-color: $gris;
+        color: black;
+        cursor: default;
+    }
+}
+
+// elementos
+
+.caja {
+    width: 100%;
+    border: solid 1px $gris;
+    border-radius: .4em;
+    padding: 2em;
+    position: relative;
+
+    .tag {
+        display: block;
+        position: absolute;
+            top: -0.7em;
+            left: 1.5em;
+        background: #FFF;
+        padding: .2em .4em;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+}
+
+.contenedor {
+    width: 100%;
+    margin-top: 2em;
+}
+
+.formulario, .fila, .columna {
+    width: 100%;
+    align-items: flex-end;
+
+    &.alineado { align-items: flex-start }
+}
+
+.formulario {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(27.9vw,1fr));
+    grid-gap: 2em;
+}
+
+.fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    grid-gap: 2em;
+
+    @media (max-width: 45em) { grid-template-columns: 1fr }
+}
+
+.columna {
+    max-width: 40em;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    & > *:not(.tag) {
+        width: 100%;
+        margin-bottom: 2em;
+    }
+
+    &:nth-last-child(1) { margin-bottom: 0 }
+}
+
+.botones {
+    .boton, button {
+        margin-right: .6em;
+        margin-top: 0;
+
+        &:nth-last-of-type(1) { margin-right: 0 }
+    }
+}
+
+.horario {
+    display: grid;
+    margin-top: 2em;
+    grid-gap: 2em;
+    grid-template-columns: repeat(auto-fit, minmax(8em, 1fr));
+
+    label {
+        input { margin-right: 1em }
+    }
+}

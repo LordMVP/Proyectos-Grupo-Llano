@@ -1,0 +1,34 @@
+.mt-8{
+  margin-top: 8px;
+}
+.centrado {
+  display: block;
+  margin: 0 auto;
+}
+
+.tabla {
+  text-align: center;
+}
+
+.scroll-table .ReactTable .rt-tbody .rt-td {
+  border: 1px solid #ced4da;
+  width: 200px !important;
+}
+
+.scroll-table .ReactTable .rt-thead .rt-resizable-header {
+  width: 200px !important;
+}
+
+.scroll-table {
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.anchoTabla {
+  width: 200px !important;
+}
+
+.scroll-table .ReactTable {
+  width: 1730px;
+  display: table !important;
+}

@@ -1,0 +1,17 @@
+aprovechamiento_api:
+    pattern:  /api/{ruta}
+    defaults: { _controller: AprovechamientoAprovechamientoNotasBundle:Default:api }
+
+aprovechamiento_index:
+    pattern:  /{ruta}
+    defaults: { _controller: AprovechamientoAprovechamientoBundle:Default:index }
+    requirements:
+        ruta: .+
+
+aprovechamiento_kio:
+    pattern:  /kio/{ruta}
+    defaults: { _controller: AprovechamientoAprovechamientoBundle:Default:kio }    
+
+aprovechamiento_todas:
+    pattern:  /
+    defaults: { _controller: AprovechamientoAprovechamientoBundle:Default:index }

@@ -1,0 +1,41 @@
+table#tblDetalleLectura,
+table#tblHistorialMedidor{
+    margin-top: 15px;
+}
+fieldset#divLecturaActual,
+div#divVerEncabezadoHistorico,
+div#divDetalleLectura,
+div#divEncabezadoHistorico,
+div#divAgregarLectura,
+div#divDetalleMedidor,
+div#camposBuscarSuscripcion,
+div#divConfirmarEliminar,
+div#divConfirmarCancelar,
+div#divMotivoNota{
+    display: none;
+}
+fieldset{
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+.listaSuscripciones{
+
+}
+
+	.listaSuscripciones .div-lectura-suscripcion:nth-child(2n){
+	    background-color: #c5dbec;
+	}
+
+	.listaSuscripciones div.div-lectura-suscripcion {
+		height: auto;
+	}
+
+	a.btn-consulta-lectura {
+	    color: #09F;
+	    font-weight: bold;
+	    text-decoration: none;
+	    margin-left: 15px;
+	    margin-bottom: 10px;
+	    display: block;
+	}

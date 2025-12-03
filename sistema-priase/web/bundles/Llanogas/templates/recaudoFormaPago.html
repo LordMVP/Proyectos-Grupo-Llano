@@ -1,0 +1,40 @@
+
+<!--Template para controlar los recaudos que afectaron una factura y su respectiva forma de pago-->
+<script id="tplRecaudoFactura" type="text/template">
+    {{#recaudos}}
+    <div id="divRecaudoFactura"{{idrecaudo}}>
+        <h3>Recaudo</h3>
+        <div class="campo">
+            <label for="txtIdRecaudo{{idrecaudo}}">Id Recaudo</label>
+            <input type="text" disabled="disabled" id="txtIdRecaudo{{idrecaudo}}" value="{{idrecaudo}}" />
+        </div>
+        <div class="campo">
+            <label for="txtFecha{{idrecaudo}}">Fecha</label>
+            <input type="text" disabled="disabled" id="txtFecha{{idrecaudo}}" value="{{fecha}}" />
+        </div>
+        <div class="campo">
+            <label for="txtValorPagado{{idrecaudo}}">Valor Pagado</label>
+            <input type="text" disabled="disabled" id="txtValorPagado{{idrecaudo}}" value="{{valor}}"/>
+        </div>
+        <div class="campo">
+            <label for="txtSucursal{{idrecaudo}}">Sucursal</label>
+            <input type="text" disabled="disabled" id="txtSucursal{{idrecaudo}}" value="{{sucursal}}"/>
+        </div>
+        <div class="campo">
+            <label for="txtMedioPago{{idrecaudo}}">Medio Pago: </label>
+            <input type="text" disabled="disabled" id="txtMedioPago{{idrecaudo}}" value="{{mediopago}}"/>
+        </div>
+        <div class="campo">
+            <label for="txtConvenio{{idrecaudo}}">Convenio</label>
+            <input type="text" disabled="disabled" id="txtConvenio{{idrecaudo}}" value="{{convenio}}"/>
+        </div>
+
+        {{#formaspago}}
+            <div style="padding:7px 5px 5px 15px">
+            <p> <strong> Forma de pago: </strong> {{formapago}} -  <strong> Valor:</strong>   ${{valorreal}}</p>
+            </div>
+        {{/formaspago}}
+    </div>
+    <hr />
+    {{/recaudos}}
+</script>

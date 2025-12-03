@@ -1,0 +1,94 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/facturacion/cargarFactorCorreccion.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/jquery.dataTables.min.css')}}" />
+    <style type="text/css">
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            display: none;
+            border-radius: 20px;
+            padding-left: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+    </style>
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/achagua/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block titulo %} Facturación Fes  {% endblock %}
+
+{% block body %}
+
+    <div id="divProceso" style="display: none;">
+        <fieldset>
+            <legend>Información proceso: </legend>
+            <div id="divProcesando">
+                <div id="divCargando"> 
+                    <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+                    <p>Procesando generación Archivo Plano Fes, <br>esto puede tardar unos minutos...</p>                
+                </div>
+                <table id="tblEjecucion" class="tabla" style="margin: 10px;"></table>
+            </div>
+        </fieldset>
+    </div>
+
+       <div id="diverrores" style="display: none" >
+        <fieldset><legend>Listado errores preeliminar</legend>
+            <div>
+                <table id="tblerrores" class="tabla"></table>
+            </div>
+        </fieldset>
+    </div>
+    
+    <div id="divCabecera" style="display: none;"  >
+        <fieldset><legend>Generación Archivo Plano Fes</legend>
+            <div class="campo">
+                <label for="cboCicloActivo"> Ciclo </label>   
+                <select id ="cboCicloActivo">
+                    {% for registro in ciclos %}
+                        <option value ={{registro.idciclo}}>{{ 
+                                         registro.ciclo}} </option>
+                        {% endfor %}
+                </select> 
+            </div>
+            <div class="divBotones">
+                <input type="button" value="generar" id="btnCargar" class="btnSimple" />
+            </div>
+        </fieldset> 
+        <fieldset><legend>Arhivos Generados</legend>
+            <div id="divArchivos"><table id="tblArchivos" class="tabla"></table></div>
+        </fieldset>         
+    </div>
+
+ 
+    <div id="diverroresproceso" style="display: none" >
+        <fieldset><legend>Listado errores final</legend>
+            <div>
+                <table id="tblerroresproceso" class="tabla"></table>
+            </div>
+        </fieldset>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/fes/fes.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/fes/fes.control.js')}}"></script>-->
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/fes/fes.vista.js')}}"></script>
+{% endblock %}

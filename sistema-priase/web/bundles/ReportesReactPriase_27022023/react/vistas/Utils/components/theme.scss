@@ -1,0 +1,14 @@
+.react-autosuggest__input {
+  width: 100%;
+  height: 38px;
+  padding: 10px 10px;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.react-autosuggest__input--focused {
+  border: 1px solid #00a1ff !important;
+}

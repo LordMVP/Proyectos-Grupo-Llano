@@ -1,0 +1,164 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/anular.estilo.css')}}" />
+    <!--
+    <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/estilo_imprimir.css')}}" />
+    -->
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Recaudos: Autorizar impresión por usuario - {{empresa}}  {% endblock %}
+
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPanelContenedor">
+        <fieldset id="fieldCabecera">
+            <legend>Información del Recaudo</legend>
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtIdRecaudo">Id Recaudo:</label>
+                <input type="text" id="txtIdRecaudo" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtFecha">Fecha:</label>
+                <input type="text" id="txtFecha" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtFechaOPago">Fecha Pago:</label>
+                <input type="text" id="txtFechaPago" disabled="disabled" />
+            </div>
+
+            <div class="campoCorto campo-impresion-30pto">
+                <label for="txtValorPagado">Valor Pagado:</label>
+                <input type="text" id="txtValorPagado" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-10pto">
+                <label for="txtCambio">Cambio:</label>
+                <input type="text" id="txtCambio" disabled="disabled" />
+            </div>
+            <div class="campoCorto campo-impresion-10pto">
+                <label for="txtAjuste">Ajuste:</label>
+                <input type="text" id="txtAjuste" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-40pto">
+                <label for="txtMedioPago">Medio de Pago:</label>
+                <input type="text" id="txtMedioPago" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-30pto">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtNombreTercero">Nombre del Tercero:</label>
+                <input type="text" id="txtNombreTercero" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtConvenio">Convenio:</label>
+                <input type="text" id="txtConvenio" disabled="disabled" />
+            </div>
+
+            <div class="campo campo-impresion-30pto">
+                <label for="txtClasePago">Clase Pago:</label>
+                <input type="text" id="txtClasePago" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-30pto">
+                <label for="txtSucursal">Sucursal:</label>
+                <input type="text" id="txtSucursal" disabled="disabled" />
+            </div>
+            <div class="campo campo-impresion-50pto">
+                <label for="txtCifrado">Cifrado:</label>
+                <input type="text" id="txtCifrado" disabled="disabled" />
+            </div>
+            <button id="btnVerFormasPago" class="btnSimple ocultar">Ver Formas de Pago</button>
+            <h3 style="font-size: 14px; color: #408BC4; margin-top: 15px;"> Información usuario </h3>
+            
+            <div class="campo">
+                <label for="txtDocumentoUsuario">Documento Usuario:</label>
+                <input type="text" id="txtDocumentoUsuario" disabled="disabled"/>
+            </div>
+            <div class="campo">
+                <label for="txtUsuario">Nombre Usuario:</label>
+                <input type="text" id="txtUsuario" disabled="disabled"/>
+            </div>
+            <div class="campo">
+                <label for="txtCantImpresiones">Cant. Impresiones:</label>
+                <input type="text" id="txtCantImpresiones" disabled="disabled"/>
+            </div>
+            <table id="tblImpresiones" class="tabla"></table>
+        </fieldset>
+
+        <div id="divSuscripciones">
+            <table id="tblSuscripciones" class="tabla"></table>
+        </div>
+
+        <div id="divFacturas">
+            <table id="tblFacturas" class="tabla"></table>
+        </div>
+
+        <div id="divConceptos">
+            <table id="tblConceptos" class="tabla"></table>
+        </div>
+    </div>
+
+
+    <div id="divFiltro">
+        <div class="campo">
+            <label for="txtIdRegistroFiltro">Id Recaudo:</label>
+            <input type="text" id="txtIdRegistroFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtIdSuscripcionFiltro">Id Suscripción:</label>
+            <input type="text" id="txtIdSuscripcionFiltro" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaInicio">Fecha de Inicio:</label>
+            <input type="text" id="txtFechaInicio" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaFin">Fecha de Fin:</label>
+            <input type="text" id="txtFechaFin" />
+        </div>
+        <div class="campo">
+            <label for="$txtCodigoAnterior">Código Anterior</label>
+            <input type="text" id="txtCodigoAnterior" />
+        </div>
+        <p class="pMensaje"></p>
+        <div id="divResultadoFiltro" class="listaSeleccion"></div>
+    </div>
+
+    <div id="divFormasPago"></div>
+    <div id="divFormaPImprimir" align="center" style="display:none">
+        <table id="tblFormaPago" class="tabla" style="width: 50%;">
+            <caption>Formas de pago</caption>
+            <thead><tr>
+                    <th>Forma</th>
+                    <th>Valor</th>
+                </tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consultar/consultar.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/consultar/consultar.vista.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/autorizacion_impresion/autorizacion_impresion.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/recaudos/autorizacion_impresion/autorizacion_impresion.vista.js')}}"></script>
+{% endblock %}

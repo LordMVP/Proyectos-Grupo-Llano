@@ -1,0 +1,187 @@
+bioagricola_bioagricola_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller:BioagricolaBioagricolaBundle:Default:index }
+
+#Financiaciones Especiales
+bioagricola_financiacion_importar:
+    pattern:  /financiaciones/importar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarFinanciacion:index }
+    
+bioagricola_financiacion_importar_cargar:
+    pattern:  /financiaciones/importar/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarFinanciacion:cargar }
+    
+importar_finaciacion_progreso:
+  pattern: /financiaciones/importar/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarFinanciacion:consultarProgreso}
+  
+importar_finaciacion_resumen:
+  pattern: /financiaciones/importar/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarFinanciacion:consultarResumen}
+  
+importar_finaciacion_eliminar_resumen:
+  pattern: /financiaciones/importar/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarFinanciacion:eliminarResumen}  
+ 
+#Actualización Financiaciones Especiales
+bioagricola_act_fin_importar:
+    pattern:  /financiaciones/importar_act/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarActFinanciacion:index }
+    
+bioagricola_act_fin_importar_cargar:
+    pattern:  /financiaciones/importar_act/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarActFinanciacion:cargar }
+    
+importar_act_fin_progreso:
+  pattern: /financiaciones/importar_act/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarActFinanciacion:consultarProgreso}
+  
+importar_act_fin_resumen:
+  pattern: /financiaciones/importar_act/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarActFinanciacion:consultarResumen}
+  
+importar_act_fin_eliminar_resumen:
+  pattern: /financiaciones/importar_act/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarActFinanciacion:eliminarResumen}  
+ 
+#Aplicar Cambios de Valor Financiaciones Especiales
+bioagricola_dxd_fin_aplicar:
+    pattern:  /financiaciones/aplicar_cv_dxd/
+    defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:index }
+    
+bioagricola_dxd_fin_importar_cargar:
+    pattern:  /financiaciones/aplicar_cv_dxd/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:cargar }
+    
+importar_dxd_fin_progreso:
+  pattern: /financiaciones/aplicar_cv_dxd/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:consultarProgreso}
+  
+importar_dxd_fin_resumen:
+  pattern: /financiaciones/aplicar_cv_dxd/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:consultarResumen}
+  
+importar_dxd_fin_eliminar_resumen:
+  pattern: /financiaciones/aplicar_cv_dxd/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:eliminarResumen} 
+  
+importar_dxd_fin_errores:
+  pattern: /financiaciones/aplicar_cv_dxd/gen_errores/
+  defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:GenerarErrores} 
+    
+importar_dxd_fin_saldos:
+  pattern: /financiaciones/aplicar_cv_dxd/gen_saldos/
+  defaults: { _controller: BioagricolaBioagricolaBundle:AplicarCambiosDxD:Generarsaldos} 
+  
+#Cargar Pagos Financiaciones Especiales
+bioagricola_pag_fin_aplicar:
+    pattern:  /financiaciones/importar_pagos/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:index }
+    
+bioagricola_pag_fin_importar_cargar:
+    pattern:  /financiaciones/importar_pagos/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:cargar }
+    
+importar_pag_fin_progreso:
+  pattern: /financiaciones/importar_pagos/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:consultarProgreso}
+  
+importar_pag_fin_resumen:
+  pattern: /financiaciones/importar_pagos/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:consultarResumen}
+  
+importar_pag_fin_eliminar_resumen:
+  pattern: /financiaciones/importar_pagos/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:eliminarResumen}  
+
+importar_pag_fin_errores:
+  pattern: /financiaciones/importar_pagos/gen_errores/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:GenerarErrores} 
+    
+importar_pag_fin_saldos:
+  pattern: /financiaciones/importar_pagos/gen_saldos/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarPagosFinanc:Generarsaldos} 
+#Consulta Financiaciones Especiales
+bioagricola_con_fin_esp:
+    pattern:  /financiaciones/consultar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:ConsultarFinanciacion:index }
+    
+bioagricola_con_fin_esp_buscar:
+    pattern:  /financiaciones/consultar/buscar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:ConsultarFinanciacion:buscarDatos }
+    
+#Cargar procentaje de Aprovechamiento
+bioagricola_porcentajes_apr_fin:
+    pattern:  /financiaciones/importar_porcentajes/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:index }
+    
+bioagricola_porcentajes_apr_fin_cargar:
+    pattern:  /financiaciones/importar_porcentajes/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:cargar }
+    
+importar_porcentajes_apr_fin_progreso:
+  pattern: /financiaciones/importar_porcentajes/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:consultarProgreso}
+  
+importar_porcentajes_apr_fin_resumen:
+  pattern: /financiaciones/importar_porcentajes/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:consultarResumen}
+  
+importar_porcentajes_apr_fin_eliminar_resumen:
+  pattern: /financiaciones/importar_porcentajes/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:eliminarResumen}  
+  
+importar_porcentajes_apr_fin_eliminar_resumen:
+  pattern: /financiaciones/importar_porcentajes/consultaDatos/
+  defaults: { _controller: BioagricolaBioagricolaBundle:CargarProcentajesApr:buscarDatos}  
+  
+#Generar Informe Aprovechamiento
+
+bioagricola_informe_apr:
+    pattern:  /financiaciones/generar_inf_apr/
+    defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:index }
+    
+bioagricola_informe_apr_iniciar:
+    pattern:  /financiaciones/generar_inf_apr/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:cargar }
+    
+generar_inf_apr_proceso:
+  pattern: /financiaciones/generar_inf_apr/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:consultarProgreso}
+  
+generar_inf_apr_resumen:
+  pattern: /financiaciones/generar_inf_apr/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:consultarResumen}
+  
+generar_inf_apr_eliminar:
+  pattern: /financiaciones/generar_inf_apr/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:eliminarResumen}  
+  
+generar_inf_informe:
+  pattern: /financiaciones/generar_inf_apr/generar/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarInformeApr:GenerarInforme}  
+  
+#Generar Amortizaciones Financiaciones Especiales
+bioagricola_gen_amortiz:
+    pattern:  /financiaciones/gen_amortiz/
+    defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:index }
+    
+bioagricola_gen_amortiz_cargar:
+    pattern:  /financiaciones/gen_amortiz/cargar/
+    defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:cargar }
+    
+importar_gen_amortiz_progreso:
+  pattern: /financiaciones/gen_amortiz/progreso/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:consultarProgreso}
+  
+importar_gen_amortiz_resumen:
+  pattern: /financiaciones/gen_amortiz/resumen/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:consultarResumen}
+  
+importar_gen_amortiz_eliminar_resumen:
+  pattern: /financiaciones/gen_amortiz/eliminar_tabla/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:eliminarResumen}  
+  
+importar_gen_amortiz_cuotas:
+  pattern: /financiaciones/gen_amortiz/generar/
+  defaults: { _controller: BioagricolaBioagricolaBundle:GenerarAmortizacion:GenerarPlano}  

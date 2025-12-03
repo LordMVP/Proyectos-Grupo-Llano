@@ -1,0 +1,54 @@
+<script type="x-tmpl-mustache" id="tplReferencias">
+    <div class="divContenedorColapsable">
+        <div class="divColapsable">
+            <h4 class="tituloColapsable" data-tipo="{{tiporeferencia}}">Referencia {{tiporeferencia}} de <span data-id="spanNombre"></span> <span data-id="spanApellido"></span></h4>
+            <div class="btnColapsable">
+                <a href="" class="fa fa-minus" tabindex="-1"></a>
+                <a href="" class="fa fa-times" tabindex="-2" style="margin-left: 8px;"></a>
+            </div>
+        </div>
+        <div class="contenidoColapsable">
+            <div class="campo">
+                <label for="txtNombreRef_{{tiporeferencia}}_{{indice}}">Nombres:</label>
+                <input type="text" id="txtNombreRef_{{tiporeferencia}}_{{indice}}" data-reference-referencia="nombrereferencia{{tiporeferencia}}" obligatory="required" maxlength="250">
+            </div>
+            <div class="campo">
+                <label for="txtApellidoRef_{{tiporeferencia}}_{{indice}}">Apellidos:</label>
+                <input type="text" id="txtApellidoRef_{{tiporeferencia}}_{{indice}}" data-reference-referencia="apellidoreferencia{{tiporeferencia}}" obligatory="required" maxlength="250">
+            </div>
+            <div class="campo">
+                <label for="cmbParentescoRef_{{tiporeferencia}}_{{indice}}">Parentesco:</label>
+                <select obligatory="required" id="cmbParentescoRef_{{tiporeferencia}}_{{indice}}" data-reference-referencia="parentescoreferencia{{tiporeferencia}}">
+                </select>
+                
+            </div>
+            <div class="campo" style="display:none">
+                <label for="txtTelefono_{{tiporeferencia}}_{{indice}}">Teléfono Fijo:</label>
+                <input type="text" class="number" id="txtTelefono_{{tiporeferencia}}_{{indice}}" data-reference-referencia="telefonoreferencia{{tiporeferencia}}" maxlength="100">
+            </div>
+            <div class="campo">
+                <label for="txtCelular_{{tiporeferencia}}_{{indice}}">Teléfono Celular:</label>
+                <input type="text" class="number" id="txtCelular_{{tiporeferencia}}_{{indice}}" data-reference-referencia="celularreferencia{{tiporeferencia}}" obligatory="required" maxlength="100">
+            </div>
+            <div class="campo" style="display:none">
+                <label for="txtDireccion_{{tiporeferencia}}_{{indice}}">Dirección:</label>
+                <input type="text" id="txtDireccion_{{tiporeferencia}}_{{indice}}" data-reference-referencia="direccionreferencia{{tiporeferencia}}"  maxlength="250">
+            </div>
+            <div class="campo" style="display:none">
+                <label for="cmbOcupacion_{{tiporeferencia}}_{{indice}}">Ocupación:</label>
+                <select id="cmbOcupacion_{{tiporeferencia}}_{{indice}}" data-reference-referencia="ocupacionreferencia{{tiporeferencia}}" ></select>
+            </div>
+
+            <div class="campo" style="display:none">
+                <label for="cmbDepartamento_{{tiporeferencia}}_{{indice}}">Departamento:</label>
+                <select id="cmbDepartamento_{{tiporeferencia}}_{{indice}}" data-reference-referencia="departamentoreferencia{{tiporeferencia}}" ></select>
+            </div>
+            <div class="campo" style="display:none">
+                <label for="cmbCiudad_{{tiporeferencia}}_{{indice}}">Ciudad:</label>
+                <select id="cmbCiudad_{{tiporeferencia}}_{{indice}}" data-reference-referencia="ciudadreferencia{{tiporeferencia}}" >
+                </select>
+            </div>
+        </div>
+    </div>
+
+</script>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ConsultaPeriodos/subcomponentes/Busqueda.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ConsultaPeriodos/subcomponentes/Busqueda.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+import { Combo, Input, Tabla } from 'appfuture-react'
+
+import Peticion from '../../../global/peticion'
+import API from '../../../global/rutas_api'
+
+/**
+ *
+ *
+ * @class Busqueda
+ * @extends {Component}
+ */
+class Busqueda extends Component {
+
+	/**
+     *Define estados iniciales
+     * @memberof Busqueda
+     */
+	state = {
+		lista: [],
+
+		// defecto
+
+		id: '',
+		año: new Date().getFullYear(),
+		estado: '-1',
+
+		estadoJson: [
+			{ texto: 'Activo', valor: 1 },
+			{ texto: 'Inactivo', valor: 0 },
+		],
+	}
+
+	columnas = [
+		{
+			Header: 'Consulta de periodos',
+
+			columns: [
+				{ Header: 'Periodo', accessor: 'periodo' },
+
+				{
+					Header: 'Fecha Inicial',
+					accessor: 'fechaInicial',
+					Cell: (props) => {
+						return new Date(props.value).toISOString().split('T')[0]
+					}
+				},
+
+				{
+					Header: 'Fecha Final',
+					accessor: 'fechaFinal',
+					Cell: (props) => {
+						return props.value.split('T')[0]
+					}
+				},
+
+				{ Header: 'Liquidación', accessor: 'liquidacion' },
+				{ Header: 'Estado', accessor: 'estado' },
+				{
+					Header: 'Acción',
+					accessor: 'id',
+					Cell: (props) => (
+						&lt;button className="btn" onClick={(e) => this.editar(props.original)}>
+							Editar
+						&lt;/button>
+					),
+				},
+			],
+		},
+	]
+
+	/**
+     *
+     *Habilita el botón buscar
+     *@method
+     *@return {JSX} Componente - Button
+     */
+
+	BotonBuscar = () => {
+		const { año, estado } = this.state
+
+		/* prettier-ignore */
+
+		return estado !== '-1' &amp;&amp; año
+			? &lt;button className="btn" onClick={this.buscar}>Buscar&lt;/button>
+			: &lt;button className="btn" disabled={true}>Buscar&lt;/button>
+	}
+
+	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */
+	change = ({ target: { id, value } }) => this.setState({ [id]: value })
+
+	/**
+	 *
+	 *Búsqueda por año y estado y agregarlo a la tabla
+	 * @async
+	 * @method
+	  */
+	buscar = async () => {
+		let lista = await Peticion.post({
+			url: API.CONSULTA_PERIODOS.CONSULTAR_PERIODO,
+			parametros: {
+				anio: this.state.año,
+				estado: this.state.estado,
+			},
+		})
+
+		if (lista.length == undefined) return // no hay datos
+
+		lista = lista.map(function (datos) {
+			return {
+				id: datos.ppeIderegistro,
+				periodo: datos.ppeDescripcion,
+				fechaInicial: datos.ppeMinvalue,
+				fechaFinal: datos.ppeMaxvalue,
+				liquidacion: datos.ppeTipo,
+				estado: datos.ppeEstado == 1 ? 'Activo' : 'Inactivo',
+			}
+		})
+
+		this.setState({ lista })
+	}
+
+	/**
+	 *
+	 * Crea los estados del componente padre
+	 * @method
+	 */
+	crear = () => this.props.onChange({})
+
+	/**
+	 *
+	 * Edita los estados del componente padre
+	 * @method
+	 * @param {object} datos Pasa un object al padre para editarlo
+	 */
+	editar = (datos) => this.props.onChange(datos)
+
+	/**
+	* Renderiza la vista 
+	* @return {JSX} componente - returna vista jsx 
+	*/
+	render() {
+		return (
+			&lt;React.Fragment>
+				&lt;h1>Consulta de periodos&lt;/h1>
+
+				&lt;div className="contenedor d-flex justify-content-center btn-group">
+					&lt;button className="btn" onClick={this.crear}>
+						Crear
+					&lt;/button>
+					&lt;this.BotonBuscar />
+				&lt;/div>
+
+				&lt;div className="contenedor formulario">
+					&lt;Input
+						id="año"
+						label="año"
+						type="number"
+						value={this.state.año}
+						onChange={this.change}
+						extra={{ min: 1999, max: 3000 }}
+					/>
+
+					&lt;Combo
+						id="estado"
+						label="estado"
+						opciones={this.state.estadoJson}
+						value={this.state.estado}
+						onChange={this.change}
+					/>
+				&lt;/div>
+
+				&lt;div className="contenedor">
+					&lt;Tabla datos={this.state.lista} columnas={this.columnas} />
+				&lt;/div>
+			&lt;/React.Fragment>
+		)
+	}
+}
+
+export default Busqueda
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" />
+{% endblock %}
+{% block titulo %}Reporte - Recaudos Ace Seguros {{empresa}} {% endblock %}
+{% block body %}
+    <div ng-app="myApp" ng-controller="recaudoAceController">
+        <form name="reporte" id="reporte" method="post" novalidate>
+            <fieldset>
+                <legend>Filtro de búsqueda</legend>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group col-md-4" show-errors>
+                                <label>Años</label>
+                                <select required="true" id="cmbAnos" name="anos" ng-model="info.anos" class="form-control" ng-change="cargarPeriodosAnoAce()">
+                                    <option ng-repeat="ano in anos" ng-value="ano.anos">
+                                        {[{ano.anos}]}
+                                    </option>
+                                </select>
+                                <p class="help-block" ng-if="reporte.anos.$error.required">
+                                    El año es requerido.
+                                </p>
+                            </div>   
+                            <div class="form-group col-md-4" show-errors>
+                                <label>Periodo</label>
+                                <select id="cmbPeriodo" required="true" name="periodo" ng-model="info.periodo" class="form-control">
+                                    <option ng-repeat="periodo in periodos" ng-value="periodo.idorden">{[{periodo.nombre}]}</option>
+                                    <!--option ng-repeat="periodo in periodos" ng-value="periodo.idorden">
+                                        {[{periodo.nombre}]}
+                                    </option-->
+                                </select>    
+                                <p class="help-block" ng-if="reporte.periodo.$error.required">
+                                    El periodo es requerido.
+                                </p>
+                            </div>                                                                        
+                        </div>
+                        <div class="panel-footer">    
+                            <div class="col-md-9">
+                                <div class="alert-box info">
+                                    Seleccione los filtros de consulta y de clic sobre el botón <b>Generar reporte</b>
+                                </div>  
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" ng-click="generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                    <i class="fa fa-gears fa-lg"></i> Generar reporte
+                                </button>
+                            </div>               
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>                
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/facturacion/recaudoAce.angular.js')}}"></script>
+{% endblock %}

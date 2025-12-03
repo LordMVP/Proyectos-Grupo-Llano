@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Assets/util/Util.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Assets/util/Util.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Util = {
+    /**
+     * Actualiza un objeto con las propiedades nuevas
+     * @param objetoAnterior El objeto que se va a actualizar
+     * @param nuevasPropiedades Las nuevas propiedades del objeto
+     * @return {Object}
+     */
+    actualizarObjeto: (objetoAnterior, nuevasPropiedades) => {
+        return {
+            ...objetoAnterior,
+            ...nuevasPropiedades,
+        }
+    },
+
+    /**
+     * Actualiza un objeto con las propiedades nuevas
+     * @param texto El texto que contiene el id para el envío de la información POST
+     * @param posicion Determinar en cual posición del arreglo se encuentra el ID, por defecto es cero
+     * Sí es el último, sin importar la cantidad, se envía -1
+     * @return {(int | null)}
+     */
+
+    obtenerId: (texto, posicion = 0) => {
+        if (texto === '-1') return ''
+        if (texto.search('-') &lt; 1) return texto
+        const valor =
+            posicion != -1
+                ? texto.split(' - ')[posicion]
+                : texto.split(' - ')[texto.split(' - ').length - 1]
+
+        return valor.trim()
+    },
+
+    /**
+     * Valida que los campos no se encuentren vacios o en su estado por defecto
+     * @param objeto Objeto cuyos datos van a ser validados
+     * @returns {Boolean}
+     */
+
+    verificar(objeto) {
+        for (let index in objeto) {
+            switch (objeto[index]) {
+                case null:
+                case undefined:
+                case '':
+                case '-1':
+                    return false
+            }
+        }
+
+        return true
+    },
+
+    /**
+     * Valida la formula tando en operandos, como en operadores y paréntesis
+     * @param {String} Obtiene la formaula entregada desde la vista selección y asignación
+     * @returns {Boolean, Boolean} ValidaParéntesos ValidaOperadoresOperandos
+     */
+
+    validarFormula: (formula = '') => {
+        function validarParentesis(formula = '') {
+            const arregloFormula = formula.trim().split('')
+            const parentesis = arregloFormula.filter((fila) => {
+                return fila == '(' || fila == ')'
+            })
+            if (parentesis.length &lt;= 0) return true
+            const str = parentesis.join('')
+
+            if (str.length &lt;= 1) return str
+
+            let coincidencia, caracter
+            let reunir = []
+
+            let apertura = ['[', '{', '(']
+            let cierre = [']', '}', ')']
+
+            for (let i = 0; i &lt; str.length; i++) {
+                caracter = str[i]
+
+                if (cierre.indexOf(caracter) > -1) {
+                    coincidencia = apertura[cierre.indexOf(caracter)]
+                    if (reunir.length == 0 || reunir.pop() != coincidencia) {
+                        return str
+                    }
+                } else {
+                    reunir.push(caracter)
+                }
+            }
+
+            return reunir.length == 0
+        }
+        function validarOperador(formula) {
+            //limpiar formula
+            formula = formula.trim().split(' ')
+            formula = formula.map((elemento) => elemento.trim())
+
+            let indice = -1
+            const cantidad = formula ? formula.length : 0
+            let incremento = -1
+            let resultado = []
+
+            while (++indice &lt; cantidad) {
+                const valor = formula[indice]
+                if (valor) {
+                    resultado[++incremento] = valor
+                }
+            }
+            formula = resultado.join(' ')
+            let separador = formula.split(' ')
+
+            //verifica inconsistencias con operadores
+            const expresionOperador = /((\()(?=\s(AND|OR)))|((AND|OR)(?=\s(AND|OR|\))))/g
+            let arregloOperador = []
+            let coincidencia = ''
+            while ((coincidencia = expresionOperador.exec(formula))) {
+                if (formula.charAt(expresionOperador.lastIndex + 1) == 'A') {
+                    arregloOperador.push(
+                        formula.substring(
+                            coincidencia.index,
+                            expresionOperador.lastIndex + 4
+                        )
+                    )
+                } else if (
+                    formula.charAt(expresionOperador.lastIndex + 1) == 'O'
+                ) {
+                    arregloOperador.push(
+                        formula.substring(
+                            coincidencia.index,
+                            expresionOperador.lastIndex + 3
+                        )
+                    )
+                } else {
+                    arregloOperador.push(
+                        formula.substring(
+                            coincidencia.index,
+                            expresionOperador.lastIndex + 2
+                        )
+                    )
+                }
+            }
+
+            const expresionOperando = /(AND|OR|\(|\)|&lt;>|>=|&lt;=|==|=|===|>|&lt;|\!=)/
+            const operando = separador.map((e) => {
+                const parcial = expresionOperando.exec(e)
+                return parcial === null ? 'DATO' : e
+            })
+
+            let arregloOperando = []
+            for (let i in operando) {
+                if (i &lt; operando.length) {
+                    operando[i] == operando[parseInt(i) + 1] &amp;&amp;
+                    operando[i] == 'DATO'
+                        ? arregloOperando.push(
+                              `${separador[i]} ${separador[parseInt(i) + 1]}`
+                          )
+                        : ''
+                }
+            }
+            arregloOperando = arregloOperando.join(' ')
+
+            return arregloOperador.length &lt;= 0 &amp;&amp; arregloOperando.length &lt;= 0
+                ? true
+                : { arregloOperador, arregloOperando }
+        }
+
+        const vParentesis = validarParentesis(formula)
+        const vOperando = validarOperador(formula)
+        //no existen paréntesis en la fórmula
+
+        return vParentesis === true &amp;&amp; vOperando === true
+            ? true
+            : { vParentesis, vOperando }
+    },
+    limpiarDato: (arreglo) => {
+        let parcial
+
+        if (Array.isArray(arreglo)) {
+            parcial = arreglo[0].texto.split(' ')
+        } else {
+            parcial = arreglo.split(' ')
+        }
+
+        parcial = parcial.map((elemento) => elemento.trim())
+
+        let indice = -1
+        const cantidad = parcial ? parcial.length : 0
+        let incremento = -1
+        let resultado = []
+
+        while (++indice &lt; cantidad) {
+            const valor = parcial[indice]
+            if (valor) {
+                resultado[++incremento] = valor
+            }
+        }
+
+        resultado = resultado.join(' ')
+        return resultado
+    },
+    validarTelefono: (numero) => {
+        const validar = /^[0-9]{7,10}$/g
+        return validar.exec(numero) == null ? true : false
+    },
+    validarCorreo: (correo) => {
+        const validar = /^(([^&lt;>()[\]\\.,;:\s@\"]+(\.[^&lt;>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return validar.exec(correo) == null ? true : false
+    },
+}
+
+export { Util }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Jan 27 2020 01:52:38 GMT-0500 (Hora est. Pacífico, Sudamérica)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

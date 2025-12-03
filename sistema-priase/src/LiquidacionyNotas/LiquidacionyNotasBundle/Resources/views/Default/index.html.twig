@@ -1,0 +1,14 @@
+{% extends 'base.react.html.twig' %}
+
+{% block stylesheets %}
+<link href="{{ asset('liquidacionynotas.bundle.css') }}?v={{version}}" stylesheets="stylesheets" type="text/css" />
+{% endblock %}
+
+{% block body %}
+    Esto es Liquidacion y Notas
+    <div id="root"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('liquidacionynotas.bundle.js') }}?v={{version}}" type="text/javascript"></script>
+{% endblock %}

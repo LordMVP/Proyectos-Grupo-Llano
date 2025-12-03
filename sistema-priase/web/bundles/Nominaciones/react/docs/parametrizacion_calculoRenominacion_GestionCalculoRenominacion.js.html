@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calculoRenominacion/GestionCalculoRenominacion.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calculoRenominacion/GestionCalculoRenominacion.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { SelectorMultiple } from '../../utils/SelectorMultiple';
+import { get as getProp } from 'object-path';
+
+import RUTAS_API from '../../../global/rutas_api';
+import { mostrarAlerta } from '../../../store/actions/AplicacionAcciones';
+
+import './GestionCalculoRenominacion.scss';
+import { CLASES_UNIDADES } from '../../../global/constantes';
+import { RConsultaContratos } from '../../contratos/ConsultaContratos';
+
+
+const TIPOS_CALCULO = {
+  RENOMINACION: 'R',
+  EXCEDENTES: 'E',
+  PRECIO: 'P'
+};
+
+class GestionCalculoRenominacion extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    listaContratos: [],
+    listaTiposContrato: [],
+    listaContratos: [],
+    listaPuntosConsumo: [],
+    listaOpcionesNegociacion: [
+      {
+        texto: 'Sí',
+        valor: 'S'
+      },
+      {
+        texto: 'No',
+        valor: 'N'
+      }
+    ],
+    listaTiposCalculo: [
+      {
+        texto: 'Renominación',
+        valor: TIPOS_CALCULO.RENOMINACION,
+      },
+      {
+        texto: 'Excedentes',
+        valor: TIPOS_CALCULO.EXCEDENTES,
+      },
+      {
+        texto: 'Precio',
+        valor: TIPOS_CALCULO.PRECIO,
+      }
+    ]
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al momento de cargar el componente
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+
+    this.consultarListas();
+  }
+
+  /**
+   * Método encargado de ejecutar las consultas iniciales del componente
+   */
+  consultarListas = () => {
+    this.consultarTiposContrato();
+    this.consultarTiposNegociacion();
+  };
+
+  /**
+   * Consulta los tipos de negociación.
+   */
+  consultarTiposNegociacion = () => {
+    axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPOS_NEGOCIACION })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaTiposNegociacion: respuesta.data.datos });
+        }
+      })
+  };
+
+  /**
+   * Consulta los tipos de contrato...
+   */
+  consultarTiposContrato = () => {
+    axios.post(RUTAS_API.CONFIGURACION.CONSULTAR_UNIDAD, { criterio: '', idClase: CLASES_UNIDADES.TIPO_CONTRATO })
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaTiposContrato: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Ejecuta la petición correspondiente al tipo del cálculo seleccionado.
+   */
+  ejecutarConsulta = () => {
+    switch (this.state.tipoCalculo) {
+      case TIPOS_CALCULO.RENOMINACION:
+        this.consultarPuntosConsumo();
+        break;
+      case TIPOS_CALCULO.EXCEDENTES:
+        this.calcularExcedentes();
+        break;
+      case TIPOS_CALCULO.PRECIO:
+        this.consultarReserva();
+        break;
+    }
+  };
+
+  /**
+   * Consulta los puntos de consumo...
+   */
+  consultarPuntosConsumo = () => {
+    let { tipoContrato, tipoNegociacion, listaTiposContrato, listaTiposNegociacion, fechaNominacion, negociacion } = this.state;
+
+    const indexTipoContrato = listaTiposContrato.findIndex(tc => tc.uniIderegistro == tipoContrato);
+    const tipoContratoObj = (indexTipoContrato >= 0) ? listaTiposContrato[indexTipoContrato] : null;
+    let tipoContratoProp = (tipoContratoObj) ? getProp(tipoContratoObj, 'uniPropiedad', null) : null;
+    tipoContratoProp = (tipoContratoProp) ? JSON.parse(tipoContratoProp).tipocontrato : null;
+
+    const indexTipoNegociacion = listaTiposNegociacion.findIndex(tn => tn.uniIderegistro == tipoNegociacion);
+    const tipoNegociacionObj = (indexTipoNegociacion >= 0) ? listaTiposNegociacion[indexTipoNegociacion] : null;
+    let tipoNegociacionProp = (tipoNegociacionObj) ? getProp(tipoNegociacionObj, 'uniPropiedad', null) : null;
+    tipoNegociacionProp = (tipoNegociacionProp) ? JSON.parse(tipoNegociacionProp).clasecontrato : null;
+
+
+    let obj = {
+      fecha: fechaNominacion,
+      tipoContrato: tipoContratoProp
+    };
+
+    if (negociacion === 'S') {
+      obj.tipoNegociacion = tipoNegociacionProp;
+    }
+
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.CONSULTAR_PUNTOS_CONSUMO, obj)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.setState({ listaPuntosConsumo: JSON.parse(respuesta.data.datos) });
+        }
+      });
+  };
+
+  /**
+   * Consulta la reserva.
+   * @returns {Boolean}
+   */
+  consultarReserva = () => {
+    if (this.state.contratoSeleccionado == null) {
+      return;
+    }
+    const { fechaNominacion, idContrato, tipoContrato } = this.state;
+    let obj = {
+      fecha: fechaNominacion,
+      tipoContrato: tipoContrato,
+    };
+    //Si es de tipo transporte se le envia el id del contrato...
+    if (this.obtenerTipoContrato() === 'T') {
+      obj.idContrato = this.state.contratoSeleccionado.cntIderegistro;
+    }
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.CONSULTAR_RESERVA, obj)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          if (this.obtenerTipoContrato() == 'T') {
+            this.setState({
+              precio: getProp(respuesta.data.datos[0], 'precio', ''),
+              unidadMedida: getProp(respuesta.data.datos[0], 'idemedida.uniIderegistro', '')
+            });
+          }
+          this.setState({ listaPreciosRecerva: respuesta.data.datos });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.props.history.replace({ entidadEditar: null });
+  }
+
+  /**
+   * Limpia el formulario.
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+    });
+  };
+
+  /**
+   * Método encargado de ejecutar acciones al desmontar el componente
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Obtiene los botones de la cabecera del formulario.
+   * @returns {Array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Consultar', callback: this.consultar },
+      { texto: 'Limpiar', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Método encargado de ejecutar el metodo de consultar los puntos de consumo
+   */
+  consultar = () => {
+    this.verificarConsultaPuntoConsumo();
+  };
+
+  /**
+   * Método encargado de validar el formulario
+   * @returns {Object}
+   */
+  validarFormulario = () => {
+    // Ejemplo Validacion
+    if (false) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar al menos un cargo de tipo AO&amp;M para poder continuar.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Obtiene el punto de consumo seleccionado.
+   */
+  obtenerPuntoConsumoSeleccionado = () => {
+
+  };
+
+  /**
+   * Método encargado de consultar los tipos de negociacion
+   */
+  consultarTipoNegociacion = () => {
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.CONSULTAR_TIPOS_NEGOCIACION, {
+      fecha: this.state.fechaNominacion,
+      tipoNegociacion: 'SB',
+      tipoContrato: this.state.tipoContrato,
+    }).then(respuesta => {
+      this.setState({ listaTiposNegociacion: respuesta.data.datos });
+    })
+  };
+
+  /**
+   * Métpodo encargado de obtener el tipo de contrato
+   * @returns {String}
+   */
+  obtenerTipoContrato = () => {
+    const { tipoContrato, listaTiposContrato } = this.state;
+    const indexTipoContrato = listaTiposContrato.findIndex(tc => tc.uniIderegistro == tipoContrato);
+    const tipoContratoObj = (indexTipoContrato >= 0) ? listaTiposContrato[indexTipoContrato] : null;
+    let tipoContratoProp = (tipoContratoObj) ? getProp(tipoContratoObj, 'uniPropiedad', null) : null;
+    tipoContratoProp = (tipoContratoProp) ? JSON.parse(tipoContratoProp).tipocontrato : null;
+    return tipoContratoProp;
+  };
+
+  /**
+   * Método encargado de ejecutar el calculo de los excedentes
+   */
+  calcularExcedentes = () => {
+    const tipoContrato = this.obtenerTipoContrato();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.CALCULAR_EXCEDENTES, {
+      fecha: this.state.fechaNominacion,
+      tipoContrato: tipoContrato
+    }).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        this.setState({ listaCalculosExcedentes: respuesta.data.datos });
+      }
+    });
+  };
+
+  /**
+   * Método encargado de objeter el objeto guardar
+   * @returns {Array}
+   */
+  obtenerEntidadGuardar = () => {
+    const { listaPuntosConsumo, listaCalculosExcedentes, tipoCalculo, fechaNominacion } = this.state;
+    if (tipoCalculo == TIPOS_CALCULO.RENOMINACION) {
+      const listaPuntos = listaPuntosConsumo.filter(punto => punto.seleccionado)
+        .map(punto => {
+          return {
+            fecha: fechaNominacion,
+            puntoConsumo: punto,
+            valorReNominado: punto.valorRenominacion
+          };
+        });
+      return listaPuntos;
+    } else if (tipoCalculo == TIPOS_CALCULO.EXCEDENTES) {
+      const listaPuntos = listaCalculosExcedentes.map(calculo => {
+        return {
+          fecha: fechaNominacion,
+          puntoConsumo: calculo.puntoConsumo,
+          excentes: calculo.excentes
+        };
+      });
+      return listaPuntos;
+    }
+  };
+
+  /**
+   * Método encargado de guardar la entidad
+   * @returns {Boolean}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+
+    const obj = this.obtenerEntidadGuardar();
+
+    // Reemplazar con ruta del Endpoint para guardar
+    let url = RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.GUARDAR_RENOMINACION;
+    if (this.state.tipoCalculo == TIPOS_CALCULO.EXCEDENTES) {
+      url = RUTAS_API.PARAMETRIZACION.GESTION_CALCULO_RENOMINACION.GUARDAR_EXCEDENTES;
+    }
+    axios.post(url, obj)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar el componente ventana modal
+   */
+  consultarEntidad = () => {
+    this.setState({ mostrarModalConsulta: true });
+  };
+
+  /**
+   * Método encargado de controlar el cambio de los componentes
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    change[evento.target.name] = evento.target.value;
+    this.setState(change, this.verificarConsultaPuntoConsumo);
+  };
+
+  /**
+   * Método encargado de verificar la consulta de puntos de consumo
+   * @returns {Boolean}
+   */
+  verificarConsultaPuntoConsumo = () => {
+    const { tipoCalculo, tipoNegociacion, negociacion, fechaNominacion, tipoContrato } = this.state;
+    if (!fechaNominacion || typeof fechaNominacion != 'string' || fechaNominacion.trim() == '') {
+      return;
+    }
+    if (!tipoContrato || tipoContrato &lt; 0) {
+      return;
+    }
+    if (tipoCalculo == TIPOS_CALCULO.PRECIO &amp;&amp; this.obtenerTipoContrato() === 'S') {
+      this.ejecutarConsulta();
+      return;
+    }
+    if ((tipoCalculo == TIPOS_CALCULO.PRECIO) &amp;&amp; (this.obtenerTipoContrato() == 'T') &amp;&amp; (this.state.contratoSeleccionado != null)) {
+      this.ejecutarConsulta();
+      return;
+    }
+    if (tipoCalculo == TIPOS_CALCULO.EXCEDENTES) {
+      this.ejecutarConsulta();
+      return;
+    }
+    if (negociacion === 'N') {
+      this.ejecutarConsulta();
+      return;
+    }
+    if (!tipoNegociacion || tipoNegociacion.trim() === '') {
+      return;
+    }
+    if (!negociacion || negociacion.trim() === '') {
+      return;
+    }
+    this.ejecutarConsulta();
+  }
+
+  /**
+   * Método encargado de cerrar la ventana modal
+   */
+  abrirCerrarModal = () => {
+    this.setState({
+      mostrarModalConsulta: false
+    });
+  };
+
+  /**
+   * Método encargado cargar los datos que vengan de otro componente
+   * @param {Object} entidad Datos del componente externo
+   */
+  cargarDatos = (entidad) => {
+    this.setState({
+      mostrarModalConsulta: false,
+    });
+  };
+
+  /**
+   * Método encargado de cargar los datos del contrato seleccionado
+   */
+  seleccionarContrato = (contrato) => {
+    this.setState({ contratoSeleccionado: contrato, mostrarModalConsulta: false });
+  };
+
+  /**
+   * Método encargado de controlar los cambios hechos en la tabla
+   * @param {Event} evento Evento ejecutado en el control de usuario
+   * @returns {Boolean}
+   */
+  controlarCambioTabla = (evento) => {
+    const control = evento.target;
+    const idPunto = (control.attributes['data-punto']) ? control.attributes['data-punto'].value : null;
+    if (idPunto) {
+      const { listaPuntosConsumo } = this.state;
+      const indexPunto = listaPuntosConsumo.findIndex(punto => punto.ptcIderegistro == idPunto);
+      const nuevaListaPuntos = [...listaPuntosConsumo];
+      nuevaListaPuntos[indexPunto][control.name] = control.value;
+      this.setState({ listaPuntosConsumo: nuevaListaPuntos });
+      return;
+    }
+    const idCalculo = (control.attributes['data-idcalculo']) ? control.attributes['data-idcalculo'].value : null;
+    if (idCalculo) {
+      const { listaCalculosExcedentes } = this.state;
+      const indexPunto = listaCalculosExcedentes.findIndex(calculo => calculo.puntoConsumo.ptcIderegistro == idCalculo);
+      const nuevaListaPuntos = [...listaCalculosExcedentes];
+      nuevaListaPuntos[indexPunto][control.name] = control.value;
+      this.setState({ listaCalculosExcedentes: nuevaListaPuntos });
+    }
+  };
+
+  /**
+   * Renderiza la tabla puntos consumo...
+   * @returns {JSX}
+   */
+  renderTablaPuntosConsumo = () => {
+    const lista = this.state.listaPuntosConsumo;
+    const listaPuntosConsumo = lista.filter(item => item.seleccionado);
+    if (!Util.validarArreglo(listaPuntosConsumo)) {
+      return (&lt;span>&lt;i className='fa fa-fw fa-warning'>&lt;/i> Seleccione los puntos de consumo.&lt;/span>);
+    }
+
+    return (
+      &lt;table className='table table-hover table-condensed table-bordered'>
+        &lt;thead className='text-white bg-dark'>
+          &lt;tr>
+            &lt;th>Punto de Consumo&lt;/th>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Tipo Venta&lt;/th>
+            &lt;th>Medidor&lt;/th>
+            &lt;th>Cantidad Medidores&lt;/th>
+            &lt;th>Valor Nominado&lt;/th>
+            &lt;th>Valor a Renominar&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            Util.validarArreglo(listaPuntosConsumo) &amp;&amp; listaPuntosConsumo.map(
+              puntoConsumo => {
+                let numContratos = 1;
+                puntoConsumo.listaContratos.map(c => {
+                  numContratos++;
+                });
+
+                return (
+                  &lt;Fragment>
+                    &lt;tr key={puntoConsumo.ptcIderegistro + '_punto_consumo'}>
+                      &lt;td rowSpan={numContratos}>{getProp(puntoConsumo, 'ptcoNombre', 'Indefinido')}&lt;/td>
+                    &lt;/tr>
+                    {
+                      Util.validarArreglo(puntoConsumo.listaContratos) &amp;&amp; puntoConsumo.listaContratos.map(contrato => {
+                        let numMedidores = Util.validarArreglo(contrato.listaMedidores) ? (contrato.listaMedidores.length) : 0;
+                        let filas = numMedidores + 1;
+                        return (
+                          &lt;tr key={contrato.cntNumero + '_contrato'}>
+                            &lt;td>{contrato.cntNumero}&lt;/td>
+                            &lt;td >{getProp(contrato, 'uniIdeclasecontrato.uniNombre1', null)}&lt;/td>
+                            {
+                              !Util.validarArreglo(contrato.listaMedidores) &amp;&amp; (
+                                &lt;tr key={'no_hay_medidores' + contrato.cntNumero} style={{ 'display': 'block' }}>
+                                  &lt;td style={{ 'display': 'block' }}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay medidores&lt;/td>
+                                &lt;/tr>
+                              )
+                            }
+                            {
+                              Util.validarArreglo(contrato.listaMedidores) &amp;&amp; contrato.listaMedidores.map(medidor => {
+                                return (
+                                  &lt;tr key={medidor.mesuIderegistro + '_medidor'} style={{ 'display': 'block' }}>
+                                    &lt;td style={{ 'display': 'block' }}>{medidor.mesuNombre}&lt;/td>
+                                  &lt;/tr>
+                                )
+                              })
+                            }
+                            &lt;td>{numMedidores}&lt;/td>
+                            &lt;td>
+                              &lt;Input
+                                value={getProp(puntoConsumo, 'ptcCantidadNominacion', 0)}
+                                onChange={this.controlarCambioTabla}
+                                name='ptcCantidadNominacion'
+                                cols={12}
+                                extra={{ 'data-punto': puntoConsumo.ptcIderegistro }}
+                              />
+                            &lt;/td>
+                            &lt;td>
+                              &lt;Input
+                                value={getProp(puntoConsumo, 'valorRenominacion', 0)}
+                                onChange={this.controlarCambioTabla}
+                                extra={{ 'data-punto': puntoConsumo.ptcIderegistro }}
+                                cols={12}
+                                name='valorRenominacion'
+                              />
+                            &lt;/td>
+                          &lt;/tr>
+                        );
+                      })}
+                  &lt;/Fragment>
+                );
+              }
+            )
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Renderiza la tabla de los exedentes.
+   * @returns {JSX}
+   */
+  renderCalculoExcedentes = () => {
+    return (
+      &lt;table className='table table-condensed table-hover table-striped table-bordered'>
+        &lt;thead className='text-white bg-dark'>
+          &lt;tr>
+            &lt;th>Punto de Consumo&lt;/th>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Medidor/Tramo&lt;/th>
+            &lt;th>Cantidad Contratada&lt;/th>
+            &lt;th>Cantidad Nominada&lt;/th>
+            &lt;th>Excedente&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            Util.validarArreglo(this.state.listaCalculosExcedentes) &amp;&amp; this.state.listaCalculosExcedentes.map(
+              calculo => {
+                let numContratos = 1;
+                if (Util.validarArreglo(calculo.puntoConsumo.listaContratos)) {
+                  calculo.puntoConsumo.listaContratos.forEach(contrato => {
+                    numContratos++;
+                    if (Util.validarArreglo(contrato.listaTramos)) {
+                      contrato.listaTramos.forEach(tramo => {
+                        numContratos++;
+                      });
+                    }
+                  });
+                }
+                return (
+                  &lt;Fragment>
+                    &lt;tr key={calculo.puntoConsumo.ptcIderegistro + '_ptc_exe'}>
+                      &lt;td rowSpan={numContratos}>{getProp(calculo, 'puntoConsumo.ptcoNombre')}&lt;/td>
+                    &lt;/tr>
+                    {
+                      !Util.validarArreglo(calculo.puntoConsumo.listaContratos) &amp;&amp; (
+                        &lt;tr key={calculo.puntoConsumo.ptcIderegistro + 'no_hayregistros'}>
+                          &lt;td colSpan={5}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay registros.&lt;/td>
+                        &lt;/tr>
+                      )
+                    }
+                    {
+                      Util.validarArreglo(calculo.puntoConsumo.listaContratos) &amp;&amp; calculo.puntoConsumo.listaContratos.map(contrato => {
+                        const numTramos = Util.validarArreglo(contrato.listaTramos) ? (contrato.listaTramos.length + 1) : 1;
+                        return (
+                          &lt;Fragment>
+                            &lt;tr key={calculo.puntoConsumo.ptcIderegistro + contrato.cntNumero + '_ptc_contrato'} >
+                              &lt;td rowSpan={numTramos}>{contrato.cntNumero}&lt;/td>
+                            &lt;/tr>
+                            {
+                              Util.validarArreglo(contrato.listaTramos) &amp;&amp; contrato.listaTramos.map((tramo, indexTramo) => {
+                                return (
+                                  &lt;tr key={calculo.ptcIderegistro + contrato.cntNumero + tramo.cntrIderegistro}>
+                                    &lt;td>{getProp(tramo, 'trcaIdetramocargo.trmIderegistro.trmNombre', 'Indefinido')}&lt;/td>
+                                    {indexTramo == 0 &amp;&amp; (
+                                      &lt;Fragment>
+                                        &lt;td rowSpan={numTramos}>{contrato.cntCantidadcontratada}&lt;/td>
+                                        &lt;td rowSpan={numTramos}>{getProp(calculo, 'puntoConsumo.ptcCantidadNominacion', 0)}&lt;/td>
+                                        &lt;td rowSpan={numTramos}>
+                                          &lt;TextoNumerico
+                                            aceptaDecimales={false}
+                                            aceptaNegativos={false}
+                                            cols={12}
+                                            value={getProp(calculo, 'excentes', 0)}
+                                            onChange={this.controlarCambioTabla}
+                                            name='excentes'
+                                            extra={{ 'data-idcalculo': calculo.puntoConsumo.ptcIderegistro }}
+                                          />
+                                        &lt;/td>
+                                      &lt;/Fragment>
+                                    )}
+                                  &lt;/tr>
+                                )
+                              })
+                            }
+                            {
+                              !Util.validarArreglo(contrato.listaTramos) &amp;&amp; (
+                                &lt;tr key={calculo.ptcIderegistro + contrato.cntNumero + 'no_haytramos'}>
+                                  &lt;td colSpan={3}>&lt;i className='fa fa-fw fa-warning'>&lt;/i> No hay tramos&lt;/td>
+                                &lt;/tr>
+                              )
+                            }
+                          &lt;/Fragment>
+                        );
+                      })
+                    }
+                  &lt;/Fragment>
+                )
+              }
+            )
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Marca como seleccionado un item de la lista de puntos de consumo.
+   */
+  seleccionarPunto = (evento) => {
+    const listaPuntosConsumo = this.state.listaPuntosConsumo;
+    const value = evento.target.value;
+    const index = listaPuntosConsumo.findIndex(c => c.ptcIderegistro == value);
+    listaPuntosConsumo[index].seleccionado = evento.target.checked;
+    this.setState({ listaPuntosConsumo: listaPuntosConsumo });
+  };
+
+
+  /**
+ * Obtiene la fecha en string
+ * @return {string}
+ */
+  convertirFecha = (timestamp) => {
+    if (timestamp == null) {
+      return 'Indefinido';
+    }
+    const fecha = new Date(timestamp);
+    const anio = fecha.getFullYear();
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth() + 1;
+    return `${((dia &lt; 9) ? '0' : '')}${dia}/${(mes &lt; 9) ? '0' : ''}${mes}/${anio}`;
+  };
+
+  /**
+   * Render Precios Recerva Suministro.
+   * @returns {JSX}
+   */
+  renderPreciosRecerva = () => {
+    if (!Util.validarArreglo(this.state.listaPreciosRecerva)) {
+      return null;
+    }
+    return (
+      &lt;table className='table table-condensed table-striped table-bordered table-hover'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th>Productor&lt;/th>
+            &lt;th>Fecha a Nominar&lt;/th>
+            &lt;th>$ medidor reg&lt;/th>
+            &lt;th>Cantidad Excedente Medidor Reg&lt;/th>
+            &lt;th>$ medidor gnv&lt;/th>
+            &lt;th>$ medidor ind&lt;/th>
+            &lt;th>Cantidad excedente medidor ind&lt;/th>
+            &lt;th>Cálculo Precio&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            Util.validarArreglo(this.state.listaPreciosRecerva) &amp;&amp; this.state.listaPreciosRecerva.map(
+              (precio, index) => {
+                return (
+                  &lt;tr key={index + '_ps'}>
+                    &lt;td>{getProp(precio, 'nombreProductor', 'Indefinido')}&lt;/td>
+                    &lt;td>{this.convertirFecha(precio.fechaNominar)}&lt;/td>
+                    &lt;td>{getProp(precio, 'medidorReg', 0)}&lt;/td>
+                    &lt;td>{getProp(precio, 'excdMedidorReg', 0)}&lt;/td>
+                    &lt;td>{getProp(precio, 'medidorGNV', 0)}&lt;/td>
+                    &lt;td>{getProp(precio, 'medidorInd', 0)}&lt;/td>
+                    &lt;td>{getProp(precio, 'excdMedidorInd', 0)}&lt;/td>
+                    &lt;td>{getProp(precio, 'calculoPrecio', 0)}&lt;/td>
+                  &lt;/tr>
+                );
+              }
+            )
+          }
+        &lt;/tbody>
+      &lt;/table>
+    )
+  };
+
+  /**
+   * Método encargado de mostrar el formulario de calculo de la renominación
+   * @returns {JSX}
+   */
+  renderCalculoRenominacion = () => {
+    return (
+      &lt;Fragment>
+        &lt;div className='col-md-12'>
+          &lt;h2>Cálculo Renominación Transporte, ATR y Suministro&lt;/h2>
+        &lt;/div>
+        &lt;Combo
+          opciones={this.state.listaOpcionesNegociacion}
+          propTexto='texto'
+          propValor='valor'
+          label='Negociación:'
+          name='negociacion'
+          value={this.state.negociacion}
+          onChange={this.controlarCambio}
+        />
+        {this.state.negociacion === 'S' &amp;&amp; (
+          &lt;Combo
+            opciones={this.state.listaTiposNegociacion}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipos Negociación:'
+            name='tipoNegociacion'
+            value={this.state.tipoNegociacion}
+            onChange={this.controlarCambio}
+          />
+        )}
+        &lt;SelectorMultiple
+          lista={this.state.listaPuntosConsumo}
+          propValor='ptcIderegistro'
+          propTexto='ptcoNombre'
+          titulo='Puntos Consumo:'
+          seleccionarItem={this.seleccionarPunto}
+          cols={4}
+        />
+      &lt;/Fragment>
+    );
+  }
+
+  /**
+   * Método encargado de mostrar el selector de contratos
+   * @returns {JSX}
+   */
+  renderSelectorContratos = () => {
+    return (
+      &lt;Fragment>
+        &lt;div className='form-group col-4'>
+          &lt;label>Contrato:&lt;/label>
+          &lt;div className='input-group'>
+            &lt;input type='text' className='form-control' placeholder='Seleccionar Contrato' disabled={true} value={(this.state.contratoSeleccionado) ? this.state.contratoSeleccionado.cntNumero : 'Ningun contrato seleccionado'} />
+            &lt;div className='input-group-btn'>
+              &lt;button className='btn btn-primary' onClick={() => { this.setState({ mostrarModalConsulta: true }) }}>&lt;i className='fa fa-fw fa-check-square-o'>&lt;/i>&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;VentanaModal
+          mostrar={this.state.mostrarModalConsulta}
+          titulo={'Consultar Contratos'}
+          cerrarModal={this.abrirCerrarModal}>
+          &lt;RConsultaContratos
+            esModal
+            seleccionMultiple={false}
+            seleccionarEntidad={this.seleccionarContrato}
+            tiposContrato={[this.obtenerTipoContrato()]}
+            autoconsultar={true}
+            ocultarFiltros={true}
+          />
+        &lt;/VentanaModal>
+      &lt;/Fragment>
+    );
+  }
+
+  /**
+   * Método encargado de mostrar el formulario
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;div className='d-flex justify-content-center'>
+          &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;/div>
+
+        &lt;div className='conf-general row mt-5'>
+          &lt;Combo
+            opciones={this.state.listaTiposCalculo}
+            propTexto='texto'
+            propValor='valor'
+            label='Tipo Cálculo:'
+            name='tipoCalculo'
+            value={this.state.tipoCalculo}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha a nominar:'
+            name='fechaNominacion'
+            fecha={this.state.fechaNominacion}
+            onChange={this.controlarCambio}
+          />
+          &lt;Combo
+            opciones={this.state.listaTiposContrato}
+            propTexto='uniNombre1'
+            propValor='uniIderegistro'
+            label='Tipo Contrato:'
+            name='tipoContrato'
+            value={this.state.tipoContrato}
+            onChange={this.controlarCambio}
+          />
+          {
+            this.state.tipoCalculo == TIPOS_CALCULO.RENOMINACION &amp;&amp; (this.renderCalculoRenominacion())
+          }
+          {this.state.tipoCalculo === TIPOS_CALCULO.RENOMINACION &amp;&amp; (
+            &lt;div className='col-12'>
+              {this.renderTablaPuntosConsumo()}
+            &lt;/div>
+          )}
+          {
+            this.state.tipoCalculo === TIPOS_CALCULO.EXCEDENTES &amp;&amp; Util.validarArreglo(this.state.listaCalculosExcedentes) &amp;&amp; (
+              &lt;div className='col-12'>
+                &lt;h2>Cálculo Excedentes&lt;/h2>
+                {this.renderCalculoExcedentes()}
+              &lt;/div>
+            )
+          }
+          {
+            this.state.tipoCalculo === TIPOS_CALCULO.PRECIO &amp;&amp; (
+              &lt;Fragment>
+                {
+                  this.obtenerTipoContrato() === 'S' &amp;&amp; (
+                    &lt;div className='col-12'>
+                      &lt;h2>Precio de Reserva Suministro&lt;/h2>
+                      {this.renderPreciosRecerva()}
+                    &lt;/div>
+                  )
+                }
+                {
+                  this.obtenerTipoContrato() === 'T' &amp;&amp; (
+                    &lt;div className='col-12 row'>
+                      &lt;div className='col-12'>
+                        &lt;h2>Precio de Reserva Transporte&lt;/h2>
+                      &lt;/div>
+                      {this.renderSelectorContratos()}
+                      &lt;TextoNumerico
+                        aceptaDecimales={false}
+                        aceptaNegativos={false}
+                        label='Precio:'
+                        cols={4}
+                        value={this.state.precio}
+                        onChange={this.controlarCambio}
+                        name='precio'
+                        extra={{ disabled: true }}
+                      />
+                      &lt;Combo
+                        opciones={this.state.listaUnidadesMedida}
+                        propTexto='texto'
+                        propValor='valor'
+                        label='Unidades Medida:'
+                        name='unidadesMedida'
+                        value={this.state.unidadesMedida}
+                        onChange={this.controlarCambio}
+                        extra={{ disabled: true }}
+                      />
+                      &lt;div className='col-12'>
+                        {this.renderPreciosRecerva()}
+                      &lt;/div>
+                    &lt;/div>
+                  )
+                }
+                &lt;div className='col-md-3 form-group'>
+                  &lt;button className='btn btn-primary' onClick={this.verificarConsultaPuntoConsumo}>&lt;i className='fa fa-fw fa-calculator'>&lt;/i> Calcular&lt;/button>
+                &lt;/div>
+              &lt;/Fragment>
+            )
+          }
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  }
+}
+
+GestionCalculoRenominacion.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCalculoRenominacion);
+
+export { VistaRedux as RGestionCalculoRenominacion };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

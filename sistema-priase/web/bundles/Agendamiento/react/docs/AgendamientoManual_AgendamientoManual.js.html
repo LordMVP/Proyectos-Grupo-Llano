@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: AgendamientoManual/AgendamientoManual.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: AgendamientoManual/AgendamientoManual.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Botonera, Combo, Fecha, Tabla, Util, TextoNumerico } from 'appfuture-react';
+import axios from 'axios';
+import { mostrarAlerta } from '../../store/actions/AplicacionAcciones';
+import RUTAS_API from '../../global/rutas_api';
+import './AgendamientoManual.scss';
+import { columnasTablaCuentas, columnasTablaRutas } from './ColumnasTablas';
+import { SelectorMultiple } from '../utils/SelectorMultiple';
+
+const listaZar = [{ text: 'SI', value: 'S' }, { text: 'NO', value: 'N' }];
+const zonas = [{ text: 'URBANO', value: 'U' }, { text: 'RURAL', value: 'R' }];
+
+class AgendamientoManual extends Component {
+
+  state = {
+    mostrarModalConsulta: false,
+    contratantes: [],
+    procesos: [],
+    proyectos: [],
+    listaZar: listaZar,
+    zonas: zonas,
+    servicios: [],
+    cuentas: [],
+    actividades: [],
+    contratistas: [],
+    unidadesReponsables: []
+  };
+
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.entidadEditar) {
+      this.cargarDatos(state.entidadEditar);
+    }
+    this.cargarDatosAplicacion();
+  }
+
+  /**
+   * Comprueba una respuesta de una petición y retorna los datos que de la misma.
+   * @param {Object} response
+   * @param {Object|Array} defaultData
+   * @return {Object|Array}
+   */
+  obtenerDatos = (response, defaultData = []) => {
+    return response.data.codigo > 0 ? response.data.datos : defaultData;
+  };
+
+  /**
+   * Carga los datos de las listas principales.
+   */
+  cargarDatosAplicacion() {
+    const peticiones = [
+      axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_CONTRATANTES),
+    ];
+    axios.all(peticiones)
+      .then(
+        axios.spread((contratantes) => {
+          this.setState({
+            contratantes: this.obtenerDatos(contratantes),
+          })
+        })
+      )
+  }
+
+  /**
+   * Limpia el formulario...
+   */
+  limpiarFormulario = (evento) => {
+    this.setState({
+      mostrarModalConsulta: false,
+      contratante: '',
+      proceso: '',
+      proyecto: '',
+      servicio: '',
+      zona: '',
+      actividad: '',
+      contratista: '',
+      unidadResponsable: '',
+      fechaProgramacion: '',
+      rutas: [],
+      cuentas: [],
+    });
+  };
+
+  /**
+   * Se ejecuta cuando el componente se destruye del contenedor...
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  }
+
+  /**
+   * Retorna las funciones de la botonera...
+   * @return {Array}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Limpiar Formulario', callback: this.limpiarFormulario }
+    ];
+  };
+
+  /**
+   * Controla el onChange de los componentes del formulario y los modifica en el state...
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const { name, value } = evento.target;
+    change[name] = value;
+    this.validarConsultas(name, value);
+    this.setState(change);
+  };
+
+  /**
+   * Colnsulta la lista de proyectos...
+   */
+  consultarProyectos = (empresaContratante) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_PROYECTOS, { empresaContratante: empresaContratante })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ proyectos: datos });
+      });
+  };
+
+  /**
+   * Consulta la lista de procesos...
+   */
+  consultarProcesos = (empresaContratante) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_PROCESOS, { empresaContratante: empresaContratante })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ procesos: datos });
+      });
+  };
+
+  /**
+   * Consulta los servicios...
+   */
+  consultarServicios = (empresaContratante, uniProceso) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_SERVICIOS, { empresaCod: empresaContratante, uniProceso: uniProceso })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ servicios: datos });
+      });
+  };
+
+  /**
+   * Consulta las actividades...
+   */
+  consultarActividades = (empresaCod, uniProceso, servicioCod) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_ACTIVIDADES, {
+      "empresaCod": empresaCod,
+      "uniProceso": uniProceso,
+      "servicioCod": servicioCod
+    }).then(respuesta => {
+      const datos = this.obtenerDatos(respuesta);
+      this.setState({ actividades: datos });
+    })
+  };
+
+  /**
+   * Consulta los contratistas...
+   */
+  consutlarContratistas = (empresaContratante) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_CONTRATISTAS, { empresaContratante: empresaContratante })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ contratistas: datos });
+      });
+  };
+
+  /**
+   * Consulta las unidades responsables...
+   */
+  consultarUnidadesResponsables = (empresaContratante, uniProceso) => {
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_UNIDADES_RESPONSABLES, { empresaCod: empresaContratante, uniProceso: uniProceso })
+      .then(respuesta => {
+        const datos = this.obtenerDatos(respuesta);
+        this.setState({ unidadesReponsables: datos });
+      });
+  };
+
+  /**
+   * Valida las consultas y procesos que debe ejecutar cuando cambia el valor de un componente.
+   */
+  validarConsultas = (name, value) => {
+    switch (name) {
+      case 'contratante':
+        this.consultarProyectos(value);
+        this.consultarProcesos(value);
+        this.consutlarContratistas(value);
+        break;
+      case 'proceso':
+        this.consultarUnidadesResponsables(this.state.contratante, value);
+        this.consultarServicios(this.state.contratante, value);
+        break;
+      case 'servicio':
+        this.consultarActividades(this.state.contratante, this.state.proceso, value);
+        break;
+    }
+  };
+
+  /**
+   * Elimina los atributos vacios...
+   */
+  llenarAtributosVacios = (obj) => {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        if (!value || value == '' || value == '-1') {
+          delete obj[key];
+        }
+      }
+    }
+    return obj;
+  };
+
+  /**
+   * Valida que los datos para el filtro de las actividades se encuentre disponible.
+   */
+  validarFormularioFiltroActividades = () => {
+    const { contratante, proceso, servicio, contratantes } = this.state;
+    const objContratante = contratantes.find(c => c.empresaCod == contratante);
+    if (!objContratante) {
+      return { respuesta: false, mensaje: 'Debe seleccionar un contratante.' };
+    }
+    if (!proceso) {
+      return { respuesta: false, mensaje: 'Debe seleccionar un proceso.' };
+    }
+    if (!servicio) {
+      return { respuesta: false, mensaje: 'Debe seleccionar un servicio.' };
+    }
+    return { respuesta: true };
+  }
+
+  /**
+   * Filtra un objeto contratante por el codigo del contratante seleccionado.
+   * @return {Object}
+   */
+  obtenerContratante = () => {
+    const { contratante, contratantes } = this.state;
+    const objContratante = contratantes.find(c => c.empresaCod == contratante);
+    return objContratante;
+  };
+
+  /**
+   * Controla la selección de una cuenta | Checkbox de la tabla rutas.
+   */
+  seleccionarCuenta = (cuenta, evento) => {
+    const { cuentas } = this.state;
+    const cuentasNuevo = cuentas.map(c => {
+      if (c.ideSuscriptor == cuenta.ideSuscriptor) {
+        c.seleccionado = evento.target.checked;
+      }
+      return c;
+    });
+    this.setState({
+      cuentas: cuentasNuevo
+    })
+  };
+
+  obtenerActividadesSeleccionadas = () => {
+    const { actividades } = this.state;
+    return actividades
+      .filter(actividad => actividad.seleccionado)
+      .map(actividad => actividad.servicioCod).join(',');
+  };
+
+  obtenerValor = (valor) => {
+    if (this.validarValor(valor)) {
+      return '';
+    }
+    return valor;
+  };
+
+  /**
+   * Retorna el objeto para consultar las rutas...
+   * @return {Object}
+   */
+  obtenerObjetoConsultaRutas = () => {
+    const { proceso, servicio, proyecto, zar, zona } = this.state;
+    const objContratante = this.obtenerContratante();
+    const obj = {
+      empresaSevemp: this.obtenerValor(objContratante.empresaSevemp),
+      uniProceso: this.obtenerValor(proceso),
+      servicioCod: this.obtenerValor(servicio),
+      proyecto: this.obtenerValor(proyecto),
+      zar: this.obtenerValor(zar),
+      zona: this.obtenerValor(zona),
+      actividad: this.obtenerValor(this.obtenerActividadesSeleccionadas())
+    };
+    return obj;
+  }
+
+  /**
+   * Consulta las rutas... (Botón Consultar).
+   */
+  consultarRutas = () => {
+    const respuesta = this.validarFormularioFiltroActividades();
+    if (!respuesta.respuesta) {
+      return this.props.mostrarAlerta('Información', respuesta.mensaje);
+    }
+
+    const obj = this.obtenerObjetoConsultaRutas();
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_RUTAS, obj).then(respuesta => {
+      const datos = this.obtenerDatos(respuesta);
+      this.setState({ rutas: datos });
+    });
+  };
+
+  obtenerObjetoModeloAsignacion = () => {
+    return {
+      "uniProceso": "",
+      "codSuscriptor": "",
+      "ideSuscriptor": 0,
+      "ureIderegistro": "",
+      "fechaProgramacion": "",
+      "ideActividad": 0,
+      "ideActividades": 0,
+      "camporeferencia": "",
+      "tablareferencia": "",
+      "duracion": 0,
+      "tipo": "",
+      "observaciones": "",
+      "direccion": "",
+      "barrio": "",
+      "telefono": "",
+      "correo": ".",
+      "nombrecliente": ""
+    };
+  };
+
+  /**
+   * Consulta las cuentas de la ruta seleccionada (btns ver de la tabla rutas);
+   */
+  verRuta = (ruta) => {
+    const { proceso, servicio, proyecto, zar, zona, cuentas } = this.state;
+    const objContratante = this.obtenerContratante();
+    if (!objContratante) {
+      return this.props.mostrarAlerta('Inforamción', 'Debe seleccionar un contratante.');
+    }
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.CONSULTAR_CUENTAS, {
+      "empresaSevemp": this.obtenerValor(objContratante.empresaSevemp),
+      "uniProceso": this.obtenerValor(proceso),
+      "servicioCod": this.obtenerValor(servicio),
+      "rutaIde": this.obtenerValor(ruta.rutaIde),
+      "proyecto": this.obtenerValor(proyecto),
+      "zar": this.obtenerValor(zar),
+      "zona": this.obtenerValor(zona),
+      "actividad": this.obtenerValor(this.obtenerActividadesSeleccionadas())
+    })
+      .then(respuesta => {
+        const datos = cuentas.concat(this.obtenerDatos(respuesta));
+
+        this.setState({ cuentas: datos });
+      });
+  };
+
+  cambiarEstadoRangos = (estado = true) => {
+    let { rangoInicial, rangoFinal } = this.state;
+    if (!rangoInicial || rangoInicial &lt; 0) {
+      return this.props.mostrarAlerta('Error', 'Debe seleccionar el rango inicial.');
+    }
+
+    if (!rangoFinal || rangoFinal &lt; 0) {
+      return this.props.mostrarAlerta('Error', 'Debe seleccionar el rango final.');
+    }
+
+    if (rangoFinal &lt; rangoInicial) {
+      return this.props.mostrarAlerta('Error', 'El rango final debe ser igual o mayor al rango inicial.');
+    }
+
+    const cuentas = this.state.cuentas.map((cuenta, index) => {
+      const indice = index + 1;
+      if (indice >= rangoInicial &amp;&amp; indice &lt;= rangoFinal) {
+        cuenta.seleccionado = estado;
+      }
+      return cuenta;
+    });
+    this.setState({ cuentas });
+  };
+
+  /**
+   * Renderiza la tabla de las cuentas...
+   */
+  renderTablaCuentas = () => {
+    return (
+      &lt;div className='mt-5 agendamiento-manual'>
+        &lt;div className='caja contenedor'>
+          &lt;label className='tag'>Seleccionar por Rangos&lt;/label>
+          &lt;div className='formulario'>
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Rango inicial:'
+              cols={4}
+              value={this.state.rangoInicial}
+              onChange={this.controlarCambio}
+              name='rangoInicial'
+            />
+            &lt;TextoNumerico
+              aceptaDecimales={false}
+              aceptaNegativos={false}
+              label='Rango Final:'
+              cols={4}
+              value={this.state.rangoFinal}
+              onChange={this.controlarCambio}
+              name='rangoFinal'
+            />
+            &lt;div className='col-md-12'>
+              &lt;button className='btn btn-primary mr-3' onClick={() => this.cambiarEstadoRangos(true)}>&lt;i className='fa fa-fw fa-plus'>&lt;/i> Seleccionar Rangos&lt;/button>
+              &lt;button className='btn btn-primary' onClick={() => this.cambiarEstadoRangos(false)}>&lt;i className='fa fa-fw fa-minus'>&lt;/i> Deseleccionar Rangos&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;Tabla datos={this.state.cuentas} columnas={columnasTablaCuentas((props, evento) => this.seleccionarCuenta(props.original, evento))} />
+      &lt;/div>
+    )
+  };
+
+  /**
+   * Renderiza la tabla de rutas...
+   */
+  renderTablaRutas = () => {
+    return (
+      &lt;div className='pt-5 agendamiento-manual'>
+        &lt;Tabla datos={this.state.rutas} columnas={columnasTablaRutas((props) => this.verRuta(props.original))} />
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Valida que un valor sea diferente de vacio o -1.
+* @return {Boolean}
+    */
+  validarValor = (valor) => {
+    return !valor || valor == '' || valor == '-1';
+  }
+
+  /**
+   * Valida que los datos necesarios para realizar la asignación se encuentren disponibles...
+   */
+  validarFormularioAsignacion = () => {
+    const { unidadResponsable, fechaProgramacion, actividad, cuentas } = this.state;
+    if (this.validarValor(unidadResponsable)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar una unidad responsable.' };
+    }
+    if (this.validarValor(fechaProgramacion)) {
+      return { respuesta: false, mensaje: 'Debe seleccionar una fecha de programación.' };
+    }
+    if (cuentas.filter(c => c.seleccionado).length == 0) {
+      return { respuesta: false, mensaje: 'Debe seleccionar como mínimo una cuenta.' };
+    }
+    return { respuesta: true };
+  }
+
+  /**
+   * Obtiene la lista de registros que se van a asignar...
+* @return {Array}
+    */
+  obtenerRegistrosParaAsignar = () => {
+    const { proceso, unidadResponsable, fechaProgramacion, actividad } = this.state;
+    return this.state.cuentas.filter(cuenta => cuenta.seleccionado)
+      .map(cuenta => {
+        const obj = this.obtenerObjetoModeloAsignacion();
+        return {
+          ...obj,
+          "uniProceso": proceso,
+          "codSuscriptor": cuenta.codSuscriptor,
+          "ideSuscriptor": cuenta.ideSuscriptor,
+          "ureIderegistro": unidadResponsable,
+          "fechaProgramacion": fechaProgramacion,
+          "ideActividad": actividad,
+          "idActividades": this.obtenerActividadesSeleccionadas(),
+          ...cuenta
+        };
+      });
+  };
+
+  /**
+   * Ejecuta la petición para asignar las cuentas seleccionadas...
+   */
+  asignar = () => {
+    const respuesta = this.validarFormularioAsignacion();
+    if (!respuesta.respuesta) {
+      return this.props.mostrarAlerta('Información', respuesta.mensaje);
+    }
+    const registrosParaAsignar = this.obtenerRegistrosParaAsignar();
+    axios.post(RUTAS_API.AGENDAMIENTO_MANUAL.ASIGNAR, registrosParaAsignar).then(respuesta => {
+      if (respuesta.data.codigo > 0) {
+        this.props.mostrarAlerta('Correcto', 'Se han asignado correctamente las cuentas.');
+      } else {
+        this.props.mostrarAlerta('Error', 'No se han podido asignar correctamente las cuentas.');
+      }
+    });
+  };
+
+  seleccionarItem = (evento) => {
+    const control = evento.target;
+    const value = control.value;
+    const actividades = this.state.actividades.map(actividad => {
+      if (actividad.servicioCod == value) {
+        actividad.seleccionado = control.checked;
+      }
+      return actividad;
+    });
+    this.setState({ actividades: actividades });
+  };
+
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;h1>Agendamiento Manual&lt;/h1>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+
+        &lt;div className='caja contenedor'>
+          &lt;label className='tag'>Filtro de actividades&lt;/label>
+          &lt;div className='formulario'>
+            &lt;Combo
+              opciones={this.state.contratantes}
+              propTexto='empresaNom'
+              propValor='empresaCod'
+              label='Contratante: *'
+              name='contratante'
+              value={this.state.contratante}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.procesos}
+              propTexto='prcDescripcion'
+              propValor='uniProceso'
+              label='Proceso: *'
+              name='proceso'
+              value={this.state.proceso}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.proyectos}
+              propTexto='proyectoNom'
+              propValor='proyectoIdregistro'
+              label='Proyecto:'
+              name='proyecto'
+              value={this.state.proyecto}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.listaZar}
+              propTexto='text'
+              propValor='value'
+              label='ZAR:'
+              name='zar'
+              value={this.state.zar}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.zonas}
+              propTexto='text'
+              propValor='value'
+              label='Zona:'
+              name='zona'
+              value={this.state.zona}
+              onChange={this.controlarCambio}
+            />
+            &lt;Combo
+              opciones={this.state.servicios}
+              propTexto='servicioNom'
+              propValor='servicioCod'
+              label='Servicio: *'
+              name='servicio'
+              value={this.state.servicio}
+              onChange={this.controlarCambio}
+            />
+            &lt;SelectorMultiple
+              titulo='Actividades:'
+              propTexto='servicioNom'
+              propValor='servicioCod'
+              lista={this.state.actividades}
+              seleccionarItem={this.seleccionarItem}
+            />
+            &lt;div className='col-md-12'>
+              &lt;button className='btn btn-primary' onClick={this.consultarRutas}>&lt;i className='fa fa-fw fa-search'>&lt;/i> Consultar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className='caja contenedor'>
+          &lt;label className='tag'>Asignar Trabajo&lt;/label>
+          &lt;div className='formulario'>
+            &lt;Combo
+              opciones={this.state.unidadesReponsables}
+              propTexto='cuadrillaNom'
+              propValor='ureIderegistro'
+              label='Unidad Responsable: *'
+              name='unidadResponsable'
+              value={this.state.unidadResponsable}
+              onChange={this.controlarCambio}
+            />
+            &lt;Fecha
+              label='Fecha Programación: *'
+              name='fechaProgramacion'
+              fecha={this.state.fechaProgramacion}
+              onChange={this.controlarCambio}
+            />
+            &lt;div className='col-md-12'>
+              &lt;button className='btn btn-primary' onClick={this.asignar}>&lt;i className='fa fa-fw fa-plus'>&lt;/i> Asignar&lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+        {Util.validarArreglo(this.state.rutas) &amp;&amp; this.renderTablaRutas()}
+        {Util.validarArreglo(this.state.cuentas) &amp;&amp; this.renderTablaCuentas()}
+      &lt;/Fragment>
+    );
+  }
+}
+
+AgendamientoManual.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(AgendamientoManual);
+
+export { VistaRedux as RAgendamientoManual };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="Agrupamiento.html">Agrupamiento</a></li><li><a href="Asignacion.html">Asignacion</a></li><li><a href="Asignacion.Asignacion.html">Asignacion</a></li><li><a href="Calendario.html">Calendario</a></li><li><a href="CalendarioHabil.html">CalendarioHabil</a></li><li><a href="ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaActividades.ConsultaActividades.html">ConsultaActividades</a></li><li><a href="ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaCalendario.ConsultaCalendario.html">ConsultaCalendario</a></li><li><a href="ConsultaEntrada.html">ConsultaEntrada</a></li><li><a href="ConsultaFrecuencia.html">ConsultaFrecuencia</a></li><li><a href="ConsultaInformacion.html">ConsultaInformacion</a></li><li><a href="ConsultaRegla.html">ConsultaRegla</a></li><li><a href="ConsultaUnidadResponsable.html">ConsultaUnidadResponsable</a></li><li><a href="EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionActividades.EdicionActividades.html">EdicionActividades</a></li><li><a href="EdicionParametros.html">EdicionParametros</a></li><li><a href="EdicionReglas.html">EdicionReglas</a></li><li><a href="EdicionReglas.EdicionReglas.html">EdicionReglas</a></li><li><a href="Flujo.html">Flujo</a></li><li><a href="FrecuenciaAgendamiento.html">FrecuenciaAgendamiento</a></li><li><a href="Horario.html">Horario</a></li><li><a href="Informacion.html">Informacion</a></li><li><a href="Jornada.html">Jornada</a></li><li><a href="Muncipios.html">Muncipios</a></li><li><a href="Municipio.html">Municipio</a></li><li><a href="Municipios.html">Municipios</a></li><li><a href="Municipios.Municipios.html">Municipios</a></li><li><a href="NuevaRuta.html">NuevaRuta</a></li><li><a href="NuevaRuta.ConfiguracionAgendamiento.html">ConfiguracionAgendamiento</a></li><li><a href="NuevaRuta.NuevaRuta.html">NuevaRuta</a></li><li><a href="Ordenamiento.html">Ordenamiento</a></li><li><a href="Pendientes.html">Pendientes</a></li><li><a href="ProgramacionManual.html">ProgramacionManual</a></li><li><a href="RutasMunicipios.html">RutasMunicipios</a></li><li><a href="RutasSectores.html">RutasSectores</a></li><li><a href="Seleccion.html">Seleccion</a></li><li><a href="Seleccion.Seleccion.html">Seleccion</a></li><li><a href="SolicitudAgendamiento.html">SolicitudAgendamiento</a></li><li><a href="Unidades.html">Unidades</a></li><li><a href="Unidades.Unidades.html">Unidades</a></li><li><a href="UnidadesResponsables.html">UnidadesResponsables</a></li><li><a href="UnidadResponsable.html">UnidadResponsable</a></li></ul><h3>Global</h3><ul><li><a href="global.html#inicio">inicio</a></li><li><a href="global.html#listar">listar</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Feb 22 2020 11:52:13 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

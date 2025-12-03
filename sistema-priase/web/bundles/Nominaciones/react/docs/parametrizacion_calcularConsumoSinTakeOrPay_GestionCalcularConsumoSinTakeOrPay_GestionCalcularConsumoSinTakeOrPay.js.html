@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parametrizacion/calcularConsumoSinTakeOrPay/GestionCalcularConsumoSinTakeOrPay/GestionCalcularConsumoSinTakeOrPay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parametrizacion/calcularConsumoSinTakeOrPay/GestionCalcularConsumoSinTakeOrPay/GestionCalcularConsumoSinTakeOrPay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component, Fragment } from 'react';
+import connect from 'react-redux/es/connect/connect';
+import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
+import { Input, Botonera, Combo, Tabla, VentanaModal, Util, Fecha } from 'appfuture-react';
+import axios from 'axios';
+import RUTAS_API from '../../../../global/rutas_api';
+import RUTAS_VISTA from '../../../../global/rutas_vista';
+import { formatearArray, limpiarHistorico } from '../../../../global/util_nominaciones';
+import { mostrarAlerta } from '../../../../store/actions/AplicacionAcciones';
+import './GestionCalcularConsumoSinTakeOrPay.scss';
+
+class GestionCalcularConsumoSinTakeOrPay extends Component {
+
+  state = {
+    // Datos de la entidad
+    listaContratosSeleccionados: [],
+    listaIdContrato: [],
+    listaContratos: [],
+    contrato: '',
+    fechaInicial: '',
+    fechaFinal: '',
+    tipoUso: '',
+    agente: '',
+    codigoContrato: '',
+    ultimoRangoConsultado: '',
+  };
+
+  /**
+   * Método encargado de comprobar si el formulario ya cargo
+   */
+  componentDidMount() {
+    const { state } = this.props.history &amp;&amp; this.props.history.location;
+    if (state &amp;&amp; state.listaContratos) {
+      this.cargarDatos(state);
+    }
+  };
+
+  /**
+   * Método encargado de cargar los datos que vienen desde otro componente
+   * @param {*} state Datos del componente padre
+   */
+  cargarDatos(state) {
+    const listaContratos = state.listaContratos.map(contrato => {
+      contrato.seleccionado = true;
+      return contrato;
+    });
+    this.setState({
+      listaContratos: listaContratos
+    });
+  };
+
+  /**
+   * Método encargado de limpiar los campos del formulario
+   */
+  limpiarFormulario = () => {
+    this.setState({
+      // Datos de la entidad
+      codigoContrato: '',
+      listaIdContrato: [],
+      listaContratos: [],
+      listaContratosSeleccionados: [],
+      contrato: '-1',
+      fechaInicial: ' ',
+      fechaFinal: ' ',
+      tipoUso: '',
+      agente: '',
+      fechaInicio: '',
+      fechaFin: '',
+    });
+    limpiarHistorico(this.props);
+  };
+
+  /**
+   * Método encargado de limpiar el formulario al momento de salir
+   */
+  componentWillUnmount() {
+    this.limpiarFormulario();
+  };
+
+  /**
+   * Método encargado de generar los botones del formulario
+	 * @returns {Object}
+   */
+  obtenerFunciones = () => {
+    return [
+      { texto: 'Guardar', callback: this.guardarEntidad },
+      { texto: 'Calcular Consumo', callback: this.calcularConsumo },
+      { texto: 'Limpiar', callback: this.limpiarFormulario },
+    ];
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  validarFormularioConsultar = () => {
+    const { fechaInicial, fechaFinal, listaContratos } = this.state;
+    const fechaIniDate = new Date(fechaInicial);
+    const fechaFinDate = new Date(fechaFinal);
+    //Validaciones
+    if (!Util.validarArreglo(listaContratos)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar un contrato' } };
+    }
+
+    if (fechaInicial.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha inicial.' } };
+    }
+
+    if (fechaFinal.trim() === '') {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe seleccionar la fecha final.' } };
+    }
+
+    if (fechaIniDate > fechaFinDate) {
+      return { respuesta: false, mensaje: { titulo: 'Error', mensaje: 'La fecha inicial no puede ser mayor que la final' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de validar las variables del formulario
+	 * @returns {Object}
+   */
+  validarFormulario = () => {
+    const { listaContratosSeleccionados } = this.state;
+    //Validaciones
+    if (!Util.validarArreglo(listaContratosSeleccionados)) {
+      return { respuesta: false, mensaje: { titulo: 'Datos incompletos', mensaje: 'Debe agregar al menos un contrato.' } };
+    }
+
+    return { respuesta: true };
+  };
+
+  /**
+   * Método encargado de obtener el valor de la cantidad firme.
+   * @param {number} cantidadFirme La cantidad firme del contrato consultado.
+   * @param {number} cantidadReal La cantidad real del contrato consultado.
+   * @returns {number}
+   */
+  obtenerCantidadFirme = (cantidadFirme, cantidadReal) => {
+    let cantidadF = cantidadFirme;
+    let cantidadR = cantidadReal;
+    if (!cantidadF || cantidadF === null) {
+      cantidadF = cantidadR
+    }
+    return cantidadF;
+  };
+
+  /**
+   * Método encargado de construir el objeto con los datos para guardar.
+   * @returns {Object}
+   */
+  obtenerObjeto = () => {
+    const { listaContratosSeleccionados, fechaInicial, fechaFinal } = this.state;
+    let objetoDevoler = {};
+    const valores = listaContratosSeleccionados.map((dato) => {
+      return {
+        cntIdecontrato: {
+          cntIderegistro: dato.tipoContrato.cntIdecontrato.cntIderegistro
+        },
+        nvcCantidadreal: dato.cantidadReal,
+        nvcCantidadfirme: this.obtenerCantidadFirme(dato.cantidadFirme, dato.cantidadReal),
+        nvcConsumoocacional: dato.consumoOcasional,
+        nvcFechainicialcalculo: fechaInicial,
+        nvcFechafinalcalculo: fechaFinal,
+        nvcCantidaddeficiente: dato.cantidadDeficiente
+      }
+    });
+    objetoDevoler.listaValores = valores;
+    return objetoDevoler
+  };
+
+  /**
+   * Método encargado de guardar los datos de la entidad
+	 * @returns {bool}
+   */
+  guardarEntidad = () => {
+    const validacion = this.validarFormulario();
+    if (!validacion.respuesta) {
+      this.props.mostrarAlerta(validacion.mensaje.titulo, validacion.mensaje.mensaje);
+      return false;
+    }
+    const entidadGuardar = this.obtenerObjeto();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CONSUMO_SIN_TAKE_OR_PAY.GUARDAR, entidadGuardar)
+      .then(respuesta => {
+        if (respuesta.data.codigo > 0) {
+          this.limpiarFormulario();
+        }
+      });
+  };
+
+  /**
+   * Método encargado de controlar el cambio del valor de los campos del formulario
+	 * @param {Event} evento El evento que se ejecuta en el control de usuario
+   */
+  controlarCambio = (evento) => {
+    let change = {};
+    const listaContratos = this.state.listaContratos;
+    const { name } = evento.target;
+    if (name == 'seleccionado') {
+      listaContratos[evento.target.attributes['data-index'].value].seleccionado = evento.target.checked;
+    }
+    change[name] = evento.target.value;
+    this.setState(change);
+  };
+
+  /**
+   * Método encargado de que no se agreguen contratos repetidos
+   * @param {number} idContrato Identificador del contrato seleccionado
+   * @returns {number}
+   */
+  validarRepetido = (idContrato) => {
+    const lista = [...this.state.listaContratosSeleccionados];
+    const index = lista.findIndex(p => p.tipoContrato.cntIdecontrato.cntIderegistro == idContrato);
+    return index >= 0;
+  };
+
+  /**
+   * Método encargado de construir un objeto para realizar el calculo.
+   * @returns {Object}
+   */
+  contruirObjetoCalcular = () => {
+    const { listaContratos, fechaInicial, fechaFinal } = this.state;
+    const lista = listaContratos
+      .filter(contrato => contrato.seleccionado)
+      .map(dato => (
+        {
+          contrato: {
+            cntIderegistro: (dato.cntIderegistro) ? dato.cntIderegistro : dato,
+          },
+          fechaInicial: fechaInicial,
+          fechaFinal: fechaFinal
+        }
+      ));
+    return lista;
+  };
+
+  /**
+   * Método encargado de consultar los calculos del contrato seleccionado a una lista.
+   * @returns {bool}
+   */
+  calcularConsumo = () => {
+    const { listaContratosSeleccionados, listaContratos, contrato, fechaInicial, fechaFinal, ultimoRangoConsultado } = this.state;
+    const validar = this.validarFormularioConsultar();
+    if (!validar.respuesta) {
+      this.props.mostrarAlerta(validar.mensaje.titulo, validar.mensaje.mensaje);
+      return false;
+    }
+
+    const rangoRepetido = `${fechaInicial}-${fechaFinal}` == ultimoRangoConsultado;
+    if (rangoRepetido) {
+      this.props.mostrarAlerta('Error', 'El rango actual ya ha sido consultado.');
+      return false;
+    }
+
+    const validarRepetido = this.validarRepetido(contrato);
+    if (validarRepetido) {
+      this.props.mostrarAlerta('Error', 'El contrato ya se encuentra en la lista');
+      return false;
+    }
+    const entidadConsultar = this.contruirObjetoCalcular();
+    axios.post(RUTAS_API.PARAMETRIZACION.GESTION_CONSUMO_SIN_TAKE_OR_PAY.CONSULTAR_CONTRATOS_CALCULO, entidadConsultar)
+      .then(respuesta => {
+        if (respuesta.data.codigo == 0) {
+          this.setState({ listaContratosSeleccionados: [] });
+          return;
+        }
+        if (respuesta.data.codigo > 0) {
+          this.setState({
+            listaContratosSeleccionados: respuesta.data.datos,
+            ultimoRangoConsultado: ultimoRangoConsultado
+          });
+        }
+      });
+  };
+
+  /**
+   * Método encargado de mostrar la tabla con los contratos agregados.
+   * @returns {Array}
+   */
+  renderTablaContratos = () => {
+    return (
+      &lt;table className='table table-striped mt-5'>
+        &lt;thead>
+          &lt;tr>
+            &lt;th>Tipo de Agente&lt;/th>
+            &lt;th>Agente&lt;/th>
+            &lt;th>Contrato&lt;/th>
+            &lt;th>Tipo De Contrato&lt;/th>
+            &lt;th>Cantidad Deficiente&lt;/th>
+            &lt;th>Unidad de Medida&lt;/th>
+            &lt;th>Cantidad Real&lt;/th>
+            &lt;th>Cantidad Ocasional&lt;/th>
+            &lt;th>Fecha Inicio&lt;/th>
+            &lt;th>Fecha Finalización&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.listaContratosSeleccionados.map((dato, index) => {
+              return (
+                &lt;tr key={dato.tipoContrato.cntIdecontrato.cntIderegistro}>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.cntTiponegocio}&lt;/td>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.terIdeagente.terNomcompleto}&lt;/td>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.cntNumero}&lt;/td>
+                  &lt;td>{dato.tipoContrato.uniIdetipocontrato.uniNombre1}&lt;/td>
+                  &lt;td>{dato.cantidadDeficiente}&lt;/td>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.uniIdemedidacontratada.uniNombre1}&lt;/td>
+                  &lt;td>{dato.cantidadReal}&lt;/td>
+                  &lt;td>{dato.consumoOcasional}&lt;/td>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.cntFechainicio}&lt;/td>
+                  &lt;td>{dato.tipoContrato.cntIdecontrato.cntFechafin}&lt;/td>
+                &lt;/tr>
+              );
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de redireccionar a la interfaz de consultar contratos.
+   */
+  seleccionarContrato = () => {
+    this.props.history.push({
+      pathname: RUTAS_VISTA.CONSULTA_CONTRATOS.url,
+      state: {
+        interfazGestion: RUTAS_VISTA.GESTION_CONSUMO_SIN_TAKE_OR_PAY.url,
+        seleccionMultiple: true,
+        mostrarTablaSeleccionados: true,
+        estadosContrato: ['A', 'F'],
+        tiposContrato: ['GNVS', 'S'],
+        takeOrPay: 'N',
+        estadoContratoDisabled: true,
+        takeOrPayDisabled: true,
+        tiposContratoDisabled: true,
+      }
+    });
+  };
+
+  /**
+   * Método encargado mostrar una tabla con los contratos seleccionados en la interfaz de contrato
+   * @returns {JSX}
+   */
+  renderContratosSeleccionados = () => {
+    if (!Util.validarArreglo(this.state.listaContratos)) {
+      return;
+    }
+    return (
+      &lt;table className='table table-hover table-striped table-condensed table-bordered mt-5'>
+        &lt;thead className='bg-dark text-white'>
+          &lt;tr>
+            &lt;th className='text-center'>*&lt;/th>
+            &lt;th>Agente&lt;/th>
+            &lt;th>Fecha Inicio&lt;/th>
+            &lt;th>Fecha Fin&lt;/th>
+            &lt;th>Tipo de uso&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {
+            this.state.listaContratos.map((contrato, index) => {
+              return (
+                &lt;tr key={index}>
+                  &lt;td>
+                    &lt;input type="checkbox" checked={contrato.seleccionado} onChange={this.controlarCambio} name='seleccionado' data-index={index} />
+                  &lt;/td>
+                  &lt;td>{contrato.terIdeagente.terNomcompleto}&lt;/td>
+                  &lt;td>{contrato.cntFechainicio}&lt;/td>
+                  &lt;td>{contrato.cntFechafin}&lt;/td>
+                  &lt;td>{contrato.uniIdetipouso.uniNombre1}&lt;/td>
+                &lt;/tr>
+              )
+            })
+          }
+        &lt;/tbody>
+      &lt;/table>
+    );
+  };
+
+  /**
+   * Método encargado de mostrar el formulario.
+   * @returns {Object}
+   */
+  render() {
+    return (
+      &lt;Fragment>
+        &lt;Botonera funciones={this.obtenerFunciones()} />
+        &lt;div className='conf-general row mt-5'>
+          &lt;div className='form-group col-4'>
+            &lt;label>Contrato:&lt;/label>
+            &lt;div className='input-group'>
+              &lt;input
+                type="text"
+                disabled={true}
+                className='form-control'
+                onChange={this.controlarCambio}
+                name='codigoContrato'
+                placeholder='Seleccionar contrato'
+                value={Util.validarArreglo(this.state.listaContratos) ? (this.state.listaContratos.length + ' Contratos seleccionados') : 'Seleccione un contrato'}
+              />
+              &lt;div className='input-group-btn'>
+                &lt;button className='btn btn-primary' onClick={this.seleccionarContrato}>&lt;i className='fa fa-fw fa-search'>&lt;/i>&lt;/button>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+          &lt;Fecha
+            label='Fecha Inicio:'
+            name='fechaInicial'
+            fecha={this.state.fechaInicial}
+            onChange={this.controlarCambio}
+          />
+          &lt;Fecha
+            label='Fecha Fin:'
+            name='fechaFinal'
+            fecha={this.state.fechaFinal}
+            onChange={this.controlarCambio}
+          />
+          {this.renderContratosSeleccionados()}
+          {this.state.listaContratosSeleccionados.length > 0 &amp;&amp; this.renderTablaContratos()}
+        &lt;/div>
+      &lt;/Fragment>
+    );
+  };
+}
+
+GestionCalcularConsumoSinTakeOrPay.propTypes = {
+  history: PropTypes.object,
+  mostrarAlerta: PropTypes.func
+};
+
+const mapStateToProps = state => {
+  return {};
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({
+    mostrarAlerta,
+  }, dispatch);
+};
+
+const VistaRedux = connect(mapStateToProps, mapDispatchToProps)(GestionCalcularConsumoSinTakeOrPay);
+
+export { VistaRedux as RGestionCalcularConsumoSinTakeOrPay };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsultaTerceros.html">ConsultaTerceros</a></li><li><a href="GestionLiquidarContrato.html">GestionLiquidarContrato</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ComboHoras">ComboHoras</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Mar 16 2020 15:20:43 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

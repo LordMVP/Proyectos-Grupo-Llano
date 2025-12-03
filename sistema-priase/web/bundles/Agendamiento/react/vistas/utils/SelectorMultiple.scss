@@ -1,0 +1,19 @@
+.selector-multiple input[type="checkbox"] {
+  height: auto;
+  width: auto;
+}
+.selector-multiple label.label-selector{
+  display: block;
+  text-align: left;
+}
+
+.selector-multiple .list-content{
+  display: block;
+  width: 100%;
+  overflow: auto;
+  max-height: 60vh;
+}
+
+button.btn-buscador:disabled{
+  opacity: 0.5 !important;
+}

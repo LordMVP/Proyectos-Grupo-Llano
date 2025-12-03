@@ -1,0 +1,54 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/lecturas/gestionar.estilo.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+    <link rel="stylesheet" type="text/css" href="/achagua/css/appload.css" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %} Cargar Lectura  {% endblock %}
+{% block body %}   
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="submit" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+
+    <fieldset id="divPanelContenedor">
+        <legend>Información</legend>
+        <div>
+            <div class="campo">
+                <label for="txtEmpresa">Empresa:</label>
+                <input type="text" id="txtEmpresa" name="txtEmpresa" disabled="disable" value="{{empresa}}" />
+            </div>
+            <div class="campo">
+                <label for="cmbTipoCargue">Tipo Cargue:</label>
+                <select id="cmbTipoCargue" name="cmbTipoCargue">
+                    <option value="R">Revisión</option>
+                    <option value="F">Facturar</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="txtArchivo">Archivo:</label>
+                <input type="file" id="txtArchivo" name="txtArchivo" accept=".txt,.csv"/>
+
+            </div>
+
+        </div>
+    </fieldset>
+    <div style="margin-top: 15px;">
+        <table class="tabla" id="tblErrores"></table>
+    </div>
+    <div id="divDialogoErrores" style="display: none;">
+        <span class="pMensaje" id="spanMensaje" style="text-align: right; margin-right: 40px;"></span>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="/achagua/js/Appload.js"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/lectura/cargarlectura/cargarlectura.vista.js')}}"></script>
+{% endblock %}

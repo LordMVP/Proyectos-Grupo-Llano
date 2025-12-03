@@ -1,0 +1,7 @@
+parameters:
+#    nominaciones_nominaciones.example.class: Nominaciones\NominacionesBundle\Example
+
+services:
+#    nominaciones_nominaciones.example:
+#        class: %nominaciones_nominaciones.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

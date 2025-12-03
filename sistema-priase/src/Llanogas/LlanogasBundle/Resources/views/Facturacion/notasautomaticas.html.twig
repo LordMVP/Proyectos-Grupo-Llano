@@ -1,0 +1,406 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/recaudos/abonos.estilo.css')}}" />
+    <link href="{{asset('bundles/Llanogas/css/facturacion/dataTables.css')}}" media="screen" type="text/css" rel="stylesheet" />
+    <style>
+        .tipoAplicacion{
+            display: inline-block;
+            width: 40%;
+            border-right: solid 1px #408BC4;
+        }
+
+        .tipoNota{
+            display: inline-block;
+            width: 40%;
+        }
+        .noclose .ui-dialog-titlebar-close
+        {
+            display:none;
+        }
+        #divCargando {
+            min-width: 100px;
+            max-width: 300px;
+            min-height: 40px;
+            background-color: #8AB6D9;
+            color: #FFF;
+            font-size: 12px;
+            margin: 0 auto;
+            border-radius: 20px;
+            padding-left: 20px;
+            text-align: center;
+            padding-top: 3px;
+        }
+
+        #divCargando p{
+            margin: 7px 0px 0px 10px;
+            display: inline-block;
+        }
+
+        .link-archivo{
+            font-weight: bold;
+            color:#09F;
+            margin: 0px 5px 0px 10px;
+            text-decoration: none;
+            position: relative;
+            top:5px;
+        }
+        #divDialogoConceptoInformativo .campo{
+            width: 27%;
+            margin-bottom: 15px
+        }
+        
+        #divDialogoConceptoInformativo select option[disabled="disabled"]{
+            cursor: not-allowed;
+        }
+
+    </style>
+
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}
+{% block titulo %}Facturación: Notas Automáticas Directas - {{empresa}}  {% endblock %}
+{% block body %}
+
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="procesar" id="btnProcesar" class="btn" />
+            <input type="button" value="aplicar notas" id="btnAplicarNotas" class="btn"/>
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="divPestanias">
+
+        <ul>
+            {% for tipo in tipoafectacion %} 
+                {% if tipo.idunidad == 1084 %}
+                    <li id="liSuscripcion"><a data-tipo="S" href="#divSuscripcion">Suscripción única</a></li>
+                    {% elseif tipo.idunidad == 1085 %}
+                    <li id="liMultiple"><a data-tipo="V" href="#divVariasSuscripciones">Varias Suscripciones</a></li>
+                    {% endif %}
+                {% endfor %}
+        </ul>
+        {% for tipo in tipoafectacion %} 
+            {% if tipo.idunidad == 1084 %}
+                <div id="divSuscripcion">
+                    <fieldset>
+                        <legend>Suscripción</legend>
+
+                        <div class="campoBusqueda">
+                            <label for="btnBuscarSuscripcion">Suscripción:</label>
+                            <input type="text" id="txtSuscripcion" disabled="disabled" />
+                            <button id="btnBuscarSuscripcion"></button>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtDocumento">NIT/CC:</label>
+                            <input type="text" id="txtDocumento" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtNombre">Nombre Completo:</label>
+                            <input type="text" id="txtNombre" disabled>
+                        </div>
+
+                        <div class="campoCorto">
+                            <label for="txtCodAnterior">Código Anterior:</label>
+                            <input type="text" id="txtCodAnterior" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtSuscMunicipo">Municipo:</label>
+                            <input type="text" id="txtSuscMunicipo" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtSuscBarrio">Barrio:</label>
+                            <input type="text" id="txtSuscBarrio" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtDireccion">Dirección:</label>
+                            <input type="text" id="txtDireccion" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtTelefono">Teléfono:</label>
+                            <input type="text" id="txtTelefono" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtCelular">Celular:</label>
+                            <input type="text" id="txtCelular" disabled>
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtSuscTipoUso">Tipo de Uso:</label>
+                            <input type="text" id="txtSuscTipoUso" disabled>
+                        </div>
+                        <button class="btnSimple" id="btnBuscarFacturasSuscripcion">Buscar Facturas</button>
+                    </fieldset>
+                </div>
+            {% elseif tipo.idunidad == 1085 %}
+                <div id="divVariasSuscripciones">
+                    <fieldset>
+                        <legend>Filtro Facturas </legend>
+                        <div class="campo">
+                            <label for="txtTipoDocumentoFiltro">Tipo Documento:</label>
+                            <select id="txtTipoDocumentoFiltro" required="required">
+                                <option value="-1">Seleccione una opción</option>
+                                {% for tipodocumento in listatipodocumentos %}
+                                    <option value="{{tipodocumento.idtipodocumento}}">{{tipodocumento.tipodocumento}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtDocumentoFiltro">Documento:</label>
+                            <select id="txtDocumentoFiltro" required="required"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="cmbLiquidacion">Liquidación:</label>
+                            <select id="cmbLiquidacion" required="required"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtCiclo">Ciclo:</label>
+                            <select id="txtCiclo" required="required">
+                                <option value="-1">Seleccione una opción</option>
+                                {% for ciclo in ciclos %}
+                                    <option value="{{ciclo.idciclo}}" >{{ciclo.ciclo}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtTipoUso">Tipo de Uso:</label>
+                            <select id="txtTipoUso" required="required">
+                                <option value="-1">Seleccione una opción</option>
+                                {% for tipo in tiposuso %}
+                                    <option value="{{tipo.idtipousosuscripcion}}" >{{tipo.tipousosuscripcion}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="cmbCantidadMeses">Mes a afectar:</label>
+                            <select id="cmbCantidadMeses" required="required">
+                                <option value="-1">Seleccione una opción</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="cmbReclamacion">Nota en reclamación:</label>
+                            <select id="cmbReclamacion" required="required">
+                                <option value="-1">Seleccione una opción</option>
+                                <option value="S">Sí </option>
+                                <option value="N">No </option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="txtMunicipio">Municipio:</label>
+                            <input type="text" id="txtMunicipio">
+                        </div>
+
+                        <div class="campo">
+                            <label for="txtBarrio">Barrio:</label>
+                            <input type="text" id="txtBarrio" disabled="disabled">
+                        </div>
+                        <button class="btnSimple" id="btnBuscarFacturas">Buscar</button>
+                    </fieldset>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div id="divFacturas">
+        <button class="btnSimple" id="btnAgregarFiltroAdicional">Agregar filtro adicional</button>
+
+
+        <a href="archivofactura/" target="_blank" disabled="disabled" class="link-archivo">
+            <i class="fa fa-file-excel-o fa-2x"></i> Exportar Facturas Originales
+        </a>
+        <a href="archivo/" id="linkArchivoProcesadas" target="_blank" disabled="disabled" class="link-archivo">
+            <i class="fa fa-file-excel-o fa-2x"></i> Exportar Facturas Procesadas
+        </a>
+
+
+        <table id="tblFacturas" class="tabla"></table>
+    </div>
+    <div id="divValoresConceptos">
+        <fieldset>
+            <legend>Asignación de valor/concepto en la nota</legend>
+            <div>
+                <div class="campo" id="divTxtLiquidacion">
+                    <label for="txtLiquidacion">Liquidación:</label>
+                    <input type="text" id="txtLiquidacion" disabled="disabled"/>
+                </div>
+                <div class="campo" id="divCmbLiquidacion" style="display:none;">
+                    <label for="cmbLiquidacionSus">Liquidación:</label>
+                    <select id="cmbLiquidacionSus"></select>
+                </div>
+                <div class="campo">
+                    <label for="txtConcepto">Concepto:</label>
+                    <select id="txtConcepto"></select>
+                </div>
+                <div class="campoCorto">
+                    <label></label>
+                    <button class="btnSimple" id="btnAgregarValor">Agregar</button>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div id="divValores">
+        <table id="tblValores" class="tabla"></table>
+        <button style="display:none;" id="btnQuitarValor" class="btnSimple">Quitar Valor</button>
+    </div>
+    <div id="divDetalleFactura">
+        <div style="max-height:300px; overflow-y: auto;">
+            <table id="tblConceptos" class="tabla"></table>
+        </div>
+    </div>
+
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div>
+            <div class="campo">
+                <label for="txtFiltroMunicipo">Municipo:</label>
+                <input type="text" id="txtFiltroMunicipo" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroSus">Suscripción:</label>
+                <input type="text" id="txtFiltroSus" data-attr="suscripcion" maxlength="15" />
+            </div>
+            <div class="campo">
+                <label for="txtFiltroDoc">NIT/CC:</label>
+                <input type="text" id="txtFiltroDoc" data-attr="documento" maxlength="20" />
+            </div>
+        </div>
+        <div>
+            <div class="campo">
+                <label for="txtFiltroCodAnt">Código Anterior:</label>
+                <input type="text" id="txtFiltroCodAnt" data-attr="codAnterior" maxlength="30" />
+            </div>
+            <div class="campo">
+                <label for="txtIdPropiedad">Id Propiedad:</label>
+                <input type="text" id="txtIdPropiedad" />
+            </div>
+        </div>
+        <span id="spanMensaje" class="pMensaje"></span>
+        <button id="btnBuscar" class="btnSimple">Buscar</button>
+    </div>
+    <div id="divFiltroAdicionalFacturas" style="display:none;">
+        <div>
+
+            <div class="campoMitad">
+                <label for="cmbFiltroConceptos">Concepto:</label>
+                <select id="cmbFiltroConceptos"></select>
+            </div>
+            <div class="campo">
+                <button class="btnSimple" id="btnAgregarFiltro">Agregar</button>
+            </div>
+        </div>
+        <div id="divListaFiltrosFacturas" style="margin-top: 7px;">
+            <table class="tabla" id="tblFiltros"></table>
+        </div>
+        <span class="pMensaje" id="spanFiltroFactura"></span>
+    </div>
+
+    <div id="divDialogProcesando" style="display:none;">
+        <div id="divCargando" style="margin-bottom: 25px; margin-top: 20px;"> 
+            <img src="/achagua/sistema/web/bundles/Llanogas/img/cargando2.gif">
+            <p>Procesando facturas, <br>esto puede tardar unos minutos...</p>                
+        </div>
+    </div>
+
+
+    <div id="divDialogoConceptos" style="display:none;">
+        <table class="tabla" id="tblConceptosProcesados"></table>
+    </div>
+
+
+    <div id="divDialogoMotivos" style="display:none;">
+        <div class="campoCompleto">
+            <label for="cmbMotivo">Mótivo:</label>
+            <select id="cmbMotivo"></select>
+        </div>
+        <div class="campoCompleto">
+            <label for="txtComentario">Comentarios:</label>
+            <textarea name="" id="txtComentarios"></textarea>
+        </div>
+    </div>
+
+    <div id="divDialogoErrores" style="display:none">
+        <table class="tabla" id="tblErrores"></table>
+    </div>
+    <div id="divDialogoBusquedaFactura" style="display: none;">
+        <div class="campo">
+            <label for="txtTipoDocumentoFiltroSuscripcion">Tipo Documento:</label>
+            <select id="txtTipoDocumentoFiltroSuscripcion" required="required"></select>
+        </div>
+        <div class="campo">
+            <label for="txtDocumentoFiltroSuscripcion">Documento:</label>
+            <select id="txtDocumentoFiltroSuscripcion" required="required"></select>
+        </div>
+        <div class="campo">
+            <label for="cmbLiquidacionSuscripcion">Liquidación:</label>
+            <select id="cmbLiquidacionSuscripcion" required="required"></select>
+        </div>
+        <div class="campo">
+            <label for="cmbReclamacionSuscripcion">Nota en reclamación:</label>
+            <select id="cmbReclamacionSuscripcion" required="required">
+                <option value="-1">Seleccione una opción</option>
+                <option value="S">Sí </option>
+                <option value="N">No </option>
+            </select>
+        </div>
+        <div class="campo" id="divMeses">
+            <label for="cmbMesesSus">Mes a afectar:</label>
+            <select id="cmbMesesSus">
+                <option value="-1">Seleccione una opción</option>
+            </select>
+        </div>
+        <div class="campo" id="divContabilizacion" style="display:none">
+            <label for="cmbContabilizacion">Clase de Contabilización:</label>
+            <select id="cmbContabilizacion">
+                <option value="-1">Seleccione una opción</option>
+                <option value="CE">Cambio Estrato </option>
+                <option value="EL">Error Lectura </option>
+            </select>
+        </div>
+        <p class="pMensaje" id="pMensajeFiltroFacturas"></p>
+    </div>
+    <div id="divDialogoConceptoInformativo" style="display: none;">
+        <div>
+            <div class="campo">
+                <label for="txtLiquidacionRelacion">Liquidación:</label>
+                <input type="text" id="txtLiquidacionRelacionado" disabled="disabled"/>
+            </div>
+            <div class="campo">
+                <label for="txtConceptoRelacion">Concepto:</label>
+                <input type="text" id="txtConceptoRelacionado" disabled="disabled"/>
+            </div>
+            <div class="campo">
+                <label for="cmbInformativos">Concepto Informativo:</label>
+                <select id="cmbInformativos"></select>
+            </div>
+            <div class="campoCorto" >
+                <button class="btnSimple" id="btnAgregarRelacionado" style="position: relative; top: 0;">Agregar</button>
+            </div>
+            <span style="color: #F90" id="spanErrorRelacionado"></span>
+        </div>
+        <div id="detalleSeleccionRelacionado">
+            <table id="tblConceptosRelacionadosSeleccionados" class="tabla"></table>
+            <button id="btnQuitarRelacionado" class="btnSimple">Quitar Valor</button>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/jquery.dataTables.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/dataTables.tableTool.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasautomaticas/notasautomaticas.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasautomaticas/notasautomaticas.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/facturacion/notasautomaticas/notasautomaticas.vista.js')}}"></script>
+{% endblock %}

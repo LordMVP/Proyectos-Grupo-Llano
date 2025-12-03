@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BusquedaServicios/subcomponentes/Busqueda.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BusquedaServicios/subcomponentes/Busqueda.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react'
+
+import { Combo, Input, Tabla } from 'appfuture-react'
+
+import Autocompletado from '../../Assets/componentes/Autocompletado'
+import API from '../../../global/rutas_api'
+import Peticion from '../../../global/peticion'
+import Util from '../../../global/util.js'
+
+import { toast } from 'react-toastify'
+
+/**
+ *
+ *
+ * @class Busqueda
+ * @extends {Component}
+ */
+class Busqueda extends Component {
+ 
+	/**
+     *Define estados iniciales
+     * @memberof class Busqueda
+     */  
+  state = {
+    lista: [],
+
+    // defecto
+
+    agenda: '-1',
+    servicio: '',
+    cuadrilla: '',
+    suscriptor: '', // 0194700240101
+    ordenTrabajo: '',
+  }
+
+  montado = false
+
+	/**
+     *
+     *Habilita el botón guardar
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */
+
+  BotonBuscar = () => {
+    return this.state.suscriptor
+      ? &lt;button className="btn" onClick={this.buscar}>buscar&lt;/button>
+      : &lt;button className="btn" disabled={true}>buscar&lt;/button>
+  }
+
+ 	/**
+     *
+     *Habilita el botón limpiar filtro
+     *@method
+     *@param {Object} props
+     *@return {JSX} Componente - Button
+     */ 
+  BotonLimpiarFiltro = () => {
+    return this.state.suscriptor
+      ? &lt;button className="btn" onClick={this.limpiarFiltro}>limpiar filtro&lt;/button>
+      : &lt;button className="btn" disabled={true}>limpiar filtro&lt;/button>
+  }
+
+	/**
+     * Realiza las consultas previas para listar los elementos que irán en los combobox
+     * @method
+     * @async
+     */
+  componentDidMount() {
+    // cuadrillaJson
+
+    Peticion.get({
+      url: API.BUSQUEDA_SERVICIOS.FILTRAR_CUADRILLAS,
+      config: {
+        valor: 'cuadrillaCod',
+        texto: 'cuadrillaNom',
+      },
+      callback: (cuadrillaJson) => this.setState({ cuadrillaJson }),
+    })
+  }
+
+ 	/**
+     * Cambia el valor del estado asociado a cada componente
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */ 
+  change = ({ target: { id, value } }) => {
+    this.setState({ [id]: value })
+  }
+
+ 	/**
+     * Cambia el valor del estado asociado al filtro
+     * @method
+     * @async
+     * @param {int} id al nombre del estado que se desea modificar
+     * @param {(int|string)} value del componente correspondiente al dato
+     * que se visualizará en el componente
+     */   
+  changeFilter = async ({ target: { id, value } }) => {
+    await this.setState({ [id]: value })
+    await this.consultar()
+  }
+
+    /**
+     *Detecta el cambio de estado, al digitar en el campo de texto
+     *@method
+     *@param {Object} e - Adjudicado a un campo de texto
+     */  
+  changeBlur = async ({ target: { id, value } }) => {
+    if (this.state.suscriptor) this.consultar()
+  }
+
+  // vista
+
+  /**
+   *
+   *Busca por suscriptor y lista las agendas y servicios para colovarlo en los combobox
+   * @async
+   * @method
+   * 
+   */
+  buscar = async () => {
+    // agendaJson
+
+    await Peticion.post({
+      url: API.BUSQUEDA_SERVICIOS.FILTRAR_AGENDAS,
+      parametros: {
+        suscriptor: this.state.suscriptor,
+      },
+      config: {
+        valor: 'agendaCod',
+        texto: 'agendaNom',
+      },
+      callback: (agendaJson) => this.setState({ agendaJson }),
+    });
+
+    // serviciosJson
+
+    await Peticion.postCustom({
+      url: API.BUSQUEDA_SERVICIOS.FILTRAR_SERVICIOS,
+      parametros: {
+        suscripcion: this.state.suscriptor,
+      },
+      config: {
+        valor: 'servicioCod',
+        texto: 'servicioNom',
+      },
+      callback: (servicioJson) => this.setState({ servicioJson }),
+    });
+
+    // consultar
+
+    this.consultar()
+  }
+
+  /**
+   *
+   *Realiza la consulta conlos campos diligenciados en el formulario y los lista en la tabla
+   * @method
+   * @async
+   * 
+   */
+  consultar = async () => {
+
+    let lista = await Peticion.post({
+      url: API.BUSQUEDA_SERVICIOS.BUSCAR_SERVICIO,
+      parametros: {
+        suscriptor: this.state.suscriptor,
+        servicio: Util.obtenerId(this.state.servicio),
+        agenda: Util.obtenerId(this.state.agenda),
+        ordenTrabajo: this.state.ordenTrabajo,
+        cuadrilla: Util.obtenerId(this.state.cuadrilla),
+      },
+    });
+
+    if (lista.length == 0 || lista.length == undefined) {
+      // no hay datos
+
+      const mensaje = 'La consulta no retorno ningun registro'
+      const opciones = {
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      }
+
+      //limpiar tabla
+      this.setState({ lista: [] })
+      toast.info(mensaje, opciones)
+      return
+    }
+
+    lista = lista.map(function (servicio) {
+      let { suscriptores, servicios } = servicio
+
+      return {
+        id: servicios.servicioCod,
+        agenda: servicio.sigueCodage,
+        nombreAgenda: `${servicio.sigueCodage} - ${servicio.sigueCodageNom}`,
+        contratante: servicio.sigueCodemp,
+        contratista: servicio.sigueEmpcon,
+        cuadrilla: (servicio.sigueCodcua &amp;&amp; servicio.sigueCodcuaNom) ? `${servicio.sigueCodcua} - ${servicio.sigueCodcuaNom}` : '',
+        ordenTrabajo: servicio.sigueOrdtra,
+        suscriptor: suscriptores.clienteCodsus,
+        suscriptorNombre: `${suscriptores.clienteCodsus} - ${suscriptores.clienteNomsus}`,
+        servicioNombre: servicios.servicioNom,
+        sigueIde: servicio.sigueIde,
+        sigueCoddepemp: servicio.sigueCoddepemp
+      }
+    });
+
+    await this.setState({ lista });
+    this.props.onChangeLista(lista);
+  }
+
+	/**
+	 *
+	 *Limpiar el formulario
+	 * @method
+	 * 
+	 */  
+  limpiarFiltro = async () => {
+    // limpiar
+
+    await this.setState({
+      agenda: '-1',
+      servicio: '-1',
+      cuadrilla: '-1',
+      ordenTrabajo: '',
+    })
+
+    // consultar
+
+    await this.consultar()
+  }
+
+  /**
+   *
+   *
+   * Deshabilita el elemento de la tabla
+   * @method
+   * @return {boolean}  
+   */
+  get deshabilitarElemento() {
+    const { lista, suscriptor } = this.state
+
+    return !(Util.validarArreglo(lista) &amp;&amp; suscriptor.length)
+  }
+
+   /**
+   *
+   *
+   * Deshabilita la agenda de la tabla
+   * @method
+   * @return {boolean}  
+   */ 
+  get deshabilitarAgenda() {
+    const { agendaJson } = this.state
+    const valido = Util.validarArreglo(agendaJson)
+
+    return !(valido &amp;&amp; !this.deshabilitarElemento)
+  }
+
+    /**
+   *
+   *
+   * Deshabilita el servicio de la tabla
+   * @method
+   * @return {boolean}  
+   */ 
+  get deshabilitarServicio() {
+    const { servicioJson } = this.state
+    const valido = Util.validarArreglo(servicioJson)
+
+    return !(valido &amp;&amp; !this.deshabilitarElemento)
+  }
+
+     /**
+     *Renderiza la vista 
+     * @return {JSX} componente - returna vista jsx 
+     */ 
+  render() {
+    const { BotonBuscar, BotonLimpiarFiltro } = this
+
+    return (
+      &lt;React.Fragment>
+        &lt;h1>Busqueda de servicios&lt;/h1>
+
+        &lt;div className="contenedor fila">
+          &lt;Input
+            id="suscriptor"
+            label="Suscripción"
+            value={this.state.suscriptor}
+            onChange={this.change}
+            required={true}
+          />
+
+          &lt;span>
+            &lt;BotonBuscar />
+          &lt;/span>
+        &lt;/div>
+
+        &lt;fieldset className="contenedor">
+          &lt;legend>filtros&lt;/legend>
+
+          &lt;span className="formulario">
+            &lt;Combo
+              id="servicio"
+              label="servicio"
+              value={this.state.servicio}
+              opciones={this.state.servicioJson}
+              onChange={this.changeFilter}
+              extra={{
+                disabled: this.deshabilitarServicio
+              }}
+            />
+
+            &lt;Input
+              id="ordenTrabajo"
+              label="orden trabajo"
+              value={this.state.ordenTrabajo}
+              onChange={this.change}
+              extra={{
+                onBlur: this.changeBlur,
+                disabled: this.deshabilitarElemento,
+              }}
+            />
+
+            &lt;Combo
+              id="agenda"
+              label="agenda"
+              value={this.state.agenda}
+              opciones={this.state.agendaJson}
+              onChange={this.changeFilter}
+              extra={{
+                disabled: this.deshabilitarAgenda
+              }}
+            />
+
+            &lt;Autocompletado
+              id="cuadrilla"
+              label="cuadrilla"
+              marcaAgua={'Escribe el número de la cuadrilla'}
+              opciones={this.state.cuadrillaJson}
+              onChange={this.changeFilter}
+              value={this.state.cuadrilla}
+              required={true}
+              extra={{
+                disabled: false
+              }}
+            />
+            &lt;div>
+              &lt;BotonLimpiarFiltro />
+            &lt;/div>
+          &lt;/span>
+        &lt;/fieldset>
+      &lt;/React.Fragment>
+    )
+  }
+}
+
+export default Busqueda
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Actividades.html">Actividades</a></li><li><a href="ActividadesMunicipios.html">ActividadesMunicipios</a></li><li><a href="ActualizacionMedidor.html">ActualizacionMedidor</a></li><li><a href="Adjuntos.html">Adjuntos</a></li><li><a href="Busqueda.html">Busqueda</a></li><li><a href="BusquedaServicios.html">BusquedaServicios</a></li><li><a href="ConsultaPeriodos.html">ConsultaPeriodos</a></li><li><a href="Detalle.html">Detalle</a></li><li><a href="Edicion.html">Edicion</a></li><li><a href="Gestion.html">Gestion</a></li><li><a href="HomologacionAgendas.html">HomologacionAgendas</a></li><li><a href="Lista.html">Lista</a></li><li><a href="ListarAgendas.html">ListarAgendas</a></li><li><a href="ListarAgendasServicios.html">ListarAgendasServicios</a></li><li><a href="Materiales.html">Materiales</a></li><li><a href="NoConformidades.html">NoConformidades</a></li><li><a href="Novedades.html">Novedades</a></li><li><a href="Servicio.html">Servicio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 25 2020 17:10:15 GMT-0500 (GMT-05:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

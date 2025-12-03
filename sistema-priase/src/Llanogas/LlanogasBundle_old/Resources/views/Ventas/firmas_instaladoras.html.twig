@@ -1,0 +1,95 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/archivos.css')}}" />
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block titulo %}Ventas: Firmas Instaladoras- {{empresa}}  {% endblock %}
+
+{% block body %}
+    <div id="divComandos">
+        <div class="divBotones">
+            <input type="button" value="buscar" id="btnBuscar" class="btn" />
+            <input type="button" value="grabar" id="btnGrabar" class="btn" />
+            <input type="button" value="cancelar" id="btnCancelar" class="btn" />
+        </div>
+    </div>
+
+    <div id="Contenedor">
+        <fieldset><legend>Datos del Tercero</legend>
+            <div class="campo" >
+                <label for="txtNit">CC/Nit:</label>
+                <input type="text" id="txtNit" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtNombre">Nombre:</label>
+                <input type="text" id="txtNombre" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTipo">Tipo Tercero:</label>
+                <input type="text" id="txtTipo" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTelefonoFijo">Teléfono Fijo:</label>
+                <input type="text" id="txtTelefonoFijo" disabled="disabled" />
+            </div>
+            <div class="campo">
+                <label for="txtTelefonoCelular">Teléfono Celular:</label>
+                <input type="text" id="txtTelefonoCelular" disabled="disabled" />
+            </div>
+
+        </fieldset>
+        <fieldset><legend>Datos Empleados y Certificaciones</legend>
+            <div id='EmpleadosCertificaciones'><table id="tblEmpleadosCertificaciones" class='tabla'></table></div>
+            <div class='campo'><input type='button' id='btnAdicionarEmpleado'class="btnSimple" value="Adicionar Colaborador" />  </div>
+        </fieldset>
+
+        <div id='edicionEmpleadosCertificaciones' style="display:none;">
+            <p id="pMensaje" class="pMensaje"> </p>
+            <div class="campo">
+                <label for="txtCodigo">Número de Identificación: </label>
+                <input type="text" id="txtCodigo"  />
+            </div>
+            <div class="campo">
+                <label for="txtNombreEmpleado">Nombre Empleado: </label>
+                <input type="text" id="txtNombreEmpleado"  maxlength="60"/>
+            </div>
+            <div class="campo">
+                <label for="cboCompetencia">Competencia: </label>
+                <select  id="cboCompetencia">
+                    <option value=''>Seleccione Competencia</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="txtVigenciaInicial">Vigencia Inicial Competencia: </label>
+                <input type="text" id="txtVigenciaInicial"  />
+            </div>
+            <div class="campo">
+                <label for="txtVigenciaFinal">Vigencia Final Competencia: </label>
+                <input type="text" id="txtVigenciaFinal"  />
+            </div>
+            <div class="campo">
+                <label for="txtCodigoSIC">Código SIC: </label>
+                <input type="text" id="txtCodigoSIC"  />
+            </div>
+            <div class="campo">
+                <label for="txtVigenciaInicialSIC">Vigencia Inicial SIC: </label>
+                <input type="text" id="txtVigenciaInicialSIC"  />
+            </div>
+            <div class="campo">
+                <label for="txtVigenciaFinalSIC">Vigencia Final SIC: </label>
+                <input type="text" id="txtVigenciaFinalSIC"  />
+            </div>
+        </div>    
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/firmasinstaladoras/firmasinstaladoras.modelo.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/firmasinstaladoras/firmasinstaladoras.control.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/ventas/firmasinstaladoras/firmasinstaladoras.vista.js')}}"></script>
+{% endblock %}

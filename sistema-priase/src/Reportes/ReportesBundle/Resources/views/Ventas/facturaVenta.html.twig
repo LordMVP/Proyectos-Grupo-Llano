@@ -1,0 +1,129 @@
+{% extends "::base.html.twig" %}
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/main.css')}}" />    
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Reportes/css/main/bootstrap.css')}}" /> 
+{% endblock %}
+{% block titulo %}Generacion de formato factura de venta - {{empresa}}  {% endblock %}
+{% block body %}
+    <div style="display: none" id="module" ng-app="myApp" ng-controller="ventasController">
+        <form name="reporte" novalidate >
+            <div id="divPanelContenedor">
+                <fieldset>  
+                    <legend>Generacion de formato factura de venta</legend>
+                    <div class="col-md-12 col-lg-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3> Parametros necesarios para la generacion del formato</h3>
+                            </div>
+                            <div class="panel-body panel-info" id="panelBody">                                 
+                                <div class="row">
+                                    <div class="form-group col-md-6 col-lg-12">
+                                        <label>Numero de venta</label>
+                                        <input type="number" name="numeroVenta" id="numeroVenta" ng-model="info.numeroVenta" class="form-control input-sm"/>
+                                        <p class="help-block" ng-if="reporte.numeroVenta.$error.required">
+                                            El numero de venta es requerido
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-6 col-lg-12" show-errors>
+                                        <label>Numero documento suscritor</label>
+                                        <input type="number" name="numeroDocumento" id="numeroDocumento" ng-model="info.numeroDocumento" class="form-control input-sm"/>
+                                        <p class="help-block" ng-if="reporte.numeroVenta.$error.required">                                           
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-md-6 col-lg-12" show-errors>
+                                        <label>Numero id suscripcion</label>
+                                        <input type="number" name="numeroSuscripcion" id="numeroSuscripcion" ng-model="info.numeroSuscripcion" class="form-control input-sm"/>
+                                        <p class="help-block" ng-if="reporte.numeroVenta.$error.required">                                           
+                                        </p>
+                                    </div>
+                                </div>                                   
+                            </div>                            
+                            <div class="panel-footer">
+                                <div class="col-md-9">
+                                    <div ng-show="!nofound" class="alert-box info">
+                                        Ingrese los datos , clic en el boton Buscar.
+                                    </div>
+                                    <div ng-show="nofound" class="alert-box error">
+                                        No se encontraron resultados para el numero de factura o documento [ {[{info.numeroVenta }]} {[{info.numeroDocumento}]} ]
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button ng-click="download=true;buscarVentas()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-search fa-1x"></i> Buscar 
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3>Resultados, solo se visualizan las ultimas 5 ventas</h3>
+                            </div>
+                            <div class="panel-body">                                 
+                                <table id="resultados" class="table table-responsive table-condensed table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th># Venta</th>
+                                            <th>Fecha Venta</th>                                            
+                                            <th>Nombre Cliente</th>                                            
+                                            <th>Metodo pago</th>
+                                            <th>Direccion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-show="!ventas || ventas.length==0">
+                                            <td colspan="4">No hay resultados para mostrar</td>
+                                        </tr>
+                                        <tr ng-repeat="item in ventas" ng-click="seleccionarFila(item)" id="tr_ven_{[{item.venta_id}]}">
+                                            <td>
+                                                <input type="radio" name="venta" id="ck_ven_{[{item.venta_id}]}" ng-click="seleccionarFila(item)" />
+                                            </td>
+                                            <td>
+                                                {[{item.venta_id}]}
+                                            </td>
+                                            <td>{[{item.venta_fecha}]}</td>
+                                            <td>{[{item.tercero_nombre}]}</td>
+                                            <td>{[{item.venta_metodo_pago}]}</td>
+                                            <td>{[{item.direccion}]}</td> 
+                                        </tr>
+                                    </tbody>                                    
+                                </table>  
+                                <div class="clearfix"/>
+                            </div>
+                            <div class="panel-footer">               
+                                <div class="col-md-9">
+                                    <b>Venta: </b> {[{selected.venta_id}]}
+                                    <br/>
+                                    <b>Fec. Venta: </b>{[{selected.venta_fecha}]}
+                                    <br/>
+                                    <b>Nom. Cliente: </b>{[{selected.tercero_nombre}]}
+                                    <br/>
+                                    <b>Dir. Cliente: </b>{[{selected.direccion}]}
+                                    <br/>
+                                </div>
+                                <div class="col-md-3">
+                                    <button ng-disabled="selected==null" ng-click="download=true;generarReporte()" class="btn btn-primary btn-sm pull-right">
+                                        <i class="fa fa-print fa-1x"></i> Imprimir Factura
+                                    </button>
+                                </div>               
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </form>        
+    </div>
+{% endblock %}
+
+{% block javascripts %}     
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/angular.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/showErrors.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/bootstrap.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/main/main.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Reportes/js/ventas/facturaVenta.control.angular.js')}}"></script>
+{% endblock %}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}ACHAGUA{% endblock %}</title>
+
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/estilo.layout.css')}}" />
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/estilo.ui.css')}}" />
+        <link rel="stylesheet" type="text/css" href="/achagua/css/style.css" />
+        <link rel="stylesheet" type="text/css" href="/achagua/css/Apptable.css" />
+        <link rel="stylesheet" type="text/css" href="/achagua/css/appload.css" />
+
+        <link rel="stylesheet" type="text/css" href="/achagua/css/override_appload.css" />
+        <link rel="stylesheet" type="text/css" href="/achagua/css/override_apptable.css" />
+
+        <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/font-awesome.min.css')}}" />
+
+        <link rel="stylesheet" media="print" type="text/css" href="{{asset('bundles/Llanogas/css/estilo_imprimir.css')}}" />
+	<link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
+
+    {% block stylesheets %}{% endblock %}
+    <script type="text/javascript" src="/achagua/js/app.prototypes.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery.plugins.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.datepicker.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.datetimepicker.js"></script>
+    <script type="text/javascript" src="/achagua/js/maskedinput.min.js"></script>
+    <script type="text/javascript" src="/achagua/js/mustache.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.tabs.js"></script>
+    <script type="text/javascript" src="/achagua/js/ui/jquery.ui.autocomplete.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery.tree.js"></script>
+    <script type="text/javascript" src="/achagua/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/achagua/js/EventTarget.js"></script>
+    <script type="text/javascript" src="/achagua/js/Apptable.js"></script>
+    <script type="text/javascript" src="/achagua/js/Appload.js"></script>
+
+    <script type="text/javascript" src="/achagua/js/app.funciones.js"></script>
+    <script type="text/javascript" src="/achagua/js/app.global.js"></script>
+    <script type="text/javascript" src="/achagua/js/app.ui.js"></script>
+    <script type="text/javascript" src="/achagua/js/app.tabla.js"></script>
+    <script type="text/javascript">
+
+        var esAppload = {
+            versionError: 'Appload.js no es compatible con esta versión del navegador.',
+            labelInput: 'Seleccionar archivos',
+            fileTypesErrorDeclaration: 'Los tipos de archivos deben ser declarados de tipo String o Array. Definición de tipo indefinida',
+            removeAllFilesBtn: 'Remover todos los archivos',
+            uploadAllFilesBtn: 'Subir todos los archivos',
+            singleUploadBtn: 'Subir este archivo',
+            singleDiscardBtn: 'Descartar este archivo',
+            singleDownloadBtn: 'Descargar este archivo',
+            singleDeleteBtn: 'Borrar este archivo del servidor',
+            fileNotExists: 'El archivo seleccionado no existe o está corrupto',
+            notEspecifiedURL: 'Debe especificar una URL',
+            errorUploadingFile: 'Ocurrió un problema al subir los archivos',
+            uploading: 'Cargando...',
+            fileTypeError: 'El archivo no se pudo subir, error de tipo, ',
+            mustSelectFile: 'Debe seleccionar al menos un archivo',
+            uploadComplete: 'Los archivos se han subido correctamente',
+            filesNotLoaded: 'Hay <b>#</b> archivos que no se pueden cargar.<br />',
+            allowedExtensions: 'Solo están permitidos archivos con extensión <b>#</b>.<br />',
+            fileSizeExceeded: 'Los archivos no pueden exceder los <b>#Kb.</b><br>',
+            summaryFileErrors: '<br>Estos son los archivos con errores:'
+        };
+
+        var lenguajeTabla = {//lenguaje
+            linesPerPage: 'Líneas por página:',
+            totalItems: 'Cantidad de Registros: #',
+            currentPage: 'Página _# de #_ ',
+            seachInputPlaceHolder: 'Buscar y presionar Enter',
+            noFilteredDataMessage: 'No se encontraron resultados'
+        };
+
+        var __app = new App();
+        var __cnn = new Cnn();
+        var __dom = new Dom();
+        window.onerror = __app.controlarErrorGeneral;
+        window.onresize = __app.ajustarAnchoMenu;
+        window.onscroll = __app.ajustarAnchoMenu;
+        /*
+         window.onbeforeunload = confirmExit;
+         function confirmExit() {
+         return 'Está a punto de cerrar la aplicación, si no ha guardado cambios éstos se perderán ¿Realmente desea cerrar esta ventana?';
+         }
+         */
+    </script>
+
+    <script type="text/javascript" src="/achagua/js/menu/menu.model.js"></script>
+    <script type="text/javascript" src="/achagua/js/menu/menu.control.js"></script>
+    <script type="text/javascript" src="/achagua/js/menu/menu.vista.js"></script>
+
+
+    <style type="text/css">
+        .ui-autocomplete { z-index:1000 !important; }
+    </style>
+
+{% block scripts %}{% endblock %}
+
+</head>
+<body>
+
+    <div id="divDialogoCargador"></div>
+
+
+    <div id="divCortinaModal"></div>
+
+    <div id="divCargador" tabindex="0">
+        <img src="{{asset('bundles/Llanogas/img/cargando2.gif')}}" />
+        <span>Cargando...</span>
+        <input type="text" id="txtTrampaFoco" style="position: absolute; top:-10000px; opacity: 0;">
+    </div>
+
+    <div id="divDialogo">
+    </div>
+
+    <div id="contenedor">
+        <div id="divTitulo">
+            <h1 id="h1_base_titulo_app">Sistema de información de {{empresa}}</h1>
+        </div>
+        <div id="divAppContainer" style="position:relative;">
+            <div id="menu">
+                <div id="userData">
+                    <p>Bienvenido: </p>
+                    <p id="nomUsuarioTxt"></p>
+                    <a href="/achagua/index.html">Cerrar Sesión</a>
+                </div>
+                <!-- para crear el menu -->
+                <div class="filtroBusqueda">
+                    <input type="text"
+                           id="txtFiltroMenu"
+                           placeholder="Buscar..." autofocus="autofocus">
+                </div>
+                <div class="tree contentMenu" id="contenedorOpcionesMenu">
+                    <ul id='menuItems'>
+
+                    </ul>
+                </div>
+            </div>
+
+
+            <div id="divGeneral">
+                <div id="divBarraOcultarMenu">
+                    <button id="btnOcultarMenu" data-visible="true">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <h2>{% block titulo %}{% endblock %}</h2>
+                <div id="divFormulario">{% block body %}{% endblock %}</div>
+            </div>
+            <hr class="limpiar" />
+        </div>
+        <hr class="limpiar" />
+        <div id="piePagina">
+        </div>
+        <div style="display:none;">
+            <input type="hidden" id="hiddenEmpresa" value="{{empresa}}" />
+            <input type="hidden" id="hiddenFechaActualServidor" value="{{ "now"|date("m/d/Y") }}" />
+        </div>
+    </div>
+    <script type="text/javascript">
+        (function ($) {
+        for(var key in localStorage){	
+            sessionStorage.setItem(key, localStorage[key]);
+        }
+            $('#btnOcultarMenu').on('click', function () {
+                $(this).find('.fa').toggleClass('fa-chevron-left').toggleClass('fa-chevron-right');
+                if ($(this).attr('data-visible') === 'true') {
+                    $(this).attr('data-visible', false);
+                    $('#menu').hide();
+                    __app.ajustarAnchoMenu();
+                    /*
+                     $('#divGeneral').width(  $('#divAppContainer').width()-20  );
+                     */
+                    return;
+                }
+                $(this).attr('data-visible', true);
+                $('#menu').show()//.width('15%');
+                //$('#divGeneral').width('80%');
+                __app.ajustarAnchoMenu();
+            });
+
+            menuVista.init();
+            __app.ajustarAnchoMenu();
+            //console.clear();
+        })(jQuery);
+    </script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

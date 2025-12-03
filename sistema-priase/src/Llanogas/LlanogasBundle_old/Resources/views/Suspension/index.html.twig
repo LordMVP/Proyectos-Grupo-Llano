@@ -1,0 +1,308 @@
+{% extends "::base.html.twig" %}
+
+{% block stylesheets %}
+
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.ui.all.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{asset('bundles/Llanogas/css/theme/jquery.datetimepicker.css')}}" />
+
+    <style type="text/css">
+        div#divItemsSuscripcion{
+            clear:both;
+            margin-top: 20px;
+            width: 95%;
+        }
+    </style>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+
+{% block titulo %}Operaciones: Suspensiones - {{empresa}}  {% endblock %}
+{% block body %}
+
+    {% include "::botones.html.twig" %}
+    <input type="hidden" style="display: none;" value="{{fechaactual}}" id="txtFechaActual" />
+    <input type="hidden" style="display: none;" value="{{fechaactualSuspension}}" id="txtFechaactualSuspension" />
+    <input type="hidden" style="display: none;" value="{{fechaactualReconexion}}" id="txtFechaactualReconexion" />
+    <div id="divCabecera">
+        <fieldset>
+            <legend>Datos de la suscripción</legend>
+            <div class="campo">
+                <label for="txtSuscripcion">Suscripción:</label>
+                <input type="text" id="txtSuscripcion" name="txtSuscripcion" disabled="disabled" placeholder="Suscripcion" />
+            </div>
+            <div class="campo">
+                <label for="txtDocumento">NIT/CC:</label>
+                <input type="text" id="txtDocumento" name="txtDocumento" disabled="disabled" placeholder="NIT/Cédula" />
+            </div>
+            <div class="campo">
+                <label for="txtNombre">Nombre Completo:</label>
+                <input type="text" id="txtNombre" name="txtNombre" disabled="disabled" placeholder="Nombre Completo" />
+            </div>
+            <div class="campo">
+                <label for="txtNombre">Tipo de Uso:</label>
+                <input type="text" id="txtTipUso" name="txtNombre" disabled="disabled" placeholder="Tipo de Uso" />
+            </div>
+            <div class="campo">
+                <label for="txtNombre">Convenio:</label>
+                <input type="text" id="txtConvenio" name="txtNombre" disabled="disabled" placeholder="Convenio" />
+            </div>
+            <input type="button" id="btnVerMasDetallesSuscripcion" value="Ver más detalles de suscripción" class="btnSimple"/>
+        </fieldset>
+        <fieldset id="divDatosSuspension">
+            <legend>Datos de la suspensión</legend>
+            <div class="campo">
+                <label for="cmbEstadoNuevaSus">Estado:</label>
+                <select id="cmbEstadoNuevaSus" name="cmbEstadoNuevaSus" disabled="disabled">
+                    <option value="0">Estado de Suspension</option>
+                    <option value="A" selected>Activo</option>
+                    <option value="G">Generada</option>
+                    <option value="P">Procesada</option>
+                    <option value="E">Ejecutada</option>
+                    <option value="C">Cerrada</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="txtCicloNuevaSus">Ciclo:</label>
+                <input type="text" id="txtCicloNuevaSus" name="txtCicloNuevaSus" placeholder="Ciclo" disabled="true"/>
+            </div>
+            <div class="campo">
+                <label for="txtPeriodoNuevaSus">Periodo:</label>
+                <input type="text" id="txtPeriodoNuevaSus" name="txtPeriodoNuevaSus" placeholder="Periodo" disabled="true"/>
+            </div>
+
+            <div class="campo">
+                <label for="txtFechaGeneracionNuevaSus">Fecha de generación:</label>
+                <input type="text" id="txtFechaGeneracionNuevaSus" name="txtFechaGeneracionNuevaSus" placeholder="Fecha de generación" disabled="true"/>
+            </div>
+            <div class="campo">
+                <label for="txtFechaAprobacionNuevaSus">Fecha de aprobación:</label>
+                <input type="text" id="txtFechaAprobacionNuevaSus" name="txtFechaAprobacionNuevaSus" placeholder="Fecha de aprobación" disabled="true"/>
+            </div>
+            <div class="campo">
+                <label for="txtFechaProcesamientoNuevaSus">Fecha de procesamiento:</label>
+                <input type="text" id="txtFechaProcesamientoNuevaSus" name="txtFechaProcesamientoNuevaSus" placeholder="Fecha de procesamiento" disabled="true"/>
+            </div>
+
+            <label for="txtObservacionesNuevaSus">Observaciones:</label>
+            <textarea id="txtObservacionesNuevaSus" name="txtObservaciones" placeholder="Comentarios de la suspensión o reconexión" disabled="true"></textarea>
+            <div>
+                <input type="button" id="btnVerMasDetallesSuspension" value="Ver detalles suspensión" class="btnSimple"/>
+            </div>
+            <div>
+                <label id="lbCantidadSuspensiones" class="pMensaje"></label>
+            </div>
+        </fieldset>
+
+    </div>
+    <div id="divDetalles" style="display: none" >
+        <div id="tabs">
+            <ul>
+                <li><a href="#tabSuspensiones">Suspensiones</a></li>
+                <li><a href="#tabReconexiones">Reconexiones</a></li>
+            </ul>
+            <div id="tabSuspensiones">
+                <!--<input id="nDetalleSus_btn" type="button" class="btnSimple" value="Nuevo Detalle Suspensión"/>-->
+                <table id="tblSuspensiones" class="tabla"></table>
+                <input type="button" id="btnNuevoDetaleSuspension" value="Nuevo detalle suspensión" class="btnSimple"/>
+            </div>
+            <div id="tabReconexiones">
+                <!--<input id="nReconexion_btn"type="button" class="btnSimple" value="Nuevo Detalle Reconexión"/>-->
+                <table id="tblReconexiones" class="tabla"></table>
+                <input type="button" id="btnNuevaReconexion" value="Nueva Reconexión" class="btnSimple"/>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Division para vista y edicion de detalles de suspension-->
+    <div id="camposVerEditarDetSuspencion" style="display:none;">
+        <div class="campo">
+            <label for="txtMotivoSuspensionSus">Motivo:</label>
+            <select id="txtMotivoSuspensionSus" data-attr="motivo">
+                <option value="0">Seleccione un opción</option>
+            </select>
+        </div>
+        <!--<div class="campo">
+            <label for="txtConceptoSuspensionSus">Concepto:</label>
+            <select id="txtConceptoSuspensionSus" data-attr="conceptoSuspension">
+                <option value="0">Seleccione un Concepto</option>
+            </select>
+        </div>-->
+        <div class="campo">
+            <label for="txtFechaProgramacionSus">Fecha Programación:</label>
+            <input type="text" id="txtFechaProgramacionSus" data-attr="fechaProgramacion" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaEjecucionSus">Fecha Ejecución:</label>
+            <input type="text" id="txtFechaEjecucionSus" data-attr="fechaEjecucion" />
+        </div>
+        <div class="campo">
+            <label for="txtTerceroSuspensionSus">Empresa Suspensión:</label>
+            <input type="text" id="txtTerceroSuspensionSus" data-attr="terceroSuspension" value=" "/>
+            <input type="hidden" id="idTerceroSuspensionSus" data-attr="idTerceroSuspension"/>
+        </div>
+        <div class="campo">
+            <label for="txtNovedadSuspensionSus">Novedad:</label>
+            <select id="txtNovedadSuspensionSus" data-attr="novedadSuspension">
+                <option value="0">Seleccione un opción</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtTipoSuspensionSus">Tipo Suspensión:</label>
+            <select id="txtTipoSuspensionSus" data-attr="tipoSuspension">
+                <option value="0">Seleccione un opción</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtValorTotalSus">Valor Total:</label>
+            <input type="text" id="txtValorTotalSus" data-attr="lectura" disabled/>
+        </div>
+        <div class="campo">
+            <label for="txtLecturaSus">Lectura:</label>
+            <input type="text" id="txtLecturaSus" data-attr="lectura" />
+        </div>
+        <div class="campo">
+            <label for="txtEjecutada">Suspensión Efectiva:</label>
+            S<input type="radio" id="txtEjecutadaSSus" title="S" name="txtEjecutadaSus" disabled data-attr="ejecutada" value="S"/>
+            N<input type="radio" id="txtEjecutadaNSus" title="N" name="txtEjecutadaSus" disabled data-attr="ejecutada" value="N"/>
+        </div>
+        <div class="campo">
+            <label for="txtObservacionesSus">Observaciones:</label>
+            <textarea id="txtObservacionesSus" data-attr="observaciones"></textarea>
+        </div>
+    </div>
+
+    <!-- Division para vista y edicion de reconexiones-->
+    <div id="camposVerEditarReconexion" style="display:none;">
+        <div class="campo">
+            <label for="txtMotivoSuspensionRec">Motivo:</label>
+            <select id="txtMotivoSuspensionRec" data-attr="motivo">
+                <option value="0">Seleccione un opción</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="txtNovedadReconexionRec">Novedad:</label>
+            <select id="txtNovedadReconexionRec" data-attr="novedadReconexion">
+                <option value="0">Seleccione un opción</option>
+            </select>
+        </div>
+        <!--<div class="campo">
+            <label for="txtConceptoReconexionRec">Concepto:</label>
+            <select id="txtConceptoReconexionRec" data-attr="conceptoReconexion">
+                <option value="0">Seleccione un Concepto</option>
+            </select>
+        </div>-->
+        <div class="campo">
+            <label for="txtFechaAprobacionRec">Fecha Aprobación:</label>
+            <input type="text" id="txtFechaAprobacionRec" data-attr="fechaAprobacion" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaEjecucionRec">Fecha Ejecución:</label>
+            <input type="text" id="txtFechaEjecucionRec" data-attr="fechaEjecucion" />
+        </div>
+        <div class="campo">
+            <label for="txtFechaProgramacionRec">Fecha Programación:</label>
+            <input type="text" id="txtFechaProgramacionRec" data-attr="fechaProgramacion" />
+        </div>
+        <div class="campo">
+            <label for="txtTerceroReconexionRec">Empresa Reconexión:</label>
+            <input type="text" id="txtTerceroReconexionRec" data-attr="terceroReconexion"/>
+            <input type="hidden" id="idTerceroReconexionRec" data-attr="idTerceroReconexion"/>
+        </div>
+        <div class="campo">
+            <label for="txtLecturaRec">Lectura:</label>
+            <input type="text" id="txtLecturaRec" data-attr="lectura" />
+        </div>
+        <div class="campo">
+            <label for="txtValorTotalRec">Valor Total:</label>
+            <input type="text" id="txtValorTotalRec" data-attr="lectura" disabled/>
+        </div>
+        <div class="campo">
+            <label for="txtEjecutada">Reconexión Efectiva:</label>
+            S<input type="radio" id="txtEjecutadaSRec" title="S" name="txtEjecutadaRec" disabled data-attr="ejecutada" value="S"/>
+            N<input type="radio" id="txtEjecutadaNRec" title="N" name="txtEjecutadaRec" disabled data-attr="ejecutada" value="N"/>
+        </div>
+        <div class="campo">
+            <label for="txtObservacionesRec">Observaciones:</label>
+            <textarea id="txtObservacionesRec" data-attr="observaciones"></textarea>
+        </div>
+    </div>
+
+    <!-- Division para filtro -->
+    <div id="camposBuscarSuscripcion" style="display:none;" >
+        <div class="campo">
+            <label for="txtMunicipio">Municipio:</label>
+            <input type="text" id="txtMunicipio" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroSus">Suscripción:</label>
+            <input type="text" id="txtFiltroSuscripcion" data-attr="suscripcion" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroDoc">Cédula/NIT:</label>
+            <input type="text" id="txtFiltroDocumento" value="" data-attr="documento" />
+        </div>
+        <div class="campo">
+            <label for="txtFiltroCodAnt">Código Anterior:</label>
+            <input type="text" id="txtFiltroCodigoAnterior" data-attr="codAnterior" />
+        </div>
+
+        <span id="spanMensaje" class="pMensaje"></span>
+        <div id="divFiltroSuspensionesResultado"></div>
+        <!--<input type="button" id="btnFinalizarBuscarSuscripcion" value="Finalizar" class="btnSimple" style="visibility:hidden"/>-->
+    </div>
+
+    <div id="divListaSuscripciones" style="display:none;">
+        <div id="divItemsSuscripcion"></div>
+        <input id="btnSeleccionarSuscrip" type="button" class="btnSimple" value="Seleccionar" />
+    </div>
+
+    <!-- Div que muestra el detalle de la suspension -->
+    <div id="divDetallesSuspenciones" style="display: none" >
+        <div class="campo">
+            <label for="txtSuscripcion">Suscripción:</label>
+            <input type="text" id="txtSuscripcionDetalle" name="txtSuscripcionDetalle" placeholder="300-1" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtDocumento">NIT/Cédula:</label>
+            <input type="text" id="txtDocumentoDetalle" name="txtDocumentoDetalle" placeholder="123456789" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtNombre">Nombre Completo:</label>
+            <input type="text" id="txtNombreDetalle" name="txtNombreDetalle" placeholder="Pedro Perez" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtCodigo">Código Anterior:</label>
+            <input type="text" id="txtCodigoDetalle" name="txtCodigoDetalle" placeholder="0100100101" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtTipoSuscripcion">Tipo de Suscripción:</label>
+            <input type="text" id="txtTipoSuscripcionDetalle" name="txtTipoSuscripcionDetalle" placeholder="Gas Natural - Regulado" disabled="disabled" />
+        </div>
+        <div class="campo">
+            <label for="txtTipoLiquidacion">Tipo de Liquidación:</label>
+            <input type="text" id="txtTipoLiquidacionDetalle" name="txtTipoLiquidacionDetalle" placeholder="Gas Natural - Domiciliario"disabled="disabled"  />
+        </div>
+        <div class="campo">
+            <label for="txtPropiedad">Propiedad:</label>
+            <input type="text" id="txtPropiedadDetalle" name="txtPropiedadDetalle" placeholder="Medidor" class="campoCorto" disabled="disabled"  />
+            <input type="text" id="txtCodPropiedad" name="txtCodPropiedad" placeholder="1A2345" class="campoCorto"  disabled="disabled" />
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/suspension/suspension.vista.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/suspension/suspension.model.js')}}"></script>
+    <script type="text/javascript" src="{{asset('bundles/Llanogas/js/operaciones/suspension/suspension.control.js')}}"></script>
+    <script type="text/javascript">
+        (function ($) {
+            $('div#tabs').tabs();
+            suspensionVista.init();
+        })(jQuery);
+    </script>
+{% endblock %}
