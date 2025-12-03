@@ -1,0 +1,41 @@
+export default class HomologacionModel
+{
+    nuevoConvenio:number;
+	nombreNuevoConvenio:String;
+	nuevoTercero:number;
+	usuario:number;
+	///ghmo
+	empresaHomologa:number;
+    periodoHomologa:number;
+    dsusHomologa:number;
+	//dgho
+	dsusHomologador:number;
+	empresaHomologador:number;
+	pcodigoHomologador:number;
+	suscripcion1:number;
+	suscripcion2:number;
+	consumo:String;
+    medidor:number;
+    observaciones:String;
+    deshomologacion:Boolean;
+
+    constructor(nuevoConvenio:number,nombreNuevoConvenio:String,nuevoTercero:number,usuario:number,empresaHomologa:number,periodoHomologa:number,dsusHomologador:number, empresaHomologador:number, pcodigoHomologador:number, suscripcion1:number,suscripcion2:number, consumo:String, medidor:number,observaciones:String,deshomologacion:Boolean,dsusHomologa:number)
+    {
+        this.nuevoConvenio=nuevoConvenio;
+        this.nombreNuevoConvenio=nombreNuevoConvenio;
+        this.nuevoTercero=nuevoTercero;
+        this.usuario=usuario;
+        this.empresaHomologa=empresaHomologa;
+        this.periodoHomologa=periodoHomologa;
+        this.dsusHomologador=dsusHomologador;
+        this.empresaHomologador=empresaHomologador;
+        this.pcodigoHomologador=pcodigoHomologador
+        this.suscripcion1=suscripcion1;
+        this.suscripcion2=suscripcion2;
+        this.consumo=consumo;
+        this.medidor=medidor;
+        this.observaciones=observaciones;
+        this.deshomologacion=deshomologacion;
+        this.dsusHomologa=dsusHomologa;
+    }
+}

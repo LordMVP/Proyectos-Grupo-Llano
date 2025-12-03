@@ -1,0 +1,6 @@
+.visualizar{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(303px, auto));
+    margin-bottom:30px;
+
+}

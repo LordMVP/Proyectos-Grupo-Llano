@@ -1,0 +1,220 @@
+import React, { Component } from 'react'
+import { Form, Col, Button } from 'react-bootstrap'
+import OnlyInfo from '../../components/Table/OnlyInfo'
+import NuevoMultiusuario from './multiusuario/Nuevo'
+
+class EditarAforo extends Component<{history: any},{}> {
+
+    state = {
+        info_basica: false,
+        detalle_registro_aforo: false,
+        consolidado_aforos: false,
+
+
+    }
+
+    changeStatus = ( e : any ) => {
+        const {name} = e.target
+        this.setState((prevState: any) => ({ [name]: !prevState[name] }))
+    }
+    onSubmit(){
+
+    }
+    render() {
+        const { info_basica, detalle_registro_aforo, consolidado_aforos } = this.state
+        return (
+            <div>
+                <Form className="mb-2" onSubmit={this.onSubmit}>
+                    <Form.Row>
+                        <Form.Group as={Col} controlId="formGridEmail">
+                            <Form.Label>Suscripción</Form.Label>
+                            <Form.Control placeholder="Suscripcion" />
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId="formGridEmail">
+                            <Form.Label>Tercero Nombres/Apellidos</Form.Label>
+                            <Form.Control placeholder="Nombres/Apellidos" />
+                        </Form.Group>
+                        <Form.Group as={Col} controlId="formGridEmail">
+                            <Form.Label>Documento Tercero</Form.Label>
+                            <Form.Control placeholder="Documento " />
+                        </Form.Group>
+                        <Form.Group as={Col} controlId="formGridState">
+                            <Form.Label>Barrio</Form.Label>
+                            <Form.Control as="select" disabled>
+                                <option>Choose...</option>
+                                <option>...</option>
+                            </Form.Control>
+                        </Form.Group>
+                    </Form.Row>
+                    <Form.Row>
+                        <Form.Group as={Col} controlId="formGridState">
+                            <Form.Label>Estado aforo</Form.Label>
+                            <Form.Control as="select" disabled>
+                                <option>Choose...</option>
+                                <option>...</option>
+                            </Form.Control>
+                        </Form.Group>
+                        <Form.Group as={Col} controlId="formGridEmail" >
+                            <Form.Label>Vigencia Desde</Form.Label>
+                            <Form.Control placeholder="Vigencia" type="date" />
+                        </Form.Group>
+                        <Form.Group as={Col} controlId="formGridEmail">
+                            <Form.Label>Vigencia Hasta</Form.Label>
+                            <Form.Control placeholder="Vigencia" type="date" />
+                        </Form.Group>
+                    </Form.Row>
+                    <Form.Row>
+                        <Form.Group as={Col} controlId="formGridEmail" className="sm-2">
+                            <Form.Label>Fecha creación</Form.Label>
+                            <Form.Control placeholder="creación" type="date" />
+                        </Form.Group>
+                        <Form.Group as={Col} controlId="formGridEmail">
+                            <Form.Label> Fecha actualización</Form.Label>
+                            <Form.Control placeholder="actualizacion" type="date" />
+                        </Form.Group>
+
+                    </Form.Row>
+                    <Form.Row>
+
+                        <Form.Group md="6" as={Col} controlId="exampleForm.ControlTextarea1">
+                            <Form.Label >Observaciones</Form.Label>
+                            <Form.Control as="textarea" rows={3} />
+                        </Form.Group>
+                        <div>
+                            <Button variant="primary" onClick={()=>this.props.history.goBack()}  > Regresar al Listado</Button>
+                        </div>
+                    </Form.Row>
+
+
+                </Form>
+                <Button variant="primary" className="mr-5" type="submit" name="info_basica" onClick={this.changeStatus}> +</Button> Información Básica
+                {info_basica && <div>
+                    <NuevoMultiusuario withOptions={false} />
+                </div>}
+                <hr />
+                <Button variant="primary" className="mr-5" type="submit" name="detalle_registro_aforo" onClick={this.changeStatus}> +</Button>Registro Aforos
+                {detalle_registro_aforo && <div>
+                    <Form className="mb-2" onSubmit={this.onSubmit}>
+                        <Form.Row>
+                            <Form.Group as={Col} controlId="formGridEmail">
+                                <Form.Label>Desde</Form.Label>
+                                <Form.Control placeholder="Suscripcion" />
+                            </Form.Group>
+
+                            <Form.Group as={Col} controlId="formGridEmail">
+                                <Form.Label>Hasta</Form.Label>
+                                <Form.Control placeholder="Codigo Suscripcion" />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formGridEmail">
+                                <Form.Label>Documento Tercero</Form.Label>
+                                <Form.Control placeholder="Codigo Suscripcion" />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formGridState">
+                                <Form.Label>Tecnico Aforador</Form.Label>
+                                <Form.Control as="select">
+                                    <option>Choose...</option>
+                                    <option>...</option>
+                                </Form.Control>
+                            </Form.Group>
+                            <Button variant="primary" className="mr-2" type="submit">   Consultar</Button>
+                        </Form.Row>
+                    </Form>
+                    Aforos Realizados
+                    <OnlyInfo
+                        head={[
+                            'Id Aforo',
+                            'Tecnico Aforador',
+                            'Fecha Programación',
+                            'Fecha Ejecucion',
+                            'Concepto',
+                            'Peso',
+                            'Volumen',
+                        ]}
+                        body={[
+                            ['1',
+                                'Tecnico Aforador 1',
+                                'dd/mm/yyyy hh:mm:ss',
+                                'dd/mm/yyyy hh:mm:ss',
+                                'Concepto 1',
+                                '999,9 kg',
+                                '999,99m3']
+                        ]}
+                        background="#70B603"
+                    />
+                    Aforos Pendientes
+                       <OnlyInfo
+                        head={[
+                            'Id Aforo',
+                            'Tecnico Aforador',
+                            'Fecha Programación',
+                        ]}
+                        body={[
+                            ['1',
+                                'Tecnico Aforador 1',
+                                'dd/mm/yyyy hh:mm:ss',
+                            ]
+                        ]}
+                        background="#D9001B"
+                    />
+                </div>}
+                <hr />
+                <Button variant="primary" className="mr-5" type="submit" onClick={() => this.changeStatus("consolidado_aforos")}> +</Button>Consolidado Aforos
+                {consolidado_aforos && <div>
+                    <Form className="mb-2" onSubmit={this.onSubmit}>
+                        <Form.Row>
+                            <Form.Group as={Col} controlId="formGridEmail">
+                                <Form.Label>Desde</Form.Label>
+                                <Form.Control placeholder="Suscripcion" />
+                            </Form.Group>
+
+                            <Form.Group as={Col} controlId="formGridEmail">
+                                <Form.Label>Hasta</Form.Label>
+                                <Form.Control placeholder="Codigo Suscripcion" />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formGridState">
+                                <Form.Label>Tipo de Aforo</Form.Label>
+                                <Form.Control as="select">
+                                    <option>Choose...</option>
+                                    <option>...</option>
+                                </Form.Control>
+                            </Form.Group>
+                            <Button variant="primary" className="mr-2" type="submit">   Consultar</Button>
+                        </Form.Row>
+                    </Form>
+                    Resultado Aforos Realizados
+                    <OnlyInfo
+                        head={[
+                            'Id Aforo',
+                            'Tecnico Aforador',
+                            'Fecha Programación',
+                            'Fecha Ejecucion',
+                            'Concepto',
+                            'Peso',
+                            'Volumen',
+                        ]}
+                        body={[
+                            ['1',
+                                'Tecnico Aforador 1',
+                                'dd/mm/yyyy hh:mm:ss',
+                                'dd/mm/yyyy hh:mm:ss',
+                                'Concepto 1',
+                                '999,9 kg',
+                                '999,99m3']
+                        ]}
+                        background="#70B603"
+                    />
+                </div>}
+
+            </div>
+        )
+    }
+}
+
+export default  EditarAforo
+/*
+
+['Usuario',Tipo 'Aforo',Fecha 'Corte',Periodo Desde ','Frecuencia',Visitas Ejecutadas','Peso',Volumen('m3)','TAFNA(Toneladas)','Tipo Generador']
+'
+{',Analista '1','Ordinario','dd/mm/yyyy hh:mm:ss','dd/mm/yyyy  a dd/mm/yyyy','3','12','####,## kg',5,'99m3','###,##','Grande Gen. Cat 1,}
+*/

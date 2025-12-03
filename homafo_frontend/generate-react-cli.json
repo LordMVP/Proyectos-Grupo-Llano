@@ -1,0 +1,68 @@
+{
+  "usesTypeScript": true,
+  "usesCssModule": false,
+  "cssPreprocessor": "css",
+  "testLibrary": "None",
+  "component": {
+    "default": {
+      "customTemplates": {
+        "component": "templates/component/component.js"        
+      },
+      "path": "src/components",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    },
+    "homologaciones": {
+      "customTemplates": {
+        "component": "templates/component/component.js"        
+      },
+      "path": "src/components/homologaciones",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    },
+    "aforos": {
+      "customTemplates": {
+        "component": "templates/component/component.js"        
+      },
+      "path": "src/components/aforos",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    },
+    "utils": {
+      "customTemplates": {
+        "component": "templates/component/component.js"        
+      },
+      "path": "src/components/utils",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    },
+    "page-homologaciones": {
+      "customTemplates": {
+        "component": "templates/pages/page.js"        
+      },
+      "path": "src/pages/homologaciones",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    },
+    "page-aforos": {
+      "customTemplates": {
+        "component": "templates/pages/page.js"        
+      },
+      "path": "src/pages/aforos",
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    }
+  } 
+}

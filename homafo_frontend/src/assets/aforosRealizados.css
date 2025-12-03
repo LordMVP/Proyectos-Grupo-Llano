@@ -1,0 +1,20 @@
+.page-link{
+    color: #ffffffcb !important;
+  }
+
+  .green-header {
+    color:white;
+    background-color:#70B603;
+    border-color: white;
+    cursor: pointer default ;
+
+}
+.red-header {
+    color:white;
+    background-color:#C90035;
+    
+  }
+  /* thead{
+    background-color:#70B603 !important;
+    
+  } */

@@ -1,0 +1,22 @@
+.searchMenu {
+  margin: 13px;
+  width: 90%;
+  margin-top: 0px !important;
+  margin-left: 20px !important;
+}
+
+.rs-dropdown-toggle,.rs-nav-item-content{
+  padding-left:18px !important;
+}
+
+/* 
+.rs-dropdown-item > .rs-dropdown-item-content{
+  padding: 11px 20px 11px 30px !important;
+} */
+
+/* 
+ a.active:parent {
+  color: #575757;
+  display: block;
+  background: #f7f7fa;
+} */

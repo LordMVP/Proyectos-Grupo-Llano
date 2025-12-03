@@ -1,0 +1,91 @@
+#table-turned{
+    border: 0px;
+
+}
+#table-rotated th{
+    border-color: #777676 !important;
+    color:white !important;
+    background-color:#333d37 !important;
+    padding:10px;
+    align-content: center;
+    
+    
+    
+}
+#table-rotated td{
+    border-style: solid !important;
+     border-color: #ECECEC !important;
+     padding:10px;
+}
+.green-header {
+    color:white;
+    background-color:#70B603;
+    border-color: white;
+    cursor: pointer default ;
+
+}
+.red-header {
+    color:white;
+    background-color:#C90035;
+
+}
+.section-form-4{
+    margin-bottom: 4%;
+
+}
+.section-form-1{
+    margin-bottom: 1%;
+}
+#AforosrealizadosTable thead{
+    background-color: #70B603 !important;
+
+}
+#AforosPendientesTable thead{
+    background-color: #b3285d !important;
+
+}
+
+.greenHead thead{
+    background-color: #70B603 !important;
+    color:white
+}
+.redHead thead{
+    background-color: #C90035 !important;
+    color:white
+}
+
+#AforosrealizadosTable2 thead {
+    color:white;
+    background-color:#6c757d;
+
+}
+
+#AforosPendientesTable2 thead{
+    color:white;
+    background-color: #6c757d;
+
+}
+
+.preliquidarButton {
+    font-size: 20px;
+    width: 230px;
+    height: 80px;
+    border-radius: 4px;
+    cursor:pointer;
+    font-family: lato;
+}
+.breath-neon {
+    color: #2b8a2f;
+    background-color: #9dffa1;
+    border: 2px solid transparent;
+    -webkit-transition: .5s all ease-in;
+    transition: .5s all ease-in;
+}
+ 
+.breath-neon:hover, .breath-neon:focus {
+    background-color: #ceffd0;
+    -webkit-animation: breathing 3s infinite;
+            animation: breathing 3s infinite;
+    -webkit-box-shadow: 0px 0px 10px 0px #b5ffb8;
+            box-shadow: 0px 0px 10px 0px #b5ffb8;
+}
