@@ -1,0 +1,508 @@
+/* CSS Document */
+    
+form{
+    position:relative;
+    display:block;
+    width:97%;
+    height:100%;
+	left:2%;    
+    border-radius:15px;
+    background:#fff;
+    padding-bottom:10px;
+    text-align:left;
+    }
+form fieldset{
+	border:1px solid #4099D4;
+	margin-bottom:15px;
+	}
+
+/*form fieldset legend{
+	color:#4099D4;
+	font-weight:bold;
+	font-size:13px;
+	cursor:default;
+	}*/
+form fieldset .botonera{
+	text-align:right;
+	}
+/*form h2{
+	text-align:center;
+	font-size:17px;
+	color:#0066CC;
+	} comentariado lmr*/
+form h3{
+	margin-top:30px;
+	text-align:center;
+	padding-left:25px;
+	font-size:15px;
+	color:#408BC4;
+	}
+form h4{
+	color:#0099CC;
+	font-size:12px;
+	text-shadow:1px 2px 2px #fff;
+	}
+form h5{
+	font-size:11px;
+	background:rgb(32,96,255);
+	color:#fff;	
+	}
+form .campo{
+    border:0px;
+    /*margin-top:20px;*/
+    margin-left:10px;
+    display:inline-block;
+    position:relative;
+    width:180px;
+    vertical-align:top;
+    }
+
+form .campodoble{
+    border:0px;
+    /*margin-top:20px;*/
+    margin-left:10px;
+    display:inline-block;
+    position:relative;
+    width:370px;
+    vertical-align:top;
+}
+
+table{
+    width: 100%;
+    border:solid 1px #408BC4;
+    border-collapse: collapse;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    margin: 7px;
+    margin-bottom: 7px;
+}
+
+form .campodoble input{
+    width:100%;
+}
+    
+form button{
+	min-width:43px;
+	color:#fff;
+	background:linear-gradient(180deg, #8AB6D9 50%, #71A7D3 50%);
+	margin:0px 2px 0px 0px;
+	border-radius:2px;
+	border:1px solid #3366CC;
+	padding:0px;
+	}
+form button:disabled{
+	background:linear-gradient(180deg, #D6D6D6 50%, #B8B8B8 50%);
+	}
+form button:disabled:hover{
+	background:linear-gradient(180deg, #B3B3B3 50%, #959595 50%);
+	}
+form .campo:hover{
+    background:#f1f1f1;
+    }
+form .campo label{
+    display:block;
+    position:relative;
+    text-align:left;
+    vertical-align:top;
+    color:#666;
+    margin-bottom: 5px;
+    margin-top: 7px;
+    font-size: 1.1em;
+    }
+
+form .campo input,select,textarea{
+	border-radius:4px;
+	border:1px solid #D2D2D2;
+	width:180px;
+	height:25px;
+	font-family:inherit;
+	}
+        
+form .campodoble input,select,textarea{
+    border-radius:4px;
+    border:1px solid #D2D2D2;
+    width:100%;
+    height:25px;
+    font-family:inherit;
+}
+        
+form .campodoble label{
+    display:block;
+    position:relative;
+    text-align:left;
+    vertical-align:top;
+    color:#666;
+    margin-bottom: 5px;
+    margin-top: 7px;
+    font-size: 1.1em;
+}
+        
+        
+form .campo .archivo{
+	width:130px;
+	}
+form .campo input:hover, select:hover, textarea:hover{
+	border:1px solid #0099FF;
+	}
+form .botonera{
+	display:inline-block;
+	width:100%;
+    margin-top:10px;
+    margin-bottom:10px;
+    text-align:center;
+    vertical-align:top;
+    }
+form .botonera button{
+    color:#fff;
+    background:linear-gradient(180deg, #8AB6D9 50%, #71A7D3 50%);
+    border:0px;
+    min-width:90px;
+    height:30px;
+    border-radius:5px;
+    color:#fff;
+    font-weight:bold;
+    }
+
+form #divFormActions button{
+	color:#fff;
+	background:linear-gradient(180deg, #8AB6D9 50%, #71A7D3 50%);
+	margin:0px -2px 0px -2px;
+	border-radius:0px;
+	border:1px solid #3366CC;
+	padding:0px;
+	width:75px;
+	height:28px;
+	display:inline-block;
+	}
+form #divFormActions button:disabled{
+	background:linear-gradient(180deg, #D6D6D6 50%, #B8B8B8 50%);
+	}
+form #divFormActions button:disabled:hover{
+	background:linear-gradient(180deg, #B3B3B3 50%, #959595 50%);
+	}
+form #divFormActions button#naBusca{
+	border-left:0px;
+	border-radius:0px 10px 10px 0px;
+	}
+form #divFormActions button#opEliminar{
+	border-left:0px;
+	border-radius:0px 10px 10px 0px;
+	}
+form #divFormActions button#opGrabar{
+	border-radius:10px 0px 0px 10px;
+	}
+form #divFormActions button#opNuevo{
+	border-radius:10px 0px 0px 10px;
+	}
+form button:hover{
+	background:linear-gradient(180deg, #8AB6D9 50%, #5F95C1 50%);
+	}
+form #divFormActions{
+	text-align:center;
+	}
+form #divFormActions button:hover{
+	color:#fefefe;
+	background:linear-gradient(180deg, #8AB6D9 50%, #5F95C1 50%);
+	}
+form #divFormActions div{
+	display:inline-block;
+	margin:5px 0px 0px 0px;
+	width:100%;
+	}
+form .marco_item{
+    border: 1px solid #B0BBF8;
+    border-radius: 15px;
+    background:rgba(226, 237, 245, 1);
+    margin:2px;
+    }
+form .frmPopupCerrar{
+	font-size:16px;
+	font-weight:bold;
+	color:#F00;
+	display:block;
+	position:absolute;
+	top:5px;
+	right:5px;
+	cursor:pointer;
+	}
+.comboUnidadDiv{
+	display:block;
+	position:absolute;
+	top:60px;
+	width:290px;
+	max-height:250px;
+	overflow:auto;
+	background:rgba(202,220,254,0.8);
+	z-index:999;
+	border-radius:0px 0px 10px 10px;
+	padding:0px 5px 10px 5px;
+	box-shadow:0px 2px 5px 4px #909090;
+	}
+.comboUnidadDiv #cierra_ap_arbol{
+	position:absolute;
+	top:2px;
+	right:2px;
+	color:#f00;
+	font-weight:bold;
+	font-size:16px;
+	cursor:pointer;
+	}
+.comboUnidadDiv button{
+	display:block;
+	color:#0066FF;
+	background:#fefefe;
+	border-radius:2px;
+	border:1px solid #3366CC;
+	width:65px;
+	}
+.comboUnidadDiv select{
+	width:280px;
+	margin:0px 5px 5px 0px;
+	}
+
+.espacioAdicion{
+	display:table-cell;
+	vertical-align:top;
+	width:100%;
+	max-width:35%;
+	text-align:center;
+	}
+
+
+.direccion{
+	width:360px;
+	position:absolute;
+	top:40px;
+	background:rgba(202,220,254,0.8);
+	z-index:999;
+	border-radius:0px 0px 10px 10px;
+	padding:0px 5px 10px 5px;
+	box-shadow:0px 2px 5px 4px #909090;
+	text-transform:uppercase;
+        margin-top: 19px;
+	}
+        
+        .direccion>input[type="text"] {
+            width: 98%;
+        }
+
+.direccion .titulo th{
+	width:5px;
+	}
+.direccion #cierra_direccion{
+	display:block;
+	position:absolute;
+	top:2px;
+	right:2px;
+	color:#f00;
+	font-weight:bold;
+	cursor:default;
+	}
+.boton_carga {
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:9px;
+	color:#000000;
+	width:79px;
+	height:30px;
+	text-align:center;
+	background-image:url(../images/cargararchivo.png);
+	background-repeat:no-repeat;	
+	font-weight:bold;
+	padding-top:2px;
+	margin:auto;
+	cursor:pointer;	
+	padding-top:15px;
+    display:inline;
+    overflow:auto;
+}
+		
+.boton_carga:hover{
+	color:#999;
+	}
+.boton_carga_campo{
+	width:130px !important;
+	height:25px;
+	text-decoration:underline;
+	color:#000080;
+	}
+
+#constuctorFormula{
+	position:relative;
+	display:inline-block;
+	border-radius:5px;
+	background:#EAEDFF;
+	padding:5px 0px;
+	width:100%;
+
+	}
+#constuctorFormula input select{
+	width:80%;
+	}
+#constuctorFormula .contDatos{
+	float:left;
+	width:60%;
+	border-radius:10px;
+	}
+#constuctorFormula .conceptos{
+	width:100%;
+	float:left;
+	min-height:150px;
+	}
+#constuctorFormula .formula{
+	clear:both;
+	font-weight:bold;
+	font-size:14px;
+	box-shadow:inset 1px 0px 1px 1px #eee;
+	min-height:150px;
+	}
+#constuctorFormula .conceptos button{
+	width:70px;
+		
+	}
+#constuctorFormula .contHerramienta{
+	float:left;
+	width:37%;
+	border-radius:10px;
+	background:#C3D9F4;
+
+	}
+	
+#constuctorFormula #operacion{
+	text-align:center;
+	height:100%;
+	width:95%;
+	display:inline-block;
+	border-radius:5px;	
+	}
+#constuctorFormula #herramientas{
+	height:100%;
+	width:95%;
+	display:inline-block;
+	border-radius:5px;
+	margin:5px;
+	}
+#constuctorFormula #herramientas:hover,#operacion:hover{
+	background:rgba(255,255,255,0.1);
+	}
+#constuctorFormula #operacion button{
+	margin:10px 0px 0px 10px;
+	float:left;
+	width:30px;
+	height:30px;
+	font-size:16px;
+	}
+
+
+
+#constuctorFormula .funcion_fondo{
+	display:none;
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	background:rgba(0,0,0,0.5);
+	text-align:center;
+	z-index:99;
+	}
+#constuctorFormula .funcion{
+	display:inline-block;
+	top:10%;
+	width:60%;
+	height:80%;
+	position:relative;
+	background:rgba(255,255,255,0.8);
+	border-radius:15px;
+	}
+#constuctorFormula .funcion .funcionTxt{
+	font-size:16px;
+	color:#0066FF;
+	display:block;
+	padding:10px 0px;
+	}
+#constuctorFormula .funcion #cierraFunciones{
+	display:block;
+	position:absolute;
+	top:2px;
+	right:2px;
+	color:#f00;
+	cursor:pointer;
+	padding:10px 0px;
+	}
+#constuctorFormula .funcion .funcionConceptos{
+	display:block;
+	padding:10px 0px;
+	}
+#constuctorFormula .funcion .contParams{
+	display:inline-block;
+	}
+#constuctorFormula .funcion .txtParam{
+	display:block;
+	}
+#constuctorFormula .funcion .txtParamSel{
+	display:block;
+	background:#BEDEFF;
+	}
+#constuctorFormula .funcion #funAceptar{
+	margin-top:5px;
+	display:inline-block;
+	width:30%;
+	height:30px;
+	font-size:14px;
+	}
+
+#facturacion_registr_ciclo_factura_agenda{
+	min-height:700px;
+	}
+div#divComandos{
+    padding:0px;
+    text-align: center;
+}
+
+div.divBotones{
+    margin-right: 20px;
+    display: inline-block;
+}
+
+div.divBotones .btn{
+    background-image: url('/achagua/sistema/web/bundles/Llanogas/css/img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    color:#FFF;
+    float:left;
+}
+
+div.divBotones .btn:hover,
+.btnSimple:hover, .tblBtn:hover{
+    cursor:pointer;
+    background-image: url('/achagua/sistema/web/bundles/Llanogas/css/img/bgBotonesHover.jpg');
+}
+
+div.divBotones .btn:first-child{
+    border-radius: 10px 0px 0px 10px;
+}
+
+div.divBotones .btn:last-of-type{
+    border-radius: 0px 10px 10px 0px;
+}
+
+.btn:disabled, 
+.btnSimple:disabled,
+.tblBtn:disabled{
+    color:#666 !important;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#dddad9+50,aaaaaa+51,bfbfbf+51,b2b2b2+100 */
+    background: #dddad9; /* Old browsers */
+    background: -moz-linear-gradient(top, #dddad9 50%, #aaaaaa 51%, #bfbfbf 51%, #b2b2b2 100%) !important; /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(50%,#dddad9), color-stop(51%,#aaaaaa), color-stop(51%,#bfbfbf), color-stop(100%,#b2b2b2)) !important; /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* IE10+ */
+    background: linear-gradient(to bottom, #dddad9 50%,#aaaaaa 51%,#bfbfbf 51%,#b2b2b2 100%) !important; /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dddad9', endColorstr='#b2b2b2',GradientType=0 ) !important; /* IE6-9 */
+}
+
+        

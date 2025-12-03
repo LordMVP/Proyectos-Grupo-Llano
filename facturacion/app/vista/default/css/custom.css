@@ -1,0 +1,20 @@
+#ClasTer{
+	width:300px;
+	display:inline-table;
+	}
+#asignarClaseTercero{
+	margin-top:20px;
+	display:inline-block;
+	height:30px;
+	width:70px;
+	}
+
+div#agendasCollapse{
+	margin-top:-20px;
+	height:300px;
+	overflow-x:hidden;
+	overflow-y:visible;
+	}
+div#agendasCollapse table{
+	margin-top:-5px;
+	}

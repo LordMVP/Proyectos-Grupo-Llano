@@ -1,0 +1,693 @@
+/* CSS Document */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video{ margin:0; padding:0; border:0; outline:0; font-size:100%; 
+                          /*vertical-align: top; */
+                          background:transparent;}
+
+html,body{ border:0em;margin:0px;width:100%;height:100%;font-family:verdana;font-size:12px;overflow-y:auto;}
+/*h1{
+        vertical-align:middle;
+        color:#CC0033;
+        text-shadow:3px 3px 1px #bbb;
+        }*/
+label{
+    margin-bottom: 5px;
+    margin-top: 7px;
+    font-size: 1.1em;
+}
+
+body{
+    background-color: #FFF;
+    /*background-image: url('img/bg.png');*/
+    font-size: 11px;
+    color:#666;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0px 10px 20px 10px;
+}
+
+h1{
+    font-size: 1.7em;
+    color:#408BC4;
+    font-weight: bold;
+}
+
+h2{
+    font-size: 1.8em;
+    color:#408BC4;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+div#divTitulo{
+    border-bottom: solid 1px #408BC4;
+    background-image: url('img/LogoAchagua.png');
+    background-size: 180px auto;
+    background-repeat: no-repeat;
+    background-position: 5px 10px;
+    height: 50px;
+    padding-bottom: 5px;
+}   
+
+
+div#divTitulo h1{
+    padding-top: 15px;
+    text-align: center;
+    font-size: 2em;
+    font-weight: bold;        
+    vertical-align :middle;
+}
+
+div#contenedor{
+    margin: 0 auto;
+    background-color: #FFF;
+    border-radius: 15px;
+    padding: 15px 10px 20px 10px;
+    box-shadow: 0px 0px 10px #999;
+    margin-top: 10px;
+    width: 95%;
+}
+.umCuadroBusqueda button{
+    color:#fff;
+    background:linear-gradient(180deg, #8AB6D9 50%, #71A7D3 50%);
+    border:0px;
+    min-width:90px;
+    height:30px;
+    border-radius:5px;
+    color:#fff;
+    font-weight:bold;
+    margin:4px 4px 0px 0px;
+}
+#divRespuesta{
+    position:relative;
+    display:inline-block;
+    width:60%;
+    padding:5px 0px 5px 0px;
+    margin:5px 0px 5px 0px;
+    background:#FFFF99;
+    border:1px solid #FF9900;
+    border-radius:5px;
+}
+
+#divRespuesta #cerrarRespuesta{
+    color:#ff0000;
+    display:block;
+    position:absolute;
+    top:2px;
+    right:2px;
+    cursor:pointer;
+}
+
+#contPrincipal{
+    display:block;
+    position:relative;
+    width:100%;
+    text-align:center;    
+}
+
+#contPrincipal .cuerpo{
+    display:inline-block;
+    position:relative;
+    max-width:98%;
+    width:100%;    
+    color:#666;
+    border-radius:0px 0px 15px 15px;
+    box-shadow:1px 1px 10px 5px #C6C6C6;
+    background:#FCFCFC;	
+}
+.bodyprograma #cuerpo{
+    display:inline-block;
+    position:relative;
+    max-width:98%;
+    width:100%;    
+    color:#666;
+    border-radius:0px;
+    box-shadow:none;
+    background:#FCFCFC;	
+}
+#contPrincipal .cuerpo .cabecera{
+    display:block;
+    position:relative;
+    width:100%;
+    min-height:115px;
+    background:#fff;
+    margin:0px;
+    box-shadow:inset 0px -3px 2px 1px #ccc;    
+}
+#contPrincipal .cuerpo .cabecera img{
+    float:left;
+    max-width:204px;
+    width:100%;
+}
+
+#contPrincipal .cuerpo .cabecera h1{
+    display:inline-block;
+}
+
+#contPrincipal .cuerpo .contenido{
+    display:block;
+    position:relative;
+    width:100%;    
+    margin:0px;   
+}
+
+#contPrincipal .cuerpo .contenido .col1{
+    display:inline-block;
+    position:relative;
+    width:15%;
+    min-width:140px;    
+    margin:0px;
+    vertical-align:top;
+    border-right:1px solid #eee;
+}
+@media screen and (max-width:900px){
+    #contPrincipal .cuerpo .contenido .col1{
+        display:inline-block;
+        position:relative;
+        width:90%;  
+        margin:0px;
+        vertical-align:top;
+        border-right:1px solid #eee;
+    }
+}
+#contPrincipal .cuerpo .contenido nav{
+    width:100%;
+}
+#contPrincipal .cuerpo .contenido nav h4,h5{
+    font-size:14px;
+    margin:0px;
+}
+#contPrincipal .cuerpo .contenido nav h4{
+    background:#0066FF;
+    color:#fff;
+}
+#contPrincipal .cuerpo .contenido nav h5{
+    background:#eee;
+}
+#contPrincipal .cuerpo .contenido nav ul{
+    list-style:none;
+    margin-left:0px;
+    padding:0px;
+}
+#contPrincipal .cuerpo .contenido nav ul li{
+    width:100%;
+    height:30px;
+    border:1px solid #d1e0f8;
+    margin-bottom:5px;
+    font-size:11px;
+    padding:0px;
+}
+#contPrincipal .cuerpo .contenido nav ul li:hover{
+    background:#F0F0FF;
+}
+#contPrincipal .cuerpo .contenido nav ul li a{
+    display:inline-block;
+    position:relative;
+    width:100%;
+    height:100%;   
+    text-decoration:none;
+    color:#3366cc;
+    vertical-align:middle;
+    font-weight:bold;
+}
+#contPrincipal .cuerpo .contenido nav ul li a:link,active,visited{text-decoration:none;color:#3366cc;}
+#contPrincipal .cuerpo .contenido .col1 .login{
+    display:inline-block;
+    min-width:140px;
+    width:100%;
+    height:140px;
+    background:#d1e0f8;
+    margin-left:5px;
+    margin-bottom:10px;
+    border-radius:10px;
+    float:right;
+}
+
+#contPrincipal .cuerpo .contenido .col2{
+    display:inline-block;
+    position:relative;
+    width:84%;
+    background:#fff;
+    margin:0px;
+    vertical-align:top;
+
+} 
+
+#contPrincipal .cuerpo .contenido .col2 .miga{
+    display:block;
+    position:relative;
+    height:30px;
+    width:100%;
+    background:#fff;
+    border-bottom:1px solid #eee;
+}
+
+#contPrincipal .cuerpo .contenido .col2 .contenido{
+    display:block;
+    position:relative;
+    background:#fff;    
+}
+
+#contPrincipal .cuerpo .pie{
+    display:block;
+    position:relative;
+    width:100%;
+    height:55px;
+    background:#E0EDFF;
+    border-radius:0px 0px 15px 15px;
+}
+table{
+    display:table;
+    position:relative;
+    width:98%;
+    border:1px solid #d1e0f8;
+    background:#f8f8f8;    
+    margin-top:15px;
+    margin-bottom:15px;
+    border-collapse: collapse;
+}
+table caption{
+    color:#4099D4;
+    font-weight:bold;
+    font-size:13px;
+}
+table tr{
+    background:#fff;
+    border-bottom:1px solid #d1e0f8;
+}
+table tr:hover{
+    background:#DCEBFF;
+}
+table th{
+    background:linear-gradient(180deg, #8AB6D9 50%, #71A7D3 50%);
+    color:#fff;
+    height:31px;
+    border:0px;
+    text-align:center;
+}
+
+table td{    
+    height:25px;
+    cursor:default;
+    border:1px solid #d1e0f8;
+    position:relative;
+}
+
+.contenedorDesborda{
+    width:100%;
+    overflow:auto;
+    max-height:400px;
+}
+
+#divForms iframe{
+    width:100%;
+    height:450px;
+    margin:0px;
+    border:none;
+    padding:0px;
+}
+
+/*Definicion de estilo para pesta�as de formulario*/
+.pestana_enc ul{	
+
+}
+
+.pestana_enc ul{
+    list-style:none;
+    margin:0px;
+    padding:0px;
+}
+.pestana_enc ul li{
+    margin:0px;
+    display:inline-block;
+    padding:3px 2px 0px 2px;	
+    min-width:134px;
+    height:25px;
+    text-align:center;
+    border:1px solid #fff;
+    border-bottom:0px;
+    border-radius:0px 5px 0px 0px;
+    background:#CADCFE;
+}
+.pestana_enc ul li a{
+    width:100%;
+    height:100%;
+    display:block;
+    font-size:12px;
+    font-weight:bold;
+    color:#0066CC;
+    background:#CADCFE;
+    text-decoration:none;
+
+}
+.pestana_enc ul li a:link :visited{
+    text-decoration:none;
+}
+.pestana_enc ul li a:active{
+    color:#fff;
+}
+
+.hoja{
+    clear:both;
+    position:relative;
+    top:0px;
+    left:0px;	
+}
+
+.jeusCalendar{
+    display:none;
+    position:absolute;
+    width:250px;
+    height:220px;
+    border:2px solid #3366CC;
+    border-radius:10px;
+    overflow:hidden;
+    text-align:center;
+    font-family: Tahoma, Geneva, Verdana, sans-serif;
+    z-index:99999;
+    background:#ffe;
+    box-shadow:1px 2px 4px 2px #999;
+}
+.jeusCalendar .flechaDer{
+    width:25px;
+    height:100%;
+    float:right;
+    text-align:center;
+    cursor:pointer;
+}
+.jeusCalendar .flechaDer span{
+
+}
+.jeusCalendar .flechaIzq{
+    width:25px;
+    height:100%;
+    float:left;
+    text-align:center;
+    cursor:pointer;
+}
+.jeusCalendar .flechaIzq:hover,.flechaDer:hover{
+    box-shadow:inset 1px 1px 1px 1px #efefef;
+}
+.jeusCalendar .divAnyo{
+    width:100%;
+    height:15%;
+    display:block;
+    font-size:100%;
+    font-weight:bold;
+}
+.jeusCalendar .divAnyo .inputAnyo{
+    height:100%;
+    font-size:1em;
+    font-weight:bold;
+    text-align:center;
+}
+.jeusCalendar .divAnyo .inputAnyo option{		
+    font-weight:normal;
+    font-size:0.8em;
+    text-align:left;
+}
+.jeusCalendar .divMes{
+    width:100%;
+    height:15%;
+    display:block;
+}
+.jeusCalendar .divMes select{
+    width:70%;
+    height:100%;
+    font-size:1em;
+}
+.jeusCalendar .divMes select option{
+    font-size:0.8em;
+}
+.jeusCalendar .divDias{
+    display:block;
+    position:relative;
+    width:100%;
+    height:70%;
+    background:#F1F8FF;
+    float:left;
+    text-align:center;
+}	
+.jeusCalendar .divDias .cuadroDia{
+    margin:1px;
+    width:13%;
+    height:11%;
+    background:#fff;
+    display:inline-block;
+    font-size:0.9em;
+    cursor:pointer;
+}
+.cuadroDiaSeleccion{		
+    background:#D8EAFF !important;
+}	
+.cuadroDiaBloqueado{		
+    background:#BCBFBC !important;
+    color:#fff;
+    cursor:default !important;		
+}
+.jeusCalendar .divDias .cuadroDia:hover{
+    box-shadow:inset 1px 1px 2px 1px #C4DBEF;
+}
+.jeusCalendar .divDias .calCuadDiaTitulo{
+    margin:1px 1px 5px 1px;
+    width:13%;
+    height:11%;
+    display:inline-block;
+    font-weight:bold;		
+}
+pre{
+    text-align:left;
+    max-height:350px;
+    overflow:auto;
+    color:#0066FF;
+}
+.umCuadroBusqueda{
+    display:block;
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+    min-height:100%;
+    background:#fff;
+    border:1px solid #A6C9E2;
+    border-radius:3px;
+    z-index:666;
+}
+.umCuadroBusqueda .umCuadroBusquedaBotonera{
+    text-align:right;
+
+}
+.umCuadroBusqueda form{
+    background:none;
+    border:none;
+    border-radius:0px;
+    border-bottom:1px solid #A6C9E2;
+}
+.umCuadroBusqueda h4{
+    background:linear-gradient(180deg, #88B7DA 50%, #6EA6D2 50%);
+    margin:0px;
+    height:24px;
+    text-align:center;
+    vertical-align:middle;
+    color:#fff;
+    padding-top:5px;
+}
+.umCuadroBusquedaBotonera{
+    height:inherit;
+}
+.umCuadroBusqueda .divautocomplete{
+    position:absolute;
+    top:40px;
+    left:0px;
+    min-width:240px;
+    max-height:150px;
+    z-index:100;
+    background:#000;
+    margin-top:18px;
+    padding:0px;
+}
+.umCuadroBusqueda .divautocomplete table{
+    margin:0px;
+    width:100%;
+    border-radius:0px;
+    padding: 100px;
+}
+
+.blockUI.blockMsg.blockElement iframe{
+    width:100%;
+    height:100%;
+    margin:0px;
+    border:0px;
+}
+h1{
+    font-size: 1.7em;
+    color:#408BC4;
+    font-weight: bold;
+}        
+
+div#divTitulo{
+    height: 40px;
+}
+
+div#divTitulo h1 {
+    text-align: right;
+    padding: 7px 15px 0px 0px;
+    font-size: 1.7em;
+}
+
+h2{
+    font-size: 1.8em;
+    color:#408BC4;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+div#divTitulo{
+    border-bottom: solid 1px #408BC4;
+    background-image: url('/achagua/sistema/web/bundles/Llanogas/css/img/LogoAchagua.png');
+    background-size: 180px auto;
+    background-repeat: no-repeat;
+    background-position: 5px 10px;
+    height: 50px;
+    padding-bottom: 5px;
+}   
+
+
+div#divTitulo h1{
+    padding-top: 15px;
+    text-align: center;
+    font-size: 2em;
+    font-weight: bold;        
+    vertical-align :middle;
+}
+
+div.divBotones .btn{
+    background-image: url('/achagua/sistema/web/bundles/Llanogas/img/bgBotones.jpg');
+    background-position: center;
+    background-repeat: repeat-x;
+    min-width:80px;
+    height: 30px;
+    border:solid 1px #408BC4;
+    margin:0px;
+    color:#FFF;
+    float:left;
+}
+
+
+div#divCargador{
+    display:none;
+    position: fixed;
+    top:-1px;
+    background-color: #FFF;
+    min-width: 200px;
+    height: 40px;
+    padding: 7px 5px 5px 5px;
+    text-align: center;
+    right: 42%;
+    border:solid 1px #AAA;
+    border-top:none;
+    border-radius: 0px 0px 10px 10px;
+    /*background-image: url('img/bgCargador.jpg');*/
+    background-repeat: repeat-x;
+    background-size: 100% 100%;
+    color:#FFF;
+    z-index: 99999;
+    box-shadow: 0px 0px 20px 3px #FFF;
+}
+
+div#divCargador span{
+    position: relative;
+    /* top:-10px; */
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+div#divBarraOcultarMenu {
+    position: absolute;
+    left: 0px;
+    top:0px;
+    min-height: 480px;
+    width: 9px;
+    background-color: rgba(247, 245, 245, 0.5);
+}
+
+button#btnOcultarMenu:hover {
+    background-color: rgba(230, 225, 225, 0.7);
+    cursor: pointer;
+}
+button#btnOcultarMenu {
+    min-height: 480px;
+    background-color: inherit;
+    border: none;
+    width: inherit;
+    padding: 0px 0px 25px 0px;
+    vertical-align: middle;
+}
+button#btnOcultarMenu:focus {
+    outline: none;
+}
+div#divGeneral{
+    width: 80%;
+    float:right;
+    border-left: solid 1px #DEDEDE;
+    min-height: 400px;
+    padding: 15px 15px 20px 15px;
+    position: relative;
+}
+
+div#contenedor{
+    margin: 0 auto;
+    background-color: #FFF;
+    border-radius: 15px;
+    padding: 15px 10px 20px 10px;
+    box-shadow: 0px 0px 10px #999;
+    margin-top: 10px;
+    width: 95%;
+}
+
+div#menu{
+    width:15%;
+    min-height: 400px;
+    float:left;
+    margin-right: 10px;
+}
+
+.limpiar {
+    clear: both;
+    opacity: 0;
+}
+
+fieldset{
+    margin-top: 14px;
+    margin-bottom: 7px;
+    padding: 17px 0px 6px 7px;
+    border:solid 1px #408BC4;
+}
+
+td .tdderecha {
+    text-align: right ;
+}
+
+fieldset .subfieldset{
+    margin-right: 20px
+}
+
+fieldset legend {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #408BC4;
+    padding: 0px 7px 0px 7px;
+}
