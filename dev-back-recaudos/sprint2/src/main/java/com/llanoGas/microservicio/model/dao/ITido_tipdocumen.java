@@ -1,0 +1,16 @@
+package com.llanoGas.microservicio.model.dao;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+
+import com.llanoGas.microservicio.Entity.Tido_tipdocumen;;
+
+public interface ITido_tipdocumen  extends JpaRepository<Tido_tipdocumen,Integer> {
+	
+	@Query(value = "SELECT *  FROM public.uni_unidad inner join esem_estempresa  on uni_unidad.est_ideregistro = esem_estempresa.est_ideregistro inner join tido_tipdocumen  on uni_unidad.uni_ideregistro = tido_tipdocumen.uni_tipdocument inner join prun_prgunidad on tido_tipdocumen.uni_tipdocument=prun_prgunidad.uni_ideregistro inner join uspu_usuprgunid on   prun_prgunidad.prun_ideregistr=uspu_usuprgunid.prun_ideregistr where uspu_usuprgunid.usu_ideregistro= :#{#usuario} and esem_estempresa .emp_ideregistro= :#{#empresa} and  prun_prgunidad.prg_ideregistro= :#{#programa} order by tido_pagpriori",nativeQuery = true)	
+    public List<Tido_tipdocumen> listaTipoDocument( int usuario, int empresa,   int programa);
+
+}
