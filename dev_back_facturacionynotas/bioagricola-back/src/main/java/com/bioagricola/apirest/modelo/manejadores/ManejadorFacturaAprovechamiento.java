@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import com.bioagricola.apirest.modelo.dtos.FacFacturaDTO;
 import com.bioagricola.apirest.modelo.entidades.FacFactura;
+import java.sql.Timestamp;
+import java.util.Map;
 
 @Repository
 public class ManejadorFacturaAprovechamiento {
@@ -191,5 +193,34 @@ public class ManejadorFacturaAprovechamiento {
         query.setParameter("anoCiclo", anoCiclo);
         query.setParameter("aprovechamiento", aprovechamiento);
         return query.getResultList();
+    }
+    
+    public List<Object[]> ejecutarProcesoAproCast(Integer idempresa,Date fechacorte,Integer idusuario) throws Exception {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select * from aseo.fn_apro_marcacion_conciliacion(:idempresa, cast(:fechacorte as timestamp), :idusuario); ");
+                
+        Query query = this.em.createNativeQuery(sqlBuilder.toString());
+        query.setParameter("idempresa", idempresa);
+        query.setParameter("fechacorte", fechacorte);
+        query.setParameter("idusuario", idusuario);
+        return query.getResultList();
+    }
+    
+    public void ejecutarAprobarProcesoAprovCast(Long mapcrIdregistr){
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from aseo.fn_apro_aprobar_conciliacion(:mapcrIdregistr); ");
+        
+        Query query = em.createNativeQuery(sql.toString());
+        query.setParameter("mapcrIdregistr", mapcrIdregistr);
+        query.getSingleResult();
+    }
+    
+    public void ejecutarDescartarProcesoAprovCast(Long mapcrIdregistr){
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from aseo.fn_apro_descartar_conciliacion(:mapcrIdregistr); ");
+        
+        Query q_update = em.createNativeQuery(sql.toString());
+        q_update.setParameter("mapcrIdregistr", mapcrIdregistr);
+        q_update.getSingleResult();
     }
 }

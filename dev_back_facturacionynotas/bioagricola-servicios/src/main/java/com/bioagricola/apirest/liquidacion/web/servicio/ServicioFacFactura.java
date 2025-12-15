@@ -98,9 +98,9 @@ public class ServicioFacFactura implements IFacFactura {
     @PostMapping(value = "/FiltroFactura", produces = "application/json")
     public ResponseEntity<GeneralBodyResponse<Page<FacFacturaDTOResponse>>> filterInvoice(@RequestBody FacFacturaPayload facFacturaPayload, Pageable pageable) {
         try {
-            if (facFacturaPayload.getDateInit() == null || facFacturaPayload.getDateEnd() == null || facFacturaPayload.getDsusId() == null)
+            if (facFacturaPayload.getDateInit() == null || facFacturaPayload.getDateEnd() == null || (facFacturaPayload.getDsusId() == null && facFacturaPayload.getCodBefore()==null) )
                 return new ResponseEntity<>(
-                        new GeneralBodyResponse<>(null, "los campos Id Suscripción, Fecha Desde y Fecha Hasta SON obligatorios", null),
+                        new GeneralBodyResponse<>(null, "los campos Id Suscripción o Codigo Anterior , Fecha Desde y Fecha Hasta SON obligatorios", null),
                         HttpStatus.BAD_REQUEST);
 
             if (facFacturaPayload.getDateEnd().getTime() < facFacturaPayload.getDateInit().getTime())

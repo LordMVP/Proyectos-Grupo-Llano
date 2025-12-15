@@ -42,10 +42,12 @@ public class UtilConstantes {
     //Aforos Parametros		
 	public static final String CLASE_SUSC_INDIVIDUAL = "Individual";
 	public static final String CLASE_SUSC_MULTIUSUARIO = "Multiusuario";
+	public static final Integer CONVERTPESO_A_TONELADA = 1000;
 	
 	public static final String MULTIUSUARIO = "'MULTIUSUARIO'";
 	public static final String MULTIUSUARIO_CONST = "MULTIUSUARIO";
 	public static final String INDIVIDUAL = "'INDIVIDUAL'";
+	public static final String INDIVIDUAL_CONST = "INDIVIDUAL";
 	
 	public static final String ESTADO_EN_PROCESO = "En Proceso";
 	public static final String ESTADO_PRE_LIQUIDACION = "Pre-Liquidacion";
@@ -56,6 +58,7 @@ public class UtilConstantes {
 	
 	//MicroRutas
 	public static final Integer MICRORUTAID = 3016;
+	
 	
 	
 }

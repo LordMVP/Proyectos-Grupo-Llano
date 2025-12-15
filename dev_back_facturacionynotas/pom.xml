@@ -15,7 +15,9 @@
   <version>1.0-SNAPSHOT</version>
   <name>bioagricola</name>
   <modules>
-    <module>bioagricola-back</module>
+    <module>bioagricola-back</module>    
     <module>bioagricola-servicios</module>
+<!-- Comentarear la siguiente linea si se desea generar el back solo para facturacion y notas      -->
+	<module>bioagricola-aprovechamiento</module>
   </modules>
 </project>

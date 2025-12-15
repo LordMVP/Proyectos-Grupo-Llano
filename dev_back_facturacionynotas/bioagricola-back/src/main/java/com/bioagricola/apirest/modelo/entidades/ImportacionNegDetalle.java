@@ -41,6 +41,9 @@ public class ImportacionNegDetalle {
 
     @Column(name = "impnegdet_fecha_aplicacion_nota")
     private Date fechaAplicacionNota;
+    
+    @Column(name = "impnegdet_fecha_archivo_recaudo")
+    private Date fechaArchivoRecaudo;
 
     @Column(name = "impnegdet_concepto")
     private String concept;
@@ -74,6 +77,14 @@ public class ImportacionNegDetalle {
 
     public Long getId() {
         return id;
+    }
+
+    public Date getFechaArchivoRecaudo() {
+        return fechaArchivoRecaudo;
+    }
+
+    public void setFechaArchivoRecaudo(Date fechaArchivoRecaudo) {
+        this.fechaArchivoRecaudo = fechaArchivoRecaudo;
     }
 
     public void setId(Long id) {

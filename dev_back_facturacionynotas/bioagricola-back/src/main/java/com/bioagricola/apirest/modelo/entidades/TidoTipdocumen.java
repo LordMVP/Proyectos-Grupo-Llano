@@ -95,6 +95,9 @@ public class TidoTipdocumen implements Serializable{
 	@Column(name="tido_pagpriori")
 	private Short tidoPagpriori;
 	
+	@Column(name="tido_estado")
+	private String tidoEstado;
+	
 
 	@ManyToOne
 	@JoinColumn(name="uni_tipdocument", referencedColumnName="uni_ideregistro", insertable = false, updatable = false)
@@ -386,6 +389,16 @@ public class TidoTipdocumen implements Serializable{
         return Objects.equals(this.tidoPagpriori, other.tidoPagpriori);
                 
     }
+
+
+	public String getTidoEstado() {
+		return tidoEstado;
+	}
+
+
+	public void setTidoEstado(String tidoEstado) {
+		this.tidoEstado = tidoEstado;
+	}
 	
 	// protected region metodos adicionales on begin
 	// Escriba en esta sección sus modificaciones

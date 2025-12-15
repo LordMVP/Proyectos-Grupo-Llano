@@ -9,6 +9,15 @@ public class RequestReLiquidarDTO {
 	private String desde;
 	private String hasta;
 	private Integer tipnota;
+        private String pqr;
+
+        public String getPqr() {
+            return pqr;
+        }
+
+        public void setPqr(String pqr) {
+            this.pqr = pqr;
+        }    
 	
 	public char getLiquidar() {
 		return liquidar;

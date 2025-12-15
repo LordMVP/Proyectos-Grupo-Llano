@@ -49,6 +49,9 @@ public class NotNota implements Serializable {
 
 	@Column(name = "not_comentario")
 	private String notComentario;
+        
+        @Column(name = "not_pqr")
+	private String notPqr;
 
 	@Column(name = "not_fecha")
 	private Timestamp notFecha;
@@ -108,6 +111,14 @@ public class NotNota implements Serializable {
 		this.notComentario = notComentario;
 	}
 
+        public String getNotPqr() {
+            return notPqr;
+        }
+
+        public void setNotPqr(String notPqr) {
+            this.notPqr = notPqr;
+        }
+        
 	public Timestamp getNotFecha() {
 		return this.notFecha;
 	}

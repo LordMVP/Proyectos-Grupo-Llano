@@ -8,7 +8,6 @@ import com.bioagricola.common.entity.TerTercero;
 @Mapper(componentModel = "spring")
 public interface TerceroMapper {
 
-
 	TerTerceroResource toResource(TerTercero tercero);
 
 	default Long terceroToID(TerTercero tercero) {

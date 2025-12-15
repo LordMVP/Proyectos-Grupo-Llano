@@ -34,6 +34,27 @@ public interface ManejadorAfoAforo extends ManejadorCrud<AfoAforo, Integer>, IMa
 			+ " afo_extraordinario.hmaf_fecharegistro desc " + "limit 1", nativeQuery = true)
 	List<Object[]> consultarUltimoAforoExtraordinario(Integer uniTipoAforoOrdinario, Integer uniTipoAforoExtraOrdinario,
 			Integer idSuscripcion, Timestamp fechaPqrT, Integer uniAforoIndividual, Integer uniAforoMultiusuario);
+        
+        
+        @Query(value = "  select ff.dsus_ideregistr,ff.per_ideregistro,hd.tafna_calculado ,dd.dfac_vlrtotal,ha.hafo_fecha from public.fac_factura ff " +
+" inner join public.tido_tipdocumen tt on tt.uni_tipdocument = ff.uni_tipdocument  " +
+" and tt.tido_estado = 'A' " +
+" inner join public.dfac_detfactura dd on dd.fac_ideregistro = ff.fac_ideregistro  " +
+" and dd.uni_concepto = :uniConeptoAforoExtraOrdinario " +
+" inner join aseo.hdafo_detaforo hd on hd.dsus_ideregistr = ff.dsus_ideregistr  " +
+" inner join aseo.hafo_aforos ha on ha.hafo_ideregistro = hd.hafo_ideregistro  " +
+" and ha.uni_tipoaforo = :uniTipoAforoExtraOrdinario " +
+" where ff.dsus_ideregistr = :idSuscripcion and ff.fac_estado = 'A'  " +
+" order by ff.fac_fecha desc  " +
+" limit 1 ", nativeQuery = true)
+	List<Object[]> consultarUltimoAforoExtraordinario( Integer uniConeptoAforoExtraOrdinario,Integer uniTipoAforoExtraOrdinario,
+			Integer idSuscripcion);
+
+
+
+
 
 
 }
+
+

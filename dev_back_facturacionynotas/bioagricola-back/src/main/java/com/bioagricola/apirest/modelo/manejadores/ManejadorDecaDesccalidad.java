@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import com.bioagricola.apirest.modelo.entidades.DecaDesccalidad;
 import com.bioagricola.apirest.modelo.manejadores.utils.IManejadorCrud;
 import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
+import java.util.List;
+import javax.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 
 @Service
 public interface ManejadorDecaDesccalidad
@@ -20,5 +23,10 @@ public interface ManejadorDecaDesccalidad
 			@Param("idConceptoTarifas") Integer idConceptoTarifas,
 			@Param("idPerdiodoDescuentoTarifas") Integer idPerdiodoDescuentoTarifas,
 			@Param("rutIdemicroruta") Integer rutIdemicroruta);
+        
+        @Modifying
+	@Query(value = "update aseo.deca_desccalidad set deca_aprobacion = true where per_ideregistro_tarifas =:periodo and uni_concepto_tarifas =:concepto returning dsus_ideregistr", nativeQuery = true)
+	@Transactional
+	List<Object []> aprobarEstadoDescuentoCalidad(Integer periodo,Integer concepto);
 
 }

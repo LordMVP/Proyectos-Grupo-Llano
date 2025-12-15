@@ -132,6 +132,13 @@ public interface RutRutaRepository extends JpaRepository<RutRuta, Long>,JpaSpeci
 			"WHERE dsus_ideregistr= :dsus_ideregistro ",nativeQuery = true)
 	Integer updateRutapr(@Param("rut_ideregistro") Integer rut_ideregistro, @Param("ter_aprovechamiento") Integer ter_aprovechamiento,  @Param("rutapr_incentivo") Boolean rutapr_incentivo , @Param("rutapr_aforado") Boolean rutapr_aforado, @Param("usu_ideregistro") Integer usu_ideregistro ,@Param("dsus_ideregistro") Integer dsus_ideregistro);
 	
+	@Transactional
+	@Modifying
+	@Query(value="UPDATE "+esquemaAseo+".rapr_rutaaprovechamiento \n" +
+			"SET rutapr_swtact= :rutapr_swtact \n" +
+			"WHERE dsus_ideregistr= :dsus_ideregistro ",nativeQuery = true)
+	Integer updateRutaprStatus(@Param("rutapr_swtact") String rutapr_swtact, @Param("dsus_ideregistro") Integer dsus_ideregistro);
+
 	@Query(value="SELECT * FROM "+esquemaAseo+".fn_getdmubafrecuencia(:ruta)",nativeQuery = true)
 	String buscarMacroRuta(@Param("ruta") Integer ruta);
 

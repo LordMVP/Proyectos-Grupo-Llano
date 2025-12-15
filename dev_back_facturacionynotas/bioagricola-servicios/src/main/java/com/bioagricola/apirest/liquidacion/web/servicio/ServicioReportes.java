@@ -3,6 +3,7 @@ package com.bioagricola.apirest.liquidacion.web.servicio;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -90,5 +91,15 @@ public class ServicioReportes {
 		headers.add(disposition, attachment);
 		return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
 	}
+
+	@GetMapping(path = "/reporte")
+	public ResponseEntity<Object> generarReporte( @RequestParam Map<String, String> params) {
+		ByteArrayOutputStream out = negocioReportes.generarReporte(params);
+		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(disposition, attachment);
+		return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+	}
+
 
 }

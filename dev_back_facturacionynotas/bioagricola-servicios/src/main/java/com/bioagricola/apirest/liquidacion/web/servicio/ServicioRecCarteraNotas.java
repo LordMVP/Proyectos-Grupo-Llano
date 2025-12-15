@@ -5,6 +5,7 @@ import com.bioagricola.apirest.liquidacion.web.servicio.utils.NegocioNotasRespon
 import com.bioagricola.apirest.modelo.dtos.*;
 import com.bioagricola.apirest.modelo.entidades.ImportacionNegDetalle;
 import com.bioagricola.apirest.modelo.entidades.ImportacionNegEMSA;
+import java.util.Calendar;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -82,6 +83,10 @@ public class ServicioRecCarteraNotas {
     @PostMapping("/note")
     public ResponseEntity<?> applyNote(@Valid @RequestBody ApplyNotesDTO applyNotesDTO) {
         try {
+            /*Calendar calendar = Calendar.getInstance();
+            calendar.setTime(applyNotesDTO.getImportDate());
+            calendar.add(Calendar.DAY_OF_YEAR,1 );
+            applyNotesDTO.setImportDate(calendar.getTime());*/
             this.negocioRecCarteraNotas.applyNote(applyNotesDTO);
             return ResponseEntity.ok(new ApplyNotesResponseDTO("00", "OK"));
         } catch (Exception e) {

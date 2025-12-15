@@ -21,16 +21,24 @@ import com.bioagricola.apirest.modelo.dtos.RequestGenerarNota;
 import com.bioagricola.apirest.modelo.dtos.RequestNotNotaDTO;
 import com.bioagricola.apirest.modelo.excepciones.NegocioException;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrprocesoRespository;
+import com.bioagricola.apirest.modelo.manejadores.ManejadorDocDocumento;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 @Service
 public class NegocioGenerarNota {
-
+    
+        @PersistenceContext
+	EntityManager entityManager;
+        
 	@Autowired
 	private ManejadorCprCtrprocesoRespository manejadorCprCtrprocesoRespository;
 	@Autowired
 	private NegocioNotNota negocioNotNota;
 	@Autowired
 	private NegocioParParametro negocioParParametro;
+	@Autowired
+	private ManejadorDocDocumento manejadorDocDocumento;
 
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(NegocioGenerarNota.class);
 	// datos obtenidos desde el token
@@ -40,6 +48,7 @@ public class NegocioGenerarNota {
 	int tipoNota;
 	int uniMotnota;
 	int reclamacion;
+        String adiciona; 
 	String observacion;
 	List<Object[]> infoFactura;
 	List<String[]> listaDebitos = new ArrayList<>();
@@ -58,8 +67,7 @@ public class NegocioGenerarNota {
 		tipoNota = generarNota.getTipoNota();
 		reclamacion = generarNota.getReclamacion();
 		observacion = generarNota.getObservacion();
-		uniMotnota = generarNota.getUniMotnota();
-		
+		uniMotnota = generarNota.getUniMotnota();		
 		StringBuilder bld = new StringBuilder();
 		
 		for (String idFactura : generarNota.getFacturas()) {
@@ -73,6 +81,10 @@ public class NegocioGenerarNota {
 			try {
 				compararVersion(idFactura);
 				infoFactura = manejadorCprCtrprocesoRespository.consultarNovedad(idFactura);
+                                if(infoFactura.get(0)[26] != null){
+                                    adiciona = infoFactura.get(0)[26].toString();    
+                                }                                
+				LOGGER.error("INFOFACTURA->"+infoFactura.size());
 				aplicarFormulasNovedad(idFactura);
 				procesarDebitos(idFactura);
 				procesarCreditos(idFactura);
@@ -126,7 +138,7 @@ public class NegocioGenerarNota {
 
 				manejadorCprCtrprocesoRespository.eliminarRegistroAforado(tipoNota, idEmpresa,
 						conceptoaforoextraordinario, idUsuario);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOGGER.info("Error no controlado consultando el concepto aforado extraordinario {}", e.getMessage());
 			}
 
@@ -153,6 +165,7 @@ public class NegocioGenerarNota {
 		nuevaNota.setFecha(fecha());
 		nuevaNota.setObservacion(observacion);
 		nuevaNota.setUniMotnota(uniMotnota);
+                nuevaNota.setPqr(infoFactura.get(0)[25] == null ? "" : infoFactura.get(0)[25].toString());
 
 		nota = negocioNotNota.agregarNota(nuevaNota);
 
@@ -182,12 +195,14 @@ public class NegocioGenerarNota {
 		BigInteger idFactura;
 		facturas = new ArrayList<>();
 		Long idNota;
+		LOGGER.error("DEBITOS->"+idnovedad);
 		if (!listaDebitos.isEmpty()) {
+			LOGGER.error("DEBITOS->"+listaDebitos.size());
 			idFactura = crearFactura("ND");
 			facturas.add(Long.parseLong(idFactura.toString()));
 
 			for (String[] concepto : listaDebitos) {
-				crearDetalleFatura(idFactura, concepto, idnovedad);
+				crearDetalleFatura(idFactura, concepto, idnovedad,"ND");
 			}
 			actualizarValorFactura(idFactura);
 			idNota = agregarNota();
@@ -206,10 +221,10 @@ public class NegocioGenerarNota {
 			facturas.add(Long.parseLong(idFactura.toString()));
 
 			for (String[] concepto : listaSaldos) {
-				crearDetalleFatura(idFactura, concepto, idnovedad);
+				crearDetalleFatura(idFactura, concepto, idnovedad, "NS");
 			}
-			valorNota = actualizarValorFactura(idFactura);
-			crearRecaudo(valorNota);
+			valorNota = (actualizarValorFactura(idFactura)).abs();
+ 			crearRecaudo(valorNota);
 			idNota = agregarNota();
 			agregarNofa(idNota, infoFactura.get(0)[24].toString(), idFactura);
 
@@ -220,13 +235,20 @@ public class NegocioGenerarNota {
 		BigInteger idFactura;
 		facturas = new ArrayList<>();
 		Long idNota;
-
+		LOGGER.error("NOTASCREDITOS->"+idnovedad);
 		if (!listaCreditos.isEmpty()) {
+                    if(this.reclamacion==3722){
+                        LOGGER.error("LISTACREDITOS->"+listaCreditos.size());
+			idFactura = crearFactura("NR");
+                    }else{
+                        LOGGER.error("LISTACREDITOS->"+listaCreditos.size());
 			idFactura = crearFactura("NC");
+                    }			
 			facturas.add(Long.parseLong(idFactura.toString()));
 
 			for (String[] concepto : listaCreditos) {
-				crearDetalleFatura(idFactura, concepto, idnovedad);
+				LOGGER.error("CONCEPTO->"+concepto[0] + "IDNOVEDAD->"+idnovedad);
+				crearDetalleFatura(idFactura, concepto, idnovedad,"NC");
 			}
 			actualizarValorFactura(idFactura);
 			idNota = agregarNota();
@@ -336,13 +358,17 @@ public class NegocioGenerarNota {
 
 	}
 
-	private void crearDetalleFatura(BigInteger idFactura, String[] concepto, String idnovedad) {
+	private void crearDetalleFatura(BigInteger idFactura, String[] concepto, String idnovedad, String tipoNota) {
 
+		String dfacsdoreal = tipoNota.equalsIgnoreCase("ND") ? concepto[1] : new BigDecimal(concepto[1]).negate().toString();
+		String dfacvlrreal = tipoNota.equalsIgnoreCase("ND") ? concepto[1] : new BigDecimal(concepto[1]).negate().toString();
+		//new BigDecimal(dfacvlrreal).negate().toString()
+		LOGGER.error("Concepto "+concepto[0]+" Valor->"+(concepto[5].equalsIgnoreCase("I") ? concepto[6] : concepto[1])+" --- "+concepto[5]);
 		// concepto = idconcepto, valor, saldoReal,valorReal,idconceptoPadre
-		manejadorCprCtrprocesoRespository.insertarDetalleFacturaReal(idFactura.toString(), concepto[1], concepto[1],
-				concepto[1], concepto[0], idnovedad);
+		manejadorCprCtrprocesoRespository.insertarDetalleFacturaReal(idFactura.toString(), concepto[5].equalsIgnoreCase("I") ? concepto[6] : concepto[1], dfacsdoreal,
+				dfacvlrreal, concepto[0], idnovedad);
 
-		manejadorCprCtrprocesoRespository.actualizarValorConceptoOriginal(concepto[3], concepto[2], concepto[4]);
+		manejadorCprCtrprocesoRespository.actualizarValorConceptoOriginal(concepto[3], concepto[2], concepto[4], concepto[7]);
 
 	}
 
@@ -363,6 +389,8 @@ public class NegocioGenerarNota {
 		Integer idperiodo;
 		Integer iddocumento;
 		Integer idtipodocumento;
+                Integer idnudo;
+                Integer idconsecutivo;
 		Short cicloano;
 		BigInteger idhistoricoliquidacion;
 		BigDecimal saldofactura;
@@ -376,8 +404,9 @@ public class NegocioGenerarNota {
 		BigInteger idfactura;
 		BigInteger facidepadre;
 		Integer codigoNotaReclamacion;
-
-		valorTotal = (BigDecimal) infoFactura.get(0)[0];
+		LOGGER.error("CREAR FACTURA ->"+infoFactura.get(0)[6]);
+		//valorTotal = (BigDecimal) infoFactura.get(0)[0];
+		valorTotal = tipoFactura.equalsIgnoreCase("NC") ? ((BigDecimal) infoFactura.get(0)[0]).negate() : tipoFactura.equalsIgnoreCase("NR") ? ((BigDecimal) infoFactura.get(0)[0]).negate() : (BigDecimal) infoFactura.get(0)[0] ;
 		metodogenera = infoFactura.get(0)[1].toString().charAt(0);
 		estado = 'A';
 		fecha = infoFactura.get(0)[3].toString();
@@ -391,36 +420,45 @@ public class NegocioGenerarNota {
 		idtercero = (BigInteger) infoFactura.get(0)[11];
 		idciclo = (Integer) infoFactura.get(0)[12];
 		idperiodo = (Integer) infoFactura.get(0)[13];
-		iddocumento = (Integer) infoFactura.get(0)[14];
 		idtipodocumento = (Integer) infoFactura.get(0)[15];
+                iddocumento = (Integer) infoFactura.get(0)[14];
+                if(tipoFactura != "NR"){                
+                   iddocumento = manejadorCprCtrprocesoRespository.consultarDocumentoPorDocumentoyTipoDocumento(iddocumento,idtipodocumento, tipoFactura);
+                }
+		//iddocumento = (Integer) infoFactura.get(0)[14]; //manejadorDocDocumento.consultaDocumentoTipo(tipoFactura,idtipodocumento);   //(Integer) infoFactura.get(0)[14];
+                idnudo = manejadorDocDocumento.obtenerNumeroDocumento(idempresa, iddocumento, idtipodocumento);
+                idconsecutivo = ((BigInteger) entityManager.createNativeQuery("select nextval('sq_consecutivo_"+idempresa+"_"+idnudo+"')").getSingleResult()).intValue();
 		cicloano = (Short) infoFactura.get(0)[16];
 		idhistoricoliquidacion = (BigInteger) infoFactura.get(0)[17];
-		saldofactura = (BigDecimal) infoFactura.get(0)[18];
+		//saldofactura = (BigDecimal) infoFactura.get(0)[18];
+		saldofactura = tipoFactura.equalsIgnoreCase("NC") ? ((BigDecimal) infoFactura.get(0)[18]).negate() : tipoFactura.equalsIgnoreCase("NR") ? ((BigDecimal) infoFactura.get(0)[18]).negate() : (BigDecimal) infoFactura.get(0)[18];
 		idtipotercero = (Integer) infoFactura.get(0)[19];
 		fechasuspende = infoFactura.get(0)[4].toString();
 		version = (Integer) infoFactura.get(0)[21];
 		fechaaprobacion = infoFactura.get(0)[22].toString();
 		facidepadre = (BigInteger) infoFactura.get(0)[24];
-
+		LOGGER.error("EMPRESA-"+idempresa);
 		// si es tipo reclamacion asociar tipo de documento y cambiar estado a R
 		codigoNotaReclamacion = manejadorCprCtrprocesoRespository.obtenerCodigoReclamacion(idempresa);
-
+		LOGGER.error("NOTARECLAMACION->"+codigoNotaReclamacion);
 		if (reclamacion == codigoNotaReclamacion) {
 			estado = 'R';
 			iddocumento = manejadorCprCtrprocesoRespository.consultarDocumentoPorDocumentoyTipoDocumento(iddocumento,
-					idtipodocumento, tipoFactura);
+					idtipodocumento, tipoFactura); //tipoFactura
 		}
 
-		campos = "fac_metgenera, fac_estado, fac_fecha, fac_fecvence, emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, uni_tipusosuscr, uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, cic_ano, hliq_ideregistr, fac_sdoreal, uni_tiptercero, fac_fecsuspens, fac_version, fac_vlrreal, fac_fecaprobada, usu_ideregistro, fac_idepadre";
+		campos = "fac_metgenera, fac_estado, fac_fecha, fac_fecvence, emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, uni_tipusosuscr, uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, cic_ano, hliq_ideregistr, fac_sdoreal, uni_tiptercero, fac_fecsuspens, fac_version, fac_vlrreal, fac_fecaprobada, usu_ideregistro, fac_idepadre, fac_numero";
 		valores = "'" + metodogenera + "','" + estado + "','" + fecha + "','" + fechavencimiento + "'," + idempresa
 				+ "," + idsuscriptor + "," + idsuscripcion + "," + idtiposuscripcion + "," + idtipousosuscripcion + ","
 				+ idliquidacion + "," + idtercero + "," + idciclo + "," + idperiodo + "," + iddocumento + ","
 				+ idtipodocumento + "," + cicloano + "," + idhistoricoliquidacion + "," + saldofactura + ","
 				+ idtipotercero + ",'" + fechasuspende + "'," + version + "," + valorTotal + ",'" + fechaaprobacion
-				+ "'," + idUsuario + ", " + facidepadre + " ";
+				+ "'," + idUsuario + ", " + facidepadre + ", "+idconsecutivo + " ";
+		LOGGER.error("CAMPOS->"+campos);
+		LOGGER.error("VALORES->"+valores);
 		respuesta = manejadorCprCtrprocesoRespository.insertar("fac_factura", campos, valores,
 				" returning fac_ideregistro");
-
+		LOGGER.error("RESPUESTA->" +respuesta);
 		idfactura = BigInteger.valueOf(respuesta);
 		return idfactura;
 	}
@@ -429,14 +467,18 @@ public class NegocioGenerarNota {
 		List<Object[]> conceptosNovedad = null;
 		List<Object[]> conceptoPadre = null;
 		BigDecimal ajusteAAplicar = null;
+                BigDecimal ajusteAAplicarInformativo = null;
 		String idconceptoPadre = null;
 		String idconcepto = null;
 		BigDecimal saldoOriginal = null;
 		BigDecimal valorOriginal = null;
+                BigDecimal valorOriginalInformativo = null;
+                BigDecimal valorTotalInformativo = null;
 		BigDecimal valor = null;
 		BigDecimal saldoReal = null;
 		BigDecimal valorReal = null;
 		String[] concatenar = null;
+                String operacion = null;
 
 		conceptosNovedad = manejadorCprCtrprocesoRespository.consultarConceptosNovedad(idFactura);
 
@@ -444,51 +486,71 @@ public class NegocioGenerarNota {
 			idconcepto = concepto[0].toString();
 			idconceptoPadre = concepto[2].toString();
 			ajusteAAplicar = new BigDecimal(concepto[1].toString());
+			ajusteAAplicarInformativo = new BigDecimal(concepto[4].toString());
+			LOGGER.error("CONCEPTO->"+idconcepto + " --- AJUSTE:"+ajusteAAplicar);
 
 			conceptoPadre = manejadorCprCtrprocesoRespository.consultarConceptoPadre(idconceptoPadre);
 			saldoOriginal = new BigDecimal(conceptoPadre.get(0)[1].toString());
 			valorOriginal = new BigDecimal(conceptoPadre.get(0)[2].toString());
+                        valorOriginalInformativo = new BigDecimal(conceptoPadre.get(0)[3].toString());
+                        LOGGER.error("SALDO ORIGINAL->"+saldoOriginal + " -- VALORORIGINAL->"+valorOriginal+" ORIINFOR->"+valorOriginalInformativo+" AJUSTINFOR->"+ajusteAAplicarInformativo);
+                        valorTotalInformativo = valorOriginalInformativo.subtract(ajusteAAplicarInformativo);
+                        if (tipoNota == 758 && adiciona.equalsIgnoreCase("1")){                            	
+                                valor = ajusteAAplicar; //.multiply(BigDecimal.valueOf(-1));
+				saldoReal = saldoOriginal.add(valor);
+				valorReal = valorOriginal.add(valor);
+                                operacion = concepto[3].toString();
 
-			if (ajusteAAplicar.compareTo(BigDecimal.ZERO) >= 0) {
+				concatenar = new String[] { idconcepto, valor.toString(), saldoReal.toString(), valorReal.toString(),
+						idconceptoPadre , operacion, valorTotalInformativo.toString() ,ajusteAAplicarInformativo.toString()};
+				listaDebitos.add(concatenar);
+                        }
+                        else{
+			if (ajusteAAplicar.compareTo(BigDecimal.ZERO) >= 0 || valorTotalInformativo.compareTo(BigDecimal.ZERO) >= 0 ) {
 				if ((saldoOriginal.subtract(ajusteAAplicar)).compareTo(BigDecimal.ZERO) >= 0) {
 
 					valor = ajusteAAplicar;
 					saldoReal = saldoOriginal.subtract(ajusteAAplicar);
 					valorReal = valorOriginal.subtract(ajusteAAplicar);
+                                        operacion = concepto[3].toString();
 
 					concatenar = new String[] { idconcepto, valor.toString(), saldoReal.toString(),
-							valorReal.toString(), idconceptoPadre };
+							valorReal.toString(), idconceptoPadre , operacion , valorTotalInformativo.toString(),ajusteAAplicarInformativo.toString() };
 					listaCreditos.add(concatenar);
+                                        
 				} else {
 					if (saldoOriginal.compareTo(BigDecimal.ZERO) > 0) {
 
 						valor = saldoOriginal;
 						saldoReal = saldoOriginal;
 						valorReal = valorOriginal;
+                                                operacion = concepto[3].toString();
 
 						concatenar = new String[] { idconcepto, valor.toString(), saldoReal.toString(),
-								valorReal.toString(), idconceptoPadre };
+								valorReal.toString(), idconceptoPadre, operacion ,valorTotalInformativo.toString(),ajusteAAplicarInformativo.toString() };
 						listaCreditos.add(concatenar);
 					}
 					valor = ajusteAAplicar.subtract(saldoOriginal);
 					saldoReal = BigDecimal.ZERO;
 					valorReal = valorOriginal.subtract(ajusteAAplicar);
+                                        operacion = concepto[3].toString();
 
 					concatenar = new String[] { idconcepto, valor.toString(), saldoReal.toString(),
-							valorReal.toString(), idconceptoPadre };
+							valorReal.toString(), idconceptoPadre, operacion , valorTotalInformativo.toString(),ajusteAAplicarInformativo.toString() };
 					listaSaldos.add(concatenar);
 
 				}
 			} else {
-
-				valor = ajusteAAplicar.multiply(new BigDecimal("-1"));
+				valor = ajusteAAplicar.multiply(BigDecimal.valueOf(-1));
 				saldoReal = saldoOriginal.add(valor);
 				valorReal = valorOriginal.add(valor);
+                                operacion = concepto[3].toString();
 
 				concatenar = new String[] { idconcepto, valor.toString(), saldoReal.toString(), valorReal.toString(),
-						idconceptoPadre };
+						idconceptoPadre , operacion, valorTotalInformativo.toString() ,ajusteAAplicarInformativo.toString()};
 				listaDebitos.add(concatenar);
 			}
+                    }
 		}
 
 	}
@@ -523,6 +585,6 @@ public class NegocioGenerarNota {
 		manejadorCprCtrprocesoRespository.actualizar(parametros, "fac_factura", condicion);
 
 		return facvlrreal;
-	}
+	}       
 
 }

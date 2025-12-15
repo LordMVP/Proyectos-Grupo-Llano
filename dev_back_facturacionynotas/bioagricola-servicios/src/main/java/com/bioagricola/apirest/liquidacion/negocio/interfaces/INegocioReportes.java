@@ -2,6 +2,7 @@ package com.bioagricola.apirest.liquidacion.negocio.interfaces;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,4 +20,6 @@ public interface INegocioReportes {
 	public ByteArrayOutputStream facturasLiquidadasAforo(String typeFile, String listaSuscripciones, Integer tipoNota);
 	
 	public ByteArrayOutputStream notasInclusionDeuda(String typeFile, String listaSuscripciones, Integer tipoNota, Integer accionRealizar, Boolean eliminarSuscripcion);
+
+	public ByteArrayOutputStream generarReporte(Map<String, String> params);
 }

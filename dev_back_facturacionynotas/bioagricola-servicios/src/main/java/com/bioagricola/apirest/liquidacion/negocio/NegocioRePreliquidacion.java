@@ -20,6 +20,7 @@ import com.bioagricola.apirest.modelo.entidades.FacFactura;
 import com.bioagricola.apirest.modelo.excepciones.NegocioException;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrprocesoRespository;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorHistoricos;
+import java.util.ArrayList;
 
 @Service
 public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFacturaDTO> {
@@ -72,8 +73,10 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 		String identificadorEmpresa;
 		Integer idsuscripcion;
 		Integer idCiclo;
+                List<Integer> idCiclos;
 		Integer existeTabla;
 		Object[] factura;
+                String pqr;
 		
 		idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
 		idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
@@ -86,6 +89,8 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 		identificadorEmpresa = "proceso_refacturacion_" + idEmpresa;
 		fechahasta.setHours(23);
 		fechahasta.setMinutes(59);
+                idCiclos=new ArrayList<Integer>();
+                pqr = reLiquidar.getPqr();
 
 		parametros = negocioParParametro.consultaParametros(idEmpresa, ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
 		numeroHilosFacturacion = (Integer) parametros.get(ConstantesServicios.NUMERO_HILOS_FACTURACION);
@@ -105,25 +110,29 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 					idHilo = 1;
 				}
 			
-				if (tipoNota!=715 && tipoNota!=716 && tipoNota!=722) {
+				if (tipoNota!=755 && tipoNota!=756 && tipoNota!=754) {
 					idsuscripcion = Integer.parseInt(suscripcion);
 					validarhistoricosuscrip(fechadesde, fechahasta, suscripcion);
-					idCiclo = buscarCiclo(idsuscripcion, dsusdetsuscrip, fechaDsusdetsuscrip);
+					//idCiclo = buscarCiclo(idsuscripcion, dsusdetsuscrip, fechaDsusdetsuscrip);
+                                        idCiclos = buscarCiclo(idsuscripcion, fechadesde, fechahasta);
 				}
 				else 
 				{
 					factura = manejadorHistoricos.getInfoFactura(suscripcion).get(0);
 					idsuscripcion = Integer.parseInt (factura[0].toString()); 
-					idCiclo = Integer.parseInt (factura[1].toString());
-					dsusdetsuscrip = "dsus_detsuscrip";
-					fechaDsusdetsuscrip = " and per_ideregistro = "+ factura[2].toString() +" "; 
+					idCiclo = Integer.parseInt (factura[1].toString());                                        
+                                        idCiclos.add(idCiclo);                                        
+					dsusdetsuscrip = "dsus_detsuscrip_hist";
+					fechaDsusdetsuscrip = " and per_ideregistro = "+ factura[2].toString() +" and dsus.fecha_modificacion <= '"+fechahasta+"'"; 
+					
 				}
-				iniciarProceso( idEmpresa, idCiclo, idUsuario,idsuscripcion.toString(), fechadesde, fechahasta, idHilo, tipoNota);
-				
-				lanzarHilos(idAcceso, idCiclo, idEmpresa, preLiquidar, idsuscripcion.toString(), idHilo, tipoNota);
-				idHilo += 1;
-		
-
+                                for (Integer idCiclox : idCiclos) {
+				iniciarProceso( idEmpresa, idCiclox, idUsuario,idsuscripcion.toString(), fechadesde, fechahasta, idHilo, tipoNota,suscripcion);
+				LOGGER.error("Termino el proceso-> "+idAcceso);                                
+				lanzarHilos(idAcceso, idCiclox, idEmpresa, preLiquidar, idsuscripcion.toString(), idHilo, tipoNota, pqr);
+				idHilo += 1;                                
+                                }
+                                idCiclos.clear();
 			}
 			LOGGER.info("Se incio el proceso correctamente");
 		} catch (NegocioException e) {
@@ -143,10 +152,22 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 			throw new NegocioException("Error al  buscar el ciclo de la suscripcion " + suscripcion);
 		}
 	}
+        
+        
+        	private List<Integer> buscarCiclo(Integer suscripcion,Date fechaDesde ,Date fechaHasta )
+			throws NegocioException {
+		List<Integer> idCiclos;
+		try {
+			idCiclos = manejadorHistoricos.buscarIdCiclo(suscripcion, fechaDesde ,fechaHasta);
+			return idCiclos;
+		} catch (Exception e) {
+			throw new NegocioException("Error al  buscar el ciclo de la suscripcion " + suscripcion);
+		}
+	}
 
 	public void iniciarProceso( Integer idEmpresa, Integer idCiclo, Integer idUsuario,
 			 String suscripcion, Date fechadesde, Date fechahasta, Integer idHilo,
-			Integer tipoNota)  {
+			Integer tipoNota, String idFactura)  {
 		String identificadorEmpresa;
 		Integer existeTabla;
 
@@ -156,13 +177,23 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 		manejadorCprCtrprocesoRespository.vaciarNovedadTMP(idEmpresa, idUsuario, tipoNota);
 
 		existeTabla = manejadorHistoricos.validarTablaExistente(identificadorEmpresa);
-
 		if (existeTabla == 0) { // si no existe la tabla se crea la tabla temporal
-			manejadorHistoricos.cargarSuscripciones(idCiclo, idEmpresa, idUsuario, idHilo, identificadorEmpresa,
-					suscripcion, fechadesde, fechahasta, dsusdetsuscrip, fechaDsusdetsuscrip, tipoNota);
+                        
+                        manejadorHistoricos.cargarSuscripciones(idCiclo, idEmpresa, idUsuario, idHilo, identificadorEmpresa,
+                            suscripcion, fechadesde, fechahasta, dsusdetsuscrip, fechaDsusdetsuscrip, tipoNota);                        
+			
 		} else {
-			manejadorHistoricos.insertarSuscripciones(idCiclo, idEmpresa, idUsuario, idHilo, identificadorEmpresa,
+			try {
+                            if (suscripcion.equalsIgnoreCase(idFactura)){
+                                manejadorHistoricos.insertarSuscripciones(idCiclo, idEmpresa, idUsuario, idHilo, identificadorEmpresa,
 					suscripcion, fechadesde, fechahasta, dsusdetsuscrip, fechaDsusdetsuscrip, tipoNota);
+                            }else{
+                                manejadorHistoricos.insertarSuscripcionesFactura(idEmpresa, idUsuario, idHilo, identificadorEmpresa,
+					suscripcion,tipoNota, idFactura);
+                            }			
+			}catch(Exception e) {
+				LOGGER.error("TIPO-ERROR-> "+e);
+			}
 		}
 
 	}
@@ -173,8 +204,19 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 		respuesta = manejadorHistoricos.historicoDsusDetsuscrip(fechadesde, fechahasta, suscripcion);
 
 		if (respuesta.isEmpty()) {
-			fechaDsusdetsuscrip = "";
-			dsusdetsuscrip = "dsus_detsuscrip";
+                        
+                    respuesta = manejadorHistoricos.historicoDsusDetsuscrip(fechahasta, suscripcion);
+                        
+                        if (respuesta.isEmpty()) {
+                            fechaDsusdetsuscrip = "";
+                            dsusdetsuscrip = "dsus_detsuscrip";
+                        } else {
+
+			fechaDsusdetsuscrip = "and dsus_hist_idregistr = " + respuesta.get(0)[0] + "";
+			dsusdetsuscrip = respuesta.get(0)[1].toString();
+		}
+                        
+			
 		} else {
 
 			fechaDsusdetsuscrip = "and dsus_hist_idregistr = " + respuesta.get(0)[0] + "";
@@ -184,8 +226,8 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 	}
 
 	public void lanzarHilos(Integer idAcceso, Integer idCiclo, Integer idEmpresa, char preLiquidar, String suscripcion,
-			Integer idHilo, Integer tipoNnota)  {
-		negocioReLiquidacion.inicializarData(idAcceso, idCiclo, idEmpresa, preLiquidar, suscripcion, idHilo, tipoNnota);
+			Integer idHilo, Integer tipoNnota, String pqr)  {
+		negocioReLiquidacion.inicializarData(idAcceso, idCiclo, idEmpresa, preLiquidar, suscripcion, idHilo, tipoNnota, pqr );
 
 	}
 
@@ -194,7 +236,7 @@ public class NegocioRePreliquidacion extends NegocioAbstracto<FacFactura, FacFac
 		Object[] procesos = null;
 		BigInteger cantidad;
 
-		procesos = manejadorHistoricos.getProcesoEjecucion(identificadorEmpresa, programaFacturarPeriodo, idEmpresa,
+		procesos = manejadorHistoricos.getProcesoEjecucion(identificadorEmpresa, tipoNnota, idEmpresa, //programaFacturarPeriodo
 				tipoNnota, idUsuario);
 
 		if (procesos != null) {

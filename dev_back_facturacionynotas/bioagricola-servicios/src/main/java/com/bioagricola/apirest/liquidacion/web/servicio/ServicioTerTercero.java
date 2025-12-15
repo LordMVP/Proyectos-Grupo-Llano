@@ -5,6 +5,9 @@ import com.bioagricola.apirest.liquidacion.negocio.interfaces.ITerTercero;
 import com.bioagricola.apirest.modelo.dtos.TerTerceroDTO;
 import com.bioagricola.apirest.modelo.excepciones.InvalidParameterException;
 import com.bioagricola.apirest.modelo.utils.GeneralBodyResponse;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -184,7 +187,7 @@ public class ServicioTerTercero implements ITerTercero {
         }
         // protected region Use esta region para su implementacion end
     }
-
+  
     @Override
     @GetMapping("/searchTercero")
     public ResponseEntity<GeneralBodyResponse<List<TerTerceroDTO>>> searchTerceroByFullNameOrId(@RequestParam(value = "fullname", required = false) String fullname,
@@ -199,13 +202,12 @@ public class ServicioTerTercero implements ITerTercero {
             return new ResponseEntity<>(new GeneralBodyResponse<>(null, ex.getMessage(), null), HttpStatus.BAD_REQUEST);
         }
     }
-    // protected region Use esta region para su implementacion de otros servicios end
 
     //traer nombre de terceros por empresa en sesión
     @GetMapping("/nombresPorEmpresa")
     public List<String> consultarNombresPorEmpresa() {
         // protected region Use esta region para su implementacion on begin
-        return negocioTerTercero.consultarNombresPorEmpresa();
+        return null; //negocioTerTercero.consultarNombresPorEmpresa();
         // protected region Use esta region para su implementacion end
     }
 }

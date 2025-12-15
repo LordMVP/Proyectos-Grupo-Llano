@@ -7,6 +7,7 @@ import com.bioagricola.apirest.modelo.dtos.FacFacturaDTO;
 import com.bioagricola.apirest.modelo.dtos.FacFacturaDTOResponse;
 import com.bioagricola.apirest.modelo.entidades.ConConcepto;
 import com.bioagricola.apirest.modelo.entidades.FacFactura;
+import com.bioagricola.apirest.modelo.manejadores.ManejadorFacFactura;
 import com.bioagricola.apirest.modelo.entidades.ParLabParametrosLabels;
 import com.bioagricola.apirest.modelo.excepciones.InvalidParameterException;
 import com.bioagricola.apirest.modelo.manejadores.*;
@@ -280,16 +281,31 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         List<Integer> uniDocumentInvoiceServiceList = new ArrayList<>();
         List<Integer> uniDocumentFeeList = new ArrayList<>();
         List<Integer> uniDocumentBalanceList = new ArrayList<>();
+        List<Integer> uniDocumentfinanciacionList = new ArrayList<>();
 
-        fillUniDocumentList(idEmp, uniDocumentDueList, uniDocumentInvoiceServiceList, uniDocumentFeeList, uniDocumentBalanceList);
+        fillUniDocumentList(idEmp, uniDocumentDueList, uniDocumentInvoiceServiceList, uniDocumentFeeList, uniDocumentBalanceList,uniDocumentfinanciacionList,uniDocumentInvoiceServiceList);
 
         for (Object[] object : manejadorFacFactura.getFilterInvoice(dateInit, dateEnd, dsusId, codBefore, numInvoice)) {
             Long idInvoice = (Long) object[6];
             FacFacturaDTOResponse dtoResponse = fillOtherFieldsDto(object);
-
-            dtoResponse.setDeuda(manejadorFacFactura.sumSaldoRealByClient(dtoResponse.getFacFecha(), dtoResponse.getDsusIderegistr(), uniDocumentDueList));
-            dtoResponse.setMora(manejadorFacFactura.sumSaldoRealByUniDocumentList(dtoResponse.getFacFecha(), dtoResponse.getDsusIderegistr(), uniDocumentFeeList));
-            dtoResponse.setOtros(manejadorFacFactura.sumSaldoRealByUniDocumentList(dtoResponse.getFacFecha(), dtoResponse.getDsusIderegistr(), uniDocumentBalanceList));
+            
+            dtoResponse.setDeuda(manejadorFacFactura.sumSaldoRealByClientFactura(idInvoice)); //dtoResponse.getFacFecha(),
+            dtoResponse.setDeudaNota(manejadorFacFactura.sumSaldoDeudaNota(dtoResponse.getFacFechaEnd() ,dtoResponse.getDsusIderegistr(), uniDocumentDueList)); //dtoResponse.getFacFecha(),
+            dtoResponse.setMora(manejadorFacFactura.sumSaldoRealByUniDocumentList(dtoResponse.getFacFechaEnd(), dtoResponse.getDsusIderegistr(), uniDocumentFeeList));
+            dtoResponse.setMoraNota(manejadorFacFactura.sumSaldoRealMoraNota(dtoResponse.getFacFechaEnd(), dtoResponse.getDsusIderegistr(), uniDocumentFeeList));
+            dtoResponse.setOtros(manejadorFacFactura.sumSaldoRealByUniDocumentList(dtoResponse.getFacFechaEnd(), dtoResponse.getDsusIderegistr(), uniDocumentBalanceList));
+            dtoResponse.setSaldosaFavor(manejadorFacFactura.sumSaldoReal(dtoResponse.getPerIderegistro(), dtoResponse.getDsusIderegistr(), uniDocumentBalanceList));
+            
+            dtoResponse.setCuotafinanciacion(manejadorFacFactura.sumCuotaFinanciacionDocumentList(dtoResponse.getFacFechaEnd(), dtoResponse.getDsusIderegistr(), uniDocumentfinanciacionList,(long) dtoResponse.getPerIderegistro()));
+             dtoResponse.setCuotafinanciacionNota(manejadorFacFactura.sumCuotaFinanciacionNota(dtoResponse.getFacFechaEnd(), dtoResponse.getDsusIderegistr(), uniDocumentfinanciacionList,(long) dtoResponse.getPerIderegistro()));
+            
+            dtoResponse.setValortarifa(manejadorFacFactura.sumValorTarifaDocumentList(dtoResponse.getFacNumero()));
+            dtoResponse.setTarifacomercializacion(manejadorFacFactura.sumTarifacomercializacionDocumentList(dtoResponse.getFacNumero()));
+            dtoResponse.setNombreCompleto(manejadorFacFactura.NombreTercero(dtoResponse.getDsusIderegistr()));
+            dtoResponse.setCodAnterior(manejadorFacFactura.codAnterior(dtoResponse.getDsusIderegistr()));
+            dtoResponse.setValorRecaudado(manejadorFacFactura.valorRecaudado(dtoResponse.getFacNumero()));
+            dtoResponse.setFechaRecaudo(manejadorFacFactura.fechaRecaudo(dtoResponse.getFacNumero()));
+            dtoResponse.setDocumentoTercero(manejadorFacFactura.DocumentoTercero(dtoResponse.getDsusIderegistr()));
             dtoResponse.setTotal(manejadorFacFactura.sumSaldoRealByUniDocumentList(dtoResponse.getFacFecha(), dtoResponse.getDsusIderegistr(), uniDocumentInvoiceServiceList));
             dtoResponse.setEmpresaAlterna(manejadorDsusDetsuscrip.obtenerEmpresaHomolgadaXSuscripNombre(dtoResponse.getDsusIderegistr(), idEmp));
             dtoResponse.setTotalDeudaMora((dtoResponse.getMora() != null ? dtoResponse.getMora() : 0) + (dtoResponse.getDeuda() != null ? dtoResponse.getDeuda() : 0));
@@ -307,7 +323,7 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
             for (Object[] row : detailInvoiceParamsList) {
                 for (ParLabParametrosLabels parLabParametrosLabels : parLabParametersLabelsList) {
                     if (parLabParametrosLabels.getParLabLabel().equals(row[12])) {
-                        dtoResponse.getRateDetail().put((String) row[12], ((BigDecimal) row[14]).doubleValue());
+                        dtoResponse.getRateDetail().merge((String) row[12], ((BigDecimal) row[14]).doubleValue(),Double::sum);
                     }
                 }
             }
@@ -339,7 +355,7 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
     private void fillDetailsInvoice(FacFacturaDTOResponse dtoResponse, List<Object[]> detailInvoiceParamsList) {
 
         Double subtotalTarifaFija = calculateSubTotalForRate(detailInvoiceParamsList,
-                "tar_comergasaseo,tar_comeremsa,tar_limpiezaurbana,tar_barridoylimpieza");
+                "tar_comergasaseo,tar_comeremsa,tar_limpiezaurbana,tar_barridoylimpieza,comer_aprovechamiento");
 
         dtoResponse.getRateDetail().put("subtotalTarifaFija", subtotalTarifaFija);
 
@@ -349,10 +365,10 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getRateDetail().put("subtotalTarifaVariable", subtotalTarifaVariable);
 
         Double subtotalTarifaOtros = calculateSubTotalForRate(detailInvoiceParamsList,
-                "tar_aprovechamiento,tar_incentivoaprovechamiento");
+                "tar_aprovechamiento,tar_incentivoaprovechamiento,comer_aprovechamiento_terceros");
 
         dtoResponse.getRateDetail().put("subtotalTarifaOtros", subtotalTarifaOtros);
-
+        
         Double totalGeneralTarifa = (subtotalTarifaFija != null ? subtotalTarifaFija : 0) +
                 (subtotalTarifaVariable != null ? subtotalTarifaVariable : 0) +
                 (subtotalTarifaOtros != null ? subtotalTarifaOtros : 0);
@@ -365,12 +381,22 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getRateDetail().put("totalDescuentosIndicadores", totalDescuentosIndicadores);
 
         Double totalDescuentos = calculateSubTotalForRate(detailInvoiceParamsList,
-                "dcto_sinpuertapuerta,dcto_deshabitados,tar_devoluciones");
+                "tar_devoluciones,tar_devoluciones_ter,dcto_sinpuertapuerta,dcto_deshabitados");
 
         dtoResponse.getRateDetail().put("totalDescuentos", totalDescuentos);
+        
+        Double devoluciones = calculateSubTotalForRate(detailInvoiceParamsList,
+                "tar_devoluciones,tar_devoluciones_ter");
 
-        Double totalAjustes = calculateSubTotalForRate(detailInvoiceParamsList,
-                "ajuste_ta,ajuste_ccsaseogas,ajuste_ccsenergia");
+        dtoResponse.getRateDetail().put("devoluciones", devoluciones);
+        
+        Double AjustesAprovechamiento = calculateSubTotalForRate(detailInvoiceParamsList,
+                "AjusteTA_conDINC," + "AjusteTA_sinDINC");
+         dtoResponse.getRateDetail().put("AjustesAprovechamiento", AjustesAprovechamiento);
+        
+        Double totalAjustes2 = calculateSubTotalForRate(detailInvoiceParamsList,
+                "ajuste_ccsaseogas,ajuste_ccsenergia");
+        Double totalAjustes = totalAjustes2 + AjustesAprovechamiento;
 
         dtoResponse.getRateDetail().put("totalAjustes", totalAjustes);
 
@@ -378,19 +404,60 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
                 "servicio_adicional,iva_servicioadicional");
 
         dtoResponse.getRateDetail().put("totalServiciosAdcionales", totalServiciosAdcionales);
+        
+        Double subContNota = calculateSubTotalForRate(detailInvoiceParamsList, "nc_valor_subsidio,nc_valor_contribucion");
+       
+        dtoResponse.getRateDetail().put("subContNota",subContNota * -1);
 
-        Double totalGeneralLiquidacion = (dtoResponse.getTotalDeudaMora() != null ? dtoResponse.getTotalDeudaMora() : 0) +
-                (dtoResponse.getOtros() != null ? dtoResponse.getOtros() : 0) + (dtoResponse.getFacVlrreal()).doubleValue() +
-                (totalServiciosAdcionales != null ? totalServiciosAdcionales : 0);
+        Double totalGeneralLiquidacion = (totalGeneralTarifa != null ? totalGeneralTarifa: 0)+
+                        (dtoResponse.getSubCont() != null ? dtoResponse.getSubCont() : 0)+
+                        (totalDescuentosIndicadores != null ? totalDescuentosIndicadores: 0)+
+                        (totalDescuentos != null ? totalDescuentos: 0)+
+                        (totalAjustes != null ? totalAjustes: 0)+
+                (dtoResponse.getTotalDeudaMora() != null ? dtoResponse.getTotalDeudaMora() : 0) +
+                (dtoResponse.getSaldosaFavor() != null ? dtoResponse.getSaldosaFavor() : 0) + 
+                (totalServiciosAdcionales != null ? totalServiciosAdcionales : 0)+
+                (dtoResponse.getCuotafinanciacion() != null ? dtoResponse.getCuotafinanciacion() : 0) ;
 
         dtoResponse.getRateDetail().put("totalGeneralLiquidacion", totalGeneralLiquidacion);
+                
+        Double totalLiquidacionAseo = totalGeneralLiquidacion - (totalServiciosAdcionales != null ? totalServiciosAdcionales : 0)-
+                (dtoResponse.getCuotafinanciacion() != null ? dtoResponse.getCuotafinanciacion() : 0) ;
+        dtoResponse.getRateDetail().put ("totalLiquidacionAseo",totalLiquidacionAseo);
 
         Double subtotalTarifaFijaNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_tar_comergasaseo,nc_tar_comeremsa,nc_tar_limpiezaurbana,nc_tar_barridoylimpieza," +
-                        "nd_tar_comergasaseo,nd_tar_comeremsa,nd_tar_limpiezaurbana,nd_tar_barridoylimpieza");
+                "nc_tar_comergasaseo,nc_tar_comeremsa,nc_tar_limpiezaurbana,nc_tar_barridoylimpieza,NC_comer_aprovechamiento," +
+                        "nd_tar_comergasaseo,nd_tar_comeremsa,nd_tar_limpiezaurbana,nd_tar_barridoylimpieza,ND_comer_aprovechamiento");
 
         dtoResponse.getRateDetail().put("subtotalTarifaFijaNota", subtotalTarifaFijaNota);
 
+        Double serviciosAdicionales = calculateSubTotalForRate(detailInvoiceParamsList,
+                "servicio_adicional");
+         dtoResponse.getRateDetail().put("servicio_adicional", serviciosAdicionales);
+         
+        Double serviciosAdicionalesNota = calculateSubTotalForRate(detailInvoiceParamsList,
+                "nc_servicio_adicional," +
+                        "nd_servicio_adicional");
+         dtoResponse.getRateDetail().put("serviciosAdicionalesNota", serviciosAdicionalesNota);
+         
+         Double serviciosAdicionalesDif = serviciosAdicionales-serviciosAdicionalesNota;
+         
+          dtoResponse.getRateDetail().put("serviciosAdicionalesDif", serviciosAdicionalesDif);     
+          
+          
+          Double IVAserviciosAdicionales = calculateSubTotalForRate(detailInvoiceParamsList,
+                "iva_servicioadicional");
+         dtoResponse.getRateDetail().put("IVAserviciosAdicionales", IVAserviciosAdicionales);
+        
+         Double IVAserviciosAdicionalesNota = calculateSubTotalForRate(detailInvoiceParamsList,
+                "nc_iva_servicioadicional," +
+                        "nd_iva_servicioadicional");
+         dtoResponse.getRateDetail().put("IVAserviciosAdicionalesNota", IVAserviciosAdicionalesNota);
+         
+         Double IVAserviciosAdicionalesDif = IVAserviciosAdicionales-IVAserviciosAdicionalesNota;
+         
+          dtoResponse.getRateDetail().put("IVAserviciosAdicionalesDif", IVAserviciosAdicionalesDif); 
+        
         Double subtotalTarifaVariableNota = calculateSubTotalForRate(detailInvoiceParamsList,
                 "nc_tar_recoleccionytransporte,nc_tar_disposicionfinal,nc_tar_lixiviados," +
                         "nd_tar_recoleccionytransporte,nd_tar_disposicionfinal,nd_tar_lixiviados");
@@ -398,8 +465,8 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getRateDetail().put("subtotalTarifaVariableNota", subtotalTarifaVariableNota);
 
         Double subtotalTarifaOtrosNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_tar_aprovechamiento,nc_tar_incentivoaprovechamiento," +
-                        "nd_tar_aprovechamiento,nd_tar_incentivoaprovechamiento");
+                "nc_tar_aprovechamiento,nc_tar_incentivoaprovechamiento,nc_comer_aprovechamiento_terceros," +
+                        "nd_tar_aprovechamiento,nd_tar_incentivoaprovechamiento,nd_comer_aprovechamiento_terceros");
 
         dtoResponse.getRateDetail().put("subtotalTarifaOtrosNota", subtotalTarifaOtrosNota);
 
@@ -416,48 +483,66 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getRateDetail().put("totalDescuentosIndicadoresNota", totalDescuentosIndicadoresNota);
 
         Double totalDescuentosNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_dcto_sinpuertapuerta,nc_dcto_deshabitados,nc_tar_devoluciones," +
-                        "nd_dcto_sinpuertapuerta,nd_dcto_deshabitados,nd_tar_devoluciones");
+                "nc_dcto_sinpuertapuerta,nc_dcto_deshabitados,nc_tar_devoluciones,nc_tar_devoluciones_ter," +
+                        "nd_dcto_sinpuertapuerta,nd_dcto_deshabitados,nd_tar_devoluciones,nd_tar_devoluciones_ter");
 
         dtoResponse.getRateDetail().put("totalDescuentosNota", totalDescuentosNota);
+        
+        Double AjustesAprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList,
+                "NC_AjusteTA_sinDINC,NC_AjusteTA_conDINC," +
+                        "ND_AjusteTA_sinDINC,ND_AjusteTA_conDINC");
 
+        dtoResponse.getRateDetail().put("AjustesAprovechamientoNota", AjustesAprovechamientoNota);
+        
         Double totalAjustesNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_ajuste_ta,nc_ajuste_ccsaseogas,nc_ajuste_ccsenergia," +
-                        "nd_ajuste_ta,nd_ajuste_ccsaseogas,nd_ajuste_ccsenergia");
+                "nc_ajuste_ccsaseogas,nc_ajuste_ccsenergia,NC_AjusteTA_sinDINC,NC_AjusteTA_conDINC," +
+                        "nd_ajuste_ccsaseogas,nd_ajuste_ccsenergia,ND_AjusteTA_sinDINC,ND_AjusteTA_conDINC");
 
         dtoResponse.getRateDetail().put("totalAjustesNota", totalAjustesNota);
 
-        Double subtotalTarifaFijaDif = subtotalTarifaFija - subtotalTarifaFijaNota;
+        Double subtotalTarifaFijaDif = subtotalTarifaFija + subtotalTarifaFijaNota;
 
         dtoResponse.getRateDetail().put("subtotalTarifaFijaDif", subtotalTarifaFijaDif);
 
-        Double subtotalTarifaVariableDif = subtotalTarifaVariable - subtotalTarifaVariableNota;
+        Double subtotalTarifaVariableDif = subtotalTarifaVariable + subtotalTarifaVariableNota;
 
         dtoResponse.getRateDetail().put("subtotalTarifaVariableDif", subtotalTarifaVariableDif);
 
-        Double subtotalTarifaOtrosDif = subtotalTarifaOtros - subtotalTarifaOtrosNota;
+        Double subtotalTarifaOtrosDif = subtotalTarifaOtros + subtotalTarifaOtrosNota;
 
         dtoResponse.getRateDetail().put("subtotalTarifaOtrosDif", subtotalTarifaOtrosDif);
 
-        Double totalGeneralTarifaDif = totalGeneralTarifa - totalGeneralTarifaNota;
+        Double totalGeneralTarifaDif = totalGeneralTarifa + totalGeneralTarifaNota;
 
         dtoResponse.getRateDetail().put("totalGeneralTarifaDif", totalGeneralTarifaDif);
 
-        Double totalDescuentosIndicadoresDif = totalDescuentosIndicadores - totalDescuentosIndicadoresNota;
+        Double totalDescuentosIndicadoresDif = totalDescuentosIndicadores + totalDescuentosIndicadoresNota;
 
         dtoResponse.getRateDetail().put("totalDescuentosIndicadoresDif", totalDescuentosIndicadoresDif);
 
-        Double totalDescuentosDif = totalDescuentos - totalDescuentosNota;
+        Double totalDescuentosDif = totalDescuentos + totalDescuentosNota;
 
         dtoResponse.getRateDetail().put("totalDescuentosDif", totalDescuentosDif);
 
-        Double totalAjustesDif = totalAjustes - totalAjustesNota;
+        Double AjustesAprovechamientoDif = AjustesAprovechamiento + AjustesAprovechamientoNota;
+
+        dtoResponse.getRateDetail().put("AjustesAprovechamientoDif", AjustesAprovechamientoDif);
+        
+        Double totalAjustesDif = totalAjustes + totalAjustesNota;
 
         dtoResponse.getRateDetail().put("totalAjustesDif", totalAjustesDif);
 
         Double tarComergasaseoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_comergasaseo,nc_tar_comergasaseo");
 
         dtoResponse.getRateDetail().put("tar_comergasaseo_nota", tarComergasaseoNota);
+        
+        Double comerAprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_comer_aprovechamiento,NC_comer_aprovechamiento");
+
+        dtoResponse.getRateDetail().put("comer_aprovechamiento_nota", comerAprovechamientoNota);
+        
+        Double comerAprovechamientoTercerosNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_comer_aprovechamiento_terceros,nc_comer_aprovechamiento_terceros");
+
+        dtoResponse.getRateDetail().put("comer_aprovechamiento_terceros_nota", comerAprovechamientoTercerosNota);
 
         Double tarComeremsaNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_comeremsa,nc_tar_comeremsa");
 
@@ -486,14 +571,30 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarAprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_aprovechamiento,nc_tar_aprovechamiento");
 
         dtoResponse.getRateDetail().put("tar_aprovechamiento_nota", tarAprovechamientoNota);
+        
+        Double tarajusteTAsindinNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_AjusteTA_sinDINC,NC_AjusteTA_sinDINC");
+
+        dtoResponse.getRateDetail().put("AjusteTA_sinDINC_nota", tarajusteTAsindinNota);
+        
+        Double tarajusteTAcondinNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_AjusteTA_conDINC,NC_AjusteTA_conDINC");
+
+        dtoResponse.getRateDetail().put("AjusteTA_conDINC_nota", tarajusteTAcondinNota);
+        
+       Double ajusteTAcompletonota = tarajusteTAsindinNota + tarajusteTAcondinNota;
+
+        dtoResponse.getRateDetail().put("ajusteta_completo_nota", ajusteTAcompletonota);
 
         Double tarIncentivoaprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_incentivoaprovechamiento,nc_tar_incentivoaprovechamiento");
 
         dtoResponse.getRateDetail().put("tar_incentivoaprovechamiento_nota", tarIncentivoaprovechamientoNota);
-
+        
         Double dctoIndcalrecoleccionNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_dcto_indcalrecoleccion,nc_dcto_indcalrecoleccion");
 
         dtoResponse.getRateDetail().put("dcto_indcalrecoleccion_nota", dctoIndcalrecoleccionNota);
+        
+        Double tar_devoluciones_ter_nota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_devoluciones_ter,nc_tar_devoluciones_ter");
+
+        dtoResponse.getRateDetail().put("tar_devoluciones_ter_nota", tar_devoluciones_ter_nota);
 
         Double dctoIndcalcomercializacionNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_dcto_indcalcomercializacion,nc_dcto_indcalcomercializacion");
 
@@ -514,6 +615,10 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarDevolucionesNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_devoluciones,nc_tar_devoluciones");
 
         dtoResponse.getRateDetail().put("tar_devoluciones_nota", tarDevolucionesNota);
+        
+        Double tar_devoluciones_total_nota = tarDevolucionesNota +tar_devoluciones_ter_nota;
+                
+        dtoResponse.getRateDetail().put("tar_devoluciones_total_nota", tar_devoluciones_total_nota);
 
         Double ajusteTaNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_ajuste_ta,nc_ajuste_ta");
 
@@ -527,75 +632,103 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
 
         dtoResponse.getRateDetail().put("ajuste_ccsenergia_nota", ajusteCcsenergiaNota);
 
-        Double tarComergasaseoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comergasaseo") - tarComergasaseoNota;
+        Double tarComergasaseoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comergasaseo") + tarComergasaseoNota;
 
         dtoResponse.getRateDetail().put("tar_comergasaseo_dif", tarComergasaseoDif);
+        
+        Double comerAprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "comer_aprovechamiento") + comerAprovechamientoNota;
 
-        Double tarComeremsaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comeremsa") - tarComeremsaNota;
+        dtoResponse.getRateDetail().put("comer_aprovechamiento_dif", comerAprovechamientoDif);
+        
+        Double comerAprovechamientoTercerosDif = calculateSubTotalForRate(detailInvoiceParamsList, "comer_aprovechamiento_terceros") + comerAprovechamientoTercerosNota;
+
+        dtoResponse.getRateDetail().put("comer_aprovechamiento_terceros_dif", comerAprovechamientoTercerosDif);
+
+        Double tarComeremsaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comeremsa") + tarComeremsaNota;
 
         dtoResponse.getRateDetail().put("tar_comeremsa_dif", tarComeremsaDif);
 
-        Double tarLimpiezaurbanaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_limpiezaurbana") - tarLimpiezaurbanaNota;
+        Double tarLimpiezaurbanaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_limpiezaurbana") + tarLimpiezaurbanaNota;
 
         dtoResponse.getRateDetail().put("tar_limpiezaurbana_dif", tarLimpiezaurbanaDif);
 
-        Double tarBarridoylimpiezaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_barridoylimpieza") - tarBarridoylimpiezaNota;
+        Double tarBarridoylimpiezaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_barridoylimpieza") + tarBarridoylimpiezaNota;
 
         dtoResponse.getRateDetail().put("tar_barridoylimpieza_dif", tarBarridoylimpiezaDif);
 
-        Double tarRecoleccionytransporteDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_recoleccionytransporte") - tarRecoleccionytransporteNota;
+        Double tarRecoleccionytransporteDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_recoleccionytransporte") + tarRecoleccionytransporteNota;
 
         dtoResponse.getRateDetail().put("tar_recoleccionytransporte_dif", tarRecoleccionytransporteDif);
 
-        Double tarDisposicionfinalDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_disposicionfinal") - tarDisposicionfinalNota;
+        Double tarDisposicionfinalDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_disposicionfinal") + tarDisposicionfinalNota;
 
         dtoResponse.getRateDetail().put("tar_disposicionfinal_dif", tarDisposicionfinalDif);
 
-        Double tarLixiviadosDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_lixiviados") - tarLixiviadosNota;
+        Double tarLixiviadosDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_lixiviados") + tarLixiviadosNota;
 
         dtoResponse.getRateDetail().put("tar_lixiviados_dif", tarLixiviadosDif);
 
-        Double tarAprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_aprovechamiento") - tarAprovechamientoNota;
+        Double tarAprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_aprovechamiento") + tarAprovechamientoNota;
 
         dtoResponse.getRateDetail().put("tar_aprovechamiento_dif", tarAprovechamientoDif);
+        
+        Double tarajusteTAsindinDif = calculateSubTotalForRate(detailInvoiceParamsList, "AjusteTA_sinDINC") + tarajusteTAsindinNota;
 
-        Double tarIncentivoaprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_incentivoaprovechamiento") - tarIncentivoaprovechamientoNota;
+        dtoResponse.getRateDetail().put("AjusteTA_sinDINC_dif", tarajusteTAsindinDif);
+        
+        Double tarajusteTAcondinDif = calculateSubTotalForRate(detailInvoiceParamsList, "AjusteTA_conDINC") + tarajusteTAcondinNota;
+
+        dtoResponse.getRateDetail().put("AjusteTA_conDINC_dif", tarajusteTAcondinDif);
+         
+        Double ajusteTAcompletodif = tarajusteTAsindinDif + tarajusteTAcondinDif;
+
+        dtoResponse.getRateDetail().put("ajusteta_completo_dif", ajusteTAcompletodif);
+
+        Double tarIncentivoaprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_incentivoaprovechamiento") + tarIncentivoaprovechamientoNota;
 
         dtoResponse.getRateDetail().put("tar_incentivoaprovechamiento_dif", tarIncentivoaprovechamientoDif);
 
-        Double dctoIndcalrecoleccionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalrecoleccion") - dctoIndcalrecoleccionNota;
+        Double dctoIndcalrecoleccionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalrecoleccion") + dctoIndcalrecoleccionNota;
 
         dtoResponse.getRateDetail().put("dcto_indcalrecoleccion_dif", dctoIndcalrecoleccionDif);
+                
+        Double tar_devoluciones_ter_dif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_devoluciones_ter") + tar_devoluciones_ter_nota;
 
-        Double dctoIndcalcomercializacionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalcomercializacion") - dctoIndcalcomercializacionNota;
+        dtoResponse.getRateDetail().put("tar_devoluciones_ter_dif", tar_devoluciones_ter_dif);
+
+        Double dctoIndcalcomercializacionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalcomercializacion") + dctoIndcalcomercializacionNota;
 
         dtoResponse.getRateDetail().put("dcto_indcalcomercializacion_dif", dctoIndcalcomercializacionDif);
 
-        Double dctoIndcalcompactacionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalcompactacion") - dctoIndcalcompactacionNota;
+        Double dctoIndcalcompactacionDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_indcalcompactacion") + dctoIndcalcompactacionNota;
 
         dtoResponse.getRateDetail().put("dcto_indcalcompactacion_dif", dctoIndcalcompactacionDif);
 
-        Double dctoSinpuertapuertaDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_sinpuertapuerta") - dctoSinpuertapuertaNota;
+        Double dctoSinpuertapuertaDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_sinpuertapuerta") + dctoSinpuertapuertaNota;
 
         dtoResponse.getRateDetail().put("dcto_sinpuertapuerta_dif", dctoSinpuertapuertaDif);
 
-        Double dctoDeshabitadosDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_deshabitados") - dctoDeshabitadosNota;
+        Double dctoDeshabitadosDif = calculateSubTotalForRate(detailInvoiceParamsList, "dcto_deshabitados") + dctoDeshabitadosNota;
 
         dtoResponse.getRateDetail().put("dcto_deshabitados_dif", dctoDeshabitadosDif);
 
-        Double tarDevolucionesDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_devoluciones") - tarDevolucionesNota;
+        Double tarDevolucionesDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_devoluciones") + tarDevolucionesNota;
 
         dtoResponse.getRateDetail().put("tar_devoluciones_dif", tarDevolucionesDif);
+        
+        Double tar_devoluciones_total_dif = tar_devoluciones_ter_dif + tarDevolucionesDif;
+        
+        dtoResponse.getRateDetail().put("tar_devoluciones_total_dif", tar_devoluciones_total_dif);
 
-        Double ajusteTaDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ta") - ajusteTaNota;
+        Double ajusteTaDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ta") + ajusteTaNota;
 
         dtoResponse.getRateDetail().put("ajuste_ta_dif", ajusteTaDif);
 
-        Double ajusteCcsaseogasDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ccsaseogas") - ajusteCcsaseogasNota;
+        Double ajusteCcsaseogasDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ccsaseogas") + ajusteCcsaseogasNota;
 
         dtoResponse.getRateDetail().put("ajuste_ccsaseogas_dif", ajusteCcsaseogasDif);
 
-        Double ajusteCcsenergiaDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ccsenergia") - ajusteCcsenergiaNota;
+        Double ajusteCcsenergiaDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ccsenergia") + ajusteCcsenergiaNota;
 
         dtoResponse.getRateDetail().put("ajuste_ccsenergia_dif", ajusteCcsenergiaDif);
 
@@ -605,32 +738,39 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
     }
 
     private void fillFieldsSubsidyAndContribution(FacFacturaDTOResponse dtoResponse, Long idInvoice, List<ConConcepto> uniConceptoList) {
-        List<ConConcepto> uniConceptoSubList = uniConceptoList.stream().filter(cc ->
-                {
-                    try {
-                        return new ObjectMapper().readValue(cc.getConPropiedad(), HashMap.class)
-                                .get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO).equals(ConstantesServicios.CON_CONCEPTOS_SUBSIDIO) ||
-                                new ObjectMapper().readValue(cc.getConPropiedad(), HashMap.class)
-                                        .get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO).equals(ConstantesServicios.CON_CONCEPTOS_CONTRIBUCION);
-                    } catch (IOException e) {
-                        return false;
-                    }
-                }
-        ).collect(Collectors.toList());
-
-        for (ConConcepto conConcepto : uniConceptoSubList) {
-            List<BigDecimal> vlrTotalList = manejadorDfacDetfactura.findAllVlrTotalByDfacIderegistrAndUniConcepto(idInvoice, conConcepto.getUniConcepto());
-            double sumSld = vlrTotalList.stream().reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
-            double finalValue = 0;
+//        List<ConConcepto> uniConceptoSubList = uniConceptoList.stream().filter(cc ->
+//                {
+//                    try {
+//                        return new ObjectMapper().readValue(cc.getConPropiedad(), HashMap.class)
+//                                .get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO).equals(ConstantesServicios.CON_CONCEPTOS_SUBSIDIO) ||
+//                                new ObjectMapper().readValue(cc.getConPropiedad(), HashMap.class)
+//                                        .get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO).equals(ConstantesServicios.CON_CONCEPTOS_CONTRIBUCION);
+//                    } catch (IOException e) {
+//                        return false;
+//                    }
+//                }
+//        ).collect(Collectors.toList());
+    	double finalValue = 0; 
+        for (ConConcepto conConcepto : uniConceptoList) {
+            List<BigDecimal> vlrTotalList = manejadorDfacDetfactura.findAllVlrUnitariByDfacIderegistrAndUniConcepto(idInvoice, conConcepto.getUniConcepto());
+            double sumSld = vlrTotalList.stream().reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();            
             try {
                 Map<String, String> propiedad = new ObjectMapper().readValue(conConcepto.getConPropiedad(), HashMap.class);
-                if (propiedad.get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO).equals(ConstantesServicios.CON_CONCEPTOS_SUBSIDIO)) {
-                    finalValue = finalValue - sumSld;
-                    dtoResponse.setDctos(finalValue);
-                } else {
-                    finalValue = finalValue + sumSld;
-                    dtoResponse.setDctos(finalValue);
-                }
+                switch (propiedad.get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO)) {
+				case ConstantesServicios.CON_CONCEPTOS_SUBSIDIO:
+					finalValue = finalValue - sumSld;					
+					manejadorFacFactura.insertaAseoLogTransacciones("Subsidio"+propiedad.get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO),"Valor:"+finalValue);
+					break;
+				case  ConstantesServicios.CON_CONCEPTOS_CONTRIBUCION:					
+					finalValue = finalValue + sumSld;  
+					manejadorFacFactura.insertaAseoLogTransacciones("Contribucion :"+propiedad.get(ConstantesServicios.CON_CONCEPTOS_REPORTE_CLASIFICACION_CONCEPTO) ,"Valor:"+finalValue);
+					break; 
+				default:
+					break;
+				}
+                System.out.println("Valor Final " + finalValue);
+                 dtoResponse.setSubCont(finalValue);
+                
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -663,19 +803,23 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
     }
 
     private void fillUniDocumentList(int idEmp, List<Integer> uniDocumentDueList, List<Integer> uniDocumentInvoiceServiceList,
-                                     List<Integer> uniDocumentFeeList, List<Integer> uniDocumentBalanceList) {
+                                     List<Integer> uniDocumentFeeList, List<Integer> uniDocumentBalanceList,List<Integer> uniDocumentfinanciacionList,List<Integer> uniValortarifaList) {
         try {
             Map<String, Object> parameters = negocioParParametro.consultaParametros(idEmp, ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
             Collection<Integer> collectionFee = (Collection<Integer>) parameters.get(ConstantesServicios.UNI_DOCUMENTOS_INTERES_MORA);
             Collection<Integer> collectionBalance = (Collection<Integer>) parameters.get(ConstantesServicios.UNI_DOCUMENTOS_SALDO_A_FAVOR);
+            Collection<Integer> collectionFinanciacion = (Collection<Integer>) parameters.get(ConstantesServicios.UNI_DOCUMENTO_FINANCIACION);
+            Collection<Integer> collectionValortarifa = (Collection<Integer>) parameters.get(ConstantesServicios.UNI_DOCUMENTOS_FACTURA_SERVICIO);
 
             uniDocumentDueList.addAll(collectionFee);
             uniDocumentDueList.addAll(collectionBalance);
             uniDocumentFeeList.addAll(collectionFee);
             uniDocumentBalanceList.addAll(collectionBalance);
+            uniDocumentfinanciacionList.addAll(collectionFinanciacion);
+            uniValortarifaList.addAll(collectionValortarifa);
             uniDocumentInvoiceServiceList.addAll((Collection<Integer>) parameters.get(ConstantesServicios.UNI_DOCUMENTOS_FACTURA_SERVICIO));
         } catch (IOException e) {
-            logger.info("Error no controlado consultando el concepto interes mora o saldo a favor {}", e);
+            logger.info("Error no controlado consultando el concepto interes mora, saldo a favor o amortizaciones {}", e);
         }
     }
 
@@ -684,20 +828,25 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
 
         dtoResponse.setCicAno(object[0].toString());
         dtoResponse.setFacEstado(object[1].toString());
-        dtoResponse.setPerIderegistro((Integer) object[2]);
+        dtoResponse.setPerIderegistro((Integer) object[2]);                    
         dtoResponse.setFacVlrreal(new BigDecimal(object[3].toString()));
         dtoResponse.setFacFecha((Date) object[4]);
         dtoResponse.setDsusIderegistr((Long) object[5]);
+        dtoResponse.setPerNombre(object[8].toString());
+        dtoResponse.setFacNumero((Long) object[9]);
+        dtoResponse.setFacFechaEnd((Date) object[12]);
         return dtoResponse;
     }
 
     public Page<DocDocumentoFacturaDTOResponse> associatedDocument(Long idInvoice, Long dsusIderegistr, Pageable pageable) {
         List<DocDocumentoFacturaDTOResponse> dtoDocumentResponseList = new ArrayList<>();
+        List<Object[]> dtoDocumentoDsusFactura;
         int idEmp = JwtUtil.auditoriaDTO.getIdEmpresa();
         FacFactura facFactura = this.manejadorFacFactura.findById(idInvoice).orElse(null);
         List<ParLabParametrosLabels> parLabParametersLabelsList = this.manejadorParLabParametrosLabels.findAll();
         Long idStructure = parLabParametersLabelsList.get(0).getEstIdeRegistro();
         List<Object[]> detailInvoiceParamsList = this.manejadorFacFactura.getFnGetlabelsfacturacion(dsusIderegistr, idInvoice, 0L, idEmp, idStructure, true);
+        dtoDocumentoDsusFactura = this.manejadorFacFactura.getDocumentosDsusFactura(dsusIderegistr, idInvoice);
         List<Integer> uniDocumentServiceList = new ArrayList<>();
         try {
             Map<String, Object> parameters = negocioParParametro.consultaParametros(idEmp, ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
@@ -706,20 +855,35 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
             logger.info("{}", e);
         }
         Double parentFeeValue = manejadorFacFactura.sumSaldoRealByUniDocumentList(facFactura.getFacFecha(), facFactura.getDsusIderegistr(), uniDocumentServiceList);
-
-        for (Object[] row : detailInvoiceParamsList) {
-            DocDocumentoFacturaDTOResponse dtoResponse = new DocDocumentoFacturaDTOResponse();
+        DocDocumentoFacturaDTOResponse dtoResponse = new DocDocumentoFacturaDTOResponse();
+        for (Object[] doc : dtoDocumentoDsusFactura ){ //Documentos Notas
+            for (Object[] row : detailInvoiceParamsList) {
+                System.out.println(doc[6] + "  ---  " + row[4]);
+                if(((BigInteger)row[4]).intValue() == (Integer)doc[6]){
+                    for (ParLabParametrosLabels parLabParametrosLabels : parLabParametersLabelsList) {
+                        if (parLabParametrosLabels.getParLabLabel().equals(row[12])){
+                                dtoResponse.getDocumentDetail().put((String) row[12], ((BigDecimal) row[14]).doubleValue());
+                                dtoResponse.setParentFeeValue(parentFeeValue);
+                                fillDetailsDocuments(dtoResponse, detailInvoiceParamsList);                                
+                                setDtoResponseDataDocumento(doc, dtoResponse);
+                        }
+                    }
+                }
+            }           
+        }
+        /*for (Object[] row : detailInvoiceParamsList) {
+            //DocDocumentoFacturaDTOResponse dtoResponse = new DocDocumentoFacturaDTOResponse();
             for (ParLabParametrosLabels parLabParametrosLabels : parLabParametersLabelsList) {
-                if (parLabParametrosLabels.getParLabLabel().equals(row[12]))
+                if (parLabParametrosLabels.getParLabLabel().equals(row[12])){
                     dtoResponse.getDocumentDetail().put((String) row[12], ((BigDecimal) row[14]).doubleValue());
 
                 dtoResponse.setParentFeeValue(parentFeeValue);
                 setDtoResponseData(row, dtoResponse);
                 fillDetailsDocuments(dtoResponse, detailInvoiceParamsList);
-            }
-            dtoDocumentResponseList.add(dtoResponse);
-        }
-
+                }
+            }            
+        }*/
+        dtoDocumentResponseList.add(dtoResponse);
         final int start = (int) pageable.getOffset();
         final int end = Math.min((start + pageable.getPageSize()), dtoDocumentResponseList.size());
 
@@ -739,11 +903,25 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.setReasonNote(row[23] != null ? (String) row[23] : "");
         dtoResponse.setObservationNote(row[24] != null ? (String) row[24] : "");
     }
+    
+        private void setDtoResponseDataDocumento(Object[] row, DocDocumentoFacturaDTOResponse dtoResponse) {
+        dtoResponse.setYear(row[0] != null ? Long.parseLong((String)row[0]) : 0);
+        dtoResponse.setStatus(row[1] != null ? (String) row[1] : "");
+        dtoResponse.setAlternateCompany(row[2] != null ? (String) row[2] : "");
+        dtoResponse.setPeriod(row[3] != null ? (String) row[3] : "");
+        dtoResponse.setIdFatherInvoice(row[4] != null ? ((BigInteger)row[4]).longValue() : 0);
+        dtoResponse.setParentDocument(row[5] != null ? ((Integer) row[5]).longValue() : 0);
+        dtoResponse.setNoteDocument(row[6] != null ?  String.valueOf(row[6]) : "");
+        dtoResponse.setTypeDocument(row[7] != null ? (String) row[7] : "");
+        dtoResponse.setNote(row[8] != null ? ((BigInteger) row[8]).longValue() : 0);
+        dtoResponse.setReasonNote(row[11] != null ? (String) row[11] : "");
+        dtoResponse.setObservationNote(row[12] != null ? (String) row[12] : "");
+    }
 
     private void fillDetailsDocuments(DocDocumentoFacturaDTOResponse dtoResponse, List<Object[]> detailInvoiceParamsList) {
 
         Double subtotalTarifaFija = calculateSubTotalForRate(detailInvoiceParamsList,
-                "tar_comergasaseo,tar_comeremsa,tar_limpiezaurbana,tar_barridoylimpieza");
+                "tar_comergasaseo,tar_comeremsa,tar_limpiezaurbana,tar_barridoylimpieza,comer_aprovechamiento");
 
         dtoResponse.getDocumentDetail().put("subtotalTarifaFija", subtotalTarifaFija);
 
@@ -753,7 +931,7 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getDocumentDetail().put("subtotalTarifaVariable", subtotalTarifaVariable);
 
         Double subtotalTarifaOtros = calculateSubTotalForRate(detailInvoiceParamsList,
-                "tar_aprovechamiento,tar_incentivoaprovechamiento");
+                "tar_aprovechamiento,tar_incentivoaprovechamiento,ajuste_ta,comer_aprovechamiento_terceros");
 
         dtoResponse.getDocumentDetail().put("subtotalTarifaOtros", subtotalTarifaOtros);
 
@@ -769,8 +947,8 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getDocumentDetail().put("totalDescuentosIndicadores", totalDescuentosIndicadores);
 
         Double totalAjustes = calculateSubTotalForRate(detailInvoiceParamsList,
-                "ajuste_ta,ajuste_ccsaseogas,ajuste_ccsenergia");
-
+                "ajuste_ta,ajuste_ccsaseogas,ajuste_ccsenergia,AjusteTA_conDINC, AjusteTA_sinDINC");
+        
         dtoResponse.getDocumentDetail().put("totalAjustes", totalAjustes);
 
         Double totalServiciosAdcionales = calculateSubTotalForRate(detailInvoiceParamsList,
@@ -797,10 +975,10 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double totalGeneralLiquidacion = deudaMora + saldoFavor + (totalServiciosAdcionales != null ? totalServiciosAdcionales : 0);
 
         dtoResponse.getDocumentDetail().put("totalGeneralLiquidacion", totalGeneralLiquidacion);
-
+        
         Double subtotalTarifaFijaNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_tar_comergasaseo,nc_tar_comeremsa,nc_tar_limpiezaurbana,nc_tar_barridoylimpieza," +
-                        "nd_tar_comergasaseo,nd_tar_comeremsa,nd_tar_limpiezaurbana,nd_tar_barridoylimpieza");
+                "nc_tar_comergasaseo,nc_tar_comeremsa,nc_tar_limpiezaurbana,nc_tar_barridoylimpieza,NC_comer_aprovechamiento," +
+                        "nd_tar_comergasaseo,nd_tar_comeremsa,nd_tar_limpiezaurbana,nd_tar_barridoylimpieza,ND_comer_aprovechamiento");
 
         dtoResponse.getDocumentDetail().put("subtotalTarifaFijaNota", subtotalTarifaFijaNota);
 
@@ -811,8 +989,8 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getDocumentDetail().put("subtotalTarifaVariableNota", subtotalTarifaVariableNota);
 
         Double subtotalTarifaOtrosNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_tar_aprovechamiento,nc_tar_incentivoaprovechamiento," +
-                        "nd_tar_aprovechamiento,nd_tar_incentivoaprovechamiento");
+                "nc_tar_aprovechamiento,nc_tar_incentivoaprovechamiento,nc_comer_aprovechamiento_terceros," +
+                        "nd_tar_aprovechamiento,nd_tar_incentivoaprovechamiento,nd_comer_aprovechamiento_terceros");
 
         dtoResponse.getDocumentDetail().put("subtotalTarifaOtrosNota", subtotalTarifaOtrosNota);
 
@@ -829,8 +1007,8 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         dtoResponse.getDocumentDetail().put("totalDescuentosIndicadoresNota", totalDescuentosIndicadoresNota);
 
         Double totalAjustesNota = calculateSubTotalForRate(detailInvoiceParamsList,
-                "nc_ajuste_ta,nc_ajuste_ccsaseogas,nc_ajuste_ccsenergia," +
-                        "nd_ajuste_ta,nd_ajuste_ccsaseogas,nd_ajuste_ccsenergia");
+                "nc_ajuste_ccsaseogas,nc_ajuste_ccsenergia,NC_AjusteTA_sinDINC,NC_AjusteTA_conDINC," +
+                        "nd_ajuste_ccsaseogas,nd_ajuste_ccsenergia,ND_AjusteTA_sinDINC,ND_AjusteTA_conDINC");
 
         dtoResponse.getDocumentDetail().put("totalAjustesNota", totalAjustesNota);
 
@@ -861,6 +1039,14 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarComergasaseoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_comergasaseo,nc_tar_comergasaseo");
 
         dtoResponse.getDocumentDetail().put("tar_comergasaseo_nota", tarComergasaseoNota);
+               
+        Double comerAprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_comer_aprovechamiento,NC_comer_aprovechamiento");
+        
+        dtoResponse.getDocumentDetail().put("comer_aprovechamiento_nota", comerAprovechamientoNota);
+        
+        Double comerAprovechamientoTercerosNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_comer_aprovechamiento_terceros,nc_comer_aprovechamiento_terceros");
+        
+        dtoResponse.getDocumentDetail().put("comer_aprovechamiento_terceros_nota", comerAprovechamientoTercerosNota);
 
         Double tarComeremsaNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_comeremsa,nc_tar_comeremsa");
 
@@ -889,6 +1075,18 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarAprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_aprovechamiento,nc_tar_aprovechamiento");
 
         dtoResponse.getDocumentDetail().put("tar_aprovechamiento_nota", tarAprovechamientoNota);
+        
+        Double tarajusteTAsindinNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_AjusteTA_sinDINC,NC_AjusteTA_sinDINC");
+
+        dtoResponse.getDocumentDetail().put("AjusteTA_sinDINC_nota", tarajusteTAsindinNota);
+        
+        Double tarajusteTAcondinNota = calculateSubTotalForRate(detailInvoiceParamsList, "ND_AjusteTA_conDINC,NC_AjusteTA_conDINC");
+
+        dtoResponse.getDocumentDetail().put("AjusteTA_conDINC_nota", tarajusteTAcondinNota);
+        
+        Double ajusteTAcompletonota = tarajusteTAsindinNota + tarajusteTAcondinNota;
+
+        dtoResponse.getDocumentDetail().put("ajusteta_completo_nota", ajusteTAcompletonota);
 
         Double tarIncentivoaprovechamientoNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_incentivoaprovechamiento,nc_tar_incentivoaprovechamiento");
 
@@ -917,7 +1115,6 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarDevolucionesNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_tar_devoluciones,nc_tar_devoluciones");
 
         dtoResponse.getDocumentDetail().put("tar_devoluciones_nota", tarDevolucionesNota);
-
         Double ajusteTaNota = calculateSubTotalForRate(detailInvoiceParamsList, "nd_ajuste_ta,nc_ajuste_ta");
 
         dtoResponse.getDocumentDetail().put("ajuste_ta_nota", ajusteTaNota);
@@ -933,6 +1130,14 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarComergasaseoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comergasaseo") - tarComergasaseoNota;
 
         dtoResponse.getDocumentDetail().put("tar_comergasaseo_dif", tarComergasaseoDif);
+        
+        Double comerAprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "comer_aprovechamiento") - comerAprovechamientoNota;
+
+        dtoResponse.getDocumentDetail().put("comer_aprovechamiento_dif", comerAprovechamientoDif);
+        
+        Double comerAprovechamientoTercerosDif = calculateSubTotalForRate(detailInvoiceParamsList, "comer_aprovechamiento_terceros") - comerAprovechamientoTercerosNota;
+
+        dtoResponse.getDocumentDetail().put("comer_aprovechamiento_terceros_dif", comerAprovechamientoTercerosDif);
 
         Double tarComeremsaDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_comeremsa") - tarComeremsaNota;
 
@@ -962,6 +1167,18 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
 
         dtoResponse.getDocumentDetail().put("tar_aprovechamiento_dif", tarAprovechamientoDif);
 
+        Double tarajusteTAsindinDif = calculateSubTotalForRate(detailInvoiceParamsList, "AjusteTA_sinDINC") - tarajusteTAsindinNota;
+
+        dtoResponse.getDocumentDetail().put("AjusteTA_sinDINC_dif", tarajusteTAsindinDif);
+        
+        Double tarajusteTAcondinDif = calculateSubTotalForRate(detailInvoiceParamsList, "AjusteTA_conDINC") - tarajusteTAcondinNota;
+
+        dtoResponse.getDocumentDetail().put("AjusteTA_conDINC_dif", tarajusteTAcondinDif);
+        
+        Double ajusteTAcompletodif = tarajusteTAsindinDif + tarajusteTAcondinDif;
+
+        dtoResponse.getDocumentDetail().put("ajusteta_completo_dif", ajusteTAcompletodif);
+
         Double tarIncentivoaprovechamientoDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_incentivoaprovechamiento") - tarIncentivoaprovechamientoNota;
 
         dtoResponse.getDocumentDetail().put("tar_incentivoaprovechamiento_dif", tarIncentivoaprovechamientoDif);
@@ -989,7 +1206,7 @@ public class NegocioFacFactura extends NegocioAbstracto<FacFactura, FacFacturaDT
         Double tarDevolucionesDif = calculateSubTotalForRate(detailInvoiceParamsList, "tar_devoluciones") - tarDevolucionesNota;
 
         dtoResponse.getDocumentDetail().put("tar_devoluciones_dif", tarDevolucionesDif);
-
+        
         Double ajusteTaDif = calculateSubTotalForRate(detailInvoiceParamsList, "ajuste_ta") - ajusteTaNota;
 
         dtoResponse.getDocumentDetail().put("ajuste_ta_dif", ajusteTaDif);

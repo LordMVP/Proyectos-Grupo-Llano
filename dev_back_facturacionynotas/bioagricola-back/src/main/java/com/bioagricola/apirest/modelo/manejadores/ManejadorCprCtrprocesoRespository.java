@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class ManejadorCprCtrprocesoRespository {
+	
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@PersistenceContext
 	EntityManager entityManager;
@@ -101,7 +105,12 @@ public class ManejadorCprCtrprocesoRespository {
 	@Transactional
 	public int actualizar(String parametros, String tabla, String condicion) {
 		String sql = " Update " + tabla + " set " + parametros + " where " + condicion + "; ";
-		return entityManager.createNativeQuery(sql).executeUpdate();
+                try {
+                    return entityManager.createNativeQuery(sql).executeUpdate();
+                }catch(Exception e){
+                    log.error("ERROR-> " + e);
+                    return 0;
+                }		
 	}
 
 	@Modifying
@@ -110,6 +119,7 @@ public class ManejadorCprCtrprocesoRespository {
 		BigInteger biid;
 		long id = 0;
 		String sql = " INSERT INTO " + tabla + " ( " + campos + " ) VALUES ( " + valores + " ) " + secuencia + "; ";
+//		log.error("INSERTAR DATOS->"+sql);
 		try {
 			biid = (BigInteger) entityManager.createNativeQuery(sql).getSingleResult();
 			id = biid.longValue();
@@ -265,10 +275,11 @@ public class ManejadorCprCtrprocesoRespository {
 
 	public Object[] getFechasRutaPeriodo(BigInteger idsuscripcion, Integer idperiodo) {
 		Object[] respuesta = null;
-		String sql = "SELECT rupe.rupe_fecvence, rupe.rupe_fecsuspens"
-				+ " FROM rupe_rutperiodo rupe INNER JOIN rusu_rutsuscrip rusu ON rupe.rut_ideregistro=rusu.rut_ideregistro"
-				+ " INNER JOIN per_periodo per ON per.per_ideregistro=rupe.per_ideregistro"
-				+ " WHERE rusu.dsus_ideregistr=" + idsuscripcion + " AND per.per_ideregistro=" + idperiodo + ";";
+		String sql = "SELECT rp.rupe_fecvence, rp.rupe_fecsuspens from public.dsus_detsuscrip dd"
+				+ " inner join public.rusu_rutsuscrip rr on rr.dsus_ideregistr = dd.dsus_ideregistr"
+				+ " inner join public.per_periodo pp on pp.cic_ideregistro = dd.cic_ideregistro and pp.per_estado = 'A'"
+                                + " inner join public.rupe_rutperiodo rp on rp.per_ideregistro = pp.per_ideregistro"
+				+ " and rp.rut_ideregistro = rr.rut_ideregistro  where dd.dsus_ideregistr =" + idsuscripcion + ";";
 		try {
 			respuesta = (Object[]) entityManager.createNativeQuery(sql).getResultList().get(0);
 			return respuesta;
@@ -323,8 +334,9 @@ public class ManejadorCprCtrprocesoRespository {
 	public List<Object[]> consultarNovedad(String idFacturaNov) {
 		String sql = "select  fac_vlrreal,fac_metgenera, fac_estado, fac_fecha, fac_fecvence, emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, "
 				+ " uni_tipusosuscr, uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, cic_ano, hliq_ideregistr, "
-				+ " fac_sdoreal, uni_tiptercero, fac_fecsuspens, fac_version, fac_fecaprobada, usu_ideregistro , fac_idepadre "
+				+ " fac_sdoreal, uni_tiptercero, fac_fecsuspens, fac_version, fac_fecaprobada, usu_ideregistro , fac_idepadre, pqr, adiciona_elimina "
 				+ " from fac_novedad where fac_ideregistro =" + idFacturaNov + ";";
+		log.error("CONSULTANOVEDAD->"+sql);
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -339,8 +351,11 @@ public class ManejadorCprCtrprocesoRespository {
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> consultarConceptosNovedad(String idFacturaNov) {
-		String sql = "select  uni_concepto, dfac_vlrreal , dfac_idepadre "
-				+ " from dfac_detnovedad dd where fac_ideregistro = " + idFacturaNov + " " + " and dfac_idepadre != 0;";
+		String sql = "select  dd.uni_concepto, dd.dfac_vlrreal , dd.dfac_idepadre, cc.con_operacion ,dd.dfac_vlrtotal "
+				+ " from dfac_detnovedad dd "
+                                + " inner join con_concepto cc on cc.uni_concepto = dd.uni_concepto "
+                        + "where dd.fac_ideregistro = " + idFacturaNov + " " + " and dd.dfac_idepadre != 0;";
+		log.error("CONSULTACONCEPTONOVEDAD->"+sql);
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -348,6 +363,7 @@ public class ManejadorCprCtrprocesoRespository {
 	public List<Object[]> consultarConceptoPadre(String idFactura) {
 		String sql = "select uni_concepto, dfac_sdoreal, dfac_vlrreal, dfac_vlrtotal  "
 				+ " from dfac_detfactura dd where dfac_ideregistr =" + idFactura + ";";
+		log.error("CONSULTAPADRE->"+sql);
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -362,12 +378,13 @@ public class ManejadorCprCtrprocesoRespository {
 	@Transactional
 	public void insertarDetalleFacturaReal(String facideregistro, String dfacvlrtotal, String dfacsdoreal,
 			String dfacvlrreal, String uniconcepto, String idNovedad) {
-		String sql = "insert into dfac_detfactura (dfac_estado,dfac_cantidad,dfac_vlrunitari,dfac_vlrtotal,dfac_vlrreal,dfac_sdoreal,fac_ideregistro,uni_concepto,dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr) "
+		String sql = "insert into dfac_detfactura (dfac_estado,dfac_cantidad,dfac_vlrunitari,dfac_vlrtotal,dfac_vlrreal,dfac_sdoreal,fac_ideregistro,uni_concepto,dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,emp_ideregistro) "
 				+ " select 'A',dfac_cantidad,dfac_vlrunitari," + dfacvlrtotal + "," + dfacvlrreal + "," + dfacsdoreal
 				+ "," + facideregistro + "," + uniconcepto
-				+ ",dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr "
+				+ ",dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,emp_ideregistro "
 				+ " from dfac_detnovedad where dfac_idepadre is not null and dfac_idepadre <> 0  and fac_ideregistro = "
 				+ idNovedad + " and uni_concepto = " + uniconcepto + ";";
+		log.error("INSERTAR DETALLE FACTURA->"+sql);
 		entityManager.createNativeQuery(sql).executeUpdate();
 	}
 
@@ -379,8 +396,8 @@ public class ManejadorCprCtrprocesoRespository {
 
 	@Modifying
 	@Transactional
-	public void actualizarValorConceptoOriginal(String dfacvlrreal, String dfacsdoreal, String dfacideregistr) {
-		String sql = "update dfac_detfactura set dfac_vlrreal = " + dfacvlrreal + " , dfac_sdoreal = " + dfacsdoreal
+	public void actualizarValorConceptoOriginal(String dfacvlrreal, String dfacsdoreal, String dfacideregistr, String dfacvlrtotal) {
+		String sql = "update dfac_detfactura set dfac_vlrreal = " + dfacvlrreal + " , dfac_sdoreal = " + dfacsdoreal // + " , dfac_vlrtotal = " + dfacvlrtotal
 				+ " " + " where dfac_ideregistr = " + dfacideregistr + ";";
 		entityManager.createNativeQuery(sql).executeUpdate();
 	}
@@ -394,6 +411,7 @@ public class ManejadorCprCtrprocesoRespository {
 				+ "select " + notideregistro + " , fac_ideregistro ,dfac_ideregistr, " + facideorigen
 				+ " ,dfac_idepadre, " + usuideregistro + " " + " from dfac_detfactura where fac_ideregistro = "
 				+ facideregistro + ";";
+                log.error(sql);
 		entityManager.createNativeQuery(sql).executeUpdate();
 	}
 
@@ -514,25 +532,24 @@ public class ManejadorCprCtrprocesoRespository {
 
 	@Modifying
 	@Transactional
-	public Long insertarDeuda(char metodogenera, char estado, String fecha, String fechaaprobacion, Integer version,
-			String idUsuario, Integer tipoNota, String facIdePadre, String fechasuspende, String fechavencimiento) {
+	public BigInteger insertarDeuda(char metodogenera, char estado, String fecha, String fechaaprobacion, Integer version,
+			String idUsuario, Integer tipoNota, String facIdePadre, String fechasuspende, String fechavencimiento,char adiciona) {
 		BigInteger biid;
 		long id = 0;
 
 		String sql = " INSERT INTO public.fac_novedad "
 				+ " (fac_numero, fac_metgenera, fac_estado, fac_fecha, fac_ideactual, fac_idepadre, fac_fecaprobada, fac_feceliminad, fac_fecfinancia, fac_feccastigad,  emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, uni_tipusosuscr, uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, amo_ideregistro, cic_ano, hliq_ideregistr, fac_sdoreal, fac_ideorigen, uni_tiptercero,"
-				+ "  fin_ideregistro, fac_version, fac_vlrreal, usu_ideregistro, mvi_ideregistro, fac_ctrlfelec,tipo_nota,fac_fecsuspens,fac_fecvence) "
+				+ "  fin_ideregistro, fac_version, fac_vlrreal, usu_ideregistro, mvi_ideregistro, fac_ctrlfelec,tipo_nota,fac_fecsuspens,fac_fecvence,adiciona_elimina) "
 				+ " select fac_numero, '" + metodogenera + "','" + estado + "', '" + fecha + "' , fac_ideactual,"
 				+ facIdePadre + ", '" + fechaaprobacion
 				+ "', fac_feceliminad, fac_fecfinancia, fac_feccastigad,  emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, uni_tipusosuscr, uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, amo_ideregistro, cic_ano, hliq_ideregistr, fac_sdoreal, fac_ideorigen, uni_tiptercero,  fin_ideregistro, "
-				+ version + ", fac_vlrreal," + idUsuario + ", mvi_ideregistro, fac_ctrlfelec, " + tipoNota + ",'"+fechasuspende+"', '"+fechavencimiento+"'"
+				+ version + ", fac_vlrreal," + idUsuario + ", mvi_ideregistro, fac_ctrlfelec, " + tipoNota + ",'"+fechasuspende+"', '"+fechavencimiento+"', '"+adiciona+"'"
 				+ " from fac_factura where fac_ideregistro = " + facIdePadre + " returning fac_ideregistro ";
 		try {
 			biid = (BigInteger) entityManager.createNativeQuery(sql).getSingleResult();
-			id = biid.longValue();
-			return id;
+			return biid ;
 		} catch (Exception e) {
-			return id;
+			return BigInteger.ZERO ;
 		}
 	}
 

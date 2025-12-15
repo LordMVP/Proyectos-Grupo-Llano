@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cons_fact_aprov_iat" pageWidth="2300" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="890" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="b89063c8-709b-4bc5-982f-57d93dc67315">
+	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapterTecnicoIntegral.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="PR_STR_PERIODO_PRESTACION" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="PR_INT_CONCEPTO" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select concat(pp.per_nombre,' ',extract(year from pp.per_fecinicial)) PERIODO , ds.dsus_pcodigo CODIGO,rp.trna TRNA,rp.tafna TAFNA, 
+rr.rut_codigo MACRORUTA,rr.rut_nombre MICRORUTA,dd.valor_toneladas TONELADAS, dd.factor_desc VALOR,  dd.valor_toneladas  * dd.factor_desc DESCUENTO,
+rr.rut_codigo NUMICRO,case when (fc.estrato < 7) then 'RESIDENCIAL' when(fc.estrato = 8) then 'PEQ GENERADOR' else 'GRAN GENERADOR' end USO,
+fc.estrato CLASE,fc.aforado AFORO
+from aseo.deca_desccalidad dd
+inner join public.per_periodo pp on pp.per_ideregistro = dd.per_ideregistro_tarifas 
+inner join public.dsus_detsuscrip ds on ds.dsus_ideregistr = dd.dsus_ideregistr
+inner join public.rut_ruta rr on rr.rut_ideregistro = dd.rut_ideregistro 
+inner join etl_aseo.rtsid_restonsemindcal_pro rp on rp.dsus_ideregistr = dd.dsus_ideregistr
+inner join lateral (select * from public.fac_factura ff 
+	where ff.dsus_ideregistr = dd.dsus_ideregistr and ff.uni_documento = 24 and ff.emp_ideregistro = 317 and 
+		ff.fac_estado in ('A','F') and ff.fac_fecha between pp.per_fecinicial::timestamp + interval '1 month' 
+		and pp.per_fecfinal::timestamp + interval '1 month' order by ff.fac_fecha desc limit 1) fac on true
+inner join reportes.facturacion_consolidado_23 fc on fc.fac_ideregistro = fac.fac_ideregistro
+where dd.uni_concepto_tarifas = $P{PR_INT_CONCEPTO} and dd.per_ideregistro_tarifas =  8360 and dd.desc_aplicado = false]]>
+	</queryString>
+	<field name="periodo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="periodo"/>
+		<property name="com.jaspersoft.studio.field.name" value="periodo"/>
+	</field>
+	<field name="codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="dsus_detsuscrip"/>
+		<property name="com.jaspersoft.studio.field.name" value="codigo"/>
+	</field>
+	<field name="trna" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="trna"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rtsid_restonsemindcal_pro"/>
+		<property name="com.jaspersoft.studio.field.name" value="trna"/>
+	</field>
+	<field name="tafna" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="tafna"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rtsid_restonsemindcal_pro"/>
+		<property name="com.jaspersoft.studio.field.name" value="tafna"/>
+	</field>
+	<field name="macroruta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="macroruta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rut_ruta"/>
+		<property name="com.jaspersoft.studio.field.name" value="macroruta"/>
+	</field>
+	<field name="microruta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="microruta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rut_ruta"/>
+		<property name="com.jaspersoft.studio.field.name" value="microruta"/>
+	</field>
+	<field name="toneladas" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="toneladas"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="deca_desccalidad"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="deca_desccalidad"/>
+	</field>
+	<field name="descuento" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="descuento"/>
+	</field>
+	<field name="numicro" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numicro"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rut_ruta"/>
+		<property name="com.jaspersoft.studio.field.name" value="numicro"/>
+	</field>
+	<field name="uso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="uso"/>
+		<property name="com.jaspersoft.studio.field.name" value="uso"/>
+	</field>
+	<field name="clase" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="clase"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="facturacion_consolidado_23"/>
+		<property name="com.jaspersoft.studio.field.name" value="clase"/>
+	</field>
+	<field name="aforo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="aforo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="facturacion_consolidado_23"/>
+		<property name="com.jaspersoft.studio.field.name" value="aforo"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="30">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="2290" height="30" backcolor="#40BF00" uuid="11a6dc06-8106-41a0-825f-5f472eb03e9e"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INFORME DE FACTURACIÓN IAT]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="130" height="30" backcolor="#40BF00" uuid="7dd9ea29-3d6b-4d08-b6e2-8351c9a4ef59"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PERIODO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="320" y="0" width="190" height="30" backcolor="#40BF00" uuid="72fe14f6-c690-491e-ad6a-1d4711ee6fa8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TRNA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="130" y="0" width="190" height="30" backcolor="#40BF00" uuid="d1cbaca2-2a2a-4fb6-9df3-69f6902aa810"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÓDIGO DATABASE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="700" y="0" width="190" height="30" backcolor="#40BF00" uuid="1f8ab2de-e4dd-4905-9fc1-1dcfa4e61376"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MacroRuta
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="510" y="0" width="190" height="30" backcolor="#40BF00" uuid="8ed9d78d-ffdd-444f-bf0c-b58f63ca2e03"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TAFNA
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1590" y="0" width="190" height="30" backcolor="#40BF00" uuid="c21e545e-71fc-4b96-b64e-5bbe54f34b78"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Numicro]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1210" y="0" width="190" height="30" backcolor="#40BF00" uuid="3b53bbd8-1c47-4987-8a3b-231362709293"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor por ruta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1400" y="0" width="190" height="30" backcolor="#40BF00" uuid="066cf09b-bcd8-40c3-aa83-ecc251b77b6b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total descuento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="890" y="0" width="130" height="30" backcolor="#40BF00" uuid="72c8447f-b34a-4599-bc79-17f3193599f6"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MicroRuta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1020" y="0" width="190" height="30" backcolor="#40BF00" uuid="54ff8288-a5ce-402e-89f1-371ec653e4a6"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TRNA + TAFNA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2100" y="0" width="190" height="30" backcolor="#40BF00" uuid="b453967e-7d89-474f-8ef8-a39bd05d52f1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado Aforo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1910" y="0" width="190" height="30" backcolor="#40BF00" uuid="20080780-f880-4b9d-9452-0fab71acda31"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código clase de uso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1780" y="0" width="130" height="30" backcolor="#40BF00" uuid="c6f1c41f-c03d-4b96-95c4-9319febe3a7b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Uso/Estrato]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="130" height="30" uuid="7528b89c-ef4d-417a-8462-bebb8371d794">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{periodo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="320" y="0" width="190" height="30" uuid="e9df4de8-7a06-420d-b80c-cc2f3223f52d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{trna}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="130" y="0" width="190" height="30" uuid="66690733-bb27-491b-8f61-ca86ce95fdc5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<paragraph leftIndent="0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="700" y="0" width="190" height="30" uuid="5a799a3b-8328-4c72-8488-f4fcae3f4a93">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{macroruta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="510" y="0" width="190" height="30" uuid="3b20b4d2-2bb4-42ce-96ab-281d845ea17f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tafna}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="890" y="0" width="130" height="30" uuid="406ae157-a341-402b-af6f-b5b10b460255">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{microruta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="1210" y="0" width="190" height="30" uuid="786c93fb-acb8-4757-8b0c-4ef9c1be8b68">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="1020" y="0" width="190" height="30" uuid="4087fe77-429c-452d-ae22-97971b5f7acf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<paragraph leftIndent="0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{toneladas}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="1590" y="0" width="190" height="30" uuid="94ae90de-c3b3-4f75-9dd7-b9cd5ffc045a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numicro}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="1400" y="0" width="190" height="30" uuid="2efc4278-3739-42fa-accd-a9aeba02d670">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descuento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1780" y="0" width="130" height="30" uuid="152afe33-2c36-4485-bae7-2ae01f9b2d5f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{uso}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="2100" y="0" width="190" height="30" uuid="3344b2ed-abf2-4c34-945f-0e1c86fc6b28">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aforo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="1910" y="0" width="190" height="30" uuid="7fa29e5b-8ec2-453a-83e6-cf38b17f9cb9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3838606c-0dde-4ddc-8c73-0beedf812980"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<paragraph leftIndent="0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{clase}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

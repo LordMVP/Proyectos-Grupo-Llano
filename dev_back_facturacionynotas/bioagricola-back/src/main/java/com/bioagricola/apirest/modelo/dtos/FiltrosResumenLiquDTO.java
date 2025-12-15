@@ -6,73 +6,94 @@ import java.util.List;
 
 public class FiltrosResumenLiquDTO implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private List<Integer> perIderegistro;
-	
-	private Integer prlIderegistro;
-	
-	private List<Long> terIderegistro;
-	
-	private String estado;
-	
-	private Date fechaPrueba;
-	
-	private Integer tipoProceso;
-	
-	public FiltrosResumenLiquDTO() {
-		//constructor por defecto
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	public List<Integer> getPerIderegistro() {
-		return perIderegistro;
-	}
+    private List<Integer> perIderegistro;
 
-	public void setPerIderegistro(List<Integer> perIderegistro) {
-		this.perIderegistro = perIderegistro;
-	}
+    private List<Long> maprcIderegistr;
 
-	public Integer getPrlIderegistro() {
-		return prlIderegistro;
-	}
+    private Integer prlIderegistro;
 
-	public void setPrlIderegistro(Integer prlIderegistro) {
-		this.prlIderegistro = prlIderegistro;
-	}
+    private List<Long> terIderegistro;
 
-	public List<Long> getTerIderegistro() {
-		return terIderegistro;
-	}
+    private String estado;
 
-	public void setTerIderegistro(List<Long> terIderegistro) {
-		this.terIderegistro = terIderegistro;
-	}
+    private Date fechaPrueba;
 
-	public String getEstado() {
-		return estado;
-	}
+    private Integer tipoProceso;
+    
+    private List<PeriodoFactDTO> periodos;
 
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+    public FiltrosResumenLiquDTO() {
+        //constructor por defecto
+    }
 
-	public Date getFechaPrueba() {
-		return fechaPrueba;
-	}
+    public List<Integer> getPerIderegistro() {
+        return perIderegistro;
+    }
 
-	public void setFechaPrueba(Date fechaPrueba) {
-		this.fechaPrueba = fechaPrueba;
-	}
+    public void setPerIderegistro(List<Integer> perIderegistro) {
+        this.perIderegistro = perIderegistro;
+    }
 
-	public Integer getTipoProceso() {
-		return tipoProceso;
-	}
+    public Integer getPrlIderegistro() {
+        return prlIderegistro;
+    }
 
-	public void setTipoProceso(Integer tipoProceso) {
-		this.tipoProceso = tipoProceso;
-	}
-	
+    public void setPrlIderegistro(Integer prlIderegistro) {
+        this.prlIderegistro = prlIderegistro;
+    }
+
+    public List<Long> getTerIderegistro() {
+        return terIderegistro;
+    }
+
+    public void setTerIderegistro(List<Long> terIderegistro) {
+        this.terIderegistro = terIderegistro;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public Date getFechaPrueba() {
+        return fechaPrueba;
+    }
+
+    public void setFechaPrueba(Date fechaPrueba) {
+        this.fechaPrueba = fechaPrueba;
+    }
+
+    public Integer getTipoProceso() {
+        return tipoProceso;
+    }
+
+    public void setTipoProceso(Integer tipoProceso) {
+        this.tipoProceso = tipoProceso;
+    }
+
+    public List<Long> getMaprcIderegistr() {
+        return maprcIderegistr;
+    }
+
+    public void setMaprcIderegistr(List<Long> maprcIderegistr) {
+        this.maprcIderegistr = maprcIderegistr;
+    }
+
+    public List<PeriodoFactDTO> getPeriodos() {
+        return periodos;
+    }
+
+    public void setPeriodos(List<PeriodoFactDTO> periodos) {
+        this.periodos = periodos;
+    }
+
+    
 }

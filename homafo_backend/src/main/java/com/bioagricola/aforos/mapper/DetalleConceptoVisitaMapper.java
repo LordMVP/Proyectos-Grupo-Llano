@@ -7,11 +7,8 @@ import com.bioagricola.aforos.entity.DetalleConceptoVisitaAforo;
 import com.bioagricola.aforos.entity.dto.DetalleConceptoVisitaResource;
 import com.bioagricola.common.entity.ConConcepto;
 
-
-
 @Mapper(componentModel = "spring")
 public interface DetalleConceptoVisitaMapper {
-
 
 	@Mapping(target = "uniConceptoNombre", source = "uniConcepto.conNombre")
 	DetalleConceptoVisitaResource toResource(DetalleConceptoVisitaAforo detalle);

@@ -7,11 +7,10 @@ import com.bioagricola.aforos.entity.DetalleMaestroVisita;
 import com.bioagricola.aforos.entity.dto.DetalleMaestroVisitaResource;
 import com.bioagricola.common.entity.TerTercero;
 
-@Mapper(componentModel = "spring",uses = {DetalleConceptoVisitaMapper.class,AforoMaestroVisitasMapper.class})
+@Mapper(componentModel = "spring", uses = { DetalleConceptoVisitaMapper.class, AforoMaestroVisitasMapper.class })
 public interface DetalleMaestroVisitasMapper {
 
-
-	@Mapping(target = "detalles",source = "detalleConceptosList")
+	@Mapping(target = "detalles", source = "detalleConceptosList")
 	@Mapping(target = "terAforadorNombre", source = "terAforador.terNomcompleto")
 	DetalleMaestroVisitaResource toResource(DetalleMaestroVisita detalle);
 

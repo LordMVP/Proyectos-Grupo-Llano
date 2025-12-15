@@ -35,6 +35,10 @@ public class DetalleAforoServiceImpl {
 					 dA.setUsuIderegistro(aforoBD.getUsuIderegistro());
 		return detalleAforoRepository.save(dA);
 	}
+	@Transactional
+	public DetalleAforo updateDetalleAforo(DetalleAforo detalleAforo) {
+		return detalleAforoRepository.save(detalleAforo);
+	}
 
 
 	public List<DetalleAforo> findDetallesAforo(Long aforo){

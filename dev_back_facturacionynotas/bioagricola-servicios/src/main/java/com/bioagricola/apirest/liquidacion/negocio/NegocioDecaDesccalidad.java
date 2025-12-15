@@ -20,8 +20,12 @@ import com.bioagricola.apirest.liquidacion.security.JwtUtil;
 import com.bioagricola.apirest.liquidacion.web.servicio.utils.ConstantesServicios;
 import com.bioagricola.apirest.modelo.dtos.DecaDesccalidadDTO;
 import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolAprobDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolAprobRespuestaDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolDTO;
 import com.bioagricola.apirest.modelo.dtos.SuscripPorMicroRutaDTO;
 import com.bioagricola.apirest.modelo.dtos.TotalesDescCalidadDTO;
+import com.bioagricola.apirest.modelo.dtos.TotalesDescCalidadMicroRutaDTO;
 import com.bioagricola.apirest.modelo.entidades.ConConcepto;
 import com.bioagricola.apirest.modelo.entidades.CosuConsuscrip;
 import com.bioagricola.apirest.modelo.entidades.CprCtrProceso;
@@ -30,6 +34,7 @@ import com.bioagricola.apirest.modelo.entidades.DperDetperiodo;
 import com.bioagricola.apirest.modelo.entidades.FacFactura;
 import com.bioagricola.apirest.modelo.entidades.PerPeriodo;
 import com.bioagricola.apirest.modelo.entidades.VarprVarperreg;
+import com.bioagricola.apirest.modelo.entidades.VrmrVarmicroruta;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorConConcepto;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCosuConsuscrip;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrproceso;
@@ -39,8 +44,15 @@ import com.bioagricola.apirest.modelo.manejadores.ManejadorDsusDetsuscrip;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorFacFactura;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorPerPeriodo;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorVarprVarperreg;
+import com.bioagricola.apirest.modelo.manejadores.ManejadorVrmrVarmicroruta;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.collect.HashBiMap;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashMap;
 
 @Service
 public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, DecaDesccalidadDTO> {
@@ -56,6 +68,9 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 
 	@Autowired
 	private ManejadorVarprVarperreg manejadorVarprVarperreg;
+        
+        @Autowired
+        private ManejadorVrmrVarmicroruta manejadorVrmrVarmicroruta;
 
 	@Autowired
 	private ManejadorDsusDetsuscrip manejadorDsusDetsuscrip;
@@ -76,6 +91,7 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	private ManejadorCprCtrproceso manejadorCprCtrproceso;
 
 	private Integer idCicloSemestral;
+        private List<Integer> conceptoTarifaRecolAplicada;
 	private List<Map<String, Object>> mesAplicacionIndicador;
 	private List<Integer> conceptosToneladas;
 	private List<Integer> concepTarifRecolecc;
@@ -94,6 +110,9 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	private Integer conceptoInteresMor = null;
 	private Integer idPrgProcesoIndicadoresCalidad = null;
 	private Integer uniConceptoSuscripcionReclamacion = null;
+        private TotalesDescCalidadMicroRutaDTO totalesMicro= null;
+        private List<TotalesDescCalidadMicroRutaDTO> listaTotalesMicro = null;
+        private Map<Integer,List<TotalesDescCalidadMicroRutaDTO>> datosReporte = null;
 
 	// Variables de sumatoria de totales de descuento por indicador de calidad
 	private BigDecimal totalDescReclamacion;
@@ -131,6 +150,24 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	protected DecaDesccalidadDTO instanciarDAO() {
 		return new DecaDesccalidadDTO();
 	}
+        
+        public ResponseDescuentosCalidadRecolAprobRespuestaDTO aprobarDescCalidad(ResponseDescuentosCalidadRecolAprobDTO respuesta) throws IOException {
+            Integer periodo = respuesta.getPeriodo();
+            Integer concepto = Integer.parseInt(respuesta.getConcepto());  
+            Integer Cantidad = 0;            
+            boolean estado = false;
+            String texto = "Resultado de aprobacion ";
+            ResponseDescuentosCalidadRecolAprobRespuestaDTO resp = new ResponseDescuentosCalidadRecolAprobRespuestaDTO();
+            List<Object []> resultado = manejadorDecaDesccalidad.aprobarEstadoDescuentoCalidad(periodo,concepto);
+            if(resultado.size() > 0 ){
+                Cantidad = resultado.size();
+                estado = true;              
+            }
+            resp.setCantidad(Cantidad);
+            resp.setRep(estado);
+            resp.setRespuesta(texto + Cantidad + " registros " + (estado == true ? " Exitoso " : " "));           
+            return resp;            
+        }
 
 	/**
 	 * Método encargado de calcular el descuento y validar las suscripciones a las
@@ -142,11 +179,12 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public ResponseDescuentosCalidadDTO aplicarDescCalidad() throws IOException {
+	public ResponseDescuentosCalidadRecolDTO aplicarDescCalidad() throws IOException {
 		int idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
 		int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
 		String idAcceso = JwtUtil.auditoriaDTO.getId();
-		ResponseDescuentosCalidadDTO response = new ResponseDescuentosCalidadDTO();
+		//ResponseDescuentosCalidadDTO response = new ResponseDescuentosCalidadDTO();
+                ResponseDescuentosCalidadRecolDTO response = new ResponseDescuentosCalidadRecolDTO();
 		List<Long> suscripConError = new ArrayList<>();
 
 		crearRegistroProcesoCalidad(idEmpresa, idAcceso, idUsuario);
@@ -161,31 +199,40 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 
 		Timestamp perFecInicio = new Timestamp(periodo.getPerFecinicial().getTime());
 		Timestamp perFecFin = new Timestamp(periodo.getPerFecfinal().getTime());
+                
+                /* Actualizamos el periodo para obtener las fechas de facturacion */
+                LocalDateTime dateTimeIni = perFecInicio.toLocalDateTime();
+                LocalDateTime dateTimeFin = perFecFin.toLocalDateTime();
+                
+                Timestamp perFecInicioFacturacion = Timestamp.valueOf(dateTimeIni.plus(1,ChronoUnit.MONTHS));
+                Timestamp perFecFinFacturacion = Timestamp.valueOf(dateTimeFin.plus(1,ChronoUnit.MONTHS));
+                
 		obtenerConceptosTarifaReclamaComerc();
 		List<Integer> listaConceptosIndicadores = obtenerConceptosIndicadores(this.getListaConceptosReclamacion());
 		// Consulta de periodo fin
 
 		// Consulta a la tabla de reportes de tarifas Inicio
-		List<VarprVarperreg> reportes = manejadorVarprVarperreg.consultaReporteIndCalidad(periodo.getPerIderegistro(),
-				listaConceptosIndicadores, idEmpresa);
+                List<VrmrVarmicroruta> reportesMicro = manejadorVrmrVarmicroruta.consultaReporteIndCalidadVrm(periodo.getPerIderegistro(), listaConceptosIndicadores, idEmpresa);
+		/*List<VarprVarperreg> reportes = manejadorVarprVarperreg.consultaReporteIndCalidad(periodo.getPerIderegistro(),
+				listaConceptosIndicadores, idEmpresa);*/
 		// Consulta a la tabla de reportes de tarifas Fin
 
 		List<SuscripPorMicroRutaDTO> suscripcionesRecYTrans = manejadorDsusDetsuscrip
 				.obtenerSuscripPorMicroRuta(this.concepTarifRecolecc.get(0), periodo.getPerIderegistro(), idEmpresa);
-		List<CosuConsuscrip> suscripcionesRecComer = manejadorCosuConsuscrip.consultaSuscripReclamacionComercial(
+		/*List<CosuConsuscrip> suscripcionesRecComer = manejadorCosuConsuscrip.consultaSuscripReclamacionComercial(
 				this.uniConceptoSuscripcionReclamacion, idEmpresa, new Timestamp(new Date().getTime()));
 		List<Long> suscripcionesVigentesCompact = manejadorFacFactura.consultaSuscripVigentesCompactacion(perFecInicio,
-				perFecFin, idEmpresa);
+				perFecFin, idEmpresa);*/
 
 		// Consulta de suscripciones a aplicar el descuento según el indicador
-		for (VarprVarperreg reporte : reportes) {
+		for (VrmrVarmicroruta reporte : reportesMicro) {
 			// Recolección y transporte
 			if (reporte.getConIderegistro() != null && concepTarifRecolecc.contains(reporte.getConIderegistro())) {
 
-				calcularDescuentoRecYTrans(suscripcionesRecYTrans, perFecInicio, perFecFin, periodo, reporte, response,
+				calcularDescuentoRecYTransMod(suscripcionesRecYTrans, perFecInicioFacturacion, perFecFinFacturacion, periodo, reporte, response,
 						suscripConError);
 			}
-			// Reclamos comerciales
+			/*// Reclamos comerciales
 			else if (reporte.getConIderegistro() != null
 					&& listaConceptosReclamacion.contains(reporte.getConIderegistro())) {
 
@@ -198,23 +245,26 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 				calcularDescuentoCompact(suscripcionesVigentesCompact, perFecInicio, perFecFin, periodo, reporte,
 						response, suscripConError);
 
-			}
+			}*/
 		}
 
-		List<TotalesDescCalidadDTO> listaTotales = crearTotalesPorReporte(reportes, periodo, listaConceptosReclamacion);
-		logger.info("Generación de reportes totales: " + listaTotales.toString());
-		response.setListaTotalPorIndicador(listaTotales);
+		//List<TotalesDescCalidadDTO> listaTotales = crearTotalesPorReporte(reportesMicro, periodo, listaConceptosReclamacion);
+                
+		logger.info("Generación de reportes totales: " + this.getDatosReporte().toString());
+		response.setTotalesMicroRuta(this.getDatosReporte());               
 
 		if ((response.getCodResp() != null) && !suscripConError.isEmpty()) {
 			response.setError(ConstantesServicios.RESULTADO_FALLIDO_DESC_CALIDAD + suscripConError.size());
 			logger.error("Lista de suscripciones con errores: " + suscripConError);
-		} else if (reportes.isEmpty()) {
+		} else if (reportesMicro.isEmpty()) {
 			response.setCodResp(-1);
 			response.setError(ConstantesServicios.RESULTADO_SIN_REPORTES);
 		} else {
 			response.setCodResp(Integer.parseInt(ConstantesServicios.CODIGO_RESPUESTA_EXITOSA));
 			response.setError(ConstantesServicios.RESULTADO_EXITOSO_OPERACION);
 			actualizarActividadesPeriodo(periodo.getPerIderegistro());
+                        response.setPeriodo(periodo.getPerIderegistro());
+                        response.setRespuesta(true);
 		}
 		logger.info("Respuesta del servicio");
 		eliminarRegistroProcesoCalidad(idEmpresa);
@@ -261,7 +311,7 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 
 					DecaDesccalidad descSuscripcion = nuevoDescCalidad(periodo.getPerIderegistro(),
 							periodoActivo.getPerIderegistro(), mesAplicacion, suscripcion, valorTotalToneladas,
-							reporte.getVarprValor(), toneladasConDesc, null, reporte.getConIderegistro(),
+							reporte.getVarprValor(), toneladasConDesc, null, reporte.getConIderegistro(),0,
 							this.interesTotalCorr, this.porcentajeInteresCorr, this.conceptoInteresCorr,
 							this.interesTotalMor, this.porcentajeInteresMor, this.conceptoInteresMor, idUsuario);
 
@@ -335,7 +385,7 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 						DecaDesccalidad descSuscripcion = nuevoDescCalidad(periodo.getPerIderegistro(),
 								periodoActivo.getPerIderegistro(), mesAplicacion, suscripcion.getDsusIderegistr(), null,
 								reporte.getVarprValor(), BigDecimal.valueOf(valorDescuento), null,
-								reporte.getConIderegistro(), this.interesTotalCorr, this.porcentajeInteresCorr,
+								reporte.getConIderegistro(), 0,this.interesTotalCorr, this.porcentajeInteresCorr,
 								this.conceptoInteresCorr, this.interesTotalMor, this.porcentajeInteresMor,
 								this.conceptoInteresMor, idUsuario);
 
@@ -376,21 +426,36 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	 * @param suscripConError
 	 */
 	private void calcularDescuentoRecYTrans(List<SuscripPorMicroRutaDTO> suscripcionesRecYTrans, Timestamp perFecInicio,
-			Timestamp perFecFin, PerPeriodo periodo, VarprVarperreg reporte, ResponseDescuentosCalidadDTO response,
+			Timestamp perFecFin, PerPeriodo periodo, VrmrVarmicroruta reporte, ResponseDescuentosCalidadRecolDTO response,
 			List<Long> suscripConError) {
 
 		int idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
-		int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
+		int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();  
+                Map<Integer,List<TotalesDescCalidadMicroRutaDTO>> datosReporteTMP = new HashMap<>();
+                /*Integer cantidad = 0;
+                BigDecimal totalToneladas = BigDecimal.ZERO;
+                BigDecimal totalToneladasLiq = BigDecimal.ZERO;
+                BigDecimal totalDescuento = BigDecimal.ZERO;
+                BigDecimal totalInteresCorriente = BigDecimal.ZERO;
+                BigDecimal totalInteresMoratorio = BigDecimal.ZERO;*/
+                        
 
 		for (SuscripPorMicroRutaDTO suscripcion : suscripcionesRecYTrans) {
-			boolean vigente = validarSucripVigentes(suscripcion.getDsusIderegistr(), idEmpresa, perFecInicio,
-					perFecFin);
+			boolean vigente = validarSucripVigentesServicio(suscripcion.getDsusIderegistr(), idEmpresa, perFecInicio,
+					perFecFin,this.docFactServicio);
 			if (vigente) {
 				DecaDesccalidad existeDesc = manejadorDecaDesccalidad.validarDesceuntoPorSuscrip(
 						suscripcion.getDsusIderegistr(), suscripcion.getConIderegistro(), periodo.getPerIderegistro(),
 						suscripcion.getRutIdemicroruta());
 				if (existeDesc == null) {
-					try {
+					try {                                                
+                                                Integer cantidad = 0;
+                                                BigDecimal totalToneladas = BigDecimal.ZERO;
+                                                BigDecimal totalToneladasLiq = BigDecimal.ZERO;
+                                                BigDecimal totalDescuento = BigDecimal.ZERO;
+                                                BigDecimal totalInteresCorriente = BigDecimal.ZERO;
+                                                BigDecimal totalInteresMoratorio = BigDecimal.ZERO;
+                                                
 						PerPeriodo periodoActivo = manejadorPerPeriodo
 								.consultaPeriodoActivoPorSuscrip(suscripcion.getDsusIderegistr());
 						BigDecimal valorTotalToneladas = manejadorFacFactura.consultaSumatoriaToneladasPorSuscrip(
@@ -411,15 +476,47 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 						DecaDesccalidad descSuscripcion = nuevoDescCalidad(periodo.getPerIderegistro(),
 								periodoActivo.getPerIderegistro(), mesAplicacion, suscripcion.getDsusIderegistr(),
 								valorTotalToneladas, suscripcion.getVrmrValor(), toneladasConDesc,
-								suscripcion.getRutIdemicroruta(), suscripcion.getConIderegistro(),
+								suscripcion.getRutIdemicroruta(), suscripcion.getConIderegistro(),this.conceptoTarifaRecolAplicada.get(0),
 								this.interesTotalCorr, this.porcentajeInteresCorr, this.conceptoInteresCorr,
 								this.interesTotalMor, this.porcentajeInteresMor, this.conceptoInteresMor, idUsuario);
 
 						manejadorDecaDesccalidad.save(descSuscripcion);
 						calcularValoresTotales(toneladasConDesc, reporte.getConIderegistro(),
 								listaConceptosReclamacion);
-						logger.info("Se procesó correctamente la suscripción: " + suscripcion.getDsusIderegistr());
-						
+						logger.info("Se procesó correctamente la suscripción: " + suscripcion.getDsusIderegistr());                                                
+
+                                                if ( datosReporteTMP != null && datosReporteTMP.containsKey(suscripcion.getRutIdemicroruta())){
+                                                    
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setCantidad(datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).getCantidad() + 1);
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalDescuento(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                                            .get(0).getTotalDescuento().add(toneladasConDesc == null ?  BigDecimal.ZERO : toneladasConDesc));
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalInteresCorriente(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                                            .get(0).getTotalInteresCorriente().add(this.interesTotalCorr == null ? BigDecimal.ZERO : this.interesTotalCorr));
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalInteresMoratorio(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                                            .get(0).getTotalInteresMoratorio().add(this.interesTotalMor == null ? BigDecimal.ZERO : this.interesTotalMor));
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalToneladas(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                                            .get(0).getTotalToneladas().add(valorTotalToneladas == null ? BigDecimal.ZERO : valorTotalToneladas));
+                                                    datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalToneladasLiq(suscripcion.getVrmrValor()
+                                                            .compareTo(BigDecimal.ZERO) > 0 ? suscripcion.getVrmrValor() : BigDecimal.ZERO);                                      
+
+                                                }else {
+                                                    
+                                                cantidad+=1;
+                                                totalToneladas = valorTotalToneladas == null ? BigDecimal.ZERO : valorTotalToneladas;
+                                                totalToneladasLiq = suscripcion.getVrmrValor().compareTo(BigDecimal.ZERO) > 0 ? suscripcion.getVrmrValor() : BigDecimal.ZERO ;
+                                                totalDescuento = toneladasConDesc == null ?  BigDecimal.ZERO : toneladasConDesc;
+                                                totalInteresCorriente = this.interesTotalCorr == null ? BigDecimal.ZERO : this.interesTotalCorr;
+						totalInteresMoratorio = this.interesTotalMor == null ? BigDecimal.ZERO : this.interesTotalMor;
+                                                
+                                                TotalesDescCalidadMicroRutaDTO totalMicro = new TotalesDescCalidadMicroRutaDTO(suscripcion.getRutIdemicroruta(),
+                                                            periodo.getPerNombre(),cantidad,totalToneladas,totalToneladasLiq,totalDescuento,totalInteresCorriente,totalInteresMoratorio,suscripcion.getConIderegistro());
+                                                
+                                                List<TotalesDescCalidadMicroRutaDTO> listaTotalMicro = new ArrayList<>();
+                                                listaTotalMicro.add(totalMicro);                                                
+                                                //this.setListaTotalesMicro(listaTotalMicro);                                                 
+                                                datosReporteTMP.put(suscripcion.getRutIdemicroruta(),listaTotalMicro);
+                                                }
+                                                
 					} catch (Exception e) {
 						logger.error(
 								"Ocurrió un error en el método de calcular descuento para reporte de recolección y transporte con la suscripción: "
@@ -435,7 +532,117 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 				}
 			}
 		}
+                if( datosReporteTMP != null && datosReporteTMP.size()>0) this.setDatosReporte(datosReporteTMP);
+	}
+        
+        	/**
+	 * Método encargado de realizar los cálculos de los descuentos para las
+	 * suscripciones reportadas por el indicador de claidad de recolección y
+	 * transporte
+	 * 
+	 * @param suscripcionesRecYTrans
+	 * @param perFecInicio
+	 * @param perFecFin
+	 * @param periodo
+	 * @param reporte
+	 * @param response
+	 * @param suscripConError
+	 */
+	private void calcularDescuentoRecYTransMod(List<SuscripPorMicroRutaDTO> suscripcionesRecYTrans, Timestamp perFecInicio,
+			Timestamp perFecFin, PerPeriodo periodo, VrmrVarmicroruta reporte, ResponseDescuentosCalidadRecolDTO response,
+			List<Long> suscripConError) {
 
+		int idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
+		int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();  
+                Map<Integer,List<TotalesDescCalidadMicroRutaDTO>> datosReporteTMP = new HashMap<>();    
+                
+                suscripcionesRecYTrans.stream()
+                .filter(s -> manejadorDecaDesccalidad.validarDesceuntoPorSuscrip(s.getDsusIderegistr(), s.getConIderegistro(), periodo.getPerIderegistro(),
+			s.getRutIdemicroruta()) == null)
+                .forEach(suscripcion -> {
+                    try {                                                
+                        Integer cantidad = 0;
+                        BigDecimal totalToneladas = BigDecimal.ZERO;
+                        BigDecimal totalToneladasLiq = BigDecimal.ZERO;
+                        BigDecimal totalDescuento = BigDecimal.ZERO;
+                        BigDecimal totalInteresCorriente = BigDecimal.ZERO;
+                        BigDecimal totalInteresMoratorio = BigDecimal.ZERO;
+                        Optional<BigDecimal> valorTon = Optional.empty();
+                        BigDecimal valorTotalToneladas = BigDecimal.ZERO;
+
+                        PerPeriodo periodoActivo = manejadorPerPeriodo
+                                        .consultaPeriodoActivoPorSuscrip(suscripcion.getDsusIderegistr());
+                        
+                        valorTon = manejadorFacFactura.consultaSumatoriaToneladasPorSuscrip(
+                                        suscripcion.getDsusIderegistr()); 
+                        
+                        if (valorTon.isPresent()) {
+                            valorTotalToneladas = valorTon.get();
+                        }
+
+                        BigDecimal toneladasConDesc = valorTotalToneladas.multiply(suscripcion.getVrmrValor());
+
+                        Integer mesAplicacion = validarMesAplicacionDesc(this.mesAplicacionIndicador, periodo);
+                        Integer mesActivo = periodoActivo.getPerIdeorden().intValue();
+
+                        DecaDesccalidad descSuscripcion = nuevoDescCalidad(periodo.getPerIderegistro(),
+                                        periodoActivo.getPerIderegistro(), mesAplicacion, suscripcion.getDsusIderegistr(),
+                                        valorTotalToneladas, suscripcion.getVrmrValor(), toneladasConDesc,
+                                        suscripcion.getRutIdemicroruta(), suscripcion.getConIderegistro(),this.conceptoTarifaRecolAplicada.get(0),
+                                        this.interesTotalCorr, this.porcentajeInteresCorr, this.conceptoInteresCorr,
+                                        this.interesTotalMor, this.porcentajeInteresMor, this.conceptoInteresMor, idUsuario);
+
+                        manejadorDecaDesccalidad.save(descSuscripcion);
+                        
+                        if (concepTarifRecolecc.contains(reporte.getConIderegistro())) {
+                            this.setTotalDescReccYTransp(this.totalDescReccYTransp.add(toneladasConDesc));
+                        }    
+                        
+                        logger.info("Se procesó correctamente la suscripción: " + suscripcion.getDsusIderegistr());                                                
+
+                        if ( datosReporteTMP != null && datosReporteTMP.containsKey(suscripcion.getRutIdemicroruta())){
+
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setCantidad(datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).getCantidad() + 1);
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalDescuento(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                    .get(0).getTotalDescuento().add(toneladasConDesc == null ?  BigDecimal.ZERO : toneladasConDesc));
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalInteresCorriente(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                    .get(0).getTotalInteresCorriente().add(this.interesTotalCorr == null ? BigDecimal.ZERO : this.interesTotalCorr));
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalInteresMoratorio(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                    .get(0).getTotalInteresMoratorio().add(this.interesTotalMor == null ? BigDecimal.ZERO : this.interesTotalMor));
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalToneladas(datosReporteTMP.get(suscripcion.getRutIdemicroruta())
+                                    .get(0).getTotalToneladas().add(valorTotalToneladas == null ? BigDecimal.ZERO : valorTotalToneladas));
+                            datosReporteTMP.get(suscripcion.getRutIdemicroruta()).get(0).setTotalToneladasLiq(suscripcion.getVrmrValor()
+                                    .compareTo(BigDecimal.ZERO) > 0 ? suscripcion.getVrmrValor() : BigDecimal.ZERO);                                      
+
+                        }else {
+
+                        cantidad+=1;
+                        totalToneladas = valorTotalToneladas == null ? BigDecimal.ZERO : valorTotalToneladas;
+                        totalToneladasLiq = suscripcion.getVrmrValor().compareTo(BigDecimal.ZERO) > 0 ? suscripcion.getVrmrValor() : BigDecimal.ZERO ;
+                        totalDescuento = toneladasConDesc == null ?  BigDecimal.ZERO : toneladasConDesc;
+                        totalInteresCorriente = this.interesTotalCorr == null ? BigDecimal.ZERO : this.interesTotalCorr;
+                        totalInteresMoratorio = this.interesTotalMor == null ? BigDecimal.ZERO : this.interesTotalMor;
+
+                        TotalesDescCalidadMicroRutaDTO totalMicro = new TotalesDescCalidadMicroRutaDTO(suscripcion.getRutIdemicroruta(),
+                                    periodo.getPerNombre(),cantidad,totalToneladas,totalToneladasLiq,totalDescuento,totalInteresCorriente,totalInteresMoratorio,suscripcion.getConIderegistro());
+
+                        List<TotalesDescCalidadMicroRutaDTO> listaTotalMicro = new ArrayList<>();
+                        listaTotalMicro.add(totalMicro);                                                
+                        //this.setListaTotalesMicro(listaTotalMicro);                                                 
+                        datosReporteTMP.put(suscripcion.getRutIdemicroruta(),listaTotalMicro);
+                        }
+
+                    } catch (Exception e) {
+                        logger.error(
+                                        "Ocurrió un error en el método de calcular descuento para reporte de recolección y transporte con la suscripción: "
+                                                        + suscripcion.getDsusIderegistr(),
+                                        e);
+                        response.setCodResp(-1);
+                        suscripConError.add(suscripcion.getDsusIderegistr());
+                    }
+                });
+
+                if( datosReporteTMP != null && datosReporteTMP.size()>0) this.setDatosReporte(datosReporteTMP);
 	}
 
 	/**
@@ -500,14 +707,14 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	 * @param listaConceptosReclamacion
 	 * @return
 	 */
-	private List<TotalesDescCalidadDTO> crearTotalesPorReporte(List<VarprVarperreg> reportes, PerPeriodo periodo,
+	private List<TotalesDescCalidadDTO> crearTotalesPorReporte(List<VrmrVarmicroruta> reportes, PerPeriodo periodo,
 			List<Integer> listaConceptosReclamacion) {
 
 		List<TotalesDescCalidadDTO> lista = new ArrayList<>();
 		Calendar calendar = Calendar.getInstance();
 		ConConcepto concepto = null;
-		for (VarprVarperreg reporte : reportes) {
-			TotalesDescCalidadDTO total;
+                TotalesDescCalidadDTO total = new TotalesDescCalidadDTO();
+		for (VrmrVarmicroruta reporte : reportes) {			
 			Optional<ConConcepto> concepto1 = manejadorConConcepto.findById(reporte.getConIderegistro());
 			if (concepto1.isPresent()) {
 				concepto = concepto1.get();
@@ -516,8 +723,8 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 					total = new TotalesDescCalidadDTO(concepto.getConNombre(),
 							periodo.getPerNombre() + " - " + calendar.get(Calendar.YEAR), this.totalDescReccYTransp,
 							this.totalInteresCorrReccYTransp, this.totalInteresMorReccYTransp);
-					lista.add(total);
-				} else if (this.concepTarifaCompact.contains(concepto.getUniConcepto())) {
+					
+				} /*else if (this.concepTarifaCompact.contains(concepto.getUniConcepto())) {
 					calendar.setTime(periodo.getPerFecinicial());
 					total = new TotalesDescCalidadDTO(concepto.getConNombre(),
 							periodo.getPerNombre() + " - " + calendar.get(Calendar.YEAR), this.totalDescCompactacion,
@@ -529,10 +736,10 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 							periodo.getPerNombre() + " - " + calendar.get(Calendar.YEAR), this.totalDescReclamacion,
 							this.totalInteresCorrReclamacion, this.totalInteresMorReclamacion);
 					lista.add(total);
-				}
+				}*/
 			}
-
 		}
+                lista.add(total);
 
 		return lista;
 	}
@@ -751,7 +958,7 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
+	 @SuppressWarnings("unchecked")
 	private void consultarParametrosDescCalidad(int idEmpresa) throws IOException {
 		Map<String, Object> parametros = negocioParParametro.consultaParametros(idEmpresa,
 				ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
@@ -773,6 +980,7 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 				(Integer) parametros.get(ConstantesServicios.ID_PROGRAMA_PROCESA_INDICADORES_CALIDAD));
 		this.setUniConceptoSuscripcionReclamacion(
 				(Integer) parametros.get(ConstantesServicios.UNI_CONCEPTO_SUSCRIPCION_RECLAMACION));
+                this.setConcepTarifRecoleccAplicada((List<Integer>) parametros.get(ConstantesServicios.UNI_CONCEPTO_FACTURA_INDICADOR_CALIDAD_RECOLECCION));
 	}
 
 	/**
@@ -840,10 +1048,17 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 	 */
 	private DecaDesccalidad nuevoDescCalidad(Integer perIderegistroTaras, Integer perIderegistroActivo,
 			Integer mesAplicacion, Long dsusIderegistr, BigDecimal valorToneladas, BigDecimal factorDescuento,
-			BigDecimal toneladasConDesc, Integer rutIdemicroruta, Integer conIderegistro, BigDecimal interesTotalCorr,
+			BigDecimal toneladasConDesc, Integer rutIdemicroruta, Integer conIderegistro, Integer conIderegistroAplicada, BigDecimal interesTotalCorr,
 			BigDecimal porcentajeInteresCorr, Integer conceptoInteresCorr, BigDecimal interesTotalMor,
 			BigDecimal porcentajeInteresMor, Integer conceptoInteresMor, int idUsuario) {
 
+                /* Sumatoria de los valores Capital e Interes */        
+                List<BigDecimal> saldoValores = Arrays.asList(interesTotalCorr == null ? BigDecimal.ZERO : interesTotalCorr,
+                        interesTotalMor == null ? BigDecimal.ZERO : interesTotalMor,toneladasConDesc == null ? BigDecimal.ZERO : toneladasConDesc);
+                BigDecimal saldoTotal = BigDecimal.ZERO;
+                for(BigDecimal s : saldoValores){
+                    saldoTotal = saldoTotal.add(s);
+                }
 		Timestamp fechaActual = new Timestamp(new Date().getTime());
 		DecaDesccalidad suscripcionDescuento = new DecaDesccalidad();
 		suscripcionDescuento.setPerIderegistroTarifas(perIderegistroTaras);
@@ -853,9 +1068,10 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 		suscripcionDescuento.setValorToneladas(valorToneladas);
 		suscripcionDescuento.setFactorDesc(factorDescuento);
 		suscripcionDescuento.setValorTotalDesc(toneladasConDesc);
+                suscripcionDescuento.setSaldoTotalDesc(saldoTotal.setScale(0, RoundingMode.HALF_UP));
 		suscripcionDescuento.setRutIderegistro(rutIdemicroruta != null ? rutIdemicroruta : null);
 		suscripcionDescuento.setUniConceptoTarifas(conIderegistro);
-		suscripcionDescuento.setUniConceptoFacturacion(conIderegistro);
+		suscripcionDescuento.setUniConceptoFacturacion(conIderegistroAplicada);
 		suscripcionDescuento.setInteresCorrAplicado(interesTotalCorr);
 		suscripcionDescuento.setPorcentajeInteresCorr(porcentajeInteresCorr);
 		suscripcionDescuento.setUniConceptoInteresCorr(conceptoInteresCorr);
@@ -886,6 +1102,38 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 
 		return !facturas.isEmpty();
 	}
+        
+        private boolean validarSucripVigentesServicio(Long suscripcion, int idEmpresa, Timestamp perFecInicio,
+			Timestamp perFecFin, List<Integer> doc) {
+		List<FacFactura> facturas = manejadorFacFactura.consultaFacturasPorSucripcionServicio(suscripcion, idEmpresa,
+				perFecInicio, perFecFin ,doc);
+
+		return !facturas.isEmpty();
+	}
+
+        public Map<Integer, List<TotalesDescCalidadMicroRutaDTO>> getDatosReporte() {
+            return datosReporte;
+        }
+
+        public void setDatosReporte(Map<Integer, List<TotalesDescCalidadMicroRutaDTO>> datosReporte) {
+            this.datosReporte = datosReporte;
+        }       
+
+        public List<TotalesDescCalidadMicroRutaDTO> getListaTotalesMicro() {
+                return listaTotalesMicro;
+        }
+
+        public void setListaTotalesMicro(List<TotalesDescCalidadMicroRutaDTO> listaTotalesMicro) {
+                this.listaTotalesMicro = listaTotalesMicro;
+        }       
+        
+        public TotalesDescCalidadMicroRutaDTO getTotalesMicro() {
+                return totalesMicro;
+        }
+
+        public void setTotalesMicro(TotalesDescCalidadMicroRutaDTO totalesMicro) {
+                this.totalesMicro = totalesMicro;
+        }        
 
 	public Integer getIdCicloSemestral() {
 		return idCicloSemestral;
@@ -917,6 +1165,14 @@ public class NegocioDecaDesccalidad extends NegocioAbstracto<DecaDesccalidad, De
 
 	public void setConcepTarifRecolecc(List<Integer> concepTarifRecolecc) {
 		this.concepTarifRecolecc = concepTarifRecolecc;
+	}
+        
+        public void setConcepTarifRecoleccAplicada(List<Integer> concepTarifRecoleccAplicada) {
+		this.conceptoTarifaRecolAplicada = concepTarifRecoleccAplicada;
+	}
+        
+        public List<Integer> getConcepTarifRecolAplicada() {
+		return conceptoTarifaRecolAplicada;
 	}
 
 	public List<Integer> getConcepTarifaCompact() {

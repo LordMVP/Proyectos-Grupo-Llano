@@ -6,9 +6,9 @@ import org.mapstruct.Mapping;
 import com.bioagricola.aforos.entity.MaestroAforoVisita;
 import com.bioagricola.aforos.entity.dto.MaestroVisitasResource;
 
-@Mapper(componentModel = "spring",uses={DetalleMaestroVisitasMapper.class,AforoMapper.class})
+@Mapper(componentModel = "spring", uses = { DetalleMaestroVisitasMapper.class, AforoMapper.class })
 public interface AforoMaestroVisitasMapper {
 
-	@Mapping(source = "detallesMaestrosVisitas",target = "detallesMaestroVisita")
+	@Mapping(source = "detallesMaestrosVisitas", target = "detallesMaestroVisita")
 	MaestroVisitasResource toResource(MaestroAforoVisita maestro);
 }

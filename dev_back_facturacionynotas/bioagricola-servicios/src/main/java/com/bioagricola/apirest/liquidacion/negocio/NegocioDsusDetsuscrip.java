@@ -14,6 +14,7 @@ import com.bioagricola.apirest.modelo.utils.UtilOperaciones;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -78,6 +79,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
      * Variable estatica para imprimir logs...
      */
     private static final Logger logger = Logger.getLogger(NegocioDsusDetsuscrip.class.getName());
+    org.slf4j.Logger log = LoggerFactory.getLogger(this.getClass());
 
     // protected region Declare atributos adicionales en esta seccion on begin
 
@@ -407,7 +409,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
                 ConstantesServicios.UNI_CONCEPTO_ESTRATO);
 
         Integer tipoDocumentoParametrp = tipoDocumentoArray.getIdParametro().get(0);
-
+        
         nombreTercero = stringVacio(nombreTercero);
         nombreTercero = nombreTercero != null ? nombreTercero.toLowerCase() : nombreTercero;
 
@@ -431,7 +433,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
         listaDetalle = manejadorDsusDetsuscrip.consultaDetalleEstrato(idSuscripcion, nombreTercero, documentoTercero,
                 ciclo, documento, tipoDocumento, numCatastral, codAntSuscripcion, idEmpresa, desde, hasta,
                 tipoDocumentoParametrp, parametroEstado.getIdParametro(), pageItems);
-
+        
         // Mapeo de los objetos de respuesta de la consulta al DTO de respuesta del
         // servicio
         for (Object[] row : listaDetalle) {
@@ -683,7 +685,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
                                                                          String fechaPqr, Integer tipoNota, Integer numeroPqr) throws IOException, ParseException {
 
         List<ConsultaDetalleSuscripcionDTO> listaDetalle = new ArrayList<>();
-
+        List<Object []> listaDetalleObject = new ArrayList<>();
         // Obtención del Id de la empresa en sesión como parámetro de la consulta
         int idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
         int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
@@ -720,8 +722,10 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
         }
 
         // Validaciones de aforo extraordinario
-        List<Object[]> listaAforos = manejadorAfoAforo.consultarUltimoAforoExtraordinario(uniTipoAforoOrdinario,
-                uniTipoAforoExtraOrdinario, idSuscripcion, fechaPqrT, uniAforoIndividual, uniAforoMultiusuario);
+        /*List<Object[]> listaAforos = manejadorAfoAforo.consultarUltimoAforoExtraordinario(uniTipoAforoOrdinario,
+                uniTipoAforoExtraOrdinario, idSuscripcion, fechaPqrT, uniAforoIndividual, uniAforoMultiusuario);*/
+        List<Object[]> listaAforos = manejadorAfoAforo.consultarUltimoAforoExtraordinario(uniConeptoAforoExtraOrdinario,uniTipoAforoExtraOrdinario, idSuscripcion);
+        
 
         if (!listaAforos.isEmpty()) {
             aforadoExtraordinario = mapResultToDto(listaAforos);
@@ -735,17 +739,43 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
 
                 if (diferenciaAnios <= 2) {
 
-                    BigInteger cantResultados = manejadorDsusDetsuscrip.conteoConsultaDetalleAforados(
+                    /*BigInteger cantResultados = manejadorDsusDetsuscrip.conteoConsultaDetalleAforados(
                             Long.valueOf(idSuscripcion), nombreTercero, documentoTercero, ciclo, documento,
                             tipoDocumento, numCatastral, codAntSuscripcion, idEmpresa, desde, hasta,
-                            uniConeptoAforoExtraOrdinario, numeroPqr.toString());
+                            uniConeptoAforoExtraOrdinario, numeroPqr.toString());*/
+                    BigInteger cantResultados = manejadorDsusDetsuscrip.conteoConsultaDetalleAforados(
+                            Long.valueOf(idSuscripcion), //codAntSuscripcion, 
+                            idEmpresa, desde, hasta,
+                            uniConeptoAforoExtraOrdinario);
                     pagesconsulta = (int) Math.ceil(cantResultados.intValue() / (float) tamanoPagina);
 
                     Pageable pageItems = PageRequest.of(pagina, tamanoPagina);
-                    listaDetalle = manejadorDsusDetsuscrip.consultaDetalleAforados(Long.valueOf(idSuscripcion),
+                    /*listaDetalle = manejadorDsusDetsuscrip.consultaDetalleAforados(Long.valueOf(idSuscripcion),
                             nombreTercero, documentoTercero, ciclo, documento, tipoDocumento, numCatastral,
                             codAntSuscripcion, idEmpresa, desde, hasta, uniConeptoAforoExtraOrdinario,
-                            numeroPqr.toString(), pageItems);
+                            numeroPqr.toString(), pageItems);*/
+                    listaDetalleObject = manejadorDsusDetsuscrip.consultaDetalleAforados(Long.valueOf(idSuscripcion),
+                            //codAntSuscripcion, 
+                            idEmpresa, desde, hasta, uniConeptoAforoExtraOrdinario, pageItems);
+                    
+                    for(Object[] detalle : listaDetalleObject){
+                        ConsultaDetalleSuscripcionDTO e = new ConsultaDetalleSuscripcionDTO();
+                        e.setIdSuscripcion(((BigInteger)detalle[0]).longValueExact());
+                        e.setCodigo((String)detalle[1]);
+                        e.setFacNumero(((BigInteger)detalle[2]).longValueExact());
+                        e.setPerNombre((String)detalle[3]);
+                        e.setTafnaFactura((BigDecimal) detalle[4]);
+                        e.setEstrato((short)detalle[5]);
+                        e.setEstado(String.valueOf(detalle[6]));
+                        e.setTipoUso((String)detalle[7]);
+                        e.setNombreCompletoTercero((String)detalle[8]);
+                        e.setDocumentoTercero((String)detalle[9]);
+                        e.setDireccion((String)detalle[10]);
+                        e.setBarrio((String)detalle[11]);
+                        e.setCatastral((String)detalle[12]);
+                        e.setCiclo((String)detalle[13]);
+                        listaDetalle.add(e);
+                    }
 
                     for (ConsultaDetalleSuscripcionDTO detalle : listaDetalle) {
                         detalle.setTafnaExtraOrdinario(aforadoExtraordinario.getValorTafnaExtraOrdinario());
@@ -851,7 +881,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
         for (Object[] row : listaAforos) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String fecha = dateFormat.format(row[4]);
-            aforado.setDsusIderegistr((Integer) row[0]);
+            aforado.setDsusIderegistr(((BigInteger) row[0]).intValue());
             aforado.setPerIderegistro((Integer) row[1]);
             aforado.setValorTafnaExtraOrdinario((BigDecimal) row[2]);
             aforado.setMnafTafna((BigDecimal) row[3]);
@@ -1253,7 +1283,7 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
             novedad.setDfacCantidad(BigDecimal.ZERO);
             novedad.setDfacVlrunitari(BigDecimal.ZERO);
             novedad.setDfacVlrtotal(BigDecimal.ZERO);
-            novedad.setDfacSdoreal(BigDecimal.ZERO);
+            novedad.setDfacSdoreal(conceptos.getValorAdiciona());
             novedad.setUniConcepto(0);
             novedad.setUniConcepto(conceptos.getIdConcepto());
             novedad.setDfacVlrreal(conceptos.getValorAdiciona());
@@ -1296,5 +1326,4 @@ public class NegocioDsusDetsuscrip extends NegocioAbstracto<DsusDetsuscrip, Dsus
 
         return response;
     }
-
 }

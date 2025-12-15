@@ -92,6 +92,9 @@ public class DecaDesccalidad implements Serializable {
 
 	@Column(name="valor_total_desc")
 	private BigDecimal valorTotalDesc;
+        
+        @Column(name="deca_aprobacion")
+	private boolean decaAprobacion;
 
 	public DecaDesccalidad() {
 		//constructor por defecto
@@ -272,6 +275,14 @@ public class DecaDesccalidad implements Serializable {
 	public void setValorTotalDesc(BigDecimal valorTotalDesc) {
 		this.valorTotalDesc = valorTotalDesc;
 	}
+
+        public boolean isDecaAprobacion() {
+            return decaAprobacion;
+        }
+
+        public void setDecaAprobacion(boolean decaAprobacion) {
+            this.decaAprobacion = decaAprobacion;
+        }       
 
 	@Override
 	public int hashCode() {

@@ -12,13 +12,14 @@ import com.gell.estandar.comunicacion.ClienteToken;
 import com.gell.estandar.constante.EAplicacion;
 import com.gell.estandar.dto.AuditoriaDTO;
 import com.gell.estandar.excepcion.AplicacionExcepcion;
+import org.springframework.beans.factory.annotation.Value;
 
 public class JwtUtil {
 
 	private ClienteToken clienteToken;
 	private String tokenUser;
 	public static AuditoriaDTO auditoriaDTO;
-
+        
 	public JwtUtil() {
 		clienteToken = new ClienteToken(EAplicacion.PRISMA, ConstantesServicios.URL_SERVICIO_TOKEN);
 	}

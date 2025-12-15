@@ -47,7 +47,7 @@ public class ServicioUspuUsuprgunid implements IUspuUsuprgunid {
      */
     @GetMapping("/consultaPrivilegiosIlimitadoReporte")
     public int consultaPrivilegiosIlimitadoReporte(@RequestParam("idPrograma") Integer idPrograma) throws IOException {
-
+        System.out.println(" PARAMETRO PROGRAMA" + idPrograma);
         return negocioUspuUsuprgunid.consultaPrivilegiosIlimitadoReporte(idPrograma);
     }
 

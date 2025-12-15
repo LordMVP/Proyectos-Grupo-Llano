@@ -1,103 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-        
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    <wb-module deploy-name="bioagricola-servicios">
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/annotations"/>
-        <dependent-module archiveName="bioagricola-back-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/bioagricola-back/bioagricola-back">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-                
-
-
-        
-        
-        
-        
-        
-        
-        
-        
-        <property name="context-root" value="bioagricola-servicios"/>
-                
-        
-        
-        
-        
-        
-        
-        
-
-
-        
-        <property name="java-output-path" value="/bioagricola-servicios/target/classes"/>
             
     
     
@@ -109,6 +10,119 @@
 
 
     
-    </wb-module>
     
+    <wb-module deploy-name="bioagricola-servicios">
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/annotations"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-test-sources/test-annotations"/>
+        <dependent-module archiveName="bioagricola-back-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/bioagricola-back/bioagricola-back">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="EstandarGell-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/apiestandardgell/apiestandardgell">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+                        
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <property name="context-root" value="bioagricola-servicios"/>
+                        
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        
+        <property name="java-output-path" value="/bioagricola-servicios/target/classes"/>
+                    
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    </wb-module>
+        
+
 </project-modules>

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.math.BigInteger;
 
 /**
  * Manejador que define las operaciones CRUD y de negocio a realizar sobre
@@ -339,5 +340,61 @@ public interface ManejadorConConcepto extends ManejadorCrud<ConConcepto,Integer>
 
 	@Query(value = "select cc.* from con_concepto cc where CAST(con_propiedad as CHAR(1000)) ilike %:keyReport%", nativeQuery = true)
 	List<ConConcepto> ccUniConceptoByKey(@Param("keyReport") String keyReport);
+	
+	@Query(value=" select coalesce (("
+			+ "                    select hd.tafna_calculado resultado from aseo.hafo_aforos ha  "
+			+ "                    inner join aseo.hdafo_detaforo hd on  "
+			+ "                    hd.hafo_ideregistro = ha.hafo_ideregistro  "
+			+ "                    and hd.dsus_ideregistr = :idsuscripcion  "
+			+ "                    where ha.hafo_estado <> 'Inactivo' order by hd.hdafo_ideregistro desc limit 1  ), 0 ) resultado ", nativeQuery = true)
+	public BigDecimal getTAFNA(@Param("idsuscripcion") Long idsuscripcion);
+	
+	@Query(value=" select "
+			+ "   case when consus.bandera >= 1 then 1 else 0 "
+			+ "   end resultado  from ( select  COUNT(*) bandera "
+			+ "   from cosu_consuscrip where dsus_ideregistr = :idsuscripcion "
+			+ "   and uni_concepto =:idconcepto "
+			+ "   and now() between cosu_fecinicio and cosu_fecfinal ) consus ", nativeQuery = true)
+	public BigDecimal getRelacionConceptoSuscripcion(@Param("idsuscripcion") Long idsuscripcion,@Param("idconcepto") Integer idconcepto);
+	
+	@Query(value="SELECT "
+			+ "  case when homologa.bandera >= 1 then 1 "
+			+ "  else 0 end resultado from ( select "
+			+ "  COUNT(*) bandera from dsus_detsuscrip dd inner join sus_suscripcion ss on "
+			+ "  ss.sus_ideregistro = dd.sus_ideregistro inner join dicn_disconven dd2 on "
+			+ "  dd2.cnre_ideregistr = ss.cnre_ideregistr "
+			+ "  where dd2.emp_ideregistro =:idempresa and dd.dsus_ideregistr = :idsuscripcion "
+			+ "  and dd2.dicn_empfactura = 'S' ) as homologa", nativeQuery = true)
+	public BigDecimal getEmpresahomologa(@Param("idsuscripcion") Long idsuscripcion,@Param("idempresa") Integer idempresa);
+	
+	@Query(value="SELECT (case when validapleno.resultado = 0 then 1 "
+			+ "   else 0 end) resultado from ( select "
+			+ "   count(*) resultado from cosu_consuscrip cc "
+			+ "   where dsus_ideregistr =:idsuscripcion and uni_concepto in(5261 , 5263) "
+			+ "   and  now() between cosu_fecinicio and cosu_fecfinal ) validapleno", nativeQuery = true)
+	public BigDecimal getFacturacionPlena(@Param("idsuscripcion") Long idsuscripcion);
+	
+	@Query(value="SELECT (case when validapleno.resultado = 0 then 1 "
+			+ "   else 0 end) resultado from ( select "
+			+ "   count(*) resultado from cosu_consuscrip cc "
+			+ "   where dsus_ideregistr =:idsuscripcion and uni_concepto in(5261 , 5263) "
+			+ "   and  now() between cosu_fecinicio and cosu_fecfinal ) validapleno", nativeQuery = true)
+	public BigDecimal getCantidadVisitasAforoExtraOrdinario(@Param("idsuscripcion") Long idsuscripcion);
+        
+        
+        @Query(value="select dd.dfac_vlrtotal from public.dfac_detfactura dd " +
+                        "where dd.fac_ideregistro = :facIderegistro and dd.uni_concepto = :idconcepto", nativeQuery = true)
+	public BigDecimal getValorAjusteConceptoModLiquidacion(@Param("facIderegistro")  Long facIderegistro,@Param("idconcepto") Integer idconcepto);
+        
+        
+        @Query(value="select dd.dfac_vlrtotal from public.dfac_detfactura dd " +
+                        "where dd.fac_ideregistro = :facIderegistro and dd.uni_concepto = :idconcepto", nativeQuery = true)
+	public BigDecimal getValorDctoIndicadoresCalidadSql(@Param("facIderegistro") Long facIderegistro,@Param("idconcepto") Integer idconcepto);
+        
+        @Query(value="select uni_tipusosuscr valor from dsus_detsuscrip where dsus_ideregistr = :idSuscripcion ", nativeQuery = true)
+	public BigDecimal getTipoUsoSql(@Param("idSuscripcion") Long idSuscripcion);
+        
+        @Query(value="select uni_tipusosuscr  from fac_factura where fac_ideregistro = :idFactura", nativeQuery = true)
+	public BigDecimal getTipoUsoSqlReliquida(@Param("idFactura") Long idFactura);
 }
 

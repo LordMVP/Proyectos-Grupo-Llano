@@ -21,6 +21,9 @@ public class ImportacionNegEMSA {
 
     @Column(name = "impneg_fecha_registro", nullable = false)
     private Date creationDate;
+    
+    @Column(name = "impneg_fecha_archivo")
+    private Date creationDateFile;
 
     @Transient
     private List<ImportacionNegTemp> tempDetails;
@@ -36,6 +39,21 @@ public class ImportacionNegEMSA {
         this.state = state;
         this.creationDate = creationDate;
     }
+
+    public ImportacionNegEMSA(String filename, String state, Date creationDate, Date creationDateFile) {
+        this.filename = filename;
+        this.state = state;
+        this.creationDate = creationDate;
+        this.creationDateFile = creationDateFile;
+    }
+
+    public Date getCreationDateFile() {
+        return creationDateFile;
+    }
+
+    public void setCreationDateFile(Date creationDateFile) {
+        this.creationDateFile = creationDateFile;
+    }   
 
     public Long getId() {
         return id;

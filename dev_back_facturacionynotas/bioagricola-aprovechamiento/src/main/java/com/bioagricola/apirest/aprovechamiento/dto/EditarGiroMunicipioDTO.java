@@ -1,0 +1,39 @@
+package com.bioagricola.apirest.aprovechamiento.dto;
+
+import lombok.Data;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+@Data
+public class EditarGiroMunicipioDTO {
+
+    @NotNull(message = "La fecha de pago es obligatoria")
+    private LocalDate fechaPago;
+
+    @NotNull(message = "El total del giro es obligatorio")
+    @Positive(message = "El total del giro debe ser mayor a cero")
+    private BigDecimal totalGiroMunicipio;
+
+    private String observaciones;
+
+    @NotNull(message = "Los detalles son obligatorios")
+    private List<DetalleGiroEditarDTO> detalles;
+
+    @Data
+    public static class DetalleGiroEditarDTO {
+        private Integer idDetalle; // null para nuevos detalles
+
+        @NotNull(message = "El mes/año de pago es obligatorio")
+        private Integer mesAnioPago; // Formato YYYYMM
+
+        @NotNull(message = "El valor girado es obligatorio")
+        @Positive(message = "El valor girado debe ser mayor a cero")
+        private BigDecimal valorGirado;
+
+        private Boolean eliminar = false; // true si se debe eliminar este detalle
+    }
+}

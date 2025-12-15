@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrprocesoRespository;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorHistoricos;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Logica de negocio Liquidacion
@@ -62,13 +64,28 @@ public class NegocioHilosDeuda {
 	}
 
 	public void hilos() {
+       
+    ExecutorService executor = Executors.newFixedThreadPool(30); // 10 hilos en paralelo
 
-		Runnable hiloDeudaRUN = new NegocioEjecucionHiloDeuda(negocioParParametro, manejadorHistoricos,
+    Runnable hiloDeudaRUN = new NegocioEjecucionHiloDeuda(negocioParParametro, manejadorHistoricos,
+				manejadorCprCtrprocesoRespository, adiciona, idempresa, this.idHilo, idacceso, idCiclo, factura,
+				tipoNota, suselimina, suscripcion);
+
+    executor.submit(hiloDeudaRUN);
+    executor.shutdown(); // Opcional: si solo se ejecutará una vez
+		/*Runnable hiloDeudaRUN = new NegocioEjecucionHiloDeuda(negocioParParametro, manejadorHistoricos,
 				manejadorCprCtrprocesoRespository, adiciona, idempresa, this.idHilo, idacceso, idCiclo, factura,
 				tipoNota, suselimina, suscripcion);
 
 		Thread thread = new Thread(hiloDeudaRUN);
 		thread.start();
+                
+             executor = Executors.newFixedThreadPool(10);
+            Runnable hiloRunnable = new NegocioEjecucionHiloDeuda(negocioParParametro, manejadorHistoricos,
+				manejadorCprCtrprocesoRespository, adiciona, idempresa, this.idHilo, idacceso, idCiclo, factura,
+				tipoNota, suselimina, suscripcion);
+            executor.submit(hiloRunnable);
+            executor.shutdown();*/
 
 	}
 

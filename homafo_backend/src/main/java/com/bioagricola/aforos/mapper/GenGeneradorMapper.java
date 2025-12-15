@@ -9,10 +9,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface GenGeneradorMapper {
 
-
-	@Mapping(target = "uniTipousoDesc", source="uniTipouso.uniNombre1")
-	@Mapping(target = "uniTipouso", source="uniTipouso.uniIderegistro")
-	@Mapping(target = "genNombre",source = "unidad.uniNombre1")
+	@Mapping(target = "uniTipousoDesc", source = "uniTipouso.uniNombre1")
+	@Mapping(target = "uniTipouso", source = "uniTipouso.uniIderegistro")
+	@Mapping(target = "genNombre", source = "unidad.uniNombre1")
 	GenGeneradorResource toResource(GenGenerador generador);
 
 	default Long toLong(GenGenerador generador) {

@@ -83,6 +83,7 @@ public class NegocioNotNota extends NegocioAbstracto<NotNota, NotNotaDTO> {
 		notNotaNew.setNotComentario(nuevaNota.getObservacion());
 		notNotaNew.setUniMotnota(nuevaNota.getUniMotnota());
 		notNotaNew.setPerPeriodo(perperiodoTable);
+                notNotaNew.setNotPqr(nuevaNota.getPqr());               
 
 		manejadorNotNota.save(notNotaNew);
 

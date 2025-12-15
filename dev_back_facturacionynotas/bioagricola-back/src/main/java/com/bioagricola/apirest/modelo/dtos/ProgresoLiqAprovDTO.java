@@ -1,11 +1,8 @@
 package com.bioagricola.apirest.modelo.dtos;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-
-public class ProgresoLiqAprovDTO implements Serializable {
+public class ProgresoLiqAprovDTO {
     private String estadoProceso;
-    private BigDecimal cantidadRegistros;
+    private Byte cantidadRegistros;
 
     public String getEstadoProceso() {
         return estadoProceso;
@@ -15,11 +12,11 @@ public class ProgresoLiqAprovDTO implements Serializable {
         this.estadoProceso = estadoProceso;
     }
 
-    public BigDecimal getCantidadRegistros() {
+    public Byte getCantidadRegistros() {
         return cantidadRegistros;
     }
 
-    public void setCantidadRegistros(BigDecimal cantidadRegistros) {
+    public void setCantidadRegistros(Byte cantidadRegistros) {
         this.cantidadRegistros = cantidadRegistros;
     }
 }

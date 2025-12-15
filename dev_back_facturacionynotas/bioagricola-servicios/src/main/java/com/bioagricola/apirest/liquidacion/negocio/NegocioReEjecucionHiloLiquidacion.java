@@ -28,6 +28,9 @@ import com.bioagricola.apirest.modelo.manejadores.ManejadorHistoricos;
 import com.bioagricola.apirest.modelo.manejadores.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+//import com.sun.media.jfxmedia.logging.Logger;
 
 public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
@@ -39,7 +42,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	private char preliquidar;
 	private String suscripcion;
 	private Integer tipoNota;
-	private Integer faIdregistro;
+	private BigInteger faIdregistro;
 	private Integer versionInicial;
 	private Timestamp fechaDesde;
 	private Timestamp fechaHasta;
@@ -47,6 +50,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	private List<Object> listaLiquidaciones;
 	private List<Object> listaConceptosLiquidados = new ArrayList<>();
 	private List<Integer> listaConceptosLiquidados2 = new ArrayList<>();
+	private Integer idliquidacionGlobal;
 	private Integer idempresa;
 	private Long idsuscripcion = null;
 	private Integer idproceso;
@@ -54,9 +58,11 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	private String idUsuario;
 	private BigInteger idfactura;
 	private String[] proceso = new String[6];
+        private String pqr;
 
 	private List<Object[]> infoConceptoF = new ArrayList<>();
 	private List<Object[]> conceptosNota = new ArrayList<>();
+        private List<Object> listaConceptosAplicar = new ArrayList<>();
 	private Integer idCiclo;
 	private ManejadorCprCtrprocesoRespository manejadorCprCtrprocesoRespository;
 	private ManejadorConConcepto manejadorConConcepto;
@@ -82,7 +88,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			ManejadorCprCtrprocesoRespository manejadorCprCtrprocesoRespository,
 			ManejadorConConcepto manejadorConConcepto, FuncionesConceptos funcionesConceptos, char preliquidar,
 			Integer idempresa, Integer idproceso, Integer idacceso, Integer idCiclo, String suscripcion,
-			Integer tipoNota) {
+			Integer tipoNota, String pqr) {
 		super();
 		this.manejadorHistoricos = manejadorHistoricos;
 		this.manejadorCprCtrprocesoRespository = manejadorCprCtrprocesoRespository;
@@ -96,6 +102,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		this.idCiclo = idCiclo;
 		this.suscripcion = suscripcion;
 		this.tipoNota = tipoNota;
+                this.pqr=pqr;
 	}
 
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(NegocioReEjecucionHiloLiquidacion.class);
@@ -151,6 +158,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			fechaDesde = (Timestamp) periodo[1];
 			fechaHasta = (Timestamp) periodo[2];
 			idliquidacion = Integer.parseInt(periodo[3].toString());
+			idliquidacionGlobal=idliquidacion;
 			this.cicloPeriodo = getCicloPeriodoId(this.idperiodo);
 
 			if (cicloPeriodo == null) {
@@ -162,9 +170,13 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 				faIdregistro = manejadorHistoricos.getFacturaIdRegistro(suscripcion, idperiodo, idliquidacion);
 
-				if (faIdregistro != 0) {
+				if (faIdregistro.compareTo(BigInteger.ZERO) != 0) {
 					versionInicial = manejadorHistoricos.getFacturaVersion(faIdregistro);
-					iniciar();
+					//LOGGER.error("PERIODO LIQUIDAR->"+idperiodo);
+					//if(idperiodo.compareTo(7314)==0) {
+						iniciar();
+					//}					
+					//LOGGER.error("TERMINO INICIAR() : "+faIdregistro);
 				} else {
 					mensaje = "No hay una factura Origen de la suscripcion " + suscripcion + " para el periodo "
 							+ idperiodo.toString();
@@ -190,6 +202,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			programaFacturarPeriodo = (Integer) parametros.get(ConstantesServicios.PROGRAMA_FACTURAR_PERIODO);
 			conceptoaforoextraordinario = (Integer) parametros
 					.get(ConstantesServicios.UNI_CONCEPTO_AFORO_EXTRAORDINARIO);
+                        listaConceptosAplicar = (ArrayList<Object>) parametros.get(ConstantesServicios.LISTA_CONCEPTOS_APLICAR);
 		} catch (IOException e) {
 			LOGGER.info("Error no controlado en consultaParametros {}", e.getMessage());
 		}
@@ -200,7 +213,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		try {
 			proceso[0] = "A"; // estado
 			proceso[1] = fecha(); // fechaInicio
-			proceso[2] = String.valueOf(programaFacturarPeriodo); // idPrograma
+			proceso[2] = this.tipoNota.toString();//String.valueOf(programaFacturarPeriodo); // idPrograma
 			proceso[3] = idacceso.toString(); // idAcceso
 			proceso[4] = idempresa.toString(); // idEmpresa
 			proceso[5] = idproceso.toString(); // idHilo
@@ -276,6 +289,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			procesarSuscripciones();
 			validarNovedades();
 		} catch (NegocioException e) {
+			LOGGER.error("ERROR->GENERADO->"+e);
 			String mensaje = "Se procede a finalizar el proceso; " + proceso;
 			LOGGER.info(mensaje);
 			if (e.hashCode() == -4) {
@@ -350,7 +364,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		for (Object item : listaSuscripciones) {
 			fields = (Object[]) item;
 			try {
-				LOGGER.info("Procesando suscripcion {}{}{}{}", fields[0], " para el periodo ", idperiodo, "\n");
+				LOGGER.error("Procesando suscripcion {}{}{}{}", fields[0], " para el periodo ", idperiodo, "\n");
 				facturarSuscripcion(item);
 			} catch (Exception e) {
 				LOGGER.info(e.getMessage());
@@ -372,7 +386,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		String mensaje;
 		Object[] fields;
 		Integer valor;
-		Long factura;
+		BigInteger factura;
 		List<Object> infoFactura;
 
 		infoFactura = new ArrayList<>();
@@ -395,6 +409,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 			factura = getFacturaCicloPeriodoActual(infoFactura);
 			if (factura != null) {
+				LOGGER.error("LIQUIDACION FACTURA -> "+factura);
 				liquidarSuscripcion(infoFactura);
 				// Se genera el emitido en las tablas de faca_ dfcs_ dfci
 			} else {
@@ -424,44 +439,37 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 * @param infoFactura
 	 * @return
 	 */
-	private Long getFacturaCicloPeriodoActual(Object infoFactura) {
-		ArrayList<?> fields = null;
+	private BigInteger getFacturaCicloPeriodoActual(Object infoFactura) {
+		ArrayList<?> fields = (ArrayList<?>) infoFactura;
 
-		Integer iddocumento = null;
-		Integer idtipodocumento = null;
-		Integer idciclo = null;
-		Integer idperiodoF = null;
-
-		fields = (ArrayList<?>) infoFactura;
 		Object[] suscripcionF = (Object[]) fields.get(0);
 		Object[] cicloperiodo = (Object[]) fields.get(1);
 		Object[] objliquidacion = (Object[]) fields.get(2);
 		Object[] liquidacion = (Object[]) objliquidacion[0];
 
-		idsuscripcion = Long.parseLong(suscripcionF[0].toString());
-		iddocumento = Integer.parseInt(liquidacion[2].toString());
-		idtipodocumento = Integer.parseInt(liquidacion[1].toString());
-		idciclo = Integer.parseInt(cicloperiodo[0].toString());
-		idperiodoF = Integer.parseInt(cicloperiodo[2].toString());
+		idsuscripcion = Long.valueOf(suscripcionF[0].toString());
+		Integer iddocumento = Integer.valueOf(liquidacion[2].toString());
+		Integer idtipodocumento = Integer.valueOf(liquidacion[1].toString());
+		Integer idciclo = Integer.valueOf(cicloperiodo[0].toString());
+		Integer idperiodoF = Integer.valueOf(cicloperiodo[2].toString());
 
-		return Long.parseLong(manejadorHistoricos
-				.getFacturaCicloPeriodoActual(idsuscripcion, iddocumento, idtipodocumento, idciclo, idperiodoF)
-				.toString());
+		return manejadorHistoricos.getFacturaCicloPeriodoActual(idsuscripcion, iddocumento, idtipodocumento, idciclo, idperiodoF) ;
+				
 
 	}
 
 	/* Aumenta la cantidad de registros procesados por el hilo */
 	private void actualizarRegistro(Object suscripcion, String estado, String mensaje) {
 		Object[] items = (Object[]) suscripcion;
-		Integer idsuscripcionF = Integer.parseInt(items[0].toString());
+		Integer idsuscripcionF = Integer.valueOf(items[0].toString());
 
 		try {
 			actualizarRegistroProceso(idsuscripcionF, estado, mensaje, idempresa, idperiodo);
-			Integer idcontrol = Integer.parseInt(idControlProceso.toString());
+			Integer idcontrol = Integer.valueOf(idControlProceso.toString());
 			manejadorCprCtrprocesoRespository.aumentarCantidadRegistro(idcontrol);
 		} catch (Exception exc) {
 			LOGGER.info(Arrays.toString(exc.getStackTrace()));
-		}
+                  }
 
 	}
 
@@ -481,7 +489,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	}
 
 	/* Método encargado de invocar el método genérico de liquidación */
-	private void liquidarSuscripcion(List<Object> infoFactura) throws Exception {
+	private void liquidarSuscripcion(List<Object> infoFactura){
 		Integer idliquidacion;
 		Object[] conceptouni;
 		char preliquida;
@@ -496,7 +504,22 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		Object[] liquidacion = (Object[]) objliquidacion[0];
 		Object[] concepto = (Object[]) objliquidacion[1];
 		idliquidacion = (Integer) liquidacion[0];
-
+                listaConceptosLiquidados = new ArrayList<>();
+		listaConceptosLiquidados2 = new ArrayList<>();
+		try {
+                    
+                List<Object[]> listaPaen =  manejadorHistoricos.getTipoCalculoConceptoNota(tipoNota,idempresa,"V");
+                
+                listaPaen.stream()
+                        .forEach(l -> {                            
+                            //concatenar = new Object[] { valortotal, valorunitario, cantidad, valorreal };
+                            Object [] valores = {new BigDecimal(((Number) l[6]).toString()),BigDecimal.ONE,new BigDecimal(((Number) l[6]).toString()),
+                            new BigDecimal(((Number) l[6]).toString()) };
+                            listaConceptosLiquidados.add(Arrays.asList(l,valores));
+                            listaConceptosLiquidados2.add(((Number) l[0]).intValue());
+                        }); 
+                    
+                    
 		for (Object $concepto : concepto) {
 			/**
 			 * *Si los conceptos están parametrizados de que no preliquidar significa que lo
@@ -507,8 +530,12 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			conceptouni = (Object[]) $concepto;
 			preliquida = (char) conceptouni[1];
 			idconcepto = (Integer) conceptouni[0];
-
-			if ((preliquida == 'S' && preliquidar == 'S') || preliquida == 'N') {
+                        /*if(idconcepto.compareTo(3549)==0 ) {
+                            System.out.println("aqui");                            
+                        }*/
+			//if(idconcepto.compareTo(6623)==0) {
+			if ((preliquida == 'S' && preliquidar == 'S') || preliquida == 'N') {                            
+//                                LOGGER.error("1-> Concepto "+idconcepto+" Liquidacion "+idliquidacion);
 				conceptoLiquidado = iniciarLiquidacionConcepto(idconcepto, idliquidacion, null);
 			} else {
 				// Registra el concepto vació
@@ -519,12 +546,21 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 				conceptoLiquidado = $concepto;
 			}
 			conceptos.add(conceptoLiquidado);
+		//}
 		}
+		}catch(Exception e) {
+			LOGGER.error("LIQUIDAR SUSCRIPCION ERROR->"+e);
+		}
+//		LOGGER.error("INICIANDO FACTURA");
 		infoFactura.add(3, conceptos);
-		crearFactura(infoFactura);
+		crearFactura(infoFactura);		
+		try {
 		procesarDetallesFacturas(infoFactura);
+		}catch(Exception e) {
+			LOGGER.error("CREANDO DETALLEFACTURA ERROR-> "+e.getMessage());
+		}
 		factura = (Object[]) infoFactura.get(4);
-		idfacturaF = new BigInteger(factura[1].toString());
+		idfacturaF =  (BigInteger)(factura[1]);
 		actualizarValorFactura(idfacturaF);
 
 	}
@@ -532,17 +568,17 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	/* Suma los detalles de la factura */
 	private void actualizarValorFactura(BigInteger idfactura) {
 		BigDecimal valor;
-		Integer facideregistro;
+		BigInteger facideregistro;
 		BigDecimal facvlrreal;
 		BigDecimal facsdoreal;
 		String parametros;
 		String condicion;
 
-		valor = manejadorHistoricos.getValorFactura(Integer.parseInt(idfactura.toString()));
+		valor = manejadorHistoricos.getValorFactura(idfactura);
 
-		facideregistro = Integer.parseInt(idfactura.toString());
-		facvlrreal = valor;
-		facsdoreal = valor;
+		facideregistro =idfactura ;
+		facvlrreal = valor.setScale(0,RoundingMode.HALF_UP);
+		facsdoreal = valor.setScale(0,RoundingMode.HALF_UP);
 
 		parametros = " fac_vlrreal = " + facvlrreal + ", fac_sdoreal = " + facsdoreal + " ";
 		condicion = " fac_ideregistro = " + facideregistro + " ";
@@ -569,50 +605,63 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		Integer idusuario;
 		Object[] factura;
 
-		conceptos = (ArrayList<Object>) infoFactura.get(3);
+		conceptos = (ArrayList<Object>) infoFactura.get(3);	
 		factura = (Object[]) infoFactura.get(4);
-
+                
 		Object[] detalleFactura;
 		ArrayList<Object> listadetalleFactura = new ArrayList<>();
 		String campos = "dfac_estado,dfac_cantidad,dfac_vlrunitari,dfac_vlrtotal,dfac_vlrreal,dfac_sdoreal,fac_ideregistro,uni_concepto,dfac_version,usu_ideregistro,"
-				+ " dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,tipo_nota";
+				+ " dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,tipo_nota,emp_ideregistro";
 		String valores;
 
 		idfacturaF = new BigInteger(factura[1].toString());
 		idusuario = Integer.parseInt(idUsuario);
 		version = versionInicial;
 		estado = 'A';
-
 		for (Object arrayconcepto : conceptos) {
+                    
 			concepto = (ArrayList<Object>) arrayconcepto;
 			itemconceptos = (Object[]) concepto.get(0);
 			itemvalores = (Object[]) concepto.get(1);
-
+			
 			cantidad = (Integer) itemvalores[2];
 			valorunitario = (BigDecimal) itemvalores[1];
 			valortotal = (BigDecimal) itemvalores[0];
 			valorreal = (BigDecimal) itemvalores[3];
 			saldoreal = (BigDecimal) itemvalores[3];
-			idconcepto = (Integer) itemconceptos[0];
-
+			idconcepto = (Integer) itemconceptos[0];                      
+                                
+//			LOGGER.error("IDCONCEPTO: "+idconcepto + "VALOR TOTAL "+valortotal+" -- VALORREAL "+valorreal+" SALDOREAL "+saldoreal);
 			detalleFactura = new Object[] { estado, cantidad, valorunitario, valortotal, valorreal, saldoreal,
 					idfacturaF, idconcepto, version, idusuario, 0, 0, 0, 0 };
 
-			valores = "'" + estado + "'," + cantidad + "," + valorunitario + "," + valortotal + "," + valorreal + ","
-					+ saldoreal + "," + idfacturaF + "," + idconcepto + "," + version + "," + idusuario + ",0,0,0,0,"
-					+ tipoNota + " ";
+			valores = "'" + estado + "'," + cantidad + "," + valorunitario + "," + valortotal + "," + valorreal.setScale(0,RoundingMode.HALF_UP) + ","
+					+ saldoreal.setScale(0,RoundingMode.HALF_UP) + "," + idfacturaF + "," + idconcepto + "," + version + "," + idusuario + ",0,0,0,0,"
+					+ tipoNota + "," + 317 + " ";
 
+                        if(validadorConceptoAplicar(idconcepto) > 0 ){
 			manejadorCprCtrprocesoRespository.insertar("dfac_detnovedad", campos, valores,
 					" returning dfac_ideregistr");
-
-			listadetalleFactura.add(detalleFactura);
+                        listadetalleFactura.add(detalleFactura);
+                        }
+			
 
 		}
 		infoFactura.add(listadetalleFactura);
 	}
+        
+        private Integer validadorConceptoAplicar(Integer concepto){
+             OptionalInt index = IntStream.range(0, listaConceptosAplicar.size()).filter(i->
+                     concepto.equals((Integer)listaConceptosAplicar.get(i))
+             ).findFirst();
+             if(index == index.empty()) return 0;
+//             LOGGER.error("Concepto "+concepto+ " valor-> "+(index.isPresent() ? index.getAsInt() : 0));
+             return index.getAsInt();
+        }
 
 	/* Registra la factura */
 	private void crearFactura(List<Object> infoFactura) {
+		try {
 		Object[] suscripcionF;
 		Object[] cicloperiodo;
 		Object[] objliquidacion;
@@ -646,14 +695,18 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		String campos;
 		String valores;
 		Long respuesta;
-
+		
+//                LOGGER.error("Info Factura->"+infoFactura);
+                if(pqr != null){
+                    pqr = pqr.length() > 0 ? pqr : "0";    
+                }else{pqr = "0";}                
 		idfactura = null;
 		suscripcionF = (Object[]) infoFactura.get(0);
-		cicloperiodo = (Object[]) infoFactura.get(1);
+		cicloperiodo = (Object[]) infoFactura.get(1);                
 		objliquidacion = (Object[]) infoFactura.get(2);
 		liquidacion = (Object[]) objliquidacion[0];
 		fechaFacturas = getFechasFactura(suscripcionF, cicloperiodo);
-
+//		LOGGER.error("FECHA FACTRUA->"+fechaFacturas);
 		valorTotal = BigDecimal.ZERO;
 		metodogenera = 'P';
 		estado = 'G';
@@ -680,13 +733,13 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 		campos = "fac_metgenera, fac_estado, fac_fecha, fac_fecvence, emp_ideregistro, sus_ideregistro, dsus_ideregistr, uni_tipsuscripc, uni_tipusosuscr, "
 				+ "uni_liquidacion, ter_ideregistro, cic_ideregistro, per_ideregistro, uni_documento, uni_tipdocument, cic_ano, hliq_ideregistr, fac_sdoreal, "
-				+ "uni_tiptercero, fac_fecsuspens, fac_version, fac_vlrreal, fac_fecaprobada, usu_ideregistro,tipo_nota";
+				+ "uni_tiptercero, fac_fecsuspens, fac_version, fac_vlrreal, fac_fecaprobada, usu_ideregistro,tipo_nota,pqr";
 		valores = "'" + metodogenera + "','" + estado + "','" + fecha + "','" + fechavencimiento + "'," + idempresaF
 				+ "," + idsuscriptor + "," + idsuscripcionF + "," + idtiposuscripcion + "," + idtipousosuscripcion + ","
 				+ idliquidacion + "," + idtercero + "," + idciclo + "," + idperiodoF + "," + iddocumento + ","
 				+ idtipodocumento + "," + cicloano + "," + idhistoricoliquidacion + "," + saldofactura + ","
 				+ idtipotercero + ",'" + fechasuspende + "'," + version + "," + valorTotal + ",'" + fechaaprobacion
-				+ "'," + idUsuario + "," + tipoNota + "";
+				+ "'," + idUsuario + "," + tipoNota + "," + pqr;
 		respuesta = manejadorCprCtrprocesoRespository.insertar("fac_novedad", campos, valores,
 				" returning fac_ideregistro ");
 
@@ -699,7 +752,10 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 		factura = new Object[] { factura, idfactura };
 
-		infoFactura.add(factura);
+		infoFactura.add(factura);}
+		catch(Exception e) {
+			LOGGER.error("ERROR->CREANDO FACTURA "+e);
+		}
 
 	}
 
@@ -718,16 +774,14 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		Integer idperiodoF;
 		String fechavencimiento;
 		String fechasuspension;
-
 		itemssus = suscripcion;
 		itemscic = cicloperiodo;
 		idsuscripcionF = (BigInteger) itemssus[0];
 
 		idliquidacion = (Integer) itemssus[1];
 		idperiodoF = (Integer) itemscic[2];
-		fechavencimiento = (String) itemscic[5];
-		fechasuspension = (String) itemscic[6];
-
+		fechavencimiento = itemscic[5].toString();
+		fechasuspension =  itemscic[6].toString();
 
 		fechasRutas =  manejadorCprCtrprocesoRespository.getFechasRutaPeriodo(idsuscripcionF, idperiodoF);
 			
@@ -754,24 +808,28 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 */
 	private Object iniciarLiquidacionConcepto(Integer idconcepto, Integer liquidaciones, List<Object[]> infoConcepto)
 			throws Exception {
-		listaConceptosLiquidados = new ArrayList<>();
-		listaConceptosLiquidados2 = new ArrayList<>();
+		/*listaConceptosLiquidados = new ArrayList<>();
+		listaConceptosLiquidados2 = new ArrayList<>();*/
 		infoConceptoF = infoConcepto;
 		Object conceptoLiquidado;
 		List<Object[]> infoConceptoFCalculado;
-
 		if (infoConceptoF == null) {
 			infoConceptoF = manejadorHistoricos.getConceptoInformacion(idconcepto, conConcepto, fechaConConcepto);
 		}
+//                LOGGER.error("2-> informacion del concepto ");
+//                infoConceptoF.stream().forEach(array -> LOGGER.error(Arrays.toString(array)));
 		// Verifica si el concepto ya fue liquidado
+//                LOGGER.error("3-> Consulta Si el Concepto Esta Liquidado");
 		conceptoLiquidado = buscarConceptoLiquidado(idconcepto);
 		if (conceptoLiquidado != null) {
 			return conceptoLiquidado;
 		}
 		// liquida el concepto de acuerdo a los conceptos realcionados y rangos
+//		LOGGER.error("4-> Liquidar El Concepto "+idconcepto);
 		liquidarConcepto(infoConceptoF, liquidaciones);
 		infoConceptoFCalculado = buscarConcepto(idconcepto);
 		// Valida si el concepto es informativo o suma
+//		LOGGER.error("LIQUIDADO EL CICLO CONCPETO->"+idconcepto);
 		calculaValorRealConcepto(infoConceptoFCalculado);
 		return infoConceptoFCalculado;
 	}
@@ -780,28 +838,66 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	private void calculaValorRealConcepto(List<Object[]> infoConceptoF) {
 		String operacion = infoConceptoF.get(0)[8].toString();
 		BigInteger idconcepto;
-		List<Object[]> conceptoNota;
-
+		List<Object[]> conceptoNota;                	
 		idconcepto = new BigInteger(infoConceptoF.get(0)[0].toString());
-		conceptoNota = buscarConceptoNota(idconcepto);
-
-		if (conceptoNota != null) {
-			Object[] concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],
-					infoConceptoF.get(1)[2], infoConceptoF.get(1)[0] };
+//                LOGGER.error("20 -> El tipo de calculo del Concepto "+idconcepto+ " - Tipo Operacion -> "+ operacion);                
+		conceptoNota = buscarConceptoNota(idconcepto);		
+		
+		if (conceptoNota != null) {                       
+                        Object[] concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],
+			infoConceptoF.get(1)[2], infoConceptoF.get(1)[0] };
 			infoConceptoF.set(1, concatenar);
+                    
+                        if (infoConceptoF.get(0)[7] != null){
+                            
+                            String formula = (infoConceptoF.get(0)[7].toString());
+                            Gson gson = new Gson();
+                            List<Json> formulaJson;
+                            formulaJson = gson.fromJson(formula, new TypeToken<ArrayList<Json>>() {
+                            }.getType());
+                            
+                            
+                            for (int i = 0; i < formulaJson.size(); i++) {
+                                if(((Json) formulaJson.get(i)).getAcc() != null ) {
+                                    if(((Json) formulaJson.get(i)).getAcc()) {
+                                            concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],                                             
+                                            infoConceptoF.get(1)[2], BigDecimal.ZERO };
+//                                            Arrays.stream(concatenar).forEach(element -> LOGGER.error("21 -> RETURN Elemento Respuesta: {}", element));   
+                                            infoConceptoF.set(1, concatenar);
+                                    }
+                                }
+			
+                            }                    
+                        }                                                
+                        /*Object[] concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],
+					infoConceptoF.get(1)[2], infoConceptoF.get(1)[0] };
+			infoConceptoF.set(1, concatenar);                        
+                        if (idconcepto.compareTo(new BigInteger("3524")) == 0){
+                                 concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],
+					infoConceptoF.get(1)[2], BigDecimal.ZERO };
+                                infoConceptoF.set(1, concatenar);
+                        }			
+                        if (((String)conceptoNota.get(0)[1]).equalsIgnoreCase("V")) {
+                        Object[] concatenar = new Object[] { conceptoNota.get(0)[1], conceptoNota.get(0)[1],
+					1, conceptoNota.get(0)[1] };
+			infoConceptoF.set(1, concatenar);*/
+                        listaConceptosLiquidados.add(infoConceptoF);
+                        listaConceptosLiquidados2.add(idconcepto.intValue());
+                        //}
+                        
 			return;
 		}
-		if (operacion.equals("S")) {
+		if (operacion.equals("S")) {			
 			Object[] concatenar = new Object[] { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1],
 					infoConceptoF.get(1)[2], infoConceptoF.get(1)[0] };
+//                        Arrays.stream(concatenar).forEach(element -> LOGGER.error("22 -> RETURN Elemento Respuesta: {}", element)); 
 			infoConceptoF.set(1, concatenar);
 			return;
-		}
-
+		}		
 		Object[] concatenar = { infoConceptoF.get(1)[0], infoConceptoF.get(1)[1], infoConceptoF.get(1)[2],
 				BigDecimal.ZERO };
+//		Arrays.stream(concatenar).forEach(element -> LOGGER.error("23 -> RETURN Elemento Respuesta: {}", element)); 
 		infoConceptoF.set(1, concatenar);
-
 	}
 
 	/**
@@ -816,22 +912,27 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		BigDecimal valortotal = null;
 		BigDecimal valorreal = null;
 		List<Object[]> infoConcepto;
-		Object[] concatenar;
-
+		Object[] concatenar;		
+		
+		infoConcepto = manejadorCprCtrprocesoRespository.getConceptoInformacion(idconcepto);
+		try {
+//			LOGGER.error("CONCEPTOCORELACIONADOLIQUIDACION->"+idconcepto);
+			liquidarConcepto(infoConcepto, idliquidacionGlobal);	
+		}catch(Exception e) {
+			LOGGER.error("ERROR CONCEPTOINFORMACION-> "+e);
+		}	
+		
 		List<Object[]> conceptoLiquidado = buscarConceptoLiquidado(idconcepto);
-
 		if (conceptoLiquidado != null) {
 			return conceptoLiquidado;
 		}
 		// Consulta la información del concepto s
-
 		infoConcepto = manejadorCprCtrprocesoRespository.getConceptoInformacion(idconcepto);
-
 		valornulo = (infoConcepto.get(0)[19]).toString();
 
 		if (!valornulo.equals("N")) {
 
-			valortotal = BigDecimal.ZERO;
+    			valortotal = BigDecimal.ZERO;
 			valorunitario = BigDecimal.ZERO;
 			cantidad = 1;
 			valorreal = BigDecimal.ZERO;
@@ -839,6 +940,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			concatenar = new Object[] { valortotal, valorunitario, cantidad, valorreal };
 
 			infoConcepto.add(concatenar);
+			//LOGGER.error("INGRESANDO NO NULO ->->"+idconcepto);
 			listaConceptosLiquidados.add(infoConcepto);
 			listaConceptosLiquidados2.add(idconcepto);
 			return infoConcepto;
@@ -854,40 +956,53 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 * verfica si el concepto tiene rangos
 	 */
 	private void liquidarConcepto(List<Object[]> infoConceptoF, Integer liquidaciones) throws Exception {
+		try {
 		// Consulta los conceptos relacionados del concepto a liquidar
-		Integer idconcepto;
-		Object conceptoLiquidado = null;
-		Integer rango;
-		List<Object[]> listaConceptos;
+		Integer idconcepto = null;
+		Object conceptoLiquidado;
+		Integer rango ;
+		List<Object[]> listaConceptos  ;
 		List<Object[]> conceptoRelacionado = new ArrayList<>();
-		char valornulo;
-		BigDecimal valortotal;
-
-		idconcepto = Integer.parseInt(infoConceptoF.get(0)[0].toString());
-
-		listaConceptos = manejadorHistoricos.getConceptosRelacionados(idconcepto, liquidaciones, conConcepto,
-				coreConrelacio, fechaCoreConrelacio);
-
-		for (Object[] $conceptoRelacionado : listaConceptos) {
+		char valornulo ;
+		BigDecimal valortotal = null;		
+		
+		idconcepto = Integer.parseInt(infoConceptoF.get(0)[0].toString());		
+                if(conConcepto.equalsIgnoreCase("con_concepto_hist")){
+                    listaConceptos = manejadorHistoricos.getConceptosRelacionados(idconcepto, liquidaciones, conConcepto,
+                            coreConrelacio, fechaCoreConrelacio,fechaConConcepto);        
+                    
+                }else{
+                    listaConceptos = manejadorHistoricos.getConceptosRelacionados(idconcepto, liquidaciones, conConcepto,
+                            coreConrelacio, fechaCoreConrelacio);
+                }
+//                LOGGER.error("5 -> Lista Conceptos Relacionados del Concepto "+idconcepto);
+//                listaConceptos.stream().forEach(array -> LOGGER.error(Arrays.toString(array)));
+		for (Object[] xconceptoRelacionado : listaConceptos) { 
+//			LOGGER.error("6 -> Concepto Relacionado "+(Integer) xconceptoRelacionado[0]);
 			// valida si el concepto relacionado ya fue liquidado
-			conceptoLiquidado = buscarConceptoLiquidado((Integer) $conceptoRelacionado[0]);
-			if (conceptoLiquidado == null) {
+			conceptoLiquidado = buscarConceptoLiquidado((Integer) xconceptoRelacionado[0]);
+                        //conceptoRelacionado.clear();                        
+			if (conceptoLiquidado == null) {                            
+                                ArrayList<Object []> objLista=new ArrayList<>();
 				// liquida el conceptorelacionado
-				conceptoRelacionado.add($conceptoRelacionado);
-				liquidarConcepto(conceptoRelacionado, liquidaciones);
-			}
-	
+//				LOGGER.error("7 -> Concepto Relacionado No Liquidado->"+(Integer) xconceptoRelacionado[0]);
+				objLista.add(xconceptoRelacionado);
+				liquidarConcepto(objLista, liquidaciones);
+			}	
 		}
+//                LOGGER.error("8 -> Concepto sin Conceptos Relacionados "+idconcepto);
 		// Valida si el concepto se liquidó si ya está liquidado lo devuelve
 		conceptoLiquidado = buscarConceptoLiquidado(idconcepto);
 		if (conceptoLiquidado != null) {
+//                    LOGGER.error("9 -> Concepto Liquidado "+idconcepto);
 			return;
 		}
 		// Liquida el valor de concepto de acuerdo a la suscripción
+//                LOGGER.error("10 -> Calcular Concepto "+idconcepto);
 		calcularConcepto(infoConceptoF);
-
-		// Se valida si el concepto tiene rangos
+		// Se valida si el concepto tiene rangos                
 		rango = this.manejadorHistoricos.tieneRangoConcepto(idconcepto, racoRanconcept, fechaRacoRanconcept);
+//		LOGGER.error("23 -> Concepto Rango "+idconcepto + " Evalua si tiene Rango " + rango);
 		if (rango != 0) {
 			// Se procede a verificar los rangos de los conceptos
 			evaluarRangoConcepto(infoConceptoF);
@@ -895,19 +1010,22 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			// Se valida si el concepto permite nulos
 			valornulo = (char) infoConceptoF.get(0)[19];
 			valortotal = (BigDecimal) infoConceptoF.get(1)[0];
-
+			
 			if ((valortotal == null) && valornulo == 'N') {
 				throw new NegocioException(
 						"El valor calculado del concepto " + idconcepto + " " + infoConceptoF.get(0)[2] + " es nulo ");
 			}
-
 			// Valida el concepto real del concepto
+//                        LOGGER.error("29 -> Calcular Valor Real Concepto Rango "+idconcepto);
 			calculaValorRealConcepto(infoConceptoF);
 		}
 		// Se agrega el concepto a la lista de conceptos liquidados para no tener
 		// que liquidar dos veces el mismo concepto
 		listaConceptosLiquidados.add(infoConceptoF);
 		listaConceptosLiquidados2.add(idconcepto);
+		}catch(Exception e ) {
+			LOGGER.error("DEVUELVE ERROR LA LIQUIDACION->"+e);
+		}
 	}
 
 	/* Se encarga de consultar y procesar los rangos del concepto */
@@ -920,7 +1038,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		BigDecimal valorunitario;
 		Integer cantidad;
 		BigDecimal valorreal;
-		Object[] listaRangos;
+		List<Object[]> listaRangos=null;
 		Object[] rangoConcepto;
 		BigDecimal valor;
 		String formula;
@@ -932,24 +1050,25 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		idconcepto = (Integer) infoConceptoF.get(0)[0];
 		valortotal = (BigDecimal) infoConceptoF.get(1)[0];
 		valornulo = (char) infoConceptoF.get(0)[19];
-		valorreal = (BigDecimal) infoConceptoF.get(1)[3];
-		listaRangos = (Object[]) manejadorHistoricos
-				.getRangoConcepto(idconcepto, valortotal, racoRanconcept, fechaRacoRanconcept).get(0);
+		valorreal = (BigDecimal) infoConceptoF.get(1)[3];		
+		
+		listaRangos =  manejadorHistoricos
+				.getRangoConcepto(idconcepto, valortotal, racoRanconcept, fechaRacoRanconcept);
 
-		if (listaRangos.length == 0) {
+		if (listaRangos.size() == 0) {
 			throw new NegocioException("Error al liquidar el concepto " + idconcepto + " " + infoConceptoF.get(0)[2]
 					+ " valor: " + valortotal);
 		}
 		// Se valida si existe parametrizado un rango para el valor actual del concepto
-		if (listaRangos.length > 1) {
+		if (listaRangos.size() > 1) {
 			throw new NegocioException("Error en los rangos del concepto " + idconcepto + " " + valortotal);
 		}
 
 		// Se calcula el valor real del concepto
-		rangoConcepto = (Object[]) listaRangos[0];
+		rangoConcepto = (Object[]) listaRangos.get(0);
 		valor = (BigDecimal) (rangoConcepto[4]);
 		formula = ((String) rangoConcepto[5]);
-
+//		LOGGER.error("23 -> Concepto Rango Valor "+valor + " Evalua si tiene Formula " + formula);
 		if (valor != null) {
 			valortotal = valor;
 			valorunitario = valor;
@@ -957,7 +1076,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 			concatenar = new Object[] { valortotal, valorunitario, cantidad, valorreal };
 			infoConceptoF.set(1, concatenar);
-
+//			Arrays.stream(concatenar).forEach(element -> LOGGER.error("24 -> RETURN Elemento Respuesta: {}", element));
 			calculaValorRealConcepto(infoConceptoF);
 			return;
 		}
@@ -971,6 +1090,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			valorreal = BigDecimal.ZERO;
 
 			concatenar = new Object[] { valortotal, valorunitario, cantidad, valorreal };
+                        Arrays.stream(concatenar).forEach(element -> LOGGER.error("25 -> RETURN Elemento Respuesta: {}", element));
 			infoConceptoF.set(1, concatenar);
 
 			return;
@@ -984,12 +1104,14 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 		formulaJson = gson.fromJson(formula, new TypeToken<ArrayList<Json>>() {
 		}.getType());
+//		LOGGER.error("26 -> Concepto Valor FormulaJson "+idconcepto);
 		valorConcepto = procesarFormula(formulaJson, infoConceptoF);
-
+		
 		valortotal = new BigDecimal(valorConcepto).setScale(cantidadDecimales, RoundingMode.HALF_UP);
 		valorunitario = new BigDecimal(valorConcepto).setScale(cantidadDecimales, RoundingMode.HALF_UP);
 		cantidad = 1; // cantidad
 		concatenar = new Object[] { valortotal, valorunitario, cantidad, valorreal };
+//                Arrays.stream(concatenar).forEach(element -> LOGGER.error("28 -> RETURN Elemento Respuesta: {}", element));
 		infoConceptoF.set(1, concatenar);
 
 	}
@@ -999,49 +1121,53 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 * obtiene el dato del campo con_valor
 	 */
 	private void calcularConcepto(List<Object[]> infoConceptoF) throws NegocioException {
+		try {
 		String tipocalculo = "";
 		List<Object[]> conceptoNota;
 		BigInteger idConcepto = new BigInteger(infoConceptoF.get(0)[0].toString());
-
-		conceptoNota = buscarConceptoNota(idConcepto);
+		//LOGGER.error("CALCULAR CONCEPTO TIPO DE NOTA->"+this.tipoNota+" --IDCONCEPTO->"+idConcepto);
+		conceptoNota = buscarConceptoNota(idConcepto);	                
 		if (conceptoNota == null) {
+//                        LOGGER.error("11 -> Concepto Nota Paen "+idConcepto);
 			tipocalculo = (infoConceptoF.get(0)[5].toString());
-
+//			LOGGER.error("12 -> Concepto Nota Tipo Calculo "+tipocalculo);
 			if (tipocalculo.equalsIgnoreCase("V")) {
 				// Ejecuta las reglas de negocio del concepto valor
 				calcularConceptoValor(infoConceptoF);
+				
 			} else {
 				// Interpreta la foórmula del concepto
+				//LOGGER.error("CONCEPTO NO NOTA->"+idConcepto + "FORMULA");
 				calcularConceptoFormula(infoConceptoF);
 			}
-		} else {
-			tipocalculo = conceptoNota.get(0)[0].toString().trim();
-
+		} else {			
+			tipocalculo = conceptoNota.get(0)[0].toString().trim();			
+//                        LOGGER.error("17 -> El tipo de calculo del Concepto "+idConcepto+ " - Tipo De Calculo ->"+tipocalculo);
 			if (tipocalculo.equalsIgnoreCase("V")) {
 				Integer cantidad;
 				BigDecimal valorunitario;
 				BigDecimal valortotal;
-				BigDecimal valor;
-
+				BigDecimal valor;				
 				valor = new BigDecimal(conceptoNota.get(0)[1].toString());
-
 				cantidad = 1; // cantidad
 				valorunitario = valor; // valorunitario
 				valortotal = valor; // valortotal
 
 				Object[] concatenar = new Object[] { valortotal, valorunitario, cantidad };
+//                                Arrays.stream(concatenar).forEach(element -> LOGGER.error("18 -> RETURN Elemento Respuesta: {}", element));
 				infoConceptoF.add(concatenar);
 			} else {
 				// formula
+//                                LOGGER.error("19 -> El tipo de calculo del Concepto "+idConcepto+ " - Aplica para formula -> "+ conceptoNota.get(0)[2].toString());
 				infoConceptoF.get(0)[7] = conceptoNota.get(0)[2].toString();
-
 				calcularConceptoFormula(infoConceptoF);
 			}
-
 		}
 		// Valdia si es concepto que suma y/o informativo
 		calculaValorRealConcepto(infoConceptoF);
-
+		}catch(NegocioException e) {
+			LOGGER.error("CALCULAR CONCEPTO ERROR->"+e);
+		}
 	}
 
 	/* Método encargado de interpretar la formula */
@@ -1054,14 +1180,12 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		BigDecimal valortotal;
 		BigDecimal valorunitario;
 		Object[] concatenar;
- 
-		if (formula.isEmpty()) {
+//                LOGGER.error("16 -> El Concepto tiene formula "+ formula);
+		if (formula.isEmpty()) {			
 			throw new NegocioException("El concepto " + infoConceptoF.get(0)[0] + " - " + infoConceptoF.get(0)[2]
 					+ " no tiene asociada una fórmula");
 		}
-
 		try {
-
 			// Se convierte la formula a un objecto java
 			formulaJson = gson.fromJson(formula, new TypeToken<ArrayList<Json>>() {
 			}.getType());
@@ -1074,11 +1198,13 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			cantidad = 1; // cantidad
 
 			concatenar = new Object[] { valortotal, valorunitario, cantidad };
-
+//                        Arrays.stream(concatenar).forEach(element -> LOGGER.error("16 -> RETURN Elemento Respuesta: {}", element));                        
 			infoConceptoF.add(concatenar);
 		} catch (NegocioException e) {
+			LOGGER.error("ERROR->FORMULA->"+e);
 			throw e;
 		} catch (Exception e) {
+			LOGGER.error("ERROR->PROCESAR->FORMULA"+e);
 			throw new NegocioException("Error al procesar la fórmula del concepto " + infoConceptoF.get(0)[0] + " "
 					+ infoConceptoF.get(0)[2]);
 		}
@@ -1099,6 +1225,8 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		for (int i = 0; i < jsonformula.size(); i++) {
 			tipo = ((Json) jsonformula.get(i)).getTipo();
 			valor = ((Json) jsonformula.get(i)).getValor();
+			
+//			LOGGER.error("27 -> INDEX-> "+i+" -- "+"TIPO-> "+tipo+" -- VALOR-> "+valor + " -- "+infoConceptoF.get(0)[0]+" DATOS--->"+infoConceptoG.get(0)[0]);
 
 			switch (tipo) {
 			case "fun":
@@ -1106,6 +1234,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 				break;
 			case "con":
 				valorConcepto = liquidarConceptoRelacionado(jsonformula.get(i), infoConceptoG);
+				//LOGGER.error("VALOR CONCEPTO->FORMULA->"+valorConcepto);
 				bld.append(valorConcepto);
 				break;
 			case "op":
@@ -1127,8 +1256,8 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			}
 		}
 		formula = bld.toString();
+//                LOGGER.error("27 -> FormulaJson Resuelta ->"+formula);
 		return calculaConceptoFormulatest(formula).toString();
-
 	}
 	private void valorop(String valor, StringBuilder bld) {
 		if (valor.equals("If")) {
@@ -1175,7 +1304,6 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 */
 	private String liquidarConceptoRelacionado(Object conceptoRelacionado, List<Object[]> infoConceptoF)
 			throws NegocioException {
-
 		Integer idconceptoliq;
 		List<Object[]> infoConcepto;
 		Integer idconcepto;
@@ -1185,16 +1313,14 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		idconceptoliq = (Integer) infoConceptoF.get(0)[0];
 
 		idconcepto = ((Json) conceptoRelacionado).getIdconcepto();
-
 		infoConcepto = buscarConcepto(idconcepto);
-
 		infoFuncion = (Object[]) manejadorCprCtrprocesoRespository.getFuncionRelacionada(idconcepto, idconceptoliq);
 		if (infoFuncion == null) {
 
 			throw new NegocioException("No se encontró la función relacionada idconceptorelacionado: " + idconcepto
 					+ " idconceptoliquidar:" + idconceptoliq);
 		}
-
+		
 		idfuncionrelacionada = (Integer) infoFuncion[0];
 		return ejecutarFuncion(idfuncionrelacionada, infoConcepto);
 
@@ -1267,9 +1393,9 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		Integer cantidad;
 		BigDecimal valorunitario;
 		BigDecimal valortotal;
-
 		// Si el tipo de concepto no aplica si ejecuta la función que tenga
 		// parametrizada
+//                LOGGER.error("13 -> Calcular Concepto tipoRegistro "+ tiporegistro + " Valor "+ valor + " idFuncion "+ idfuncion + " Valor Nulo "+valornulo);
 		if (tiporegistro == 'N') { // tiporegistro
 			return conceptoFuncion(idfuncion, infoConceptoF);
 		}
@@ -1281,9 +1407,8 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			valortotal = valor; // valortotal
 
 			Object[] concatenar = new Object[] { valortotal, valorunitario, cantidad };
-
+//                        Arrays.stream(concatenar).forEach(element -> LOGGER.error("30 -> RETURN Elemento Respuesta: {}", element));
 			infoConceptoF.add(concatenar);
-
 		}
 		// Se verifica qie la función no éste vacía
 		if (idfuncion != null) {
@@ -1297,12 +1422,11 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			valortotal = BigDecimal.ZERO; // valortotal
 
 			Object[] concatenar = new Object[] { valortotal, valorunitario, cantidad };
-
+                        Arrays.stream(concatenar).forEach(element -> LOGGER.error("31 -> RETURN Elemento Respuesta: {}", element));
 			infoConceptoF.add(concatenar);
 
 			return infoConceptoF;
 		}
-
 		throw new NegocioException(
 				"No se pudo calcular el concepto " + infoConceptoF.get(0)[0] + ' ' + infoConceptoF.get(0)[2]);
 
@@ -1312,13 +1436,14 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 * Método encargado de evaluar el resultado después de interpretar la fórmula
 	 */
 	private Object conceptoFuncion(Integer idFuncion, List<Object[]> infoConceptoF) throws NegocioException {
+		try {
 		Integer cantidad = null;
 		BigDecimal valorunitario = null;
 		BigDecimal valortotal = null;
 		BigDecimal respuesta = null;
-
+//                LOGGER.error("14 -> Ejecutando la funcion "+idFuncion + " del concepto"+ Integer.valueOf(((Object[]) infoConceptoF.get(0))[0].toString()));
 		String respuestaF = ejecutarFuncion(idFuncion, infoConceptoF);
-
+		
 		try {
 			respuesta = new BigDecimal(respuestaF);
 		} catch (NumberFormatException excepcion) {
@@ -1331,11 +1456,16 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		valortotal = respuesta; // valortotal
 
 		Object[] lista = new Object[] { valortotal, valorunitario, cantidad };
-
+                
+//                Arrays.stream(lista).forEach(element -> LOGGER.error("15 -> RETURN Elemento Respuesta: {}", element));
+                
 		try {
 			infoConceptoF.set(1, lista);
 		} catch (Exception e) {
 			infoConceptoF.add(lista);
+		}
+		}catch(NegocioException e) {
+			LOGGER.error("EJECUTA FUNCION ERROR"+e);
 		}
 		return infoConceptoF;
 
@@ -1362,22 +1492,31 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes", "unused" })
 	private String funcionesConceptosDelegado(String funcion, List<Object[]> infoConceptoF) throws NegocioException {
-		Method[] metodos;
-		Method metodo;
-		Object result;
-
+		
 		try {
-			Class c = funcionesConceptos.getClass();
-			metodos = c.getMethods();
-			metodo = c.getMethod(funcion, List.class);
+                    Class<?> c = FuncionesConceptos.class;
+                    Constructor<?> constructor = c.getDeclaredConstructor(
+                        NegocioParParametro.class,
+                        ManejadorConConcepto.class,
+                        Integer.class,
+                        Long.class,
+                        BigInteger.class
+                    );
 
-			result = c.getDeclaredConstructor(NegocioParParametro.class, ManejadorConConcepto.class, Integer.class,
-					Long.class).newInstance(negocioParParametro, manejadorConConcepto, idacceso, idsuscripcion);
+                    Object result = constructor.newInstance(
+                        negocioParParametro,
+                        manejadorConConcepto,
+                        idacceso,
+                        idsuscripcion,
+                        faIdregistro
+                    );
 
-			return metodo.invoke(result, infoConceptoF).toString();
+                    Method metodo = c.getMethod(funcion, List.class);
+                    return metodo.invoke(result, infoConceptoF).toString();
 
-		} catch (Exception e) {
-			throw new NegocioException("No se encuentra la funcion " + funcion);
+
+		} catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+			throw new NegocioException("No se encuentra la funcion " + funcion +" "+ Arrays.toString(e.getStackTrace()));
 
 		}
 
@@ -1412,12 +1551,14 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	@SuppressWarnings({ "unchecked", "static-access" })
 	private List<Object[]> buscarConceptoLiquidado(Integer idconcepto) {
 		List<Object[]> infoConceptoLiquidado= null;
-
 		OptionalInt indexOpt = IntStream.range(0, listaConceptosLiquidados2.size())
-				.filter(i -> idconcepto.equals(listaConceptosLiquidados2.get(i))).findFirst();
+				.filter(i -> {//LOGGER.error("CONCEPTO->"+listaConceptosLiquidados2.get(i) + " || Position"+
+						//i + " --- RETORNO ---"+idconcepto.equals(listaConceptosLiquidados2.get(i)));
+				return idconcepto.equals(listaConceptosLiquidados2.get(i));}).findFirst();
 		if (indexOpt == indexOpt.empty()) {
 			return infoConceptoLiquidado;
 		}
+		//LOGGER.error("RETORNO INDEX->LOG->"+indexOpt.getAsInt());
 		infoConceptoLiquidado = (List<Object[]>) listaConceptosLiquidados.get(indexOpt.getAsInt());
 		return infoConceptoLiquidado;
 	}
@@ -1489,6 +1630,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 		List<Object[]> novedades;
 		String mensaje;
 
+// 		LOGGER.error("getNovedades () "+faIdregistro + " -- "+idfactura);
 		novedades = manejadorHistoricos.getNovedades(faIdregistro, idfactura);
 
 		if (novedades.isEmpty()) {
@@ -1538,11 +1680,11 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			dfacidepadre = (novedades.get(i)[12] == null) ? null : (BigInteger) novedades.get(i)[13];
 			dfinideregistr = (novedades.get(i)[12] == null) ? null : (BigInteger) novedades.get(i)[12];
 
-			campos = "dfac_estado,dfac_cantidad,dfac_vlrunitari,dfac_vlrtotal,dfac_vlrreal,dfac_sdoreal,fac_ideregistro,uni_concepto,dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,tipo_nota";
+			campos = "dfac_estado,dfac_cantidad,dfac_vlrunitari,dfac_vlrtotal,dfac_vlrreal,dfac_sdoreal,fac_ideregistro,uni_concepto,dfac_version,usu_ideregistro,dfac_ideorigen,damo_ideregistr,dfac_idepadre,dfin_ideregistr,tipo_nota,emp_ideregistro";
 			valores = "'" + estado + "'," + cantidad + "," + valorunitario + "," + valortotal + "," + valorreal
 					+ "," + saldoreal + "," + idfactura + "," + idconcepto + "," + version + "," + idusuario + ","
 					+ dfacideorigen + "," + damoideregistr + "," + dfacidepadre + "," + dfinideregistr + ","
-					+ tipoNota + "";
+					+ tipoNota + ","+ 317 +" ";
 
 			manejadorCprCtrprocesoRespository.insertar("dfac_detnovedad", campos, valores,
 					" returning dfac_ideregistr");
@@ -1577,7 +1719,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			conConcepto = "con_concepto";
 			fechaConConcepto = "";
 		} else {
-			fechaConConcepto = " and fecha_modificacion = " + respuesta.get(0)[0].toString();
+			fechaConConcepto = "and fecha_modificacion <= '" + respuesta.get(0)[0].toString() +"'";
 			conConcepto = respuesta.get(0)[1].toString();
 
 		}
@@ -1588,7 +1730,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			coreConrelacio = "core_conrelacio";
 			fechaCoreConrelacio = "";
 		} else {
-			fechaCoreConrelacio = " and core.fecha_modificacion =" + respuesta.get(0)[0].toString();
+			fechaCoreConrelacio = " and core.fecha_modificacion <= '" + respuesta.get(0)[0].toString() +"'";
 			coreConrelacio = respuesta.get(0)[1].toString();
 
 		}
@@ -1610,7 +1752,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			liqLiquidacion = "liq_liquidacion";
 			fechaLiqLiquidacion = "";
 		} else {
-			fechaLiqLiquidacion = " and fecha_modificacion =" + respuesta.get(0)[0].toString();
+			fechaLiqLiquidacion = " and fecha_modificacion ='" + respuesta.get(0)[0].toString() +"'";
 			liqLiquidacion = respuesta.get(0)[1].toString();
 
 		}
@@ -1622,7 +1764,7 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 			racoRanconcept = "raco_ranconcept";
 			fechaRacoRanconcept = "";
 		} else {
-			fechaRacoRanconcept = " and fecha_modificacion =" + respuesta.get(0)[0].toString();
+			fechaRacoRanconcept = " and fecha_modificacion <= '" + respuesta.get(0)[0].toString() +"'";
 			racoRanconcept = respuesta.get(0)[1].toString();
 
 		}
@@ -1631,8 +1773,8 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 
 	public void getConceptosTipoNota() {
 
-		conceptosNota = manejadorHistoricos.getConceptosTipoNota(tipoNota, idempresa);
-
+		conceptosNota = manejadorHistoricos.getConceptosTipoNota(tipoNota, idempresa);              
+                
 		if (tipoNota == 722) {
 			conceptosNota = null;
 			conceptosNota = manejadorHistoricos.getConceptosTipoNotaAforado(tipoNota, idempresa, idUsuario,
@@ -1645,23 +1787,22 @@ public class NegocioReEjecucionHiloLiquidacion implements Runnable {
 	private List<Object[]> buscarConceptoNota(BigInteger idConcepto) {
 
 		List<Object[]> concepto= null;
-
+		
 		for (Object item : conceptosNota.toArray()) {
 			if (idConcepto.compareTo(new BigInteger(item.toString())) == 0) {
+//				LOGGER.error("CONSULTA-NOTA-CONCEPTO-> "+idConcepto.intValue());
 				concepto = manejadorHistoricos.getTipoCalculoConceptoNota(tipoNota, idempresa, idConcepto);
-
 				if (idConcepto.compareTo(new BigInteger(conceptoaforoextraordinario.toString())) == 0
 						&& tipoNota == 722) {
 					concepto = manejadorHistoricos.getTipoCalculoConceptoNotaAforado(tipoNota, idempresa, idConcepto,
 							idUsuario);
 				}
-
+//				LOGGER.error("CONCEPTO NOTA LIQUIDADO->"+idConcepto);
 				return concepto;
 
 			}
 
 		}
-
 		return concepto;
 
 	}

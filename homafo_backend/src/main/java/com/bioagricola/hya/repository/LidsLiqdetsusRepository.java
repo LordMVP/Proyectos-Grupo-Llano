@@ -14,6 +14,6 @@ public interface LidsLiqdetsusRepository extends JpaRepository<LidsLiqdetsus, Lo
     @Modifying
     @Transactional
     @Query(value = "update LidsLiqdetsus l set l.uniLiquidacion=:uniLiquidacion where l.dsusIderegistr=:dsusId")
-    void updateLidsByDsus(Long uniLiquidacion, Long dsusId);
+    void updateLidsByDsus(Integer uniLiquidacion, Long dsusId);
 
 }

@@ -303,4 +303,24 @@ public class NegocioReportes implements INegocioReportes {
 		return result;
 	}
 
+
+	public ByteArrayOutputStream generarReporte(Map<String, String> params) {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		try {
+            //if param key contains int parse to int, else return value
+			Map<String, Object> parametros = params.entrySet().stream()
+					.collect(Collectors.toMap(Map.Entry::getKey, e -> {
+						try {
+							return e.getKey().contains("INT") ? Integer.parseInt(e.getValue()) : e.getValue();
+						} catch (Exception ex) {
+							return e.getValue();
+						}
+					}));
+			result = this.compiladorReportes(parametros, params.get("typeFile"), this.pathTemplate.concat(params.get("pathReport")));
+		} catch (Exception e) {
+			logger.error("Error no controlado en generarReporte: ", e);
+		}
+		return result;
+	}
+
 }

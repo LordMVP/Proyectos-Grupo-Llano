@@ -25,12 +25,20 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+		 <exclusions>
+		  <exclusion>
+		   <groupId>ch.qos.logback</groupId>
+		   <artifactId>logback-classic</artifactId>
+		  </exclusion>
+		  <exclusion>
+		   <groupId>org.apache.logging.log4j</groupId>
+		   <artifactId>log4j-to-slf4j</artifactId>
+		  </exclusion>
+		  <exclusion>
+		   <groupId>org.slf4j</groupId>
+		   <artifactId>jul-to-slf4j</artifactId>
+		  </exclusion>
+		 </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -43,7 +51,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
+				<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
@@ -63,6 +71,7 @@
 		<dependency>
 			<groupId>com.bioagricola.apirest</groupId>
 			<artifactId>bioagricola-back</artifactId>
+			<scope>compile</scope>
 			<version>1.0-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
@@ -88,7 +97,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 			<!--			for env local-->
 			<!--			<scope>provided</scope>-->
 		</dependency>
@@ -126,6 +135,17 @@
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
 			<version>6.20.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.lowagie</groupId>
+			<artifactId>itext</artifactId>
+			<version>4.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -137,6 +157,34 @@
 			<artifactId>modelmapper</artifactId>
 			<version>3.1.0</version>
 		</dependency>
+                <dependency>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <version>1.18.30</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                    <version>4.9.3</version>
+                </dependency>
+                  
+                <dependency>
+                    <groupId>com.squareup.okio</groupId>
+                    <artifactId>okio</artifactId>
+                    <version>2.10.0</version>
+                </dependency> 
+                  
+                <dependency>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib</artifactId>
+                    <version>1.5.31</version>
+                </dependency>
+                
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-validation</artifactId>
+                </dependency>
 	</dependencies>
 
 	<build>
@@ -156,12 +204,13 @@
 					<compilerArguments>
 						<endorseddirs>${endorsed.dir}</endorseddirs>
 					</compilerArguments>
+				 <debug>true</debug>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.3</version>
+				<version>3.2.3</version>
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>

@@ -16,9 +16,8 @@ public interface DSuscripcionMapper {
 	@Mapping(target = "proDireccion", ignore = true)
 	@Mapping(target = "tipoUsoNombre", ignore = true)
 	@Mapping(target = "terIderegistro", ignore = true)
-	@Mapping(source = "uniBarrio.barrioIderegistro",target = "uniBarrio")
-	@Mapping(source = "uniBarrio.barrioNom",target = "uniBarrioNombre")
+	@Mapping(source = "uniBarrio.barrioIderegistro", target = "uniBarrio")
+	@Mapping(source = "uniBarrio.barrioNom", target = "uniBarrioNombre")
 	DsusSuscripcionInfoDTO dsusToDto(DsusDetsuscrip dsus);
-
 
 }

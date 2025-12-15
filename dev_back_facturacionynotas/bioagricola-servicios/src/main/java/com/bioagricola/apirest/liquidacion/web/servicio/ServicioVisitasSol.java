@@ -16,6 +16,7 @@ import com.bioagricola.apirest.modelo.entidades.VisitasSol;
 import com.bioagricola.apirest.modelo.excepciones.InvalidParameterException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import javax.persistence.NoResultException;
 
 /**
  * Servicios REST para operaciones CRUD y de negocio sobre la entidad VisitasSol
@@ -51,7 +52,7 @@ public class ServicioVisitasSol implements IVisitasSol {
 	 */
 	@PostMapping(path = "/agregar", consumes = "application/json", produces = "application/json")
 	public VisitasSol agregarRegistro(@RequestBody RequestVisitasSolDTO agregarSol)
-			throws InvalidParameterException, JsonParseException, JsonMappingException, IOException {
+			throws InvalidParameterException, JsonParseException, JsonMappingException, IOException,NoResultException{
 
 		return negocioVisitasSol.agregarRegistro(agregarSol);
 	}

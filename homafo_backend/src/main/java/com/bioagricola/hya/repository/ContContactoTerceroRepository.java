@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface ContContactoTerceroRepository extends JpaRepository<ContContactotercero, Long> {
 
-    @Query(value = "select cc from ContContactotercero cc where cc.terTercero.terIderegistro = :terceroId")
-    List<ContContactotercero> findAllByTerceroId(@Param("terceroId") Long terceroId);
+	@Query(value = "select cc from ContContactotercero cc where cc.terTercero.terIderegistro = :terceroId")
+	List<ContContactotercero> findAllByTerceroId(@Param("terceroId") Long terceroId);
 
-    @Modifying(flushAutomatically = true)
-    @Query("delete from ContContactotercero cc where cc.contIderegistro in (:ids)")
-    void deleteAllByIds(@Param("ids") List<Long> ids);
+	@Modifying(flushAutomatically = true)
+	@Query("delete from ContContactotercero cc where cc.contIderegistro in (:ids)")
+	void deleteAllByIds(@Param("ids") List<Long> ids);
 }

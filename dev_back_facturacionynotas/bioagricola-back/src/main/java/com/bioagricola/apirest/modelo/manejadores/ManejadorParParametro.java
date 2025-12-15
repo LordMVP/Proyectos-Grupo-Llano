@@ -20,8 +20,7 @@ public interface ManejadorParParametro extends ManejadorCrud<ParParametro,Intege
 	/**
 	 * Método de consulta de parámetros según la empresa en sesión
 	 * */
-	@Query("select pp from ParParametro pp "
-			+ " where pp.empIderegistro = :idEmpresa ")
+	@Query(value = "select pp from ParParametro pp where pp.empIderegistro = :idEmpresa ", nativeQuery = false)
 	ParParametro consultaParametros(@Param("idEmpresa") int idEmpresa);
 
 	

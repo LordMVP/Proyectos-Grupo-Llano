@@ -123,7 +123,6 @@ public class HAforoServiceImpl {
 		
 		return visitasDTO;
 	}
-
 	private List<VisitEditAforoDTO> mapVisitaDTO(HMaestroAforoVisita m) {
 		List<VisitEditAforoDTO> response = new ArrayList<>();
 
@@ -133,31 +132,31 @@ public class HAforoServiceImpl {
 		m.getHdetallesMaestrosVisitas().forEach(d -> {
 			Optional<TerTercero> tercero = terTerceroRepository.findById(d.getTerAforador());
 			VisitEditAforoDTO v = new VisitEditAforoDTO();
-			v.setNumeroVisita(d.getHdmavConsecutivovisita()); // [JLMENDOZA] v.setNumeroVisita(d.getHdmafIderegistro());
+			v.setNumeroVisita(d.getHdmavConsecutivovisita());
 			v.setFechaVisita(DateUtil.dateToString(d.getHdmafFechavisita()));
 			v.setDia(DateUtil.getDayOfWeek(d.getHdmafFechavisita()));
 			v.setAforador(tercero.isPresent() ? tercero.get().getTerNomcompleto() : "No encontrado");
 			v.setSemana(d.getHdmafSemanasecuencia());
-			//v.setVolumen(d.getHdmafPesoaforo());
 			v.setEstado(d.getHdmafEstado());
 			v.setIdAforo(m.getAfoIderegistro());
 			v.setIdMaestro(m.getHmafvIderegistro());
 			v.setConsecutivo(d.getHdmafIderegistro());
 			v.setObservaciones(d.getHdmafObservaciones());
+
 			List<VisitEditDetailAforoDTO> detalles = this.getDetallesConceptos(m, d, dc);
-			
-			detalles.stream().forEach(det -> det.setTotalCantidadRecipientes(detalles.stream()
-					.mapToLong(ved -> Optional.ofNullable(ved.getCantidadRecipientes()).orElse(0L)).sum()));
-			
-			detalles.stream().forEach(det -> det.setTotalTotales(
-					detalles.stream().mapToDouble(ved -> Optional.ofNullable(ved.getTotal()).orElse(0D)).sum()));
-			
-			detalles.stream().forEach(det->det.setPeso(
-					detalles.stream().mapToDouble(ved -> Optional.ofNullable(ved.getPeso()).orElse(0D)).sum()));
-			
+
+			// Calcular totales UNA SOLA VEZ
+			double totalVolumen = detalles.stream()
+					.mapToDouble(ved -> Optional.ofNullable(ved.getTotal()).orElse(0D))
+					.sum();
+
+			double totalPeso = detalles.stream()
+					.mapToDouble(ved -> Optional.ofNullable(ved.getPeso()).orElse(0D))
+					.sum();
+
 			v.setDetalles(detalles);
-			v.setVolumen(detalles.stream().collect(Collectors.summingDouble(n->n.getTotal())));
-			v.setPeso(detalles.stream().collect(Collectors.summingDouble(p->p.getPeso())));
+			v.setVolumen(totalVolumen);
+			v.setPeso(totalPeso);
 			response.add(v);
 		});
 

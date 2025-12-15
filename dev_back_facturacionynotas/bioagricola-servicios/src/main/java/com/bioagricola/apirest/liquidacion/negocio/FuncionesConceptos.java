@@ -12,10 +12,15 @@ import com.bioagricola.apirest.modelo.excepciones.NegocioException;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorConConcepto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import java.math.BigInteger;
 
 @Configurable
 @Service
 public class FuncionesConceptos {
+	
+	private static final Integer EMPRESA_ENERGIA = 299;
+	private static final Integer EMPRESA_GASASEO = 322;
+	private static final Integer EMPRESA_ASEO = 317;
 
 	@Autowired
 	ManejadorConConcepto manejadorConConcepto;
@@ -24,6 +29,7 @@ public class FuncionesConceptos {
 
 	private Integer idacceso;
 	private Long idsuscripcion;
+        private Long facIderegistro;
 
 
 	public FuncionesConceptos() {
@@ -36,6 +42,17 @@ public class FuncionesConceptos {
 		this.manejadorConConcepto = manejadorConConcepto;
 		this.idacceso = idAcceso;
 		idsuscripcion = idSuscripcion;
+		
+				
+	}
+        
+        	public FuncionesConceptos(NegocioParParametro negocioParParametro, ManejadorConConcepto manejadorConConcepto, Integer idAcceso, Long idSuscripcion, BigInteger faIderegistro) {
+		super();
+		this.negocioParParametro = negocioParParametro;
+		this.manejadorConConcepto = manejadorConConcepto;
+		this.idacceso = idAcceso;
+		idsuscripcion = idSuscripcion;
+                facIderegistro = faIderegistro.longValue();
 		
 				
 	}
@@ -416,5 +433,240 @@ public class FuncionesConceptos {
 		}
 		return value;
 	}
+	
+	/**
+	 * Función fn_ObtenerTAFNA
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal obtenerTAFNA(List<Object> concepto) {
+		BigDecimal value = manejadorConConcepto.getTAFNA(this.idsuscripcion);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función NoaplicaDINC
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal NoaplicaDINC(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = 
+				manejadorConConcepto.getRelacionConceptoSuscripcion(this.idsuscripcion,5259).compareTo(BigDecimal.ZERO) > 0
+				? BigDecimal.ZERO : BigDecimal.ONE;
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función NoaplicaDINC
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaDINC(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = manejadorConConcepto.getRelacionConceptoSuscripcion(this.idsuscripcion,idconcepto);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función aplicaDescDesh
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaDescDesh(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = manejadorConConcepto.getRelacionConceptoSuscripcion(this.idsuscripcion,idconcepto);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función aplicaDescDesh
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaDescPtaPta(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = manejadorConConcepto.getRelacionConceptoSuscripcion(this.idsuscripcion,idconcepto);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función homologaEmsa
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal homologaEmsa(List<Object> concepto) {
+		BigDecimal value = manejadorConConcepto.getEmpresahomologa(this.idsuscripcion,EMPRESA_ENERGIA);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función aplicaFacturacionPlena
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaFacturacionPlena(List<Object> concepto) {
+		BigDecimal value = manejadorConConcepto.getFacturacionPlena(this.idsuscripcion);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+	
+	/**
+	 * Función aplicaAforadoAseo
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaAforadoAseo(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = 
+		manejadorConConcepto.getRelacionConceptoSuscripcion(idsuscripcion, 5261).compareTo(BigDecimal.ZERO) > 0 ?
+				BigDecimal.ZERO :
+				manejadorConConcepto.getRelacionConceptoSuscripcion(idsuscripcion, idconcepto);
+		
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}	
+	
+	/**
+	 * Función aplicaAforadoAseo
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal aplicaNoAforadoAseo(List<Object> concepto) {
+		Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());
+		BigDecimal value = 
+				manejadorConConcepto.getRelacionConceptoSuscripcion(idsuscripcion, 5261).compareTo(BigDecimal.ZERO) > 0 ?
+						BigDecimal.ONE :
+				manejadorConConcepto.getRelacionConceptoSuscripcion(this.idsuscripcion, 5262).compareTo(BigDecimal.ZERO) > 0 
+				? BigDecimal.ZERO : BigDecimal.ONE;	
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}	
+	
+	/**
+	 * Función homologagasAseo
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal homologagasAseo(List<Object> concepto) {
+		BigDecimal value = 
+				manejadorConConcepto.getEmpresahomologa(this.idsuscripcion,EMPRESA_GASASEO).compareTo(BigDecimal.ZERO) > 0 ?
+						BigDecimal.ONE :
+						manejadorConConcepto.getEmpresahomologa(this.idsuscripcion,EMPRESA_ASEO).compareTo(BigDecimal.ZERO) > 0 ?
+								BigDecimal.ONE : BigDecimal.ZERO;
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;//.compareTo(BigDecimal.ONE) <= 0 ? BigDecimal.ONE : BigDecimal.ZERO;
+	}
+	
+	/**
+	 * Función obtenerVisitasAforoExtraOrdinario
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal obtenerVisitasAforoExtraOrdinario(List<Object> concepto) {
+		/*BigDecimal value = manejadorConConcepto.getCantidadVisitasAforoExtraOrdinario(this.idsuscripcion);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}*/
+		return BigDecimal.ZERO;
+	}	
+	
+	/**
+	 * Función obtenerVisitasAforoExtraOrdinario
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal obtenerVisitasAforoMultExtraOrdinario(List<Object> concepto) {
+		/*BigDecimal value = manejadorConConcepto.getCantidadVisitasAforoExtraOrdinario(this.idsuscripcion);
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}*/
+		return BigDecimal.ZERO;
+	}
+        
+        
+        	/**
+	 * Función obtenerConceptoNovedadModLiquidacion
+	 * 
+	 * @param concepto
+	 * @return
+	 */
+	public BigDecimal obtenerConceptoNovedadModLiquidacion(List<Object> concepto) {
+                /*Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());*/    
+		BigDecimal value = manejadorConConcepto.getValorAjusteConceptoModLiquidacion(this.facIderegistro,Integer.valueOf(((Object[]) concepto.get(0))[0].toString()));
+                if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+        
+        	public BigDecimal getValorDctoIndicadoresCalidad(List<Object> concepto) {
+                /*Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());*/                
+		BigDecimal value = manejadorConConcepto.getValorDctoIndicadoresCalidadSql(this.facIderegistro,Integer.valueOf(((Object[]) concepto.get(0))[0].toString()));
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+        	public BigDecimal consultaTipoUsoAseo(List<Object> concepto) {
+                /*Object[] items = (Object[]) concepto.get(0);
+		Integer idconcepto = Integer.parseInt(items[0].toString());*/
+                       
+		BigDecimal value =   (this.facIderegistro == null ) ?  manejadorConConcepto.getTipoUsoSql(this.idsuscripcion) : manejadorConConcepto.getTipoUsoSqlReliquida(this.facIderegistro);
+		
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		return value;
+	}
+            
+        
+	
 
 }

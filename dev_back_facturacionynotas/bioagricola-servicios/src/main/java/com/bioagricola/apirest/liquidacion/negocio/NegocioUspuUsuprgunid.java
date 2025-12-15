@@ -7,11 +7,13 @@ import com.bioagricola.apirest.modelo.entidades.PrunPrgunidad;
 import com.bioagricola.apirest.modelo.entidades.UspuUsuprgunid;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorPrunPrgunidad;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorUspuUsuprgunid;
+import com.bioagricola.apirest.modelo.projections.IPermisosUnidad;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -57,6 +59,7 @@ public class NegocioUspuUsuprgunid extends NegocioAbstracto<UspuUsuprgunid, Uspu
     public int consultaPrivilegiosIlimitadoReporte(Integer idPrograma) throws IOException {
         int idEmpresa = JwtUtil.auditoriaDTO.getIdEmpresa();
         int idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
+        System.out.println("Idusuario : "+ idUsuario + " Empresa " + idEmpresa);
         Map<String, Object> consultaParametro = negocioParParametro.consultaParametros(idEmpresa,
                 ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
         PrunPrgunidad responseRelacion = getPrunPrgunidad(idPrograma, ConstantesServicios.PRIVILEGIO_ILIMITADO_REPORTE, idEmpresa, idUsuario);
@@ -73,7 +76,7 @@ public class NegocioUspuUsuprgunid extends NegocioAbstracto<UspuUsuprgunid, Uspu
     }
 
     private UspuUsuprgunid getResponsePrivilegio(int idUsuario, PrunPrgunidad responseRelacion) {
-        Integer prunIderegistr = responseRelacion.getPrgIderegistro();
+        Long prunIderegistr = responseRelacion.getPrunIderegistr() ;
         return manejadorUspuUsuprgunid.consultaPrivilegioDeshabitado(idUsuario,
                 prunIderegistr);
     }
@@ -81,11 +84,16 @@ public class NegocioUspuUsuprgunid extends NegocioAbstracto<UspuUsuprgunid, Uspu
     private PrunPrgunidad getPrunPrgunidad(Integer idPrograma, String tipo, int idEmpresa, int idUsuario) throws IOException {
         Map<String, Object> consultaParametro = negocioParParametro.consultaParametros(idEmpresa,
                 ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
-
+        System.out.println(" IdPrograma:"+ idPrograma  + " Tipo :"+tipo); 
         Integer idUnidadDxD = (Integer) (consultaParametro.get(tipo));
+        System.out.println(" IdUnidad:"+ idUnidadDxD);
 
         // Luego se consulta si existe relación del programa con la unidad
-        return manejadroPrunPrgunidad.consultaRelacion(idUsuario, idUnidadDxD, idPrograma);
+        return manejadroPrunPrgunidad.consultaRelacion( idUnidadDxD, idPrograma);
+    }
+    
+    public List<IPermisosUnidad> consultarPermisosUsuarioPrograma(Integer idUsuario, Integer idPrograma) {
+        return manejadorUspuUsuprgunid.consultarPermisosUsuarioPrograma(idUsuario, idPrograma);
     }
 
     @Override

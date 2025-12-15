@@ -7,6 +7,8 @@ import com.bioagricola.apirest.modelo.manejadores.utils.IManejadorCrud;
 import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
 
 @Service
-public interface ManejadorVisitasSol extends ManejadorCrud<VisitasSol, Long>, IManejadorCrud<VisitasSol, String> {
+public interface ManejadorVisitasSol extends ManejadorCrud<VisitasSol,String>, IManejadorCrud<VisitasSol,String> {
+
+
 
 }

@@ -45,7 +45,8 @@ public class PerPeriodoDTO implements Serializable{
 	private Date perFecsuspens;
 	
 	private Integer usuIderegistro;
-	
+
+	private Integer maprcIderegistro;
 
 	// protected region atributos adicionales on begin
 	// Escriba en esta sección sus modificaciones
@@ -139,6 +140,14 @@ public class PerPeriodoDTO implements Serializable{
 	@JsonProperty("perFecfinal")
 	public void setPerFecfinal(Date perFecfinal){
 		this.perFecfinal = perFecfinal;
+	}
+	@JsonProperty("maprcIderegistro")
+	public Integer getMaprcIderegistro() {
+		return maprcIderegistro;
+	}
+	@JsonProperty("maprcIderegistro")
+	public void setMaprcIderegistro(Integer maprcIderegistro) {
+		this.maprcIderegistro = maprcIderegistro;
 	}
 		
 	@JsonProperty("perFecvence")

@@ -44,13 +44,13 @@ public class NegocioUtilidadesLiquidacion {
 		idUsuario = JwtUtil.auditoriaDTO.getIdUsuario();
 		identificadorEmpresa = "proceso_refacturacion_" + idEmpresa;
 		parametros = negocioParParametro.consultaParametros(idEmpresa, ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
-		programaFacturarPeriodo = (Integer) parametros.get(ConstantesServicios.PROGRAMA_FACTURAR_PERIODO);
+		programaFacturarPeriodo = tipoNota;//(Integer) parametros.get(ConstantesServicios.PROGRAMA_FACTURAR_PERIODO);
 
 		existeTabla = manejadorHistoricos.validarTablaExistente(identificadorEmpresa);
 
 		if (existeTabla != 0) {
 			procesos = manejadorHistoricos.getProcesoEjecucion(identificadorEmpresa, programaFacturarPeriodo,
-					idEmpresa, tipoNota, idUsuario);
+					idEmpresa, tipoNota,idUsuario);
 
 			if (procesos != null) {
 				cantidad = new BigInteger(procesos[3].toString());

@@ -26,6 +26,6 @@ public interface ManejadorPdiaPardistribucionincentivo
 
     @Query(value = "select p.proyecto_nom  from aseo.pdia_pardistribucionincentivo pp " +
             "inner join proyectos p on p.proyecto_ideregistro = pp.uni_municipio " +
-            "where emp_ideregistro = :ideEmpresa ", nativeQuery = true)
+            "where emp_ideregistro = :ideEmpresa limit 1", nativeQuery = true)
     String nombreMunicipo(@Param("ideEmpresa") Integer ideEmpresa);
 }

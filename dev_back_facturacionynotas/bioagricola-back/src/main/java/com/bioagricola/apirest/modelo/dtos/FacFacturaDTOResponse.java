@@ -15,20 +15,44 @@ public class FacFacturaDTOResponse {
     private String facEstado;
     private String empresaAlterna;
     private Integer perIderegistro;
+    private String perNombre ;
     private BigDecimal facVlrreal;
     private Double dctos;
     private Double subCont;
     private Double dctosInd;
     private Double ajuste;
     private Double deuda;
+    private Double deudaNota;
     private Double mora;
+    private Double moraNota;
     private Double otros;
+    private Double saldosaFavor;
     private Double total;
     private Date facFecha;
+    private Date facFechaEnd;
     private Long dsusIderegistr;
     private Double totalDeudaMora;
-    private Long idInvoice;
+    private Long idInvoice;   
+    private Long facNumero;
+    private Double cuotafinanciacion;
+    private Double cuotafinanciacionNota;
+    private Double valortarifa;
+    private Double tarifacomercializacion;
+    private String nombrecompleto;
+    private String documentotercero;
+    private String codAnterior;
+    private Long valorRecaudado;
+    private String fechaRecaudo;
+   
     private Map<String, Double> rateDetail;
+
+    public Date getFacFechaEnd() {
+        return facFechaEnd;
+    }
+
+    public void setFacFechaEnd(Date facFechaEnd) {
+        this.facFechaEnd = facFechaEnd;
+    }   
 
     public FacFacturaDTOResponse() {
         this.rateDetail = new HashMap<>();
@@ -65,7 +89,7 @@ public class FacFacturaDTOResponse {
     public void setPerIderegistro(Integer perIderegistro) {
         this.perIderegistro = perIderegistro;
     }
-
+           
     public BigDecimal getFacVlrreal() {
         return facVlrreal;
     }
@@ -113,6 +137,14 @@ public class FacFacturaDTOResponse {
     public void setDeuda(Double deuda) {
         this.deuda = deuda;
     }
+            
+            public Double getDeudaNota() {
+        return deudaNota;
+    }
+
+    public void setDeudaNota(Double deudaNota) {
+        this.deudaNota = deudaNota;
+    }
 
     public Double getMora() {
         return mora;
@@ -121,7 +153,69 @@ public class FacFacturaDTOResponse {
     public void setMora(Double mora) {
         this.mora = mora;
     }
+            
+            public Double getMoraNota() {
+        return moraNota;
+    }
 
+    public void setMoraNota(Double moraNota) {
+        this.moraNota = moraNota;
+    }
+     public Double getCuotafinanciacion() {
+        return cuotafinanciacion;
+    }
+
+    public void setCuotafinanciacion(Double cuotafinanciacion) {
+        this.cuotafinanciacion = cuotafinanciacion;
+    }
+    
+             public Double getCuotafinanciacionNota() {
+        return cuotafinanciacionNota;
+    }
+
+    public void setCuotafinanciacionNota(Double cuotafinanciacionNota) {
+        this.cuotafinanciacionNota = cuotafinanciacionNota;
+    }
+    
+     public Double getValortarifa() {
+        return valortarifa;
+    }
+
+    public void setValortarifa(Double valortarifa) {
+        this.valortarifa = valortarifa;
+    }
+     public Double getTarifacomercializacion() {
+        return tarifacomercializacion;
+    }
+
+    public void setTarifacomercializacion(Double tarifacomercializacion) {
+        this.tarifacomercializacion = tarifacomercializacion;
+    }
+    
+     public String getNombreCompleto() {
+        return nombrecompleto;
+    }
+
+    public void setNombreCompleto(String nombrecompleto) {
+        this.nombrecompleto = nombrecompleto;
+    }
+    
+     public String getCodAnterior() {
+        return codAnterior;
+    }
+
+    public void setCodAnterior(String codAnterior) {
+        this.codAnterior = codAnterior;
+    }
+    
+      public String getDocumentoTercero() {
+        return documentotercero;
+    }
+
+    public void setDocumentoTercero(String documentotercero) {
+        this.documentotercero = documentotercero;
+    }
+    
     public Double getOtros() {
         return otros;
     }
@@ -129,7 +223,31 @@ public class FacFacturaDTOResponse {
     public void setOtros(Double otros) {
         this.otros = otros;
     }
+            
+             public Double getSaldosaFavor() {
+        return saldosaFavor;
+    }
 
+    public void setSaldosaFavor(Double saldosaFavor) {
+        this.saldosaFavor = saldosaFavor;
+    }
+    
+     public Long getValorRecaudado() {
+        return valorRecaudado;
+    }
+
+    public void setValorRecaudado(Long valorRecaudado) {
+        this.valorRecaudado = valorRecaudado;
+    }
+    
+     public String getFechaRecaudo() {
+        return fechaRecaudo;
+    }
+
+    public void setFechaRecaudo(String fechaRecaudo) {
+        this.fechaRecaudo = fechaRecaudo;
+    }
+    
     public Double getTotal() {
         return total;
     }
@@ -177,4 +295,20 @@ public class FacFacturaDTOResponse {
     public void setRateDetail(Map<String, Double> rateDetail) {
         this.rateDetail = rateDetail;
     }
+
+	public String getPerNombre() {
+		return perNombre;
+	}
+
+	public void setPerNombre(String perNombre) {
+		this.perNombre = perNombre;
+	}
+
+	public Long getFacNumero() {
+		return facNumero;
+	}
+
+	public void setFacNumero(Long facNumero) {
+		this.facNumero = facNumero;
+	}
 }

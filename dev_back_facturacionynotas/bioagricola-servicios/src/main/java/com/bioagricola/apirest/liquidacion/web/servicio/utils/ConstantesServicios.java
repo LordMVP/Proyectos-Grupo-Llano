@@ -35,10 +35,8 @@ public class ConstantesServicios {
 	public static final String CODIGO_RESPUESTA_EXITOSA = "0";
 	public static final String CODIGO_RESPUESTA_FALLIDA = "1";
 	public static final String CODIGO_SIN_RESULTADOS = "2";
-
-	// URL's del proyecto
-	public static final String URL_SERVICIO_TOKEN = "http://10.43.51.29:8080";
-
+        public static final String URL_SERVICIO_TOKEN = "http://10.43.51.30:8080";
+ 
 	// Formatos requeridos en conversiones para los servicios
 	public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd";
 
@@ -86,6 +84,7 @@ public class ConstantesServicios {
 	public static final String UNI_CONCEPTO_AFORO_EXTRAORDINARIO = "uni_concepto_aforo_extraordinario";
 	public static final String UNI_AFORO_INDIVIDUAL = "uni_aforo_individual";
 	public static final String UNI_AFORO_MULTIUSUARIO = "uni_aforo_multiusuario";
+        public static final String LISTA_CONCEPTOS_APLICAR = "lista_conceptos_aplicar";
 
 
 	public static final Integer FACTOR_PERIODICO_DESCUENTO_RECLAMACION_COMERCIAL = 6;
@@ -99,7 +98,7 @@ public class ConstantesServicios {
 	// programas
 	public static final int ID_PROGRAMA_DESHABITADO = 712;
 	public static final int ID_PROGRAMA_PUERTA_PUERTA = 713;
-	public static final int ID_PROGRAMA_CALIDAD = 714;
+	public static final int ID_PROGRAMA_CALIDAD = 753;
 	public static final int ID_PROGRAMA_ESTRATO = 715;
 	public static final int ID_PROGRAMA_TIPO_DE_USO = 716;
 	public static final int ID_PROGRAMA_AFORO_EXTRAORDINARIO = 722;
@@ -123,6 +122,7 @@ public class ConstantesServicios {
 	// documentos
 	public static final String UNI_DOCUMENTOS_INTERES_MORA = "uni_documentos_interes_mora";
 	public static final String UNI_DOCUMENTOS_SALDO_A_FAVOR = "uni_documentos_saldo_a_favor";
+        public static final String UNI_DOCUMENTO_FINANCIACION = "uni_documento_financiacion";        
 	public static final String UNI_DOCUMENTOS_FACTURA_SERVICIO = "uni_documentos_factura_servicio";
 
 	// Conceptos

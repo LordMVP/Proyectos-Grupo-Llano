@@ -1,39 +1,30 @@
 package com.bioagricola.apirest.modelo.dtos;
 
-import java.io.Serializable;
+import lombok.Data;
 
-public class PeriodoFactDTO implements Serializable {
+@Data
+public class PeriodoFactDTO {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    private String perNombre;
 
-	private String perNombre;
-	
-	private Integer perIderegistro;
-	
-	public PeriodoFactDTO(String perNombre, Integer perIderegistro) {
-		this.perNombre = perNombre;
-		this.perIderegistro = perIderegistro;
-	}
+    private Integer perIderegistro;
 
-	public String getPerNombre() {
-		return perNombre;
-	}
+    private Integer maprcIderegistr;
+    
+    private Integer perFacturacion;
 
-	public void setPerNombre(String perNombre) {
-		this.perNombre = perNombre;
-	}
+    public PeriodoFactDTO() {
+    }
 
-	public Integer getPerIderegistro() {
-		return perIderegistro;
-	}
+    public PeriodoFactDTO(String perNombre, Integer perIderegistro) {
+        this.perNombre = perNombre;
+        this.perIderegistro = perIderegistro;
+    }
 
-	public void setPerIderegistro(Integer perIderegistro) {
-		this.perIderegistro = perIderegistro;
-	}
-	
-	
-
+    public PeriodoFactDTO(String perNombre, Integer perIderegistro, Integer maprcIderegistr, Integer perFacturacion) {
+        this.perNombre = perNombre;
+        this.perIderegistro = perIderegistro;
+        this.maprcIderegistr = maprcIderegistr;
+        this.perFacturacion = perFacturacion;
+    }    
 }

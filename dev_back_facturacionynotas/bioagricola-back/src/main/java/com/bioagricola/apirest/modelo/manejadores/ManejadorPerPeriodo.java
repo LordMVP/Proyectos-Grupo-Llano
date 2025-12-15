@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manejador que define las operaciones CRUD y de negocio a realizar sobre la
@@ -63,9 +64,45 @@ public interface ManejadorPerPeriodo extends ManejadorCrud<PerPeriodo, Integer>,
 	@Query("Select p from PerPeriodo p where p.cicIderegistro = :idCiclo")
 	List<PerPeriodo> getPerPeriodoByCiclo(@Param("idCiclo") int idCiclo);
 
-	@Query("Select p.perIdeorden, p.perEstado, p.perFecinicial, p.perFecfinal " +
-			"from PerPeriodo p inner join CicCiclo cc on (p.cicIderegistro = cc.cicIderegistro) " +
-			"inner join CiemCicempresa cce on (cce.cicCiclo.cicIderegistro = cc.cicIderegistro) " +
-			"where p.perEstado IN :states group by p.perIdeorden, p.perEstado, p.perFecinicial, p.perFecfinal order by p.perFecinicial desc, p.perFecfinal desc ")
-	List<Object[]> getPerPeriodos(@Param("states") List<String> states);
+	@Query(value ="select distinct \n" +
+			"\tpp.per_ideregistro, pp.per_ideorden, pp.per_estado, pp.per_fecinicial, pp.per_fecfinal,\n" +
+			"    concat(pp.per_nombre,' ',pl.prl_anio) as periodo_corte,\n" +
+			"    mm.maprc_ideregistr\n" +
+			"from aseo.prl_liquidacionapro pl\n" +
+			"inner join aseo.maprc_maestroconciliacion mm on pl.maprc_ideregistr = mm.maprc_ideregistr \n" +
+			"inner join public.per_periodo pp on pp.per_ideregistro = mm.per_ideregistro\n" +
+			"where pl.prl_estado in ('A','P') and mm.emp_ideregistro = 317\n" +
+			"order by maprc_ideregistr desc;", nativeQuery = true)
+	List<Map<String,Object>> getPerPeriodos(@Param("states") List<String> states);
+
+	@Query(value = "select\n" +
+			"\tdistinct \n" +
+			"\tpp.per_ideregistro,\n" +
+			"\tpp.per_estado,\n" +
+			"\tpp.per_fecinicial,\n" +
+			"\tpp.per_fecfinal \n" +
+			"from\n" +
+			"\tper_periodo pp\n" +
+			"inner join aseo.aprconc_conciliacion ac on\n" +
+			"\tac.per_ideregistro = pp.per_ideregistro\n" +
+			"order by\n" +
+			"\tpp.per_fecinicial desc;" , nativeQuery = true)
+	List<Object[]> getPeriodosCon(@Param("idempresasesion") int idempresasesion);
+
+	@Query(value = "select distinct \n" +
+			"\tpp.per_estado ,\n" +
+			"\tpp.per_ideregistro,\n" +
+			"\taf.per_facturacion,\n" +
+			"\taf.per_prestacion,\n" +
+			"\tpp.per_fecinicial ,\n" +
+			"\tto_char(to_date(cast(af.per_facturacion as text), 'YYYYMM'), 'TMMonth YYYY') as per_nombre_facturacion,\n" +
+			"\tto_char(to_date(cast(af.per_prestacion as text), 'YYYYMM'), 'TMMonth YYYY') as per_nombre_prestacion,\n" +
+			"\tpp.per_fecfinal\n" +
+			"from aseo.aprfac_facturacion af \n" +
+			"inner join aseo.maprc_maestroconciliacion mm \n" +
+			"on mm.maprc_ideregistr = af.maprc_ideregistr \n" +
+			"inner join per_periodo pp on pp.per_ideregistro =mm.per_ideregistro and mm.maprc_ideregistr =:maprcIderegistro\n" +
+			"order by af.per_prestacion desc", nativeQuery = true)
+	List<Map<String,Object>> getPeriodosLiquidacionPrestacionApr(@Param("maprcIderegistro") int maprcIderegistro);
+
 }

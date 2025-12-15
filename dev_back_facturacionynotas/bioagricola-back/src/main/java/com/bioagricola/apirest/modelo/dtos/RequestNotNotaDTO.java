@@ -13,6 +13,16 @@ public class RequestNotNotaDTO {
 	private Long dsusIdregistr;
 	
 	private List<Long> facturas;
+        
+        private String pqr;
+
+        public String getPqr() {
+            return pqr;
+        }
+
+        public void setPqr(String pqr) {
+            this.pqr = pqr;
+        }       
 
 	public String getFecha() {
 		return fecha;

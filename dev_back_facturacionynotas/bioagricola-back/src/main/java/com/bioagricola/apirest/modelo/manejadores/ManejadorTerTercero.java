@@ -1,9 +1,9 @@
 package com.bioagricola.apirest.modelo.manejadores;
 
-import com.bioagricola.apirest.modelo.dtos.TerceroPorFactDTO;
 import com.bioagricola.apirest.modelo.entidades.TerTercero;
 import com.bioagricola.apirest.modelo.manejadores.utils.IManejadorCrud;
 import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
+import com.bioagricola.apirest.modelo.projections.TerceroFactProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -64,7 +64,8 @@ public interface ManejadorTerTercero extends ManejadorCrud<TerTercero, Long>, IM
     List<TerTercero> consultaTercerosAprovechadoresPorDocumento(
             @Param("documento") String documento,
             @Param("clasificaciones") List<Integer> clasificaciones);
-
+    
+    
     /**
      * Método de consulta de terceros según documento y digito
      */
@@ -122,15 +123,16 @@ public interface ManejadorTerTercero extends ManejadorCrud<TerTercero, Long>, IM
     /**
      * Método para consultar terceros asociados a facturas de un determinado periodo de liquidacion
      *
-     * @param perIderegistro
-     * @return List<TerceroPorFactDTO>
+     * @param maprcIderegistr
+     * @param idempresa
+     * @return List<TerceroFactProjection>
      */
-    @Query("select new com.bioagricola.apirest.modelo.dtos.TerceroPorFactDTO (tt.terNomcompleto , tt.terIderegistro) from TerTercero tt " +
-            "inner join DprlDetliquidacionapro dd on dd.terIderegistro = tt.terIderegistro " +
-            "inner join FacFactura ff on ff.facIderegistro = dd.facIderegistro " +
-            "inner join PerPeriodo pp2 on pp2.perIderegistro = ff.perIderegistro " +
-            "where pp2.perIderegistro IN :perIderegistro group by tt.terIderegistro")
-    List<TerceroPorFactDTO> consultaTerceroPorPeriodoFac(@Param("perIderegistro") List<Integer> perIderegistro);
+    @Query(value = "select distinct tt.ter_nomcompleto,tt.ter_ideregistro from aseo.aprconc_conciliacion ac \n" +
+                        "inner join aseo.maprc_maestroconciliacion mm on ac.maprc_ideregistr = mm.maprc_ideregistr\n" +
+                        "inner join aseo.prl_liquidacionapro pl on mm.per_ideregistro = pl.per_ideregistro and mm.usu_ideregistro = pl.prl_usu_ideregistro\n" +
+                        "inner join public.ter_tercero tt on tt.ter_ideregistro = ac.ter_ideregistro \n" +
+                    "where pl.prl_estado in ('A','P') and mm.maprc_ideregistr in (:maprcideregistr) and mm.emp_ideregistro = :idempresa ", nativeQuery = true)
+    List<TerceroFactProjection> consultaTerceroPorPeriodoFac(@Param("idempresa") Integer idempresa,@Param("maprcideregistr") List<Long> maprcIderegistr);
 
     Page<TerTercero> findAll(Specification specification, Pageable pageable);
 

@@ -48,7 +48,7 @@ public interface ManejadorCprCtrproceso
 	@Transactional
 	void aumentarCantidadRegistro(Integer cprideregistro);
 
-	@Query("select cpr from CprCtrProceso cpr where cpr.prgIderegistro =:tipoNota and cpr.empIderegistro = :idEmpresa and cpr.cprIdehilo=:tipoNota")
+	@Query("select cpr from CprCtrProceso cpr where cpr.prgIderegistro =:tipoNota and cpr.empIderegistro = :idEmpresa and cpr.cprIdehilo=:tipoNota and cpr.cprEstado= 'A' ")
 	public CprCtrProceso consultarProcesoCalidad(@Param("idEmpresa") int idEmpresa, @Param("tipoNota") int tipoNota);
 
 	@Query(value = "select cpr.acc_ideregistro idacceso,cpr.cpr_fecinicio fechainicio, "
@@ -62,4 +62,8 @@ public interface ManejadorCprCtrproceso
 	@Query("select pr from CprCtrProceso pr where pr.prgIderegistro = :idPrograma and pr.empIderegistro = :idEmpresa and pr.cprIdehilo = :idHilo and pr.cprEstado = 'A'")
 	List<CprCtrProceso> getProcesoEjecucionPorHilo(@Param("idPrograma") Integer idPrograma,
 			@Param("idEmpresa") Integer idEmpresa, @Param("idHilo") Long idHilo);
+        
+        @Query("select pr from CprCtrProceso pr where pr.prgIderegistro = :idPrograma and pr.empIderegistro = :idEmpresa and pr.cprEstado = :estado")
+	List<CprCtrProceso> getProcesos(@Param("idPrograma") Integer idPrograma,
+			@Param("idEmpresa") Integer idEmpresa, @Param("estado") String estado);
 }

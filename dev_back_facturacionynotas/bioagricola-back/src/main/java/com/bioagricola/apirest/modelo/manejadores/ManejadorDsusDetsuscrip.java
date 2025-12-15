@@ -141,8 +141,8 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
      * @return
      */
     @Query("select DISTINCT new com.bioagricola.apirest.modelo.dtos.ConceptoSuscripcionReliquidadaDTO(cc.conNombre as NOMBRE_CONCEPTO,  "
-            + "dd2.dfacVlrreal as TOTAL_FINAL_FACTURADA, " + "dd.dfacVlrreal as TARIFA_FINAL_DESCUENTO, "
-            + "(dd2.dfacVlrreal - dd.dfacVlrreal) as TOTAL_DESCUENTO, " + "fn.dsusIderegistr as ID_SUSCRIPCION, "
+            + "dd2.dfacVlrtotal as TOTAL_FINAL_FACTURADA, " + "dd.dfacVlrtotal as TARIFA_FINAL_DESCUENTO, "
+            + "(dd2.dfacVlrtotal - dd.dfacVlrtotal) as TOTAL_DESCUENTO, " + "fn.dsusIderegistr as ID_SUSCRIPCION, "
             + "CONCAT(pp.perNombre, ' - ', fn.cicAno ) as PERIODO_DESCUENTO, " + "tt.terNomcompleto as TERCERO, "
             + "tt.terDocumento as NUMERO_DOCUMENTO, " + "pp2.proDireccion as DIRECCION, "
             + "uu.uniNombre1 as UNI_DOCUMENTO, " + "uu2.uniNombre1 as UNI_TIPDOCUMENTO ) " + "from DfacDetnovedad dd  "
@@ -426,6 +426,37 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
                                                                        @Param("desde") Timestamp desde, @Param("hasta") Timestamp hasta,
                                                                        @Param("uniConeptoAforoExtraOrdinario") Integer uniConeptoAforoExtraOrdinario,
                                                                        @Param("numeroPqr") String numeroPqr, Pageable pageable);
+    
+    
+    @Query(value = "select dd.dsus_ideregistr ID_SUSCRIPCION, dd.dsus_pcodigo CODIGO, ff.fac_ideregistro NUMERO_FACTURA, \n" +
+"concat(pp.per_nombre,' - ',ff.cic_ano) PERIODO, df.dfac_vlrtotal ORDNIADRIO, dd.pro_catestrato ESTRATO, \n" +
+"dd.dsus_estado ESTADO, uu.uni_nombre1 TIPO_USO_ACTUAL, tr.ter_nomcompleto NOMBRE_COMPLETO, \n" +
+"tr.ter_documento DOCUMENTO_TERCERO, po.pro_direccion DIRECCION, b.barrio_nom BARRIO, po.pro_numcatastral CATASTRAL, \n" +
+"cc.cic_nombre CICLO \n" +
+"from public.dsus_detsuscrip dd \n" +
+"inner join public.fac_factura ff on ff.dsus_ideregistr = dd.dsus_ideregistr  \n" +
+"inner join public.dfac_detfactura df on df.fac_ideregistro = ff.fac_ideregistro \n" +
+"inner join public.tido_tipdocumen tt on tt.uni_tipdocument = ff.uni_tipdocument \n" +
+"inner join public.per_periodo pp on pp.per_ideregistro = ff.per_ideregistro \n" +
+"inner join public.uni_unidad uu on uu.uni_ideregistro = dd.uni_tipusosuscr \n" +
+"inner join public.ter_tercero tr on tr.ter_ideregistro = dd.ter_ideregistro \n" +
+"inner join public.pro_propiedad po on po.pro_ideregistro = dd.pro_ideregistro \n" +
+"inner join public.barrios b on b.barrio_ideregistro = dd.uni_barrio \n" +
+"inner join public.cic_ciclo cc on cc.cic_ideregistro = ff.cic_ideregistro \n" +
+"where (:idSuscripcion is null OR dd.dsus_ideregistr  =:idSuscripcion)\n" +
+"and dd.emp_ideregistro =:idEmpresa \n" +
+"AND (coalesce(:desde, null) is null OR ff.fac_fecha BETWEEN :desde AND :hasta ) \n" +
+"AND ff.fac_estado = 'A'  AND ff.fac_idepadre  is null \n" +
+"and (:uniConeptoAforoExtraOrdinario is null OR df.uni_concepto =:uniConeptoAforoExtraOrdinario) \n" +
+"and tt.tido_estado = 'A' ", nativeQuery = true)
+    public List<Object []> consultaDetalleAforados(@Param("idSuscripcion") Long idSuscripcion,
+                                                                       //@Param("codAntSuscripcion") String codAntSuscripcion, 
+                                                                       @Param("idEmpresa") int idEmpresa,
+                                                                       @Param("desde") Timestamp desde, @Param("hasta") Timestamp hasta,
+                                                                       @Param("uniConeptoAforoExtraOrdinario") Integer uniConeptoAforoExtraOrdinario,
+                                                                       Pageable pageable);
+    
+    
 
     /**
      * Método de consulta de facturas de suscripciones para eliminación/adición de
@@ -451,7 +482,7 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
             + "dd.dsusEstado as ESTADO, " + "uu.uniNombre1 as TIPO_USO,  " + "tt.terNomcompleto as NOMBRE_COMPLETO,   "
             + "tt.terDocumento as DOCUMENTO_TERCERO, " + "pp.proDireccion as DIRECCION,   "
             + "b2.barrioNom as BARRIO,   " + "pp.proNumcatastral as CATASTRAL, "
-            + "cc.cicNombre as CICLO, fac.facVlrreal as VALOR_EMITIDO, " + "SUM(dd3.dfacVlrreal) as VALOR_AJUSTAR, "
+            + "cc.cicNombre as CICLO, fac.facSdoreal as VALOR_EMITIDO, " + "SUM(dd3.dfacSdoreal) as VALOR_AJUSTAR, "
             + "0.0 as SALDO_EMITIDO," + "dd.dsusEstado as ESTADO_SUSCRIPCION ) " + "from DsusDetsuscrip dd "
             + "inner join TerTercero tt on tt.terIderegistro = dd.terIderegistro "
             + "inner join ProPropiedad pp on pp.proIderegistro = dd.proIderegistro "
@@ -640,6 +671,25 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
                                                     @Param("desde") Timestamp desde, @Param("hasta") Timestamp hasta,
                                                     @Param("uniConeptoAforoExtraOrdinario") Integer uniConeptoAforoExtraOrdinario,
                                                     @Param("numeroPqr") String numeroPqr);
+    
+    
+    @Query(value = "select count(distinct ff.fac_ideregistro) from public.dsus_detsuscrip dd \n" +
+"inner join public.fac_factura ff on ff.dsus_ideregistr = dd.dsus_ideregistr  \n" +
+"inner join public.dfac_detfactura df on df.fac_ideregistro = ff.fac_ideregistro \n" +
+"inner join public.tido_tipdocumen tt on tt.uni_tipdocument = ff.uni_tipdocument \n" +
+"where (:idSuscripcion is null OR dd.dsus_ideregistr  =:idSuscripcion) \n" +
+"and dd.emp_ideregistro =:idEmpresa \n" +
+"AND (coalesce(:desde, null) is null OR ff.fac_fecha BETWEEN :desde AND :hasta ) \n" +
+"AND ff.fac_estado = 'A'  AND ff.fac_idepadre  is null \n" +
+"and (:uniConeptoAforoExtraOrdinario is null OR df.uni_concepto =:uniConeptoAforoExtraOrdinario) \n" +
+"and tt.tido_estado = 'A' ", nativeQuery = true)
+    public BigInteger conteoConsultaDetalleAforados(@Param("idSuscripcion") Long idSuscripcion,
+                                                    //@Param("codAntSuscripcion") String codAntSuscripcion, 
+                                                    @Param("idEmpresa") int idEmpresa,
+                                                    @Param("desde") Timestamp desde, @Param("hasta") Timestamp hasta,
+                                                    @Param("uniConeptoAforoExtraOrdinario") Integer uniConeptoAforoExtraOrdinario);
+    
+    
 
     /**
      * Consulta de conteo de resultados para la consulta de facturas de una
@@ -705,6 +755,22 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
                                             @Param("registroPersona") Long registroPersona);
 
     /**
+     * Método para consultar terceros asociados a facturas de un determinado periodo de liquidacion
+     *
+     * @param idSuscripcion
+     */
+        @Query("  select tt.terNomcompleto, tt.terDocumento\n" +
+"            from DsusDetsuscrip dd \n" +
+"            inner join TerTercero tt \n" +
+"            on tt.terIderegistro =dd.terIderegistro \n" +
+"            where dd.dsusIderegistr  = :idSuscripcion ")
+    List<String> consultarTerceroPorSuscripcion(
+            @Param("idSuscripcion") Long idSuscripcion);  
+    
+    /**   
+    
+    
+    /**
      * Método encargado de obtener el valor de la liquidación asociado a cada
      * suscripción
      *
@@ -734,8 +800,8 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
      * @return
      */
     @Query("select new com.bioagricola.apirest.modelo.dtos.SuscripPorMicroRutaDTO(dd.dsusIderegistr, vv.rutIdemicroruta, vv.vrmrValor, vv.conIderegistro) from DsusDetsuscrip dd  "
-            + "inner join RrbaRutarecoleccionbarrido rr on dd.dsusIderegistr = rr.dsusIderegistr  "
-            + "inner join VrmrVarmicroruta vv on vv.rutIdemicroruta = rr.rutIderegistro   "
+            + "inner join RrbaRutarecoleccionbarrido rr on dd.dsusIderegistr = rr.dsusIderegistr and rr.rutrecbarSwtact = 'A' "
+            + "inner join VrmrVarmicroruta vv on vv.rutIdemicroruta = rr.rutIderegistro and vv.vrmrValor > 0  "
             + "where vv.perIderegistro =:idPeriodo " + "and vv.conIderegistro =:idConceptoReporteTarifas "
             + "and vv.empIderegistro =:idEmpresa ")
     public List<SuscripPorMicroRutaDTO> obtenerSuscripPorMicroRuta(
@@ -899,7 +965,7 @@ public interface ManejadorDsusDetsuscrip extends ManejadorCrud<DsusDetsuscrip, L
             "where sus.terIderegistro = :idClient and sus.empIderegistro = :idEmpresa ")
     List<DsusDetsuscrip> searchSubscriptionsByIdEmpAndIdClient(@Param("idEmpresa") int idEmpresa, @Param("idClient") Long idClient);
 
-    /**
+  /**
      * Consulta para obtener el nombre de la empresa con la que está homologada una suscripción,
      * para saber si está homologada con el servicio de gas o energía por
      *

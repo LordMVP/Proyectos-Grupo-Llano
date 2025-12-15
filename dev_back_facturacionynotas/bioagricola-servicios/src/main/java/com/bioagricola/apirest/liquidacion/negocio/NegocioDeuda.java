@@ -19,6 +19,7 @@ import com.bioagricola.apirest.modelo.dtos.RequestDeuda;
 import com.bioagricola.apirest.modelo.excepciones.NegocioException;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrprocesoRespository;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorHistoricos;
+import org.jfree.util.Log;
 
 @Service
 public class NegocioDeuda  {
@@ -91,7 +92,9 @@ public class NegocioDeuda  {
 				idHilo += 1;
 			
 			}
-				
+		manejadorCprCtrprocesoRespository.vaciarDetalleNovedadTMPDeuda(idEmpresa, idUsuario, tipoNota, facturas);
+		manejadorCprCtrprocesoRespository.vaciarNovedadTMP(idEmpresa, idUsuario, tipoNota);
+	
 			for (String item : facturas) {
 				if (idHilo > numeroHilosFacturacion) {
 					idHilo = 1;
@@ -101,7 +104,7 @@ public class NegocioDeuda  {
 					idCiclo = Integer.parseInt (factura[1].toString());
 
 				iniciarProceso( idEmpresa,  idUsuario,  idsuscripcion.toString(), idHilo, tipoNota);
-				
+				Log.info("Numero de hilo "+idHilo);
 				lanzarHilos(idAcceso, idCiclo, idEmpresa, adiciona, item, idHilo, tipoNota,suselimina,suscripcion.toString());
 				idHilo += 1;
 
@@ -123,8 +126,8 @@ public class NegocioDeuda  {
 		
 		try {
 
-		manejadorCprCtrprocesoRespository.vaciarDetalleNovedadTMPDeuda(idEmpresa, idUsuario, tipoNota, facturas);
-		manejadorCprCtrprocesoRespository.vaciarNovedadTMP(idEmpresa, idUsuario, tipoNota);
+//		manejadorCprCtrprocesoRespository.vaciarDetalleNovedadTMPDeuda(idEmpresa, idUsuario, tipoNota, facturas);
+//		manejadorCprCtrprocesoRespository.vaciarNovedadTMP(idEmpresa, idUsuario, tipoNota);
 
 		existeTabla = manejadorHistoricos.validarTablaExistente(identificadorEmpresa);
 	
@@ -143,8 +146,11 @@ public class NegocioDeuda  {
 
 	public void lanzarHilos(Integer idAcceso, Integer idCiclo, Integer idEmpresa, char adiciona, String factura,
 			Integer idHilo, Integer tipoNnota, Boolean suselimina, String suscripcion) {
-		
+	        
 		negocioHilosDeuda.inicializarData(idAcceso, idCiclo, idEmpresa, adiciona, factura, idHilo, tipoNnota,suselimina,suscripcion);
+                /*NegocioHilosDeuda obj = new NegocioHilosDeuda();
+                obj.inicializarData(idAcceso, idCiclo, idEmpresa, adiciona, factura, idHilo, tipoNnota, suselimina, suscripcion);*/
+                
 
 	}
 
@@ -153,7 +159,7 @@ public class NegocioDeuda  {
 		Object[] procesos = null;
 		BigInteger cantidad;
 
-		procesos = manejadorHistoricos.getProcesoEjecucion(identificadorEmpresa, programaFacturaPeriodo, idEmpresa,
+		procesos = manejadorHistoricos.getProcesoEjecucion(identificadorEmpresa, tipoNnota, idEmpresa,//programaFacturaPeriodo
 				tipoNnota, idUsuario);
 
 		if (procesos != null) {

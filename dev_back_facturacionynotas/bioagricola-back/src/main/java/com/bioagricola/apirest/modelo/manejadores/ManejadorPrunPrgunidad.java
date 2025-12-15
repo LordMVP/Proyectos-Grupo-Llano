@@ -37,8 +37,8 @@ public interface ManejadorPrunPrgunidad extends ManejadorCrud<PrunPrgunidad,Long
 	@Query("select pp from PrunPrgunidad pp "
 			+ "where pp.prgIderegistro = :idPrograma "
 			+ "and pp.uniUnidad.uniIderegistro = :idUnidadDxD "
-			+ "and pp.usuIderegistro = :idUsuario")
-	PrunPrgunidad consultaRelacion(@Param("idUsuario") int idUsuario, @Param("idUnidadDxD") Integer idUnidadDxD, @Param("idPrograma") Integer idPrograma);
+			 )
+	PrunPrgunidad consultaRelacion(@Param("idUnidadDxD") Integer idUnidadDxD, @Param("idPrograma") Integer idPrograma);
 
 	@Query(value = "select " +
 			"    count(*) " +

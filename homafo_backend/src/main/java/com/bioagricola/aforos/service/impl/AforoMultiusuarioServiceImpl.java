@@ -277,7 +277,8 @@ public class AforoMultiusuarioServiceImpl {
 			det.setUsuIderegistro(aforo.getUsuIderegistro());
 			det.setAfoFechafinvegencia(aforo.getAfoFechafinvegencia());
 		    det.setAfoNumpqr(aforo.getAfoNumpqr());
-		    det.setUniActsuscripc(detDto.getIasusNombreestablecimiento() == null ? 5274 
+		    det.setUniActsuscripc(detDto.getUniActsuscripc() == null
+		    		? UtilConstantes.VIVIENDA 
 		    		: Integer.parseInt(detDto.getUniActsuscripc().toString()));
 		    
 		    listaDetalle.add(det);
@@ -325,10 +326,10 @@ public class AforoMultiusuarioServiceImpl {
 		        Optional.ofNullable(iasus.getSusIderegistro())
 		                .ifPresent(val -> iasusInforadicionalsuscripcionRepository.save(iasus));
 
-		        Optional.ofNullable(detDto.getUniActsuscripc())
+		        Optional.ofNullable(det.getUniActsuscripc())
 		                .filter(val -> val >= 0)
 		                .ifPresent(val -> {
-		                    dsus.setUniActsuscripc(val);
+		                    dsus.setUniActsuscripc(Long.parseLong(val.toString()));
 		                    dsusDetsuscripRepository.save(dsus);
 		                });
 		        if (dsus.getUniTipusosuscr().equals(UtilConstantes.COMERCIAL)) valTipoUso = true;

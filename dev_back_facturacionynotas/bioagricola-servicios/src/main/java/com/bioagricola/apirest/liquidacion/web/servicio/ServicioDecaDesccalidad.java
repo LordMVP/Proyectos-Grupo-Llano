@@ -11,8 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bioagricola.apirest.liquidacion.negocio.NegocioDecaDesccalidad;
 import com.bioagricola.apirest.liquidacion.negocio.interfaces.IDecaDesccalidad;
 import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolAprobDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolAprobRespuestaDTO;
+import com.bioagricola.apirest.modelo.dtos.ResponseDescuentosCalidadRecolDTO;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * Servicios REST para operaciones CRUD y de negocio sobre la entidad Deca_Desccalidad
@@ -42,8 +47,13 @@ public class ServicioDecaDesccalidad implements IDecaDesccalidad {
 	 * @throws IOException
 	 */
 	@GetMapping("/descuentoCalidad")
-	public ResponseDescuentosCalidadDTO aplicarDescCalidad() throws JsonParseException, JsonMappingException, IOException {
+	public ResponseDescuentosCalidadRecolDTO aplicarDescCalidad() throws JsonParseException, JsonMappingException, IOException {
 		return negocioDecaDesccalidad.aplicarDescCalidad();
+	}
+        
+        @PostMapping("/aprobacionDescuentosCalidad")
+	public ResponseDescuentosCalidadRecolAprobRespuestaDTO aprobarDescCalidad(@RequestBody ResponseDescuentosCalidadRecolAprobDTO respuesta) throws IOException{
+		return negocioDecaDesccalidad.aprobarDescCalidad(respuesta);
 	}
 
 }

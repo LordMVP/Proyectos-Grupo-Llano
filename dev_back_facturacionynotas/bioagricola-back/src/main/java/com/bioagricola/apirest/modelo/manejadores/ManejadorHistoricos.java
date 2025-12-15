@@ -8,6 +8,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class ManejadorHistoricos {
 
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	@PersistenceContext
 	EntityManager entityManager;
 
@@ -22,6 +26,13 @@ public class ManejadorHistoricos {
 		String sql = "select cic_ideregistro from " + dsusdetsuscrip + " where dsus_ideregistr = " + suscripcion + " "
 				+ fechadsusdetsuscrip + "";
 		return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).intValue();
+	}
+        
+        public List<Integer> buscarIdCiclo(Integer suscripcion, Date fechaDesde, Date fechaHasta) {
+		String sql = "select distinct ff.cic_ideregistro  from fac_factura ff " +
+				" where ff.fac_fecha between '"+ fechaDesde + "' and '" + fechaHasta + "' and ff.dsus_ideregistr = "+ suscripcion +
+                                    " and ff.fac_estado = 'A' and ff.uni_documento = 24";
+		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -110,6 +121,14 @@ public class ManejadorHistoricos {
 		String query = " select dsus_hist_idregistr, 'dsus_detsuscrip_hist'  AS valida "
 				+ " from  dsus_detsuscrip_hist where fecha_modificacion BETWEEN '" + fechaDesde + "' and '" + fechaHasta
 				+ "'  and  dsus_ideregistr = " + suscripcion + " " + " order by fecha_modificacion asc limit 1;";
+		return entityManager.createNativeQuery(query).getResultList();
+	}
+        
+        @SuppressWarnings("unchecked")
+	public List<Object[]> historicoDsusDetsuscrip(Date fechaHasta, String suscripcion) {
+		String query = " select dsus_hist_idregistr, 'dsus_detsuscrip_hist'  AS valida "
+				+ " from  dsus_detsuscrip_hist where fecha_modificacion <= '" + fechaHasta
+				+ "' and  dsus_ideregistr = " + suscripcion + " order by fecha_modificacion desc limit 1;";
 		return entityManager.createNativeQuery(query).getResultList();
 	}
 	
@@ -203,18 +222,51 @@ public class ManejadorHistoricos {
 			String parametros, Integer tipoNota) {
 
 		String sql = "Insert into " + tableId + " "
-				+ " select dsus_ideregistr idsuscripcion,dsus.uni_liquidacion idliquidacion, "
-				+ " dsus.cic_ideregistro idciclo, " + " " + numeroProceso + " as proceso, "
+				/*+ " select distinct dsus_ideregistr idsuscripcion,dsus.uni_liquidacion idliquidacion, "
+				//+ " dsus.cic_ideregistro idciclo, " + " " + numeroProceso + " as proceso, "
+                                + idCiclo + " , " + numeroProceso + " as proceso, "
 				+ " CAST( 'P' AS character varying )estado," + "CAST( ' - ' AS character varying ) " + "mensaje, "
 				+ idUsuario + " usu_ideregistro , per_ideregistro, per_fecinicial, per_fecfinal, " + tipoNota
 				+ " as tipo_nota " + "from " + dsusdetsuscrip + " dsus , per_periodo per "
-				+ " where dsus.cic_ideregistro=" + idCiclo + " and " + "dsus.dsus_estado='A' and "
+				//+ " where dsus.cic_ideregistro=" + idCiclo + " and " 
+                                + " where dsus.dsus_estado='A' and "
 				+ " dsus.emp_ideregistro=" + idEmpresa + "and " + " dsus_ideregistr = " + suscripcion + "and "
-				+ " per_fecinicial >= '" + fechadesde + "' and per_fecfinal <= '" + fechahasta + "' "
-				+ " and per_estado in('C','A','B') and per.cic_ideregistro=dsus.cic_ideregistro  " + parametros
-				+ "    order by per_ideorden  ;";
+				//+ " per_fecinicial >= '" + fechadesde + "' and per_fecfinal <= '" + fechahasta + "' "
+                                + "and per_fecfinal between '" + fechadesde + "' and '" + fechahasta 
+				//+ " and per_estado in('C','A','B') and per.cic_ideregistro=dsus.cic_ideregistro  " + parametros
+                                + " and per_estado in('C','A','B') and per.cic_ideregistro= "+ idCiclo + " " + parametros ;
+				//+ "    order by per_ideorden  "
+                                //+ "limit 1;";*/
+                        + " Select dsus_ideregistr idsuscripcion,dsus.uni_liquidacion idliquidacion,"
+                        + " dsus.cic_ideregistro idciclo, " + " " + numeroProceso + " as proceso, "
+                        + " CAST( 'P' AS character varying )estado," + "CAST( ' - ' AS character varying ) " + "mensaje, "
+                        + idUsuario + " usu_ideregistro , per.per_ideregistro, per.per_fecinicial, per.per_fecfinal, " + tipoNota
+                        + " as tipo_nota " + "from fac_factura dsus , per_periodo per  where "
+                        + " dsus.emp_ideregistro=" + idEmpresa + "and " + " dsus_ideregistr = " + suscripcion + " and "
+                        + " dsus.fac_fecha between '" + fechadesde + "' and '" + fechahasta + " ' and per.per_estado in('C','A','B') "
+                        + " and per.per_ideregistro = dsus.per_ideregistro and dsus.uni_documento = 24 order by dsus.fac_fecha desc "; //limit 1
+                
+		log.error("INSERT -> "+sql);
 		return entityManager.createNativeQuery(sql).executeUpdate();
 	}
+        
+	@Modifying
+	@Transactional
+	public int insertarSuscripcionesFactura( Integer idEmpresa, Integer idUsuario, Integer numeroProceso,
+			String tableId, String suscripcion, Integer tipoNota , String idFactura) {
+
+		String sql = "Insert into " + tableId + " "
+                        + " Select distinct ff.dsus_ideregistr idsuscripcion,ff.uni_liquidacion idliquidacion,"
+                        + " ff.cic_ideregistro idciclo, " + " " + numeroProceso + " as proceso, "
+                        + " CAST( 'P' AS character varying )estado," + "CAST( ' - ' AS character varying ) " + "mensaje, "
+                        + idUsuario + " usu_ideregistro , pp.per_ideregistro, pp.per_fecinicial, pp.per_fecfinal, " + tipoNota
+                        + " as tipo_nota " + " from public.fac_factura ff "
+                        + "inner join public.per_periodo pp on pp.per_ideregistro = ff.per_ideregistro and pp.per_estado in('C','A','B') " 
+                        + "where ff.fac_ideregistro = "+idFactura+" and ff.dsus_ideregistr = "+suscripcion+" and ff.emp_ideregistro = "+idEmpresa;
+                
+		log.error("INSERT -> "+sql);
+		return entityManager.createNativeQuery(sql).executeUpdate();
+	}        
 
 	public Object[] getProcesoEjecucion(String tableName, Integer idprograma, Integer idempresa, Integer tipoNnota,
 			int idUsuario) {
@@ -277,7 +329,7 @@ public class ManejadorHistoricos {
 	@SuppressWarnings("unchecked")
 	public List<Object> getConceptosLiquidacion(Integer idliquidacion, String coliconliquida, String conconcepto,
 			String parametro) {
-		String sql = "select coli.uni_concepto idconcepto, con.con_preliquidar preliquidar " + " from "
+		String sql = "select distinct coli.uni_concepto idconcepto, con.con_preliquidar preliquidar " + " from "
 				+ coliconliquida + " coli " + " inner join " + conconcepto + " con "
 				+ " on coli.uni_concepto = con.uni_concepto  where coli.uni_liquidacion = " + idliquidacion
 				+ " " + parametro + "And (CASE WHEN con.con_finvigencia IS NULL THEN "
@@ -316,7 +368,7 @@ public class ManejadorHistoricos {
 				+ "                     con.con_tipregistro tiporegistro,con.fun_ideregistro idfuncion,"
 				+ "                     con.con_precision as precision,"
 				+ "                     con.con_metajuste metodo" + "                    from " + conconcepto
-				+ " con where con.uni_concepto =" + idconcepto + " " + parametro;
+				+ " con where con.uni_concepto =" + idconcepto + " " + parametro + " order by fecha_modificacion desc limit 1";
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -326,10 +378,11 @@ public class ManejadorHistoricos {
 				+ "                cast (CURRENT_TIMESTAMP + (cast(CAST(COALESCE(liq.liq_diavencim,0) as CHARACTER VARYING) ||' days' as  INTERVAL)) as date) fechavencimiento"
 				+ "                from  " + liqliquidacion + " liq " + "                where liq.uni_liquidacion="
 				+ idLiquidacion + " " + parametro;
+		log.error("OBTENER LIQUIDACION USUARIO-> "+sql);
 		return entityManager.createNativeQuery(sql).getResultList().get(0);
 	}
 
-	public BigDecimal getValorFactura(Integer idFactura) {
+	public BigDecimal getValorFactura(BigInteger idFactura) {
 		String sql = "SELECT" + "  SUM (dfac.dfac_vlrreal) valor" + "  FROM" + "  dfac_detnovedad dfac" + "  WHERE"
 				+ "  dfac.fac_ideregistro = " + idFactura + " ";
 		return (BigDecimal) entityManager.createNativeQuery(sql).getSingleResult();
@@ -374,21 +427,28 @@ public class ManejadorHistoricos {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object> getRangoConcepto(Integer idconcepto, BigDecimal valortotal, String racoranconcept,
+	public List<Object[]> getRangoConcepto(Integer idconcepto, BigDecimal valortotal, String racoranconcept,
 			String parametro) {
 		String sql = "select raco.raco_ideregistr idrangoconcepto,raco.uni_concepto idconcepto,"
 				+ "                 raco.raco_raninicial rangoinicial, raco.raco_ranfinal rangofinal,"
 				+ "                 raco.raco_valor valor, raco.raco_formula formula, raco.usu_ideregistro idusuario"
-				+ "               from " + racoranconcept + "  raco " + "               where raco.uni_concepto= "
+				+ "               from public.raco_ranconcept_hist "  +
+                                //+ racoranconcept +
+                                  "  raco " + "               where raco.uni_concepto= "
 				+ idconcepto + " and " + valortotal + " between  raco.raco_raninicial and  raco.raco_ranfinal" + " "
-				+ parametro;
+				+ parametro + " order by fecha_modificacion desc limit 1";
+//		log.error("RANGO->SELECT-> "+sql);
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
 	public Integer tieneRangoConcepto(Integer idconcepto, String racoranconcept, String parametro) {
-		String sql = "select count(*) numero from " + racoranconcept + " raco where raco.uni_concepto= " + idconcepto
+		String sql = "select count(raco.raco_ideregistr) numero from " + racoranconcept + " raco where raco.uni_concepto= " + idconcepto
 				+ " " + parametro;
-		return entityManager.createNativeQuery(sql).getFirstResult();
+
+
+        Object numero= entityManager.createNativeQuery(sql).getSingleResult();
+        return ((BigInteger)numero).intValue();
+
 	}
 
 	@Modifying
@@ -398,21 +458,23 @@ public class ManejadorHistoricos {
 		return entityManager.createNativeQuery(sql).executeUpdate();
 	}
 
-	public int getFacturaIdRegistro(String idSuscripcion, Integer idperiodo, Integer idliquidacion) {
+	public BigInteger getFacturaIdRegistro(String idSuscripcion, Integer idperiodo, Integer idliquidacion) {
 		String sql = "  select ff.fac_ideregistro " + " from fac_factura ff "
-				+ " where dsus_ideregistr = " + idSuscripcion + " and fac_feceliminad is null"
+                                +" inner join liq_liquidacion ll on ll.uni_liquidacion = "+idliquidacion+" and ll.est_liquidacion = 9 and ll.uni_documento = 24 and ll.liq_venclasific = 'LI' " //modifica
+				+ " where ff.dsus_ideregistr = " + idSuscripcion + " and ff.fac_feceliminad is null"
 				+ " and ff.per_ideregistro = " + idperiodo
-				+ " and fac_estado like 'A' and uni_liquidacion = " + idliquidacion + " and fac_idepadre is null";
+				+ " and ff.fac_estado like 'A' and ff.uni_liquidacion = " + idliquidacion + " and ff.fac_idepadre is null";
+                                //+ " and fac_estado like 'A' and fac_idepadre is null";
 
 		try {
-			return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).intValue();
+			return ((BigInteger) entityManager.createNativeQuery(sql).getSingleResult()) ;
 		} catch (Exception e) {
-			return 0;
+			return BigInteger.ZERO;
 		}
 
 	}
 
-	public int getFacturaVersion(Integer factura) {
+	public int getFacturaVersion(BigInteger factura) {
 		String sql = "  select fac_version " + " from fac_factura  "
 				+ " where fac_ideregistro = " + factura + " ";
 		return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).intValue();
@@ -425,7 +487,7 @@ public class ManejadorHistoricos {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object[]> getNovedades(int idFactura, BigInteger idNovedad) {
+	public List<Object[]> getNovedades(BigInteger idFactura, BigInteger idNovedad) {
 		String sql = " SELECT  dnov.dfac_estado, dnov.dfac_cantidad, dnov.dfac_vlrunitari, "
 				+ " dnov.dfac_vlrtotal, "
 				+ " (dfac.dfac_vlrreal - dnov.dfac_vlrreal  ) as dfac_vlrreal, dnov.dfac_sdoreal, dnov.fac_ideregistro, dfac.uni_concepto, "
@@ -436,13 +498,13 @@ public class ManejadorHistoricos {
 				+ "group by  dnov.dfac_estado, dnov.dfac_cantidad, dnov.dfac_vlrunitari, "
 				+ " dnov.dfac_vlrtotal, dnov.dfac_vlrreal, dnov.dfac_sdoreal, dnov.fac_ideregistro, dfac.uni_concepto, "
 				+ " dnov.dfac_version, dnov.usu_ideregistro, dnov.dfac_ideorigen, dnov.damo_ideregistr, dnov.dfin_ideregistr, dfac.dfac_vlrtotal, "
-				+ " dfac.dfac_ideregistr " + "having   (dfac.dfac_vlrreal - dnov.dfac_vlrreal  ) <> 0";
+				+ " dfac.dfac_ideregistr " + "having   (dfac.dfac_vlrtotal - dnov.dfac_vlrtotal  ) <> 0";
 		return entityManager.createNativeQuery(sql).getResultList();
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object[]> getNovedadesDeuda(int idFactura) {
+	public List<Object[]> getNovedadesDeuda(Long idFactura) {
 		String sql = " SELECT  dnov.dfac_estado, dnov.dfac_cantidad, dnov.dfac_vlrunitari, "
 				+ " dnov.dfac_vlrtotal, "
 				+ " dnov.dfac_vlrreal, dnov.dfac_sdoreal, dnov.fac_ideregistro, dfac.uni_concepto, "
@@ -454,13 +516,14 @@ public class ManejadorHistoricos {
 
 	}
 
-	public Integer getFacturaCicloPeriodoActual(Long idsuscripcion, Integer iddocumento, Integer idtipodocumento,
+	public BigInteger getFacturaCicloPeriodoActual(Long idsuscripcion, Integer iddocumento, Integer idtipodocumento,
 			Integer idciclo, Integer idperiodo) {
 		String sql = " select f.fac_ideregistro " + " from fac_factura f " + " where f.dsus_ideregistr ="
-				+ idsuscripcion + " " + " and f.uni_documento =" + iddocumento + " " + " and f.uni_tipdocument="
-				+ idtipodocumento + " " + " and f.cic_ideregistro=" + idciclo + " " + " and f.per_ideregistro="
+				+ idsuscripcion + " " + " and f.uni_documento =" + iddocumento + " " 
+                        //+ " and f.uni_tipdocument=" + idtipodocumento + " " 
+                        + " and f.cic_ideregistro=" + idciclo + " " + " and f.per_ideregistro="
 				+ idperiodo + " " + " AND f.fac_estado  IN ('A') AND f.fac_ideorigen is null and fac_idepadre is null";
-		return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).intValue();
+		return (BigInteger) entityManager.createNativeQuery(sql).getSingleResult();
 
 	}
 
@@ -487,6 +550,52 @@ public class ManejadorHistoricos {
 				+ " AND ( CASE"
 				+ " WHEN con.con_finvigencia IS NULL THEN"
 				+ " con.con_finvigencia IS NULL  ELSE con.con_finvigencia >= now() END )";
+		return entityManager.createNativeQuery(sql).getResultList();
+	}
+        
+        	@SuppressWarnings("unchecked")
+	public List<Object[]> getConceptosRelacionados(Integer idconcepto, Integer liquidaciones, String conconcepto,
+			String coreconrelacio, String parametro,String parametro2) {
+            
+                        String filtroCon = (parametro2 == null || parametro2.isEmpty()) ? " " : parametro2.replace("fecha_modificacion" ,"con.fecha_modificacion" )   ;  
+                        String filtroConUltimo = (parametro2 == null || parametro2.isEmpty()) ? " " : parametro2.replace("fecha_modificacion","ultimo.fecha_modificacion")  ;  
+                        String sql = "SELECT DISTINCT con.uni_concepto idconcepto, " + "con.est_concepto idestructuraconcepto, " +
+                                    "con.con_nombre concepto, con.con_alias alias, con.con_abreviatura abreviatura," +
+                                    "con.con_tipcalculo tipocalculo, con.con_valor valor,con.con_formula formula," +
+                                    "con.con_operacion operacion, con.con_naturaleza naturaleza, con.con_preliquidar preliquidar," +
+                                    "con.con_anticipo anticipo, con.con_pagpriori pagoprioridad, con.con_financiable financiable," +
+                                    "con.con_inivigencia iniciovigencia, con.con_finvigencia finvigencia, con.con_estado estado ," +
+                                    "con.prg_ideregistro idprograma, con.con_condonable condonable, con.con_valnulo valornulo,"    +
+                                    "con.usu_ideregistro idusuarioregistra, con.con_tipregistro tiporegistro, con.fun_ideregistro idfuncion, " +
+                                    "con.con_precision AS PRECISION, con.con_metajuste metodo, core. fun_ideregistro idfuncionrelacion " +
+                                    "FROM "+ conconcepto+ " con INNER JOIN "+coreconrelacio+" core ON con.uni_concepto = core.uni_conrelacion " +
+                                    filtroCon +" INNER JOIN LATERAL (SELECT max(ultimo.con_hist_idregistr) idhistorico  FROM "+conconcepto+" ultimo " +
+                                    "WHERE ultimo.uni_concepto = con.uni_concepto "+ filtroConUltimo +" ) ultimovalor ON TRUE " +
+                                    "INNER JOIN coli_conliquida coli ON coli.uni_concepto = core.uni_conrelacion WHERE con.con_hist_idregistr = ultimovalor.idhistorico " +
+                                    "AND core.uni_concepto IN (" + idconcepto+" ) AND coli.uni_liquidacion IN (" + liquidaciones + ") AND ( CASE WHEN con.con_finvigencia IS NULL THEN con.con_finvigencia IS NULL " +
+                                "ELSE con.con_finvigencia >= now() END )" ;
+            
+		/*String sql = " select distinct con.uni_concepto idconcepto, con.est_concepto idestructuraconcepto,"
+				+ " con.con_nombre concepto,con.con_alias  alias, con.con_abreviatura abreviatura,"
+				+ " con.con_tipcalculo tipocalculo, con.con_valor valor, con.con_formula formula,"
+				+ " con.con_operacion operacion, con.con_naturaleza naturaleza,"
+				+ " con.con_preliquidar preliquidar, con.con_anticipo anticipo,"
+				+ " con.con_pagpriori  pagoprioridad, con.con_financiable financiable,"
+				+ " con.con_inivigencia iniciovigencia,con.con_finvigencia finvigencia,"
+				+ " con.con_estado estado ,con.prg_ideregistro idprograma, con.con_condonable condonable,"
+				+ " con.con_valnulo valornulo,con.usu_ideregistro idusuarioregistra,"
+				+ " con.con_tipregistro tiporegistro,con.fun_ideregistro idfuncion,"
+				+ " con.con_precision as precision,"
+				+ " con.con_metajuste metodo,"
+				+ " core. fun_ideregistro idfuncionrelacion"
+				+ " from "+ conconcepto+ " con inner join "+coreconrelacio+" core on con.uni_concepto=core.uni_conrelacion"
+                                + parametro2 
+				+ " inner join coli_conliquida coli on coli.uni_concepto=core.uni_conrelacion"
+				+ " where core.uni_concepto in (" + idconcepto
+				+ " ) and coli.uni_liquidacion in (" + liquidaciones + ")  " + parametro + ""
+				+ " AND ( CASE"
+				+ " WHEN con.con_finvigencia IS NULL THEN"
+				+ " con.con_finvigencia IS NULL  ELSE con.con_finvigencia >= now() END )";*/
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -537,6 +646,21 @@ public class ManejadorHistoricos {
 		String sql = "select paen_tipocalculo , paen_valor,paen_sqlstring  from aseo.paen_parametrosentradanotas "
 				+ " where prg_ideregistro =" + tipoNota + " and emp_ideregistro = " + idempresa + " and uni_concepto ="
 				+ idConcepto + " ; ";
+//		log.error("CONSULTASQL->CONCEPTO-> "+sql);
+		return entityManager.createNativeQuery(sql).getResultList();
+	}
+        
+        @SuppressWarnings("unchecked")
+	public List<Object[]> getTipoCalculoConceptoNota(Integer tipoNota, Integer idempresa, String estadoTipo) {
+		String sql = "select c.uni_concepto , c.est_concepto , c.con_nombre ,c.con_alias , c.con_abreviatura , " +
+                             "p.paen_tipocalculo, p.paen_valor, c.con_formula , c.con_operacion , c.con_naturaleza, " +
+                             "c.con_preliquidar, c.con_anticipo, c.con_pagpriori, c.con_financiable, c.con_inivigencia ,c.con_finvigencia, " +
+                             "c.con_estado  ,c.prg_ideregistro , c.con_condonable , c.con_valnulo ,c.usu_ideregistro, " +
+                             "c.con_tipregistro ,c.fun_ideregistro , c.con_precision , c.con_metajuste  " +
+                             "from aseo.paen_parametrosentradanotas p " +
+                             "inner join public.con_concepto c on c.uni_concepto = p.uni_concepto "
+				+ " where p.prg_ideregistro =" + tipoNota + " and p.emp_ideregistro = " + idempresa + 
+                             " and p.paen_tipocalculo = '" +estadoTipo +"' ; ";
 		return entityManager.createNativeQuery(sql).getResultList();
 	}
 
@@ -551,14 +675,15 @@ public class ManejadorHistoricos {
 
 	public Integer validarTablaExistente(String tabla) {
 		String sql = " SELECT count(table_name) FROM information_schema.columns" + " WHERE table_name like '%" + tabla
-				+ "%' " + " AND table_catalog = 'Tecnicoaseo' " + " AND table_schema = 'public'";
+				+ "%' " + " AND table_catalog = 'Tecnico' " + " AND table_schema = 'public'";
+		log.error("CONSULTA DE TABLAS-> "+sql);
 		return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).intValue();
 
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> getInfoFactura(String idFactura) {
-		String sql = "select dsus_ideregistr , cic_ideregistro , per_ideregistro  from fac_factura ff  where  fac_ideregistro ="
+		String sql = "select dsus_ideregistr , cic_ideregistro , per_ideregistro  from fac_factura ff  where  ff.fac_ideregistro ="
 				+ idFactura + ";";
 		return entityManager.createNativeQuery(sql).getResultList();
 	}

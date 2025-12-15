@@ -94,7 +94,14 @@ public class HomologacionRestController
 		Integer usuario=autoFacade.getCredentials().getAuditoria().getIdUsuario();
 		request.setIdUsuario(usuario);
 		HomologacionResponsePayLoad response=new HomologacionResponsePayLoad();
-		Integer resultado= service.actualizarInfoBasica(request);
+		try {
+			Integer resultado= service.actualizarInfoBasica(request);
+		} catch (Exception e) {
+			response.setError(true);
+			response.setStatusCode(500);
+			response.setStatusText("Error al Registrar..."+e.getMessage());
+			return response;
+		}
 		response.setError(false);
 		response.setStatusCode(200);
 		response.setStatusText("Exito al Registrar...");

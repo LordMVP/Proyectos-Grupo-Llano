@@ -89,6 +89,9 @@ public interface ManejadorDfacDetfactura
 
     @Query("select dd.dfacVlrtotal from DfacDetfactura dd where dd.facIderegistro = :dfacIderegistr and dd.uniConcepto = :uniConcepto")
     List<BigDecimal> findAllVlrTotalByDfacIderegistrAndUniConcepto(@Param("dfacIderegistr") Long dfacIderegistr, @Param("uniConcepto") int uniConcepto);
+    
+    @Query("select dd.dfacVlrunitari from DfacDetfactura dd where dd.facIderegistro = :dfacIderegistr and dd.uniConcepto = :uniConcepto")
+    List<BigDecimal> findAllVlrUnitariByDfacIderegistrAndUniConcepto(@Param("dfacIderegistr") Long dfacIderegistr, @Param("uniConcepto") int uniConcepto);
 
     @Query("select dd.dfacVlrtotal from DfacDetfactura dd where dd.dfacIderegistr = :dfacIderegistr and dd.uniConcepto = :uniConcepto")
     Optional<BigDecimal> vlrTotalByDfacIderegistrAndUniConcepto(@Param("dfacIderegistr") Long dfacIderegistr, @Param("uniConcepto") int uniConcepto);

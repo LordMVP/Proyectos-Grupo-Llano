@@ -260,6 +260,8 @@ public class AforoServiceImpl {
 		aforo.setAfoObservaciones(dto.getObservaciones());
 		aforo.setAfoEstado(dto.getEstado());
 		aforo.setAfoFechaActualizacion(DateUtil.stringToDate(DATE_FORMAT, new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+		detalle.setUniActsuscripc(Math.toIntExact(dto.getIdActividadComercial()));
+		detalleAforoService.updateDetalleAforo(detalle);
 		//PROCESO DE CANCELACION DEL AFORO 
 		List<MaestroAforoVisita> mVisita = maestroAforoVisitaServiceImpl.getMaestroVisitasByIdAforo(aforo.getAfoIderegistro());
 		if(dto.getEstado().equalsIgnoreCase(UtilConstantes.ESTADO_EN_PROCESO)) {			
@@ -344,7 +346,7 @@ public class AforoServiceImpl {
 		TerTercero tercero = dsus.getTerIderegistro();//terTerceroRepository.findById(Optional.ofNullable(dsus.getTerIderegistro()).orElse(0L))
 				//.orElse(new TerTercero());
 		ProPropiedad pro = propiedadRepository.findById(dsus.getProIderegistro()).orElse(new ProPropiedad());
-		Optional<UniUnidad> uniActividad = uniUnidadRepository.findById(dsus.getUniActsuscripc());
+		Optional<UniUnidad> uniActividad = uniUnidadRepository.findById(Long.valueOf(detalle.getUniActsuscripc()));
 		IasusInforadicionalsuscripcion iasus = iasusInforadicionalsuscripcionRepository
 				.findInfoAdicionalSuscripcion(dsus.getDsusIderegistr()).stream().findFirst().orElse(null);
 
@@ -633,6 +635,19 @@ public class AforoServiceImpl {
 				response.setVisitasTramitadas(visitasTramitadas);
 				response.setMaestroVisitas(maestroMapper.toResource(maestro));
 				response.setTipoAforo(aforo.getUniClasesuscripcionaforo().getUniIderegistro());
+				
+				Long semanas = 0L;
+				
+				if (aforo.getAfoFrecuenciaRecoleccion() != 0){
+					semanas = (visitasTramitadas / aforo.getAfoFrecuenciaRecoleccion()) ;	
+				}else {
+					log.warn("Aforo {}: No se Existe frecuencia para el aforo ", aforoId);
+					response.setValido(false);
+					aforo.setAfoEstado(UtilConstantes.ERROR_LIQUIDACION);
+					response.setMensaje("No se Existe frecuencia para liquidar el aforo.");
+					return response;
+				}	
+				
 
 				Double totalVolumenVisitas = maestro.getDetallesMaestrosVisitas().stream()
 						.reduce(0D, (sum,item)->sum + item.getDetalleConceptosList().stream()
@@ -644,12 +659,18 @@ public class AforoServiceImpl {
 				if(aforo.getMafvFactor()==0) {
 					volumenMedio = totalVolumenVisitas;
 				} else {
+					
+					volumenMedio = (totalVolumenVisitas*aforo.getMafvFactor())/(maestro.getMafvMinimoVisitas()/aforo.getAfoFrecuenciaRecoleccion());
+					
 					if(aforo.getAforoMultiusuario()!=null) {
-						volumenMedio = totalVolumenVisitas;
+						//volumenMedio = totalVolumenVisitas;
 						totalPesoVisitas = maestro.getDetallesMaestrosVisitas().stream()
-								.reduce(0D, (sum,item)->sum + item.getDetalleConceptosList().stream()
-										.reduce(0D,(subtotal,deta)->subtotal + deta.getDcvaPesoaforo(),Double::sum), Double::sum);
-						totalPromedioToneladas = (totalPesoVisitas / 2 ) * aforo.getMafvFactor();
+						        .mapToDouble(item -> item.getDetalleConceptosList().stream()
+						                .mapToDouble(deta -> deta.getDcvaPesoaforo())
+						                .sum())
+						        .sum() / UtilConstantes.CONVERTPESO_A_TONELADA; 
+								
+						totalPromedioToneladas = ((totalPesoVisitas * aforo.getMafvFactor()) / semanas);
 					} else {
 						if(aforo.getAfoFrecuenciaRecoleccion()==0 || maestro.getMafvMinimoVisitas()==0) {
 							response.setValido(false);
@@ -657,7 +678,7 @@ public class AforoServiceImpl {
 							response.setMensaje("Error en cálculo de volumen medio, verifique frecuencia de recolección y mínimo de visitas.");
 							return response;
 						}
-						volumenMedio = (totalVolumenVisitas*aforo.getMafvFactor())/(maestro.getMafvMinimoVisitas()/aforo.getAfoFrecuenciaRecoleccion());
+						
 					}
 				}
 
@@ -783,8 +804,10 @@ public class AforoServiceImpl {
 		Long uniClaseAforo = _parametros.getLong("uni_clase_suscripcion_multiusuario");
 		
 		org.json.JSONObject _parametrosLiquidacionAforos = _parParametroService.getJSONObjectParameter(UtilConstantes.UNIT_HOMOLOGATIONS, UtilConstantes.BIOAGRICOLA);
-		JSONObject tipoLIquidacion = _parametrosLiquidacionAforos.getJSONObject("liquidacion_condicion_suscripcion");		
+		JSONObject tipoLIquidacion = _parametrosLiquidacionAforos.getJSONObject("liquidacion_condicion_suscripcion");
+		JSONObject tipoLIquidacion_adicional = _parametrosLiquidacionAforos.getJSONObject("conceptos_liquidacion_adicional_aforo");
 		JSONArray listaLiquidacionAforado = tipoLIquidacion.getJSONArray("aforado");
+		JSONArray listaLiquidacionAforado_conceptos = tipoLIquidacion_adicional.getJSONArray(UtilConstantes.INDIVIDUAL_CONST);
 		
 		AtomicInteger contador = new AtomicInteger(0);
 		
@@ -871,6 +894,59 @@ public class AforoServiceImpl {
 					});	
 					try {
 						Long resultado = aforoRepository.fnLiquidarAforo(a.getAfoIderegistro(),preliquidacion.getMaestroVisitas().getMafvIderegistro(),factor,tafna,preliquidacion.getVolumenMedio());
+						
+						if(taFo.getTafoAforoPadre()) {
+							
+							Map<Integer,BigDecimal> conceptosDetalle = new HashMap<>();
+							Map<String, BigDecimal> listaConceptos = IntStream.range(0,listaLiquidacionAforado_conceptos.length())
+									.mapToObj(listaLiquidacionAforado_conceptos::getJSONObject)
+									.map(con->{
+										ConConcepto c = conceptoService.findById(con.getLong("uni_concepto"));
+										System.out.println("CONCEPTO-> " +c.getConNombre());
+										conceptosDetalle.put(con.getInt("uni_concepto"), new BigDecimal(c.getConValor().toString()));										
+										return c;
+										})
+									.filter(c -> c != null && c.getConAlias() != null && c.getConValor() != null)
+							        .collect(Collectors.toMap(
+							                ConConcepto::getConAlias,                                   
+							                c -> new BigDecimal(c.getConValor().toString()),           
+							                (v1, v2) -> v1 ));
+							
+							String formula = "VF = N° Total Visitas * (0.222 * SMMLV) ";
+							Long visitas = preliquidacion.getVisitasTramitadas();
+							
+							BigDecimal valorTotal = (listaConceptos.get("%CCAfoExt").multiply(listaConceptos.get("SMMLV")));
+							BigDecimal valorVisita = valorTotal.multiply(new BigDecimal(visitas.toString()));
+							
+							
+							LiafocoLiquidacionAforoConceptosAdicional liAfo = new LiafocoLiquidacionAforoConceptosAdicional();
+							liAfo.setHafoIderegistro(a.getAfoIderegistro());
+							liAfo.setLiafocoCobro(true);
+							liAfo.setLiafocoFechaRegistro(LocalDateTime.now());
+							liAfo.setLiafocoIndividual(valorVisita);
+							liAfo.setLiafocoUniClasesuscripcionaforo(uniClaseAforo);
+							liAfo.setLiafocoUnidadesIndependientes(1);
+							liAfo.setLiafocoValortotal(valorTotal);
+							liAfo.setUsuIderegistro(a.getUsuIderegistro());
+							liAfo.setLiafocoVisitas(visitas);
+							liAfo.setEmpIderegistro(UtilConstantes.BIOAGRICOLA);
+							
+							 liaforepoRepository.save(liAfo);
+							 
+							 /*
+							  * detalle de la liquidacion 
+							  * 
+							  */			
+							conceptosDetalle.forEach((concepto, valor) -> {
+								DlihamDetliqaforomultiusuario dliq = new DlihamDetliqaforomultiusuario();	
+								dliq.setLiafocoIderegistro(liAfo.getLiafocoIderegistro());
+								dliq.setUniConcepto(concepto);
+								dliq.setConValor(valor);
+								dliqrepoRepository.save(dliq);
+							});	
+							
+						}			
+						
 						contador.getAndIncrement();
 					}catch(Exception e) {
 						System.err.println("Error al ejecutar la función SQL: " + e.getMessage());
@@ -1038,6 +1114,7 @@ public class AforoServiceImpl {
 			liAfo.setLiafocoUniClasesuscripcionaforo(uniClaseAforo);
 			liAfo.setLiafocoUnidadesIndependientes(cantidad);
 			liAfo.setLiafocoValortotal(valorTotal);
+			liAfo.setLiafocoVisitas(preliquidacion.getMinimoVisitas());
 			liAfo.setUsuIderegistro(aforo.getUsuIderegistro());
 			liAfo.setEmpIderegistro(UtilConstantes.BIOAGRICOLA);
 			

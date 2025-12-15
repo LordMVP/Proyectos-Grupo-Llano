@@ -9,327 +9,314 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class AproCoapConsolidadoDTO implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private Integer coapIderegistro;
-	
-	private Integer dprlIderegistro;
-	
-	private BigDecimal coapSaldoFactCc;
-	
-	private BigDecimal coapSaldoFactTa;
-		
-	private BigDecimal coapCambioVlrCteTa;
-	
-	private BigDecimal coapPagoCteCc;
-	
-	private BigDecimal coapPagoCteTa;
-	
-	private BigDecimal coapFactAjusteCc;
-	
-	private BigDecimal coapFactAjusteTa;
-	
-	private BigDecimal coapPagoAjusteCc;
-	
-	private BigDecimal coapPagoAjusteTa;
-	
-	private BigDecimal coapCambioVlrPagoCte;
-	
-	private BigDecimal coapVlrCastigado;
-	
-	private BigDecimal dinc;
-	
-	private String estado;
-	
-	private String terNomcompleto;
-	
-	private Long terIderegistro;
-	
-	private BigDecimal coapSaldoFactIa;
-	
-	private BigDecimal coapCambioVlrCteIa;
-	
-	private BigDecimal coapPagoCteIa;
-	
-	private BigDecimal coapCambioVlrPagoCteIa;
-	
-	private BigDecimal coapVlrCastigadoIa;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	private Integer coapNumeroHilo;
-	
-	private Integer usuIderegistro;
+    private Long terIderegistro;
 
-	private Date fechaReg;
-	
-	private String aprovechamiento;
-	
-	private Integer facIderegistro;
-		
-	private Integer prlIdregistro;
+    private String terNomcompleto;
 
-	
-	public AproCoapConsolidadoDTO(
-			Long terIderegistro,
-			String terNomcompleto,
-			BigDecimal coapSaldoFactCc,			
-			BigDecimal coapSaldoFactTa,				
-			BigDecimal coapCambioVlrCteTa,			
-			BigDecimal coapPagoCteCc,			
-			BigDecimal coapPagoCteTa,			
-			BigDecimal coapFactAjusteCc,			
-			BigDecimal coapFactAjusteTa,			
-			BigDecimal coapPagoAjusteCc,			
-			BigDecimal coapPagoAjusteTa,			
-			BigDecimal coapCambioVlrPagoCte,			
-			BigDecimal coapVlrCastigado
-			) {
-		this.terIderegistro=terIderegistro;
-		this.terNomcompleto=terNomcompleto;
-		this.coapSaldoFactCc=coapSaldoFactCc;		
-		this.coapSaldoFactTa=coapSaldoFactTa;				
-		this.coapCambioVlrCteTa=coapCambioVlrCteTa;		
-		this.coapPagoCteCc=coapPagoCteCc;	
-		this.coapPagoCteTa=coapPagoCteTa;	
-		this.coapFactAjusteCc=	coapFactAjusteCc;
-		this.coapFactAjusteTa=coapFactAjusteTa;		
-		this.coapPagoAjusteCc= coapPagoAjusteCc	;
-		this.coapPagoAjusteTa=coapPagoAjusteTa;		
-		this.coapCambioVlrPagoCte=coapCambioVlrPagoCte;		
-		this.coapVlrCastigado=coapVlrCastigado;
-		
-	}
+    private BigDecimal coapSaldoFactCc;
 
-	public AproCoapConsolidadoDTO() {
-	}
+    private BigDecimal coapSaldoFactTa;
 
-	public Integer getCoapIderegistro() {
-		return coapIderegistro;
-	}
+    private BigDecimal coapCambioVlrCteTa;
 
-	public void setCoapIderegistro(Integer coapIderegistro) {
-		this.coapIderegistro = coapIderegistro;
-	}
+    private BigDecimal coapPagoCteCc;
 
-	public Integer getDprlIderegistro() {
-		return dprlIderegistro;
-	}
+    private BigDecimal coapPagoCteTa;
 
-	public void setDprlIderegistro(Integer dprlIderegistro) {
-		this.dprlIderegistro = dprlIderegistro;
-	}
+    private BigDecimal coapFactAjusteCc;
 
-	public BigDecimal getCoapSaldoFactCc() {
-		return coapSaldoFactCc;
-	}
+    private BigDecimal coapFactAjusteTa;
 
-	public void setCoapSaldoFactCc(BigDecimal coapSaldoFactCc) {
-		this.coapSaldoFactCc = coapSaldoFactCc;
-	}
+    private BigDecimal coapPagoAjusteCc;
 
-	public BigDecimal getCoapSaldoFactTa() {
-		return coapSaldoFactTa;
-	}
+    private BigDecimal coapPagoAjusteTa;
 
-	public void setCoapSaldoFactTa(BigDecimal coapSaldoFactTa) {
-		this.coapSaldoFactTa = coapSaldoFactTa;
-	}
+    private BigDecimal coapCambioVlrPagoCte;
 
-	public BigDecimal getCoapCambioVlrCteTa() {
-		return coapCambioVlrCteTa;
-	}
+    private BigDecimal coapVlrCastigado;
 
-	public void setCoapCambioVlrCteTa(BigDecimal coapCambioVlrCteTa) {
-		this.coapCambioVlrCteTa = coapCambioVlrCteTa;
-	}
+    /*-----------------------------------------*/
+    private BigDecimal coapSaldoFactIa;
 
-	public BigDecimal getCoapPagoCteCc() {
-		return coapPagoCteCc;
-	}
+    private BigDecimal coapCambioVlrCteIa;
 
-	public void setCoapPagoCteCc(BigDecimal coapPagoCteCc) {
-		this.coapPagoCteCc = coapPagoCteCc;
-	}
+    private BigDecimal coapPagoCteIa;
 
-	public BigDecimal getCoapPagoCteTa() {
-		return coapPagoCteTa;
-	}
+    private BigDecimal coapCambioVlrPagoCteIa;
 
-	public void setCoapPagoCteTa(BigDecimal coapPagoCteTa) {
-		this.coapPagoCteTa = coapPagoCteTa;
-	}
+    private BigDecimal coapVlrCastigadoIa;
 
-	public BigDecimal getCoapFactAjusteCc() {
-		return coapFactAjusteCc;
-	}
+    private Integer facIderegistro;
 
-	public void setCoapFactAjusteCc(BigDecimal coapFactAjusteCc) {
-		this.coapFactAjusteCc = coapFactAjusteCc;
-	}
+    private Integer prlIdregistro;
 
-	public BigDecimal getCoapFactAjusteTa() {
-		return coapFactAjusteTa;
-	}
+    private Long perIdregistr;
 
-	public void setCoapFactAjusteTa(BigDecimal coapFactAjusteTa) {
-		this.coapFactAjusteTa = coapFactAjusteTa;
-	}
+    private Integer perFacturacion;
 
-	public BigDecimal getCoapPagoAjusteCc() {
-		return coapPagoAjusteCc;
-	}
+    /*-------------------------------*/
+    private Integer coapIderegistro;
 
-	public void setCoapPagoAjusteCc(BigDecimal coapPagoAjusteCc) {
-		this.coapPagoAjusteCc = coapPagoAjusteCc;
-	}
+    private Integer dprlIderegistro;
 
-	public BigDecimal getCoapPagoAjusteTa() {
-		return coapPagoAjusteTa;
-	}
+    private BigDecimal dinc;
 
-	public void setCoapPagoAjusteTa(BigDecimal coapPagoAjusteTa) {
-		this.coapPagoAjusteTa = coapPagoAjusteTa;
-	}
+    private String estado;
 
-	public BigDecimal getCoapCambioVlrPagoCte() {
-		return coapCambioVlrPagoCte;
-	}
+    private Integer coapNumeroHilo;
 
-	public void setCoapCambioVlrPagoCte(BigDecimal coapCambioVlrPagoCte) {
-		this.coapCambioVlrPagoCte = coapCambioVlrPagoCte;
-	}
+    private Integer usuIderegistro;
 
-	public BigDecimal getCoapVlrCastigado() {
-		return coapVlrCastigado;
-	}
+    private Date fechaReg;
 
-	public void setCoapVlrCastigado(BigDecimal coapVlrCastigado) {
-		this.coapVlrCastigado = coapVlrCastigado;
-	}
+    private String aprovechamiento;
 
-	public BigDecimal getDinc() {
-		return dinc;
-	}
+    public AproCoapConsolidadoDTO() {
+    }
 
-	public void setDinc(BigDecimal dinc) {
-		this.dinc = dinc;
-	}
+    public Integer getCoapIderegistro() {
+        return coapIderegistro;
+    }
 
-	public String getEstado() {
-		return estado;
-	}
+    public void setCoapIderegistro(Integer coapIderegistro) {
+        this.coapIderegistro = coapIderegistro;
+    }
 
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+    public Integer getDprlIderegistro() {
+        return dprlIderegistro;
+    }
 
-	public String getTerNomcompleto() {
-		return terNomcompleto;
-	}
+    public void setDprlIderegistro(Integer dprlIderegistro) {
+        this.dprlIderegistro = dprlIderegistro;
+    }
 
-	public void setTerNomcompleto(String terNomcompleto) {
-		this.terNomcompleto = terNomcompleto;
-	}
+    public BigDecimal getCoapSaldoFactCc() {
+        return coapSaldoFactCc;
+    }
 
-	public Long getTerIderegistro() {
-		return terIderegistro;
-	}
+    public void setCoapSaldoFactCc(BigDecimal coapSaldoFactCc) {
+        this.coapSaldoFactCc = coapSaldoFactCc;
+    }
 
-	public void setTerIderegistro(Long terIderegistro) {
-		this.terIderegistro = terIderegistro;
-	}
+    public BigDecimal getCoapSaldoFactTa() {
+        return coapSaldoFactTa;
+    }
 
-	public Integer getUsuIderegistro() {
-		return usuIderegistro;
-	}
+    public void setCoapSaldoFactTa(BigDecimal coapSaldoFactTa) {
+        this.coapSaldoFactTa = coapSaldoFactTa;
+    }
 
-	public void setUsuIderegistro(Integer usuIderegistro) {
-		this.usuIderegistro = usuIderegistro;
-	}
+    public BigDecimal getCoapCambioVlrCteTa() {
+        return coapCambioVlrCteTa;
+    }
 
-	public Date getFechaReg() {
-		return fechaReg;
-	}
+    public void setCoapCambioVlrCteTa(BigDecimal coapCambioVlrCteTa) {
+        this.coapCambioVlrCteTa = coapCambioVlrCteTa;
+    }
 
-	public void setFechaReg(Date fechaReg) {
-		this.fechaReg = fechaReg;
-	}
+    public BigDecimal getCoapPagoCteCc() {
+        return coapPagoCteCc;
+    }
 
-	public BigDecimal getCoapSaldoFactIa() {
-		return coapSaldoFactIa;
-	}
+    public void setCoapPagoCteCc(BigDecimal coapPagoCteCc) {
+        this.coapPagoCteCc = coapPagoCteCc;
+    }
 
-	public void setCoapSaldoFactIa(BigDecimal coapSaldoFactIa) {
-		this.coapSaldoFactIa = coapSaldoFactIa;
-	}
+    public BigDecimal getCoapPagoCteTa() {
+        return coapPagoCteTa;
+    }
 
-	public BigDecimal getCoapCambioVlrCteIa() {
-		return coapCambioVlrCteIa;
-	}
+    public void setCoapPagoCteTa(BigDecimal coapPagoCteTa) {
+        this.coapPagoCteTa = coapPagoCteTa;
+    }
 
-	public void setCoapCambioVlrCteIa(BigDecimal coapCambioVlrCteIa) {
-		this.coapCambioVlrCteIa = coapCambioVlrCteIa;
-	}
+    public BigDecimal getCoapFactAjusteCc() {
+        return coapFactAjusteCc;
+    }
 
-	public BigDecimal getCoapPagoCteIa() {
-		return coapPagoCteIa;
-	}
+    public void setCoapFactAjusteCc(BigDecimal coapFactAjusteCc) {
+        this.coapFactAjusteCc = coapFactAjusteCc;
+    }
 
-	public void setCoapPagoCteIa(BigDecimal coapPagoCteIa) {
-		this.coapPagoCteIa = coapPagoCteIa;
-	}
+    public BigDecimal getCoapFactAjusteTa() {
+        return coapFactAjusteTa;
+    }
 
-	public BigDecimal getCoapCambioVlrPagoCteIa() {
-		return coapCambioVlrPagoCteIa;
-	}
+    public void setCoapFactAjusteTa(BigDecimal coapFactAjusteTa) {
+        this.coapFactAjusteTa = coapFactAjusteTa;
+    }
 
-	public void setCoapCambioVlrPagoCteIa(BigDecimal coapCambioVlrPagoCteIa) {
-		this.coapCambioVlrPagoCteIa = coapCambioVlrPagoCteIa;
-	}
+    public BigDecimal getCoapPagoAjusteCc() {
+        return coapPagoAjusteCc;
+    }
 
-	public BigDecimal getCoapVlrCastigadoIa() {
-		return coapVlrCastigadoIa;
-	}
+    public void setCoapPagoAjusteCc(BigDecimal coapPagoAjusteCc) {
+        this.coapPagoAjusteCc = coapPagoAjusteCc;
+    }
 
-	public void setCoapVlrCastigadoIa(BigDecimal coapVlrCastigadoIa) {
-		this.coapVlrCastigadoIa = coapVlrCastigadoIa;
-	}
+    public BigDecimal getCoapPagoAjusteTa() {
+        return coapPagoAjusteTa;
+    }
 
-	public Integer getCoapNumeroHilo() {
-		return coapNumeroHilo;
-	}
+    public void setCoapPagoAjusteTa(BigDecimal coapPagoAjusteTa) {
+        this.coapPagoAjusteTa = coapPagoAjusteTa;
+    }
 
-	public void setCoapNumeroHilo(Integer coapNumeroHilo) {
-		this.coapNumeroHilo = coapNumeroHilo;
-	}
+    public BigDecimal getCoapCambioVlrPagoCte() {
+        return coapCambioVlrPagoCte;
+    }
 
-	public String getAprovechamiento() {
-		return aprovechamiento;
-	}
+    public void setCoapCambioVlrPagoCte(BigDecimal coapCambioVlrPagoCte) {
+        this.coapCambioVlrPagoCte = coapCambioVlrPagoCte;
+    }
 
-	public void setAprovechamiento(String aprovechamiento) {
-		this.aprovechamiento = aprovechamiento;
-	}
+    public BigDecimal getCoapVlrCastigado() {
+        return coapVlrCastigado;
+    }
 
-	public Integer getFacIderegistro() {
-		return facIderegistro;
-	}
+    public void setCoapVlrCastigado(BigDecimal coapVlrCastigado) {
+        this.coapVlrCastigado = coapVlrCastigado;
+    }
 
-	public void setFacIderegistro(Integer facIderegistro) {
-		this.facIderegistro = facIderegistro;
-	}
+    public BigDecimal getDinc() {
+        return dinc;
+    }
 
-	public Integer getPrlIdregistro() {
-		return prlIdregistro;
-	}
+    public void setDinc(BigDecimal dinc) {
+        this.dinc = dinc;
+    }
 
-	public void setPrlIdregistro(Integer prlIdregistro) {
-		this.prlIdregistro = prlIdregistro;
-	}
-	
-	
+    public String getEstado() {
+        return estado;
+    }
 
-	
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getTerNomcompleto() {
+        return terNomcompleto;
+    }
+
+    public void setTerNomcompleto(String terNomcompleto) {
+        this.terNomcompleto = terNomcompleto;
+    }
+
+    public Long getTerIderegistro() {
+        return terIderegistro;
+    }
+
+    public void setTerIderegistro(Long terIderegistro) {
+        this.terIderegistro = terIderegistro;
+    }
+
+    public Integer getUsuIderegistro() {
+        return usuIderegistro;
+    }
+
+    public void setUsuIderegistro(Integer usuIderegistro) {
+        this.usuIderegistro = usuIderegistro;
+    }
+
+    public Date getFechaReg() {
+        return fechaReg;
+    }
+
+    public void setFechaReg(Date fechaReg) {
+        this.fechaReg = fechaReg;
+    }
+
+    public BigDecimal getCoapSaldoFactIa() {
+        return coapSaldoFactIa;
+    }
+
+    public void setCoapSaldoFactIa(BigDecimal coapSaldoFactIa) {
+        this.coapSaldoFactIa = coapSaldoFactIa;
+    }
+
+    public BigDecimal getCoapCambioVlrCteIa() {
+        return coapCambioVlrCteIa;
+    }
+
+    public void setCoapCambioVlrCteIa(BigDecimal coapCambioVlrCteIa) {
+        this.coapCambioVlrCteIa = coapCambioVlrCteIa;
+    }
+
+    public BigDecimal getCoapPagoCteIa() {
+        return coapPagoCteIa;
+    }
+
+    public void setCoapPagoCteIa(BigDecimal coapPagoCteIa) {
+        this.coapPagoCteIa = coapPagoCteIa;
+    }
+
+    public BigDecimal getCoapCambioVlrPagoCteIa() {
+        return coapCambioVlrPagoCteIa;
+    }
+
+    public void setCoapCambioVlrPagoCteIa(BigDecimal coapCambioVlrPagoCteIa) {
+        this.coapCambioVlrPagoCteIa = coapCambioVlrPagoCteIa;
+    }
+
+    public BigDecimal getCoapVlrCastigadoIa() {
+        return coapVlrCastigadoIa;
+    }
+
+    public void setCoapVlrCastigadoIa(BigDecimal coapVlrCastigadoIa) {
+        this.coapVlrCastigadoIa = coapVlrCastigadoIa;
+    }
+
+    public Integer getCoapNumeroHilo() {
+        return coapNumeroHilo;
+    }
+
+    public void setCoapNumeroHilo(Integer coapNumeroHilo) {
+        this.coapNumeroHilo = coapNumeroHilo;
+    }
+
+    public String getAprovechamiento() {
+        return aprovechamiento;
+    }
+
+    public void setAprovechamiento(String aprovechamiento) {
+        this.aprovechamiento = aprovechamiento;
+    }
+
+    public Integer getFacIderegistro() {
+        return facIderegistro;
+    }
+
+    public void setFacIderegistro(Integer facIderegistro) {
+        this.facIderegistro = facIderegistro;
+    }
+
+    public Integer getPrlIdregistro() {
+        return prlIdregistro;
+    }
+
+    public void setPrlIdregistro(Integer prlIdregistro) {
+        this.prlIdregistro = prlIdregistro;
+    }
+
+    public Long getPerIdregistr() {
+        return perIdregistr;
+    }
+
+    public void setPerIdregistr(Long perIdregistr) {
+        this.perIdregistr = perIdregistr;
+    }
+
+    public Integer getPerFacturacion() {
+        return perFacturacion;
+    }
+
+    public void setPerFacturacion(Integer perFacturacion) {
+        this.perFacturacion = perFacturacion;
+    }
+
 }

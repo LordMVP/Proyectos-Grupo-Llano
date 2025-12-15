@@ -2,15 +2,21 @@ package com.bioagricola.apirest.liquidacion.negocio;
 
 import com.bioagricola.apirest.liquidacion.security.JwtUtil;
 import com.bioagricola.apirest.modelo.dtos.TerTerceroDTO;
+import com.bioagricola.apirest.modelo.dtos.DsusDetsuscripDTO;
 import com.bioagricola.apirest.modelo.entidades.DsusDetsuscrip;
 import com.bioagricola.apirest.modelo.entidades.TerTercero;
 import com.bioagricola.apirest.modelo.excepciones.InvalidParameterException;
+import com.bioagricola.apirest.modelo.manejadores.ManejadorDsusDetsuscrip;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorTerTercero;
 import com.bioagricola.apirest.modelo.manejadores.utils.InformacionAgrupamiento;
 import com.bioagricola.apirest.modelo.manejadores.utils.InformacionFiltro;
 import com.bioagricola.apirest.modelo.manejadores.utils.InformacionOrdenamiento;
 import com.bioagricola.apirest.modelo.manejadores.utils.RangoConsulta;
 import com.bioagricola.apirest.modelo.utils.UtilOperaciones;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import java.io.IOException;
+import java.math.BigDecimal;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -251,7 +257,6 @@ public class NegocioTerTercero extends NegocioAbstracto<TerTercero, TerTerceroDT
 
         return response;
     }
-
     /**
      * {@inheritDoc}
      *
@@ -317,7 +322,7 @@ public class NegocioTerTercero extends NegocioAbstracto<TerTercero, TerTerceroDT
                 .forEach(source -> terceroDTOList.add(convertSourceToTarget(source)));
         return terceroDTOList;
     }
-
+    
     public List<TerTerceroDTO> searchTerceroByFullNameOrId(String fullname, String id) {
         // Obtención del Id de la empresa en sesión como parámetro de la consulta
         int idEmp = JwtUtil.auditoriaDTO.getIdEmpresa();

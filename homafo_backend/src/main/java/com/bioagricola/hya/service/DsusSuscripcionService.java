@@ -196,7 +196,6 @@ public class DsusSuscripcionService {
             createExploitation(dto, entity);
         }
         createConcepts(dto, entity);
-        createSubscriptionRoute(dto.getRecoleccionBarridoDTO().getRutIderegistro(), entity, idUsu);
         createLiquidation(entity, idUsu);
         setOtherFields(entity);
 
@@ -344,13 +343,13 @@ public class DsusSuscripcionService {
         ruta.setRutIderegistro(idRut);
         rusuRepository.save(new RusuRutsuscrip(ruta, subscription, ".", 0, idUsu));
     }
-
     /**
      * Metodo para editar una suscripcion
      *
      * @param id  id suscripcion
      * @param dto dto suscripcion
      */
+    @org.springframework.transaction.annotation.Transactional
     public DsusDetsuscrip update(Long id, DsusDetsuscripDTO dto, Integer idUsu, Integer idEmp) {
         DsusDetsuscrip entity = this.dsusRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No se encuentra el detalle de suscripción. %s", id)));
@@ -392,7 +391,7 @@ public class DsusSuscripcionService {
         ruta.setRutIderegistro(dto.getRecoleccionBarridoDTO().getRutIderegistro());
 
         rusuRepository.updateRusuByDsus(ruta, id);
-        liqdetsusRepository.updateLidsByDsus(dto.getUniLiquidacion(), id);
+        liqdetsusRepository.updateLidsByDsus(dto.getUniLiquidacion().intValue() , id);
         setOtherFields(entity);
         return updated;
     }
@@ -431,7 +430,7 @@ public class DsusSuscripcionService {
      * @return lista de suscripciones
      */
     public List<DsusDetsuscrip> findAllByIdTer(Long idTer, Integer idEmp) {
-        List<DsusDetsuscrip> dsusDetsuscrips = dsusRepository.findAllDsusByIdTer(idTer, idEmp)
+            List<DsusDetsuscrip> dsusDetsuscrips = dsusRepository.findAllDsusByIdTer(idTer, idEmp)
                 .stream().peek(this::setOtherFields).collect(Collectors.toList());
         return dsusDetsuscrips;
     }

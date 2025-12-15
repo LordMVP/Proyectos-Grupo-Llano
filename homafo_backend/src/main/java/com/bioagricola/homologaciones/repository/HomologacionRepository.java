@@ -101,6 +101,27 @@ public interface HomologacionRepository extends JpaRepository<HomologacionEntity
 	
 	@Transactional
 	@Modifying
+	@Query(value="UPDATE ter_tercero SET ter_correo=:correo FROM dsus_detsuscrip " +
+			"WHERE dsus_detsuscrip.ter_ideregistro=ter_tercero.ter_ideregistro " +
+			"AND dsus_detsuscrip.dsus_ideregistr=:dsusIderegistr",nativeQuery = true)
+	Integer updateTerCorreo(@Param("correo") String correo, @Param("dsusIderegistr") Integer dsusIderegistr);
+
+	@Transactional
+	@Modifying
+	@Query(value="UPDATE ter_tercero SET ter_telfijo=:telefono FROM dsus_detsuscrip " +
+			"WHERE dsus_detsuscrip.ter_ideregistro=ter_tercero.ter_ideregistro " +
+			"AND dsus_detsuscrip.dsus_ideregistr=:dsusIderegistr",nativeQuery = true)
+	Integer updateTerTelFijo(@Param("telefono") String telefono, @Param("dsusIderegistr") Integer dsusIderegistr);
+
+	@Transactional
+	@Modifying
+	@Query(value="UPDATE ter_tercero SET ter_telcelular=:celular FROM dsus_detsuscrip " +
+			"WHERE dsus_detsuscrip.ter_ideregistro=ter_tercero.ter_ideregistro " +
+			"AND dsus_detsuscrip.dsus_ideregistr=:dsusIderegistr",nativeQuery = true)
+	Integer updateTerTelCelular(@Param("celular") String celular, @Param("dsusIderegistr") Integer dsusIderegistr);
+
+	@Transactional
+	@Modifying
 	@Query(value="UPDATE\n" + 
 			"pro_propiedad\n" + 
 			"SET pro_direccion = :direccion , pro_numcatastral = :catastralAntes , pro_numcatastralnacional=:castastralNuevo , pro_gpslatitud = :latitud ,pro_gpslongitud = :longitud, uni_municipio= :proyecto, uni_barrio = :barrio , pro_zona = :ubicacion , pro_nummatriculainmobiliaria = :matriculaInmobiliaria , uni_clasificacionvivienda = cast(:clasificacionVivienda as json) , uni_cmpdireccion = :complementoPropiedad , muba_sector = :sector  \n" +

@@ -36,9 +36,10 @@ public class NegocioReLiquidacion {
 	private Integer idCiclo;
 	private Integer idHilo;
 	private Integer tipoNota;
+        private String pqr;
 
 	public void inicializarData(Integer idAcceso, Integer idCiclo, Integer idEmpresa, char preLiquidar,
-			String suscripcion, Integer idHilo, Integer tipoNnota) {
+			String suscripcion, Integer idHilo, Integer tipoNnota, String pqr) {
 
 		this.setIdacceso(idAcceso);
 		this.setIdCiclo(idCiclo);
@@ -47,6 +48,8 @@ public class NegocioReLiquidacion {
 		this.setSuscripcion(suscripcion);
 		this.setIdhilo(idHilo);
 		this.setTipoNota(tipoNnota);
+                this.setPqr(pqr);
+                
 		hilos();
 
 	}
@@ -71,12 +74,20 @@ public class NegocioReLiquidacion {
 
 		Runnable hiloLiquidacionRUN = new NegocioReEjecucionHiloLiquidacion(negocioParParametro, manejadorHistoricos,
 				manejadorCprCtrprocesoRespository, manejadorConConcepto, funcionesConceptos, this.preliquidar,
-				this.idempresa, this.idHilo, this.idacceso, this.idCiclo, this.suscripcion, tipoNota);
+				this.idempresa, this.idHilo, this.idacceso, this.idCiclo, this.suscripcion, tipoNota,this.pqr);
 
 		Thread thread = new Thread(hiloLiquidacionRUN);
 		thread.start();
 
 	}
+
+        public String getPqr() {
+            return pqr;
+        }
+
+        public void setPqr(String pqr) {
+            this.pqr = pqr;
+        }       
 
 	public Integer getIdacceso() {
 		return idacceso;

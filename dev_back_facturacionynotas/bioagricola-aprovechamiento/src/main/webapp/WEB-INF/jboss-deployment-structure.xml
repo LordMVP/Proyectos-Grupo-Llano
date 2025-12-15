@@ -1,0 +1,9 @@
+<jboss-deployment-structure>
+    <deployment>
+        <exclusions>
+            <module name="ch.qos.logback" />
+            <module name="org.slf4j.impl" />
+            <module name="org.apache.log4j" />
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>

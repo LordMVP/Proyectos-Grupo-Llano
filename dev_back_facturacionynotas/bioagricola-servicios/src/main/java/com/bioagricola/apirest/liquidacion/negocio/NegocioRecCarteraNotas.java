@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -65,6 +67,12 @@ public class NegocioRecCarteraNotas {
     private static final String MSG_ERROR_RECAUDO = "Recaudo %s no encontrado";
     private final ReentrantLock reentrantLock;
     private static final Logger log = Logger.getLogger(NegocioRecCarteraNotas.class);
+    
+    @Autowired
+    ManejadorNovNovedad manNovedad;
+    
+    @Autowired
+    ManejadorDnovDetNovedad  manDnovDetNovedad;
 
     @Autowired
     public NegocioRecCarteraNotas(ManejadorImportacionNeg manejadorImportacionNeg, ManejadorImportacionNegTemp manejadorImportacionNegTemp,
@@ -91,7 +99,20 @@ public class NegocioRecCarteraNotas {
     public List<NegocioNotasResponseDTO> upload(MultipartFile file) throws IOException {
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         List<NegocioNotasResponseDTO> response = validateFile(file, extension);
-
+        /***** Obtener la fecha del archivo ****/
+        String dir = StringUtils.stripFilenameExtension(file.getOriginalFilename());
+        String tmpFecha = dir.split("411_AJUSTE")[1]; 
+        /*Date fecha =new Date (tmpFecha.substring(4,8)+"/"+tmpFecha.substring(2,4)+"/"+tmpFecha.substring(0,2));*/
+        Date fecha = null;
+        SimpleDateFormat inputFormat = new SimpleDateFormat("ddMMyyyy");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy/MM/dd");
+        
+        try {
+            fecha = inputFormat.parse(tmpFecha);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        /****  ----------------------  ****/
         if (!response.isEmpty())
             return response;
 
@@ -107,7 +128,7 @@ public class NegocioRecCarteraNotas {
         }
 
         int line = 1;
-        ImportacionNegEMSA negEMSA = createNegEMSA(file);
+        ImportacionNegEMSA negEMSA = createNegEMSA(file,fecha);
         List<ImportacionNegTemp> negTemps = new ArrayList<>();
 
         while (iterator.hasNext()) {
@@ -115,7 +136,7 @@ public class NegocioRecCarteraNotas {
 
             if (validateRow(response, line, row)) break;
 
-            Date recordingDate = new Date(row[4]);
+            Date recordingDate = fecha;//new Date(row[4]);
             String client = row[3];
             Double paid = Double.valueOf(row[7]);
 
@@ -153,12 +174,13 @@ public class NegocioRecCarteraNotas {
         return fails;
     }
 
-    private ImportacionNegEMSA createNegEMSA(MultipartFile file) {
+    private ImportacionNegEMSA createNegEMSA(MultipartFile file, Date fecha) {
         ImportacionNegEMSA parentFile = new ImportacionNegEMSA();
 
         parentFile.setFilename(file.getOriginalFilename());
         parentFile.setState(ImportacionNegativoEnum.PENDIENTE.name());
         parentFile.setCreationDate(new Date());
+        parentFile.setCreationDateFile(fecha);
         return this.manejadorImportacionNeg.save(parentFile);
     }
 
@@ -196,7 +218,7 @@ public class NegocioRecCarteraNotas {
     @Transactional
     public List<ImportacionNegDetalle> process(ImportacionNegativosDTO dto) {
         if (dto.getIdImportancion() != null) {
-            ImportacionNegEMSA negEMSA = this.manejadorImportacionNeg.findById(dto.getIdImportancion())
+                ImportacionNegEMSA negEMSA = this.manejadorImportacionNeg.findById(dto.getIdImportancion())
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No existe importación con id %s", dto.getIdImportancion())));
 
             negEMSA.setState(ImportacionNegativoEnum.PROCESADO.name());
@@ -246,6 +268,7 @@ public class NegocioRecCarteraNotas {
             detail.setCodigoEmsa(negTemp.getClient());
             detail.setValorCargado(negTemp.getPaid());
             detail.setIdParent(negEMSA.getId());
+            detail.setFechaArchivoRecaudo(negEMSA.getCreationDateFile());
             detail.setFechaImportacion(new Date());
             detail.setFechaRegistroEmsa(negTemp.getRecordingDate());
             detail.setExtract(negTemp.getExtract());
@@ -322,18 +345,18 @@ public class NegocioRecCarteraNotas {
         List<ImportacionNegDetalle> details = new ArrayList<>();
         int user = JwtUtil.auditoriaDTO.getIdUsuario();
         int companyId = JwtUtil.auditoriaDTO.getIdEmpresa();
-
+        log.error(applyNotesDTO.getIdSuscripcion());
         if (applyNotesDTO.getIdSuscripcion() != null) {
             Optional<ImportacionNegDetalle> optional = manejadorImportacionNegDetalle.findByIdSuscripcion(applyNotesDTO.getIdSuscripcion().toString());
 
             if (!optional.isPresent())
                 throw new IllegalStateException(String.format(MSG_ERROR_RECAUDO, applyNotesDTO.getIdSuscripcion()));
-            if (!optional.get().getEstadoCargue().equals(ImportacionNegativoEnum.PENDIENTE.name()))
+            if (!optional.get().getEstadoCargue().equals(ImportacionNegativoEnum.PROCESADO.name()))
                 throw new IllegalStateException(ESTADO_CARGUE_DIFERENTE_A_PENDIENTE);
 
             details.add(optional.get());
         } else {
-            details.addAll(manejadorImportacionNegDetalle.findAllByFechaAplicacionNota(applyNotesDTO.getImportDate(), ImportacionNegativoEnum.PENDIENTE.name()));
+            details.addAll(manejadorImportacionNegDetalle.findAllByFechaAplicacionNota(applyNotesDTO.getImportDate(),ImportacionNegativoEnum.PROCESADO.name()));//applyNotesDTO.getImportDate(),
         }
 
         if (details.isEmpty())
@@ -352,9 +375,40 @@ public class NegocioRecCarteraNotas {
                 detail.setEstadoSuscripcion("Suscripción no Activa");
                 manejadorImportacionNegDetalle.save(detail);
             } else {
-                DfacDetfactura detInvoice = new DfacDetfactura();
-                BigDecimal value = BigDecimal.valueOf(detail.getValorCargado()).abs();
-
+                Timestamp ts=new Timestamp((new Date()).getTime());
+                FacFactura fInvoice = optInvoice.get();
+                NovNovedad nov = manNovedad.findByDsusIderegistrAndPerIderegistro(fInvoice.getDsusIderegistr(), fInvoice.getPerIderegistro())
+                        .orElse(new NovNovedad());                        
+                DnovDetNovedad dnov = new DnovDetNovedad();
+                nov.setNovFecgenerac(ts);
+                nov.setNovEstado("P");
+                nov.setNovGenera("M");
+                nov.setNovObservacion("AJUSTES EMSA NEGATIVOS");
+                nov.setEmpIderegistro(fInvoice.getEmpIderegistro());
+                nov.setCicIderegistro(fInvoice.getCicIderegistro());
+                nov.setPerIderegistro(fInvoice.getPerIderegistro());
+                nov.setCicAno(Integer.valueOf(fInvoice.getCicAno()));
+                nov.setUsuIderegistro(user);
+                nov.setDsusIderegistr(fInvoice.getDsusIderegistr());
+                manNovedad.save(nov);
+                dnov.setDnovEstado("P");
+                dnov.setDnovCantidad(1);
+                dnov.setDnovVlrUnitari(new BigDecimal(detail.getValorCargado()* -1));
+                dnov.setDnovVlrTotal(new BigDecimal(detail.getValorCargado() * -1));
+                dnov.setEmpIderegistro(fInvoice.getEmpIderegistro());
+                dnov.setDsusIderegistr(fInvoice.getDsusIderegistr());
+                dnov.setUniLiquidacion(fInvoice.getUniLiquidacion());
+                dnov.setUniConcepto(ConstantesServicios.ID_CONCEPTO_AJUSTES_EMSA);
+                dnov.setCicIderegistro(fInvoice.getCicIderegistro());
+                dnov.setPerIderegistro(fInvoice.getPerIderegistro());
+                dnov.setCicAno(Integer.parseInt(fInvoice.getCicAno().toString()));
+                dnov.setUsuIderegistro(user);
+                dnov.setNovIderegistro(Integer.parseInt(nov.getNovIderegistro().toString()));
+                manDnovDetNovedad.save(dnov);
+                
+                
+                /*DfacDetfactura detInvoice = new DfacDetfactura();
+                BigDecimal value = BigDecimal.valueOf(detail.getValorCargado()).abs();                
                 detInvoice.setDfacEstado("A");
                 detInvoice.setDfacIdepadre(optInvoice.get().getFacIderegistro());
                 detInvoice.setFacIderegistro(optInvoice.get().getFacIderegistro());
@@ -367,6 +421,14 @@ public class NegocioRecCarteraNotas {
                 detInvoice.setDfacVlrreal(value);
                 detInvoice.setDfacSdoreal(value);
                 manejadorDfacDetfactura.save(detInvoice);
+                FacFactura facInvoice = optInvoice.get();
+                BigDecimal sldoFactura = facInvoice.getFacSdoreal();
+                BigDecimal vlrFactura = facInvoice.getFacVlrreal();
+                BigDecimal nSldoFactura = sldoFactura.add(value);
+                BigDecimal nVlrFactura = vlrFactura.add(value);
+                facInvoice.setFacSdoreal(nSldoFactura);
+                facInvoice.setFacVlrreal(nVlrFactura);
+                manejadorFacFactura.save(facInvoice);*/
                 detail.setEstadoCargue(ImportacionNegativoEnum.APLICADO.name());
                 detail.setFechaAplicacionNota(new Date());
                 manejadorImportacionNegDetalle.save(detail);
@@ -463,7 +525,7 @@ public class NegocioRecCarteraNotas {
     public List<NoteResponseDTO> getAllByStateAndAppliedDateProcess(NegocioRecCarteraNotasDTO negocioRecCarteraNotasDTO) {
         List<NoteResponseDTO> response = new ArrayList<>();
         List<ImportacionNegDetalle> details = manejadorImportacionNegDetalle.findAllByConceptAndEstadoCargue(negocioRecCarteraNotasDTO.getStartDate(), negocioRecCarteraNotasDTO.getEndDate());
-        Map<Pair<String, Date>, List<ImportacionNegDetalle>> listByConcept = details.stream().collect(groupingBy(detail -> Pair.of(detail.getConcept(), detail.getFechaAplicacionNota())));
+        Map<Pair<String, Date>, List<ImportacionNegDetalle>> listByConcept = details.stream().collect(groupingBy(detail -> Pair.of(detail.getConcept(), detail.getFechaArchivoRecaudo())));
 
         listByConcept.forEach((key, value) -> response.add(new NoteResponseDTO(value.size(), value.stream().map(detail -> BigDecimal.valueOf(detail.getValorCargado()))
                     .collect(Collectors.toList()).stream().reduce(BigDecimal.ZERO, BigDecimal::add), key.getLeft(), key.getRight())));

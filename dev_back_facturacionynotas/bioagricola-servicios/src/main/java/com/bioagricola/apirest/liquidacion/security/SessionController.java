@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 
 @RestController
 public class SessionController {
     private final UsuariosRepository usuariosRepository;
-
+    
     public SessionController(UsuariosRepository usuariosRepository) {
         this.usuariosRepository = usuariosRepository;
     }

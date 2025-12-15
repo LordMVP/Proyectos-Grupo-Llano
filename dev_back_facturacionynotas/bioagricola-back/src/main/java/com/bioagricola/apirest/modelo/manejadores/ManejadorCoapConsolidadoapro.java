@@ -1,14 +1,7 @@
 package com.bioagricola.apirest.modelo.manejadores;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import com.bioagricola.apirest.modelo.dtos.AproCoapConsolidadoDTO;
-import com.bioagricola.apirest.modelo.dtos.InAproCoapConsolidadoDTO;
 import com.bioagricola.apirest.modelo.entidades.CoapConsolidadoapro;
 import com.bioagricola.apirest.modelo.manejadores.utils.IManejadorCrud;
 import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
@@ -17,7 +10,7 @@ import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
 public interface ManejadorCoapConsolidadoapro 
 extends ManejadorCrud<CoapConsolidadoapro, Integer>, IManejadorCrud<CoapConsolidadoapro, Integer>{
 
-	@Query("select new com.bioagricola.apirest.modelo.dtos.AproCoapConsolidadoDTO("+
+	/*@Query("select new com.bioagricola.apirest.modelo.dtos.AproCoapConsolidadoDTO("+
 			"tt.terIderegistro, tt.terNomcompleto , " + 
 			"sum(cc.coapSaldoFactCc), sum(cc.coapSaldoFactTa) ," + 
 			"sum(cc.coapCambioVlrCteTa) ,sum (cc.coapPagoCteCc) ," + 
@@ -64,7 +57,7 @@ extends ManejadorCrud<CoapConsolidadoapro, Integer>, IManejadorCrud<CoapConsolid
 			"where pl.prlIderegistro = :prlaIderegistro " + 
 			"and dd.idEmpresa = :idEmpresa and pl.prlTipoProceso = 2 group by tt.terIderegistro, c2.ciudadNom")
 	List<InAproCoapConsolidadoDTO> getResumenLiquidacionInApro (@Param("prlaIderegistro") Integer prlaIderegistro, 
-			@Param("idEmpresa")int idEmpresa);
+			@Param("idEmpresa")int idEmpresa);*/
 	
 	
 }

@@ -18,7 +18,7 @@ import com.bioagricola.apirest.modelo.manejadores.utils.ManejadorCrud;
  */
 @Service
 public interface ManejadorNovedadesRadicado
-		extends ManejadorCrud<NovedadesRadicado, String>, IManejadorCrud<NovedadesRadicado, Integer> {
+		extends ManejadorCrud<NovedadesRadicado, Integer>, IManejadorCrud<NovedadesRadicado, Integer> {
 
 	/**
 	 * Método de consulta de parámetros del codigo de la novedad

@@ -23,6 +23,8 @@ import com.bioagricola.apirest.modelo.manejadores.ManejadorPerPeriodo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.util.Calendar;
 
 @Service
 public class NegocioParParametro extends NegocioAbstracto<ParParametro, ParParametroDTO> {
@@ -151,7 +153,9 @@ public class NegocioParParametro extends NegocioAbstracto<ParParametro, ParParam
 
 		PeriodoIndicadoresCalidadDTO response = new PeriodoIndicadoresCalidadDTO();
 		if (!lista.isEmpty()) {
-			response.setNombrePeriodo(lista.get(0).getPerNombre());
+                        Calendar calendar =  Calendar.getInstance();
+                        calendar.setTime(lista.get(0).getPerFecfinal());
+			response.setNombrePeriodo(lista.get(0).getPerNombre() + calendar.get(Calendar.YEAR));
 			response.setIdPeriodo(lista.get(0).getPerIderegistro());
 		}
 		listaResultados.add(response);

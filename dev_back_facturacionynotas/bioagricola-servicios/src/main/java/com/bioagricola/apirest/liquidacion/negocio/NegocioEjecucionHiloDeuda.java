@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.bioagricola.apirest.liquidacion.web.servicio.utils.ConstantesServicios;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorCprCtrprocesoRespository;
 import com.bioagricola.apirest.modelo.manejadores.ManejadorHistoricos;
+import javax.transaction.Transactional;
 
 public class NegocioEjecucionHiloDeuda implements Runnable {
 
@@ -35,7 +36,7 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 	private ManejadorCprCtrprocesoRespository manejadorCprCtrprocesoRespository;
 	private NegocioParParametro negocioParParametro;
 	private ManejadorHistoricos manejadorHistoricos;
-
+        
 	public NegocioEjecucionHiloDeuda(NegocioParParametro negocioParParametro, ManejadorHistoricos manejadorHistoricos,
 			ManejadorCprCtrprocesoRespository manejadorCprCtrprocesoRespository, char adiciona, Integer idempresa,
 			Integer idproceso, Integer idacceso, Integer idCiclo, String factura, Integer tipoNota, Boolean susElimina,
@@ -56,7 +57,7 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 	}
 
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(NegocioEjecucionHiloDeuda.class);
-
+        
 	@Override
 	public void run() {
 		consultaParametros();
@@ -84,12 +85,14 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 		Integer version;
 		estado = 'G';
 		version = versionInicial;
+                
+                LOGGER.error("factura -> "+factura);
 
 		if (adiciona == '2') {
 			if (!factura.equals("0")) {
 
 				try {
-					idfactura = crearNota();
+					idfactura = crearNota(adiciona);
 					if (idfactura != null) {
 						manejadorCprCtrprocesoRespository.insertarDeudaDetalle(estado, version, idUsuario, tipoNota,
 								factura, idfactura, idempresa);
@@ -111,7 +114,7 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 
 		} else {
 			try {
-				idfactura = crearNota();
+				idfactura = crearNota(adiciona);
 
 				if (idfactura != null) {
 					validarNovedades(idfactura);
@@ -130,16 +133,16 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 
 	}
 
-	private BigInteger crearNota() {
-		versionInicial = manejadorHistoricos.getFacturaVersion(Integer.parseInt(factura));
-
+	private BigInteger crearNota(char adiciona) {
+		versionInicial = manejadorHistoricos.getFacturaVersion(new BigInteger(factura));
+            
 		BigInteger idfactura;
 		char metodogenera;
 		char estado;
 		String fecha;
 		Integer version;
 		String fechaaprobacion;
-		Long respuesta;
+		BigInteger respuesta;
 		Object[] fechaFacturas;
 		String fechasuspende;
 		String fechavencimiento;
@@ -155,8 +158,9 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 		fechavencimiento = fechaFacturas[0].toString();
 
 		respuesta = manejadorCprCtrprocesoRespository.insertarDeuda(metodogenera, estado, fecha, fechaaprobacion,
-				version, idUsuario, tipoNota, factura, fechasuspende, fechavencimiento);
-		idfactura = BigInteger.valueOf(respuesta);
+				version, idUsuario, tipoNota, factura, fechasuspende, fechavencimiento,adiciona);
+                LOGGER.error("respuesta -> "+respuesta);
+		idfactura = respuesta;
 
 		return idfactura;
 
@@ -207,16 +211,20 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 			parametros = negocioParParametro.consultaParametros(idempresa,
 					ConstantesServicios.UNIDAD_LIQUIDACION_NOTAS);
 			programaFacturarPeriodo = (Integer) parametros.get(ConstantesServicios.PROGRAMA_FACTURAR_PERIODO);
-		} catch (IOException e) {
+		} catch (IOException e  ) {
 			LOGGER.info("Error no controlado en consultaParametros {}", e.getMessage());
-		}
+		} catch (Exception i ) {
+                    i.printStackTrace();
+                }
+                
+                
 	}
 
 	public void registrarProceso() {
 		try {
 			proceso[0] = "A"; // estado
 			proceso[1] = fecha(); // fechaInicio
-			proceso[2] = String.valueOf(programaFacturarPeriodo); // idPrograma
+			proceso[2] = String.valueOf(tipoNota);//programaFacturarPeriodo); // idPrograma
 			proceso[3] = idacceso.toString(); // idAcceso
 			proceso[4] = idempresa.toString(); // idEmpresa
 			proceso[5] = idproceso.toString(); // idHilo
@@ -340,7 +348,7 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 		String valores;
 		String mensaje;
 
-		novedades = manejadorHistoricos.getNovedadesDeuda(Integer.parseInt(factura));
+		novedades = manejadorHistoricos.getNovedadesDeuda(Long.parseLong(factura));
 
 		if (novedades.isEmpty()) {
 			mensaje = "no se encontraron conceptos a adicionar para la factura " + factura + " ";
@@ -381,15 +389,15 @@ public class NegocioEjecucionHiloDeuda implements Runnable {
 	/* Suma los detalles de la factura */
 	private void actualizarValorFactura(BigInteger idfactura) {
 		BigDecimal valor;
-		Integer facIderegistro;
+		BigInteger facIderegistro;
 		BigDecimal facVlrreal;
 		BigDecimal facSdoreal;
 		String parametros;
 		String condicion;
 
-		valor = manejadorHistoricos.getValorFactura(Integer.parseInt(idfactura.toString()));
+		valor = manejadorHistoricos.getValorFactura(idfactura);
 
-		facIderegistro = Integer.parseInt(idfactura.toString());
+		facIderegistro = idfactura ;
 		facVlrreal = valor;
 		facSdoreal = valor;
 

@@ -22,13 +22,21 @@ public interface ManejadorEstEstructura extends ManejadorCrud<EstEstructura,Inte
 	/**
 	 * Método de consulta de tipo de nota segun la clase del mismo
 	 * */	
-	@Query("select distinct uu.uniNombre1, " +
-			"uu.uniIderegistro " +			
+	/*@Query("select distinct uu.uniNombre1, " +
+			"uu.uniIderegistro, " +
+			"uu.uniPropiedad " +
 			"from EstEstructura ee " +
 			"inner join EsemEstempresa em on em.id.estIderegistro = ee.estIderegistro " + 
 			"inner join UniUnidad uu on uu.estIderegistro = ee.estIderegistro " + 
 			 "where em.empresa.empresaSevemp = :idEmpresa "+
-			"and ee.claIderegistro = :claRegistro")
+			"and ee.claIderegistro = :claRegistro")*/
+	@Query(value="select distinct uu.uni_nombre1,  \n"
+			+ "			uu.uni_ideregistro "
+			+ "			from est_estructura ee \n"
+			+ "			inner join esem_estempresa em on em.est_ideregistro = ee.est_ideregistro \n"
+			+ "			inner join uni_unidad uu on uu.est_ideregistro = ee.est_ideregistro \n"
+			+ "			where em.emp_ideregistro = :idEmpresa \n"
+			+ "			and ee.cla_ideregistro  = :claRegistro and uu.uni_propiedad->>'emp' = cast(:idEmpresa as varchar)",nativeQuery = true)
 	List<Object[]> consultaTipoNota(@Param("idEmpresa") int idEmpresa, 
 			@Param("claRegistro") int claRegistro);
 	

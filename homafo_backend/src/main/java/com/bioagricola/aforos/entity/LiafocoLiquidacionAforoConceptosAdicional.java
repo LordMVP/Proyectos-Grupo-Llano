@@ -55,6 +55,9 @@ public class LiafocoLiquidacionAforoConceptosAdicional implements Serializable{
 	 private Long usuIderegistro;     
 	 
 	 @Column(name="emp_ideregistro")
-	 private Long empIderegistro;            
+	 private Long empIderegistro;      
+	 
+	 @Column(name="liafoco_visitas")
+	 private Long liafocoVisitas;      
 
 }

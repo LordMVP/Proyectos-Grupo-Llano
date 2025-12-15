@@ -30,6 +30,8 @@ public class SusSuscripcionDTO implements Serializable{
 	private Integer usuIderegistro;
 
 	private String dsusPcodigo;
+	
+	private Long dsusIderegistr ;
 
 	// protected region atributos adicionales on begin
 	// Escriba en esta sección sus modificaciones
@@ -109,7 +111,22 @@ public class SusSuscripcionDTO implements Serializable{
 	public String getDsusPcodigo() {
 		return this.dsusPcodigo;
 	}
-
+	
+	@JsonProperty("dsusPcodigo")
+	public void setDsusPcodigo(String  dsusPcodigo) {
+		 this.dsusPcodigo = dsusPcodigo;
+	}
+	
+	@JsonProperty("dsusIderegistr")
+	public Long getDsusIderegistr() {
+		return dsusIderegistr;
+	}
+	
+	@JsonProperty("dsusIderegistr")
+	public void setDsusIderegistr(Long dsusIderegistr) {
+		this.dsusIderegistr = dsusIderegistr;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 *
@@ -178,6 +195,10 @@ public class SusSuscripcionDTO implements Serializable{
 		return Objects.equals(this.usuIderegistro, other.usuIderegistro);
 
 	}
+
+
+
+
 	
 	// protected region metodos adicionales on begin
 	// Escriba en esta sección sus modificaciones

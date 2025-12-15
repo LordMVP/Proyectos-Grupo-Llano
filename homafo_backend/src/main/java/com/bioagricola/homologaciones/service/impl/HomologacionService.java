@@ -463,14 +463,37 @@ public class HomologacionService extends AbstractService<HomologacionEntity, Lon
 		return "dsus.dsus_ideregistr in ("+consultaBase+")" ;		
 		
 	}
-	
+	@org.springframework.transaction.annotation.Transactional
 	public Integer actualizarInfoBasica(HomologacionInfoBasicaRequest basica)
 	{
 		//System.err.println("que llego de ubicacion "+basica.getUbicacion());
 		ConvertGeneral conv=new ConvertGeneral();
-		int resultado1=repository.updateTerTercero(basica.getTerDocumento(), basica.getTerNomcompleto(), basica.getNaturaleza(), basica.getDsusIderegistr());
+
+		// Actualizar campos básicos del tercero
+		int resultado1 = repository.updateTerTercero(basica.getTerDocumento(), basica.getTerNomcompleto(),
+				basica.getNaturaleza(), basica.getDsusIderegistr());
+
+		// Actualizar campos de contacto solo si tienen valor
+		if (basica.getContactoTerceroLista() != null) {
+			for (ContContactoterceroRequest contacto : basica.getContactoTerceroLista()) {
+				if (contacto.getUni_ideregistro() != null && contacto.getCont_valor() != null && !contacto.getCont_valor().trim().isEmpty() && contacto.getCont_ideregistro() > 0) {
+					switch (contacto.getUni_ideregistro()) {
+						case 6660:
+							repository.updateTerCorreo(contacto.getCont_valor(), basica.getDsusIderegistr());
+							break;
+						case 6661:
+							repository.updateTerTelFijo(contacto.getCont_valor(), basica.getDsusIderegistr());
+							break;
+						case 6662:
+							repository.updateTerTelCelular(contacto.getCont_valor(), basica.getDsusIderegistr());
+							break;
+					}
+				}
+			}
+		}
+
 		int resultado2=repository.updateProPropiedad(basica.getDireccion(), basica.getCatastralAntes(), basica.getCastastralNuevo(), basica.getLatitud(), basica.getLongitud(), basica.getDsusIderegistr(), basica.getProyecto(), basica.getBarrio(),basica.getUbicacion(), basica.getMatriculaInmobiliaria(), conv.convertListToJson(basica.getClasificacionVivienda()), basica.getComplementoPropiedad()==null ? Types.NULL : basica.getComplementoPropiedad(),basica.getSector()==null ? Types.NULL : basica.getSector());
-		int resultado3=repository.updateDsusDetsuscrip(basica.getBarrio(), basica.getProyecto(), basica.getDsusIderegistr(), basica.getActividadComercial() == 0 ? Types.NULL : basica.getActividadComercial());
+		int resultado3=repository.updateDsusDetsuscrip(basica.getBarrio(), basica.getProyecto(), basica.getDsusIderegistr(),(basica.getActividadComercial() == null || basica.getActividadComercial() == 0) ? Types.NULL : basica.getActividadComercial());
 		
 		for(UniUnidadTerceroRequest tmp:basica.getClasiTerceroLista())
 		{
@@ -641,8 +664,15 @@ public class HomologacionService extends AbstractService<HomologacionEntity, Lon
 		///insertar aprovechamiento
 		if(request.getAprovechamiento().getRutapr_ideregistro()>0)
 		{
-			int actualizarRutApr=rutaRepository.updateRutapr(request.getAprovechamiento().getRut_ideregistro(),request.getAprovechamiento().getTer_aprovechamiento() , request.getAprovechamiento().getRutapr_incentivo(), request.getAprovechamiento().getRutapr_aforado() , request.getUsu_ideregistro(), request.getDsus_ideregistr());
-		}		
+			if (request.getAprovechamiento().getRut_ideregistro()<=0)
+			{
+				int actualizarEstado=rutaRepository.updateRutaprStatus("I", request.getDsus_ideregistr());
+			}
+			else
+			{
+				int actualizarRutApr=rutaRepository.updateRutapr(request.getAprovechamiento().getRut_ideregistro(),request.getAprovechamiento().getTer_aprovechamiento() , request.getAprovechamiento().getRutapr_incentivo(), request.getAprovechamiento().getRutapr_aforado() , request.getUsu_ideregistro(), request.getDsus_ideregistr());
+			}
+		}
 		if(request.getAprovechamiento().getRutapr_ideregistro()==0 && request.getAprovechamiento().getRut_ideregistro()>0)
 		{
 			int insertRutApr=rutaRepository.insertRutapr(request.getAprovechamiento().getRut_ideregistro(), request.getDsus_ideregistr(), request.getAprovechamiento().getTer_aprovechamiento() , request.getAprovechamiento().getRutapr_incentivo() , request.getAprovechamiento().getRutapr_aforado() , request.getUsu_ideregistro(), new Date());
