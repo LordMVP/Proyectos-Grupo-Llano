@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:layout_marginBottom="@dimen/input_margin_bottom"
+        android:fitsSystemWindows="true"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        style="@style/HomeButtonStyle">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:text="@string/base_map"
+            android:textColor="@color/title"
+            android:textSize="@dimen/title" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="169dp"
+                android:layout_height="154dp"
+                android:src="@drawable/ic_add_photo"/>
+
+            <ImageView
+                android:layout_width="169dp"
+                android:layout_height="154dp"
+                android:src="@drawable/ic_add_photo"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_bold"
+                android:layout_marginStart="@dimen/margin_start"
+                android:text="@string/base_map"
+                android:textColor="@color/title"
+                android:textSize="@dimen/label" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_bold"
+                android:layout_marginStart="@dimen/margin_start_checkbox"
+                android:text="@string/street"
+                android:textColor="@color/title"
+                android:textSize="@dimen/label" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="169dp"
+                android:layout_height="154dp"
+                android:src="@drawable/ic_add_photo"/>
+
+            <ImageView
+                android:layout_width="169dp"
+                android:layout_height="154dp"
+                android:src="@drawable/ic_add_photo"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>

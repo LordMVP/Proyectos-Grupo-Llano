@@ -1,0 +1,56 @@
+apply from: "$rootProject.projectDir/hya.gradle"
+apply plugin: 'org.jetbrains.kotlin.android'
+
+//plugins {
+//    id 'com.android.library'
+//    id 'org.jetbrains.kotlin.android'
+//}
+
+android {
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }
+    namespace 'com.progracol.core'
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    hilt()
+    retrofit()
+    material()
+    sspusage()
+    images()
+
+    // Room
+    implementation 'androidx.room:room-runtime:2.4.3'
+    implementation 'androidx.room:room-ktx:2.4.3'
+    kapt 'androidx.room:room-compiler:2.4.3'
+
+    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    // Stetho
+    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
+
+    // Map
+    def arcgis = "100.14.0"
+    implementation "com.esri.arcgisruntime:arcgis-android:$arcgis"
+    implementation "com.esri.arcgisruntime:arcgis-android-toolkit:$arcgis"
+
+    // Navigation
+    api project(path: ':navigation')
+}

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.visit.register.ConceptFormFragment">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/novelty_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margin"
+                android:layout_marginBottom="@dimen/margin"
+                android:fitsSystemWindows="true">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="@dimen/title"
+                    android:textColor="@color/title"
+                    android:layout_marginTop="@dimen/margin"
+                    android:layout_marginBottom="@dimen/margin"
+                    android:text="@string/title_concept_visit"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/container_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/container_type"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"
+                        tools:ignore="LabelFor" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/volume_unit"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/volume_unit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:enabled="false"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/quantity"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/quantity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/volume_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/volume"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/volume"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:enabled="false"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/weight"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/weight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/observation"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/note"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/save_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/save"
+                    style="@style/ButtonStyle" />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

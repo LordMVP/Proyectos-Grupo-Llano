@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="15dp"
+    android:elevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:layout_marginBottom="@dimen/input_margin_bottom"
+        android:fitsSystemWindows="true"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        style="@style/HomeButtonStyle">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:text="@string/capacity_visualization"
+            android:textColor="@color/title"
+            android:textSize="@dimen/title" />
+
+        <CheckBox
+            android:id="@+id/checkbox_one_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/all_capacity_nvelties"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_two_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/asignate_capacity_nvelties"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_three_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/valid_capacity_nvelties"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_four_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/report_capacity_nvelties"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_five_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/beaten_capacity_nvelties"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_six_novelties"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:text="@string/no_capacity_nvelties"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

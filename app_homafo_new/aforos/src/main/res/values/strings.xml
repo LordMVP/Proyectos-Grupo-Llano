@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="visits_to_be_made">Visitas Por Realizar</string>
+    <string name="title_made_visits">Lista De Marcadores</string>
+    <string name="title_two_capacity">Registro Aforo Individual</string>
+    <string name="title_capacity">Numero De Visita</string>
+    <string name="watchword">Santo y Seña</string>
+    <string name="visit_week">Semana De Aforo</string>
+    <string name="file_number">Numero De Radicado</string>
+    <string name="visit_concepts">Conceptos De La Visita</string>
+    <string name="neighborhood">Barrio</string>
+    <string name="direction">Dirección</string>
+
+    <string name="visit_type">Tipo De Aforo</string>
+    <string name="type_of_container">Tipo De Recipiente</string>
+    <string name="quantity">Cantidad</string>
+    <string name="concept">Concepto</string>
+    <string name="volume">Volumen</string>
+    <string name="total_visit_volume">Total Volumen Visita: </string>
+    <string name="weight">Peso</string>
+    <string name="add_concepts">Añadir Conceptos</string>
+    <string name="edit_concepts">Editar Conceptos</string>
+
+    <string name="option">Opción</string>
+    <string name="total_visit_weight">Total Peso Visita: </string>
+    <string name="load_photo">Cargar Imagenes</string>
+    <string name="delete_photo">Eliminar Imagen</string>
+    <string name="confirm_button">Confirmar</string>
+    <string name="observations_visit">Observaciones De La Visita</string>
+    <string name="error_camp_empty">Debe ingresar un dato para este campo</string>
+    <string name="error_loading_companies">Error al cargar las compañias, por favor intente nuevamente.</string>
+    <string name="error_loading">Error al cargar la data, por favor intente nuevamente.</string>
+    <string name="title_cancel_capacity">Tomar Fotografia</string>
+
+    <string name="title_load_capacity">Cargar Fotografia</string>
+    <string name="title_recycler">Lista De Fotos</string>
+    <string name="layers_map">Capas</string>
+    <string name="basemap">Mapa Base</string>
+    <string name="number_reports">N° Reportes</string>
+    <string name="capacity_visualization">Visualizacion De Aforos</string>
+    <string name="all_capacity_nvelties">Todos</string>
+    <string name="asignate_capacity_nvelties">Asignate</string>
+    <string name="valid_capacity_nvelties">Vigentes</string>
+    <string name="report_capacity_nvelties">Reportes</string>
+
+
+    <string name="beaten_capacity_nvelties">Vencido</string>
+    <string name="no_capacity_nvelties">Sin Aforo</string>
+    <string name="novelties_reports_month">Novedades Reportadas Por Mes</string>
+    <string name="tracing">Seguimientos: </string>
+
+    <string name="loading">Cargando...</string>
+
+
+    <!-- Visit -->
+    <string name="visits_completed">Visitas Realizadas</string>
+    <string name="visits_pending">Visitas Por Realizar</string>
+    <string name="visits_canceled">Visitas Canceladas</string>
+    <string name="visits_uploaded">Visitas Sincronizadas</string>
+    <string name="assign_visit">Asignación de Aforos</string>
+    <string name="title_searcher">Buscar Marcador</string>
+
+    <!-- Searcher -->
+    <string name="business_name">Razón Social</string>
+    <string name="settlement_number">Número de Radicado</string>
+    <string name="user_code">Código Usuario Bio</string>
+    <string name="approved_meter_number">N Medidor Homologado</string>
+    <string name="subscription_code">Cod Suscripción Empresa Alterna</string>
+    <string name="collection_frequency">Frecuencia de Recoleción</string>
+    <string name="comercial_activity">Actividad Comercial</string>
+    <string name="billing_segment">Segmento Facturación</string>
+    <string name="capacity_type">Tipo de Aforo</string>
+    <string name="search">Buscar</string>
+
+    <!-- sync -->
+    <string name="sync_up">Sincronizar</string>
+    <string name="start_sync_up">Iniciar Sincronizar</string>
+    <string name="results_of_sync_up">Resultados Sincronizacion</string>
+    <string name="synchronization">Sincronizando...</string>
+    <string name="success_sync">La sincronización ha sido exitosa.</string>
+    <string name="error_sync">No se ha podido completar la sincronización.</string>
+
+    <!-- Errors -->
+    <string name="error_load_visits">Error cargando las visitas</string>
+    <string name="assign_capacity">Asignación de Aforos</string>
+    <string name="address">Dirección</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="container_type">Tipo de Recipiente</string>
+    <string name="save">Guardar</string>
+    <string name="title_concept_visit">Concepto de visita</string>
+    <string name="photographic_record">Registro Fotográfico</string>
+    <string name="visit_number">Numero de visita</string>
+    <string name="success_saving_visit">La visita se ha actualizado correctamente</string>
+    <string name="error_saving_visit">Error al guardar la visita</string>
+    <string name="success_cancel_visit">La visita se cancelo correctamente.</string>
+    <string name="error_cancel_visit">Error al cancelar la visita.</string>
+    <string name="cancel_visit">Cancelar Visita</string>
+    <string name="show_detail">Ver detalle</string>
+    <string name="close">Cerrar</string>
+    <string name="clear">Limpiar</string>
+    <string name="user_signature">Firma de encargado</string>
+    <string name="consumer_signature">Firma de Consumidor</string>
+    <string name="signature_register">Firma de Registro</string>
+    <string name="terms_conditions">Acepto Términos y Condiciones</string>
+    <string name="name_consumer">Nombre de consumidor</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+    <string name="download">Descargar</string>
+    <string name="see_map">Ver mapa</string>
+
+    <string name="commercial_activity">Actividad Comercial</string>
+
+    <string name="meter">Medidor</string>
+    <string name="subscriber_name">Nombre Subscriptor</string>
+    <string name="establishment">Establecimiento</string>
+    <string name="bio_code">Código Bioagricola</string>
+    <string name="cadastral">Catastral</string>
+    <string name="activity_type">Tipo de Actividad</string>
+    <string name="property_use">Uso del predio</string>
+    <string name="creation_date">Fecha de cración</string>
+
+    <string name="latitude">Latitud</string>
+    <string name="longitude">Longitud</string>
+    <string name="stratum">Estrato</string>
+    <string name="volume_unit">Volumen Unitario</string>
+    <string name="empty_visit_list">No se encontraron visitas</string>
+
+</resources>

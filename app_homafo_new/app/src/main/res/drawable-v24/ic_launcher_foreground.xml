@@ -1,0 +1,77 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Cuerpo izquierdo -->
+    <path
+        android:fillColor="#60C66E"
+        android:pathData="M61,181 L121,181 L121,391 L61,391 Z" />
+
+    <!-- Cuerpo derecho -->
+    <path
+        android:fillColor="#2A9E51"
+        android:pathData="M391,181 L451,181 L451,391 L391,391 Z" />
+
+    <!-- Tronco izquierdo -->
+    <path
+        android:fillColor="#A1E538"
+        android:pathData="M121,181 L256,181 L256,421 L121,421 Z" />
+
+    <!-- Tronco derecho -->
+    <path
+        android:fillColor="#60C66E"
+        android:pathData="M256,181 L391,181 L391,421 L256,421 Z" />
+
+    <!-- Pierna izquierda -->
+    <path
+        android:fillColor="#60C66E"
+        android:pathData="M151,421 L241,421 L241,511 L151,511 Z" />
+
+    <!-- Pierna derecha -->
+    <path
+        android:fillColor="#2A9E51"
+        android:pathData="M271,421 L361,421 L361,511 L271,511 Z" />
+
+    <!-- Cabeza izquierda -->
+    <path
+        android:fillColor="#A1E538"
+        android:pathData="M121,151 A135,135 0 0,1 256,0 L256,151 Z" />
+
+    <!-- Cabeza derecha -->
+    <path
+        android:fillColor="#60C66E"
+        android:pathData="M256,0 A135,135 0 0,1 391,151 L256,151 Z" />
+
+    <!-- Ojo izquierdo -->
+    <path
+        android:fillColor="#E7F0FF"
+        android:pathData="M211,61 L241,61 L241,91 L211,91 Z" />
+
+    <!-- Ojo derecho -->
+    <path
+        android:fillColor="#E7F0FF"
+        android:pathData="M271,61 L301,61 L301,91 L271,91 Z" />
+
+    <!-- Antena izquierda -->
+    <path
+        android:fillColor="#2A9E51"
+        android:pathData="M146,13 L174,41 L126,89 L98,61 Z" />
+
+    <!-- Antena derecha -->
+    <path
+        android:fillColor="#2A9E51"
+        android:pathData="M366,13 L338,41 L386,89 L414,61 Z" />
+
+    <!-- Texto "HYA" -->
+    <path android:fillColor="#0477BF"
+        android:pathData="M196,252v-30h10v10h10v-10h10v30h-10v-10h-10v10h-10z" />
+    <!-- Letra Y -->
+    <path android:fillColor="#0477BF"
+        android:pathData="M236,222h10l5,10l5,-10h10l-10,20v10h-10v-10z" />
+    <!-- Letra A -->
+    <path android:fillColor="#0477BF"
+        android:pathData="M286,252l12,-30h8l12,30h-10l-2,-6h-8l-2,6h-10zM298,238h6l-3,-8z" />
+
+</vector>

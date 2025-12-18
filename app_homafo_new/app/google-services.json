@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "58589608147",
+    "project_id": "hyaapp-4de15",
+    "storage_bucket": "hyaapp-4de15.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:58589608147:android:67449b3abd12a72707bc26",
+        "android_client_info": {
+          "package_name": "com.progracol.ha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "58589608147-s6vdc472484v16vhc757g2pqgmi9hovh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTbTTC9sPVu8shREjUiJtrpIYjdCUCZtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "58589608147-s6vdc472484v16vhc757g2pqgmi9hovh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

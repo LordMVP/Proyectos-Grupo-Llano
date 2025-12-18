@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/main_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/margin"
+                android:layout_marginBottom="@dimen/input_margin_bottom"
+                android:fitsSystemWindows="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/title_searcher"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/title" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/business_name">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/business_name"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/settlement_number">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/case_number"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/user_code">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/user_code"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/approved_meter_number">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/meter"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/subscription_code">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/subscription_code"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/collection_frequency">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/collection_frequency"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/commercial_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/commercial_activity"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/billing_segment"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/billing_segment"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/visit_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/capacity_type"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/search_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/search"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    style="@style/ButtonStyle" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_regular"
+            android:textAlignment="center"
+            android:textColor="@color/title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

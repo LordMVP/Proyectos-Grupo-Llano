@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/visualization_of_capacity"
+        android:icon="@drawable/ic_capmap"
+        android:title="@string/layers_map"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/base_map"
+        android:iconTint="@color/background"
+        android:title="@string/base_map"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/number_reports"
+        android:iconTint="@color/background"
+        android:title="@string/number_reports"
+        app:showAsAction="never" />
+
+</menu>

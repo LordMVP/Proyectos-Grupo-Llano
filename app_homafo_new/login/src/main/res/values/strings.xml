@@ -1,0 +1,31 @@
+<resources>
+    <string name="password">Contraseña</string>
+    <string name="login">INICIAR SESIÓN</string>
+    <string name="company">Empresa</string>
+    <string name="recover_password">Recuperar Contraseña</string>
+    <string name="username">Usuario</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="username_hint">fftrujillo</string>
+    <string name="password_hint">1121818601</string>
+    <string name="logout">Cerrar Sesion</string>
+
+    <string name="loading">Cargando</string>
+    <string name="passwordrecover">Para recuperar la contraseña por favor ingresa tu correo electrónico y pronto recibirás un mensaje de confirmación.</string>
+    <string name="confirm_logout">Al cerrar sesión se borra la información diligenciada en el dispositivo, ¿desea continuar?</string>
+    <string name="version_app_diferente">La versión del aplicativo es diferente, por favor contacte a soporte para actualizarla. </string>
+
+    <string name="error_username">Error, debe ingresar un usuario válido.</string>
+    <string name="error_valid_email">Debe ingresar un email válido.</string>
+    <string name="error_username_empty">Error, debe ingresar un usuario válido.</string>
+    <string name="error_password_empty">Error, debe ingresar una contraseña válida.</string>
+    <string name="error_loading_companies">Error al cargar las compañias.</string>
+    <string name="error_loading_options_menu">Error al cargar el menu principal, por favor intente nuevamente.!</string>
+    <string name="error_options_menu">Error al cargar el menú, usuario no dispone de permisos, por favor intente nuevamente!</string>
+
+
+    <string name="send">Enviar</string>
+    <string name="hya">H y A</string>
+    <string name="aforos">AFOROS</string>
+    <string name="error_login">Error de inicio de sesión.</string>
+
+</resources>

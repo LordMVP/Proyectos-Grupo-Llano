@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.visit.register.SignatureFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:nestedScrollingEnabled="true"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margin">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/signature_register"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/label" />
+
+                <TextView
+                    android:id="@+id/signature_pad_description_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_signature"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="@dimen/card_subtitle"
+                    android:textColor="@color/caption"
+                    android:layout_marginBottom="@dimen/card_space"/>
+
+                <com.github.gcacace.signaturepad.views.SignaturePad
+                    android:id="@+id/signature_pad_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/signature_height"
+                    android:layout_marginBottom="@dimen/signature_margin_clear"
+                    android:background="@drawable/background_signature"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signature_clear_user"
+                    android:layout_width="@dimen/signature_height"
+                    android:layout_height="@dimen/margin_cancel_visit"
+                    android:text="@string/clear"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:enabled="false"
+                    style="@style/ButtonStylethree" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/name_consumer"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="@dimen/card_subtitle"
+                    android:textColor="@color/caption"
+                    android:layout_marginBottom="@dimen/signature_margin_clear"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/signature_margin_clear">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/name_consumer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:enabled="true"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/signature_pad_description_consumer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/consumer_signature"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="@dimen/card_subtitle"
+                    android:textColor="@color/caption"
+                    android:layout_marginBottom="@dimen/signature_margin_clear"/>
+
+                <com.github.gcacace.signaturepad.views.SignaturePad
+                    android:id="@+id/signature_pad_consumer"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/signature_height"
+                    android:layout_marginBottom="@dimen/signature_margin_clear"
+                    android:background="@drawable/background_signature"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signature_clear_consumer"
+                    android:layout_width="@dimen/signature_height"
+                    android:layout_height="@dimen/margin_cancel_visit"
+                    android:text="@string/clear"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:enabled="false"
+                    style="@style/ButtonStylethree" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/margin_start_checkbox"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/check_terms"
+                        android:layout_width="@dimen/margin_start"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:paddingTop="@dimen/margin_check"
+                        android:id="@+id/check_terms_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignStart="@+id/check_terms"
+                        android:layout_marginStart="38dp"
+                        android:fontFamily="@font/poppins_medium"
+                        android:text="@string/terms_conditions"
+                        android:textColor="@color/title"
+                        android:textSize="@dimen/card_subtitle" />
+
+                </RelativeLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/save_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/confirm_button"
+                    android:visibility="gone"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    style="@style/ButtonStyle" />
+
+            </LinearLayout>
+
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

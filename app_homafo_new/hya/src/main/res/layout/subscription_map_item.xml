@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    style="@style/HomeButtonStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    card_view:cardCornerRadius="20dp"
+    card_view:cardElevation="3dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="@dimen/card_padding">
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:textColor="@color/title"
+            android:textSize="@dimen/label"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:textColor="@color/title"
+            android:textSize="@dimen/input_text_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:textColor="@color/title"
+            android:textSize="@dimen/input_text_size" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_regular"
+            android:textColor="@color/title"
+            android:textSize="@dimen/input_text_size" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buscar_punto"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_size"
+            android:layout_marginTop="@dimen/_30sp"
+            android:layout_weight="0.1"
+            android:gravity="center_vertical"
+            android:text="@string/button_buscar_punto"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textStyle="bold"
+            card_view:icon="@drawable/search_item"
+            card_view:shapeAppearance="@style/ButtonShapeAppearance" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/ver_lista_sincronizaciones"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/input_size"
+            android:layout_marginTop="@dimen/_30sp"
+            android:layout_weight="0.1"
+            android:gravity="center_vertical"
+            android:text="@string/button_ver_lista_sincronizaciones"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textStyle="bold"
+            card_view:icon="@drawable/ic_ver"
+            card_view:shapeAppearance="@style/ButtonShapeAppearance" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

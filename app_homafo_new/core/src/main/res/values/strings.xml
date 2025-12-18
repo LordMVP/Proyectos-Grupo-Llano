@@ -1,0 +1,88 @@
+<resources>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="menu_search">Buscar</string>
+    <string name="hello_blank_fragment">Hello!</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancelar</string>
+    <string name="error_title">¡Error!</string>
+    <string name="accept">Aceptar</string>
+    <string name="success_title">¡Completo!</string>
+    <string name="warning_title">¡Advertencia!</string>
+    <string name="map_delete">Eliminar mapa</string>
+    <string name="add_area">Agregar área sin conexión</string>
+    <string name="map_detail">Detalle del Mapa</string>
+
+    <string name="menu_reload">Recargar</string>
+    <string name="layers_map">Capas</string>
+    <string name="base_map">Mapa Base</string>
+    <string name="street">Calle</string>
+    <string name="loading">Cargando…</string>
+    <string name="error_loading_data">Error al cargar la información, intentalo mas tarde</string>
+    <string name="title_novelty">Gestión Novedad</string>
+    <string name="date_novelty">dd/mm/aaaa</string>
+    <string name="pqr_novelty">PQR</string>
+
+    <string name="selected_novelty_visit">Seleccione Novedad Visita</string>
+    <string name="selected_novelty_invoice">Seleccione Novedad Factura</string>
+    <string name="request_type_novelty">Tipo De Solicitud</string>
+    <string name="selected_novelty">Seleccione</string>
+    <string name="checkbox_one">Usuario no se encuentra</string>
+    <string name="checkbox_two">Visita cancelada</string>
+    <string name="checkbox_three">Usuario no ha solicitado visita</string>
+    <string name="checkbox_four">Usuario no permite realizar visita</string>
+    <string name="checkbox_five">Otro</string>
+
+    <string name="multiline_text_novelty">Novedades</string>
+    <string name="recorded_novelty">Novedades Registradas</string>
+    <string name="search_novelty">Búsqueda Rápida de Registros</string>
+    <string name="title_independece_record">Registro de Independencia</string>
+    <string name="alternate_company">Empresa Alterna</string>
+    <string name="alternating_company_meter">#Medidor Empresa Alterna</string>
+    <string name="alternate_company_code">Código Empresa Alterna</string>
+    <string name="button_addition">Adición</string>
+
+    <string name="company">Empresa</string>
+    <string name="meter">Medidor</string>
+    <string name="code">Código</string>
+
+    <string name="observations">Observaciones</string>
+    <string name="message_dialog_capacity">¿Esta seguro que desea reportar este aforo?</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+    <string name="visitsMade">Visitas Realizadas</string>
+    <string name="capacityCanceled">Aforos Cancelados</string>
+    <string name="visitsUploaded">Visitas Sincronizadas</string>
+    <string name="capacityAllocation">Asignación De Aforos</string>
+    <string name="visits_to_be_made_title">Visitas Pendientes</string>
+
+    <string name="noveltys">Novedades</string>
+    <string name="title_capacity_item">Nombre Del Establecimiento</string>
+    <string name="class_capacity">Clase Aforo:</string>
+    <string name="font">Fuente:</string>
+    <string name="subscription">Suscripción:</string>
+    <string name="total_visits">Visitas Totales:</string>
+    <string name="made_visits">Visitas Realizadas:</string>
+    <string name="assignment_date">Fecha Asignacion:</string>
+    <string name="subscriber_code">Código Suscriptor Bio:</string>
+    <string name="register">Registro</string>
+    <string name="status">Estado:</string>
+
+    <string name="title_visits_made">Visitas Realizadas</string>
+    <string name="title_visits_canceled">Visitas De Cancelación: </string>
+    <string name="title_capacity_canceled">Aforos Cancelados</string>
+    <string name="capacity_allocation_title">Asignación De Aforos</string>
+    <string name="gallery">Galería</string>
+    <string name="add_photo">Agregar Foto</string>
+    <string name="save_button">Guardar</string>
+    <string name="observation">Observación</string>
+    <string name="cancel_note">Detalles de cancelación</string>
+
+    <string name="see_map">Ver mapa</string>
+    <string name="see_map_test">Ver mapa de Pruebas</string>
+
+    <string name="marker_point_delete">Eliminar marcador</string>
+    <string name="marker_point_hide_show">Ocultar/Mostrar marcador</string>
+
+    <string name="item_delete">Eliminar</string>
+    <string name="item_edit">Editar</string>
+</resources>

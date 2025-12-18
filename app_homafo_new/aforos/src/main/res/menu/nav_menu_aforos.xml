@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/see_map"
+        android:icon="@drawable/ic_map"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"
+        android:title="@string/see_map" />
+
+    <item android:id="@+id/download"
+        android:icon="@drawable/ic_download"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"
+        android:title="@string/download" />
+
+    <item android:id="@+id/sync"
+        android:icon="@drawable/ic_reload"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/searchaforos"
+        android:icon="@drawable/search_item"
+        android:title="@string/menu_search"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/visit_completed"
+        android:iconTint="@color/background"
+        android:title="@string/visitsMade"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/visit_pending"
+        android:title="@string/visits_to_be_made_title"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/visit_uploaded"
+        android:title="@string/visitsUploaded"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/capacityCanceled"
+        android:title="@string/capacityCanceled"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/capacityAllocation"
+        android:title="@string/capacityAllocation"
+        app:showAsAction="never" />
+
+    <!--item android:id="@+id/noveltys"
+        android:title="@string/noveltys"
+        app:showAsAction="never" /-->
+
+</menu>

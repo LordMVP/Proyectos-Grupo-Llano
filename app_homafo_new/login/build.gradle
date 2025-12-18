@@ -1,0 +1,23 @@
+apply from: "$rootProject.projectDir/hya.gradle"
+android {
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }
+    namespace 'com.progracol.login'
+}
+
+dependencies {
+
+    hilt()
+    gson()
+    lifecycle()
+    material()
+
+    implementation project(path: ':core')
+    //implementation project(path: ':hya')
+    //implementation project(path: ':aforos')
+
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/edit_layout"
+        android:icon="@drawable/ic_edit_info"
+        android:iconTint="@android:color/white"
+        android:title="edit"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/markers_layout"
+        android:icon="@drawable/ic_marker_favorite"
+        android:iconTint="@android:color/white"
+        android:title="markers"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/sync"
+        android:icon="@drawable/ic_reload"
+        android:iconTint="@android:color/white"
+        android:title="sync data"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/layersmap"
+        android:icon="@drawable/ic_capmap"
+        android:title="@string/layers_map"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/searcher"
+        android:icon="@drawable/search_item"
+        android:title="@string/menu_search"
+        android:iconTint="@android:color/white"
+        app:showAsAction="always"/>
+
+</menu>

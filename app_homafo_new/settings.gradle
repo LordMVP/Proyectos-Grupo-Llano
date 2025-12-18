@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "HYA"
+
+include(":app")
+include(":core")
+include(":login")
+include(":navigation")
+include(":aforos")
+include(":hya")

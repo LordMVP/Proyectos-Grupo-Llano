@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/scrollView4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/form_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margin"
+                android:layout_marginBottom="@dimen/input_margin_bottom"
+                android:fitsSystemWindows="true"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/title_informacion_facturacion"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/label"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tipoFacturacionLayout"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/tipoFacturacion"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/title_informacion_cliente"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/label"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nombreLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/title_informacion_predio"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/label"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/direccionLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/direccion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/barrioLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/barrio"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/padding_edittext"
+                        style="@style/InputTextFont" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:id="@+id/property_condition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nombreEstablecimientoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/establishment_name"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nombreEstablecimiento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/actividadComercialLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/commercial_activity"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actividadComercial"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/padding_edittext"
+                        style="@style/InputTextFont" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/estratoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/estrato"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tipoUsoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/tipoUso"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tipoLiquidacionLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/tipoLiquidacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/catastralLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:hint="@string/number_catastral"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_marginBottom="@dimen/input_margin_bottom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/catastral"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        style="@style/InputTextFont"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/catastralNacionalLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/number_catastral_30">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/catastralNacional"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_regular"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/servicioEmsaLayout"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/servicio_emsa">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/servicioEmsa"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/medidorAlternoEmsaLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/alternative_med_emsa"
+                    android:enabled="false"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/medidorAlternoEmsa"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/codigoAlternoEmsaLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/alternative_code_emsa"
+                    android:enabled="false"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/codigoAlternoEmsa"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/servicioGasLayout"
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/servicio_gas">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/servicioGas"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/medidorAlternoGasLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/alternative_med_gas"
+                    android:enabled="false"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/medidorAlternoGas"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/codigoAlternoGasLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/alternative_code_gas"
+                    android:enabled="false"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/codigoAlternoGas"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:id="@+id/groupRadioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/radioButton_Deshabitado"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:textStyle="bold" />
+
+                    <CheckBox
+                        android:id="@+id/radioButton_DescuentoPAP"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/observacionLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/observacion">
+
+                    <EditText
+                        android:id="@+id/observacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:drawable/edit_text"
+                        android:ems="10"
+                        android:gravity="top|start"
+                        android:inputType="textMultiLine"
+                        android:lines="4"
+                        android:maxLines="6"
+                        android:padding="10dp"
+                        android:scrollbars="vertical" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/coordenadas_seleccionadas"
+                    android:textSize="@dimen/label"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/DropDownLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:hint="@string/actualizar_coordenadas">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/coordenadas_seleccionadas"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/longitudeLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:enabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/longitude"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="numberDecimal" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/latitudeLayout"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:enabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/latitude"
+                        style="@style/InputTextFont"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:inputType="numberDecimal" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/photographic_record"
+                    style="@style/ButtonStyleTwo"
+                    android:layout_marginBottom="@dimen/button_margin_bottom"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/save_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/save"
+                    style="@style/ButtonStyle" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_regular"
+            android:textAlignment="center"
+            android:textColor="@color/title"
+            app:layout_constraintBottom_toBottomOf="@+id/scrollView4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

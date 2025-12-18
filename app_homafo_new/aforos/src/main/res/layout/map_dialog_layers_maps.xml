@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tVNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Seleccion de Capas para Mostrar"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_layer_rutas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tVNotifications"
+        android:text="Rutas de recoleccion"
+        />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_barrios"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_layer_rutas"
+        android:text="Barrios"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_toponomia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_barrios"
+        android:text="Toponomia Villavicencio"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_u_terreno"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_toponomia"
+        android:text="Urbano Terreno"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_r_terreno"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_u_terreno"
+        android:text="Rural Terreno"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_comunas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_r_terreno"
+        android:text="Comunas"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_veredas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/check_veredas"
+        android:text="Veredas"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

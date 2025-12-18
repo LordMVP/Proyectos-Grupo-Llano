@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="my_maps">Mis Mapas</string>
+    <string name="id_subscription">Id Suscripción</string>
+    <string name="clean_lines_code">Código Aseo</string>
+    <string name="number_catastral">Número Catastral</string>
+    <string name="number_catastral_30">Número Catastral Nacional</string>
+    <string name="medidor_gas">Medidor Gas</string>
+    <string name="medidor_emsa">Medidor Emsa</string>
+    <string name="observacion">Observación</string>
+    <string name="full_name">Nombres Completos</string>
+    <string name="stratum">Estrato</string>
+    <string name="address">Dirección</string>
+    <string name="zone">Zona</string>
+    <string name="neighborhood">Barrio</string>
+    <string name="use_type">Tipo Uso</string>
+    <string name="settlement">Liquidación</string>
+    <string name="establishment_name">Nombre Establecimiento</string>
+    <string name="commercial_activity">Actividad Comercial</string>
+    <string name="save">Guardar</string>
+    <string name="photographic_record">Registro Fotográfico</string>
+    <string name="taboptionone">Actualizaciones Detalle</string>
+    <string name="title_recycler">Lista De Fotos</string>
+
+    <!--Titulos-->
+    <string name="title_informacion_facturacion">Información de Facturacion</string>
+    <string name="title_informacion_cliente">Información del Cliente</string>
+    <string name="title_informacion_predio">Información del Predio</string>
+    <string name="coordenadas_seleccionadas">Nuevas Coordenadas del Predio</string>
+    <string name="property_condition">Condición Predio</string>
+    <string name="title_informacion_arcgis">Información Online Arcgis</string>
+
+    <string name="meter_gas"># Medidor Emsa/GAS</string>
+    <string name="code_company">Codigo Empresa Alterna GAS/Emsa</string>
+    <string name="id_suscription_map">Id Suscripcion/Codigo Aseo</string>
+    <string name="pqr_number">Número PQR</string>
+    <string name="condition">Condición</string>
+    <string name="search">Buscar</string>
+    <string name="clear">Limpiar</string>
+
+    <string name="sync_up">Sincronizar</string>
+    <string name="start_sync_up">Iniciar Sincronizar</string>
+    <string name="results_of_sync_up">Resultados Sincronizacion</string>
+    <string name="syncronized_records">Registros Sincronizados</string>
+    <string name="title_map_information">Información General</string>
+    <string name="propietor">Propietario: </string>
+    <string name="consultation_and_edition">Consulta y Edición</string>
+    <string name="sync">Sincronización</string>
+    <string name="success_sync">Sincronización completa</string>
+    <string name="error_sync">Error en sincronización</string>
+    <string name="error_saving_subscription_detail">"Error al guardar la información. "</string>
+    <string name="error_add_photo">"Debe añadir una fotografia."</string>
+    <string name="success_saving_subscription_detail">La información se ha guardado exitosamente.</string>
+    <string name="novelties">Novedades</string>
+    <string name="new_novelty">Nueva Novedad</string>
+    <string name="error_no_pqr">Debe ingresar el PQR antes de adjuntar una imagen.</string>
+    <string name="success_saving_novelty">La novedad se guardo correctamente.</string>
+    <string name="map_delete_success">El mapa se elimino con exto.</string>
+    <string name="error_saving_novelty">Error al guardar la novedad.</string>
+    <string name="error_delete_map">Error al eliminar el mapa.</string>
+    <string name="error_novelty_missing_information">Debe ingresar la novedad de visita.</string>
+    <string name="error_novelty_missing_pqr">Debe ingresar el PQR.</string>
+    <string name="error_check_empresa">Debe seleccionar una empresa.</string>
+    <string name="error_select_tipo_facturacion">Debe seleccionar un tipo de facturación.</string>
+    <string name="error_type_name">Debe escribir un nombre completo.</string>
+    <string name="error_type_address">Debe escribir la dirección del predio.</string>
+    <string name="error_select_zone">Debe seleccionar una zona.</string>
+    <string name="error_select_neighborhood">Debe seleccionar un barrio, no escribirlo.</string>
+    <string name="error_type_property_name">Debe escribir el nombre del establecimiento.</string>
+    <string name="error_select_activity_commercial">Debe seleccionar la actividad comercial, no escribirla.</string>
+    <string name="error_select_estrato">Debe seleccionar un estrato.</string>
+    <string name="error_select_use_type">Debe seleccionar un tipo de uso.</string>
+    <string name="error_select_settlement">Debe seleccionar una liquidación.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_independence_meter">Adicionar medición</string>
+    <string name="success_saving_independence">La independencia se ha guardado exitosamente.</string>
+    <string name="error_saving_independence">Error al guardar la independencia.</string>
+    <string name="success_saving_point">El punto se ha guardado exitosamente.</string>
+    <string name="error_saving_point">Error al guardar el punto.</string>
+    <string name="meter">Medidor</string>
+    <string name="synchronization">Sincronizando...</string>
+    <string name="subscriber_name">Nombre Subscriptor</string>
+    <string name="contract_name">Nombre Contacto</string>
+    <string name="fecha_encuesta">Fecha Encuesta</string>
+    <string name="colaborador">Usuario (Colaborador)</string>
+    <string name="tipo_documento">Tipo Documento</string>
+    <string name="num_documento">Número Documento</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="telefono">Teléfono</string>
+    <string name="estrato">Estrato</string>
+    <string name="establishment">Establecimiento</string>
+    <string name="bio_code">Código Bioagricola</string>
+    <string name="facturacion">Facturación</string>
+    <string name="servicio_emsa">Servicio Energía</string>
+    <string name="alternative_code_emsa">Código Alternativo Energía</string>
+    <string name="alternative_med_emsa">Número Medidor Alternativo Energía</string>
+    <string name="servicio_gas">Servicio Gas</string>
+    <string name="alternative_code_gas">Código Alternativo Gas</string>
+    <string name="alternative_med_gas">Número Medidor Alternativo Gas</string>
+    <string name="actualizar_coordenadas">Actualizar Coordenadas</string>
+    <string name="catastral">Catastral</string>
+    <string name="catastral_nacional">Catastral Nacional</string>
+    <string name="activity_type">Tipo de Actividad</string>
+    <string name="property_use">Uso del predio</string>
+    <string name="tipo_liquidacion">Tipo Liquidación</string>
+    <string name="creation_date">Fecha de creación</string>
+    <string name="edit">Editar</string>
+
+    <string name="map_name">Nombre del mapa</string>
+    <string name="map_offline">Mapa del usuario guardado con exito.</string>
+    <string name="error_map_offline">Error al guardar el mapa.</string>
+    <string name="searching">Buscando...</string>
+    <string name="not_subscription_results">No se encontraron resultados.</string>
+    <string name="error_subscription_result">Error, no se pudo completar la busqueda, por favor intentelo más tarde.</string>
+    <string name="close">Cerrar</string>
+    <string name="error_novelty_missing_pqr_or_visit">Debe ingresar un PQR y una novedad de visita.</string>
+    <string name="latitude">Latitud</string>
+    <string name="longitude">Longitud</string>
+
+    <string name="marker_point_list_map">Lista Marcadores Favoritos</string>
+    <string name="marker_point_map">Se creo el marcador favorito con éxito.</string>
+    <string name="error_marker_point_map">Error al crear el marcador favorito.</string>
+    <string name="search_markers_point_map">Cargando marcadores favoritos...</string>
+    <string name="error_search_markers_point_map">Error al cargar los marcadores favoritos.</string>
+
+    <string name="list_pending_act">Lista Actualizaciones Pendientes</string>
+    <string name="list_pending_ind">Lista Independencias Pendientes</string>
+    <string name="list_pending_point">Lista Puntos Pendientes</string>
+
+    <string name="not_act_pending_results">No se encontraron actualizaciones pendientes.</string>
+    <string name="not_ind_pending_results">No se encontraron independencias pendientes.</string>
+    <string name="not_point_pending_results">No se encontraron puntos pendientes.</string>
+
+    <string name="not_markers_point_results">No se encontraron marcadores.</string>
+
+    <string name="list_sync_data">Información Sincronizaciones Realizadas</string>
+
+    <string name="advertencia_coordenadas">No se ha marcado unas coordenadas, por favor establezca una e intente de nuevo.</string>
+
+    <string name="button_buscar_punto">Buscar Punto en el Mapa</string>
+    <string name="button_ver_lista_sincronizaciones">Consultar Sincronizaciones</string>
+
+</resources>

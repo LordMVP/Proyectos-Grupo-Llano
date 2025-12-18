@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_aforos"
+    app:startDestination="@id/visit">
+
+    <fragment
+        android:id="@+id/visit"
+        android:name="com.progracol.aforos.ui.visit.VisitFragment"
+        android:label="Visitas">
+        <action
+            android:id="@+id/action_visit_to_novelty"
+            app:destination="@id/novelty" />
+        <action
+            android:id="@+id/action_visit_to_register"
+            app:destination="@id/register" />
+        <action
+            android:id="@+id/action_visit_to_cancel"
+            app:destination="@id/cancel" />
+        <action
+            android:id="@+id/action_visit_to_assignment"
+            app:destination="@id/assignment" />
+        <action
+            android:id="@+id/action_visit_to_map_fragment"
+            app:destination="@id/map_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/novelty"
+        android:name="com.progracol.aforos.ui.novelty.NoveltyFragment"
+        android:label="Novedades" />
+
+
+
+    <fragment
+        android:id="@+id/register"
+        android:name="com.progracol.aforos.ui.visit.register.RegisterVisitFragment"
+        android:label="Registro Visita">
+        <argument android:name="id"
+            app:argType="long"
+            android:defaultValue="0L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cancel"
+        android:name="com.progracol.aforos.ui.visit.cancel.CancelVisitFragment"
+        android:label="Cancelar Visita">
+        <argument android:name="id"
+            app:argType="long"
+            android:defaultValue="0L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assignment"
+        android:name="com.progracol.aforos.ui.visit.assignment.AssignmentVisitFragment"
+        android:label="Asignacion" />
+
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.progracol.aforos.ui.map.MapVisitFragment"
+        android:label="Mapa">
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="0" />
+        <argument
+            android:name="id_portal_map"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+</navigation>

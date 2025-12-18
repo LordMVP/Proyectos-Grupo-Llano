@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_ha"
+    app:startDestination="@id/homologations_and_updates">
+
+    <fragment
+        android:id="@+id/homologations_and_updates"
+        android:name="com.progracol.hya.ui.homologationupdate.HomologationAndUpdateFragment"
+        android:label="Homologaciones y Actualizaciones">
+        <action
+            android:id="@+id/action_homologationsAndUpdates_to_map_fragment"
+            app:destination="@id/map_fragment" />
+        <action
+            android:id="@+id/action_homologations_and_updates_to_map_test_fragment"
+            app:destination="@id/map_test_fragment" />
+        <action
+            android:id="@+id/action_homologations_and_updates_to_offline_map_fragment"
+            app:destination="@id/offline_map_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.progracol.hya.ui.map.MapFragment"
+        android:label="Mapa">
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="0" />
+        <argument
+            android:name="id_portal_map"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_map_fragment_to_map_search_fragment"
+            app:destination="@id/map_search_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/map_test_fragment"
+        android:name="com.progracol.hya.ui.maptest.MapTestFragment"
+        android:label="Mapa">
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="0" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/map_search_fragment"
+        android:name="com.progracol.hya.ui.map.search.MapSearchFragment"
+        android:label="Searcher">
+        <action
+            android:id="@+id/action_map_search_fragment_to_map_fragment"
+            app:destination="@id/map_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/offline_map_fragment"
+        android:name="com.progracol.hya.ui.map.offline.OfflineMapFragment"
+        android:label="Offline Map">
+
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="0" />
+
+    </fragment>
+
+</navigation>

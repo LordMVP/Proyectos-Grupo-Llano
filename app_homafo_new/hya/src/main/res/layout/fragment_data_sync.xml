@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.login.LoginFragment">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fitsSystemWindows="true"
+                android:orientation="vertical"
+                android:padding="@dimen/margin">
+
+                <LinearLayout
+                    android:id="@+id/result_screen_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/textView1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_medium"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:fontFamily="@font/poppins_bold"
+                        android:gravity="center"
+                        android:text="@string/list_sync_data"
+                        android:textColor="@color/title"
+                        android:textSize="@dimen/subtitle"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/lista_sincronizacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageButton
+                            android:id="@+id/back_button"
+                            style="@style/ButtonStyle"
+                            android:layout_width="@dimen/height_button"
+                            android:layout_height="@dimen/height_button"
+                            android:layout_alignParentStart="true"
+                            android:src="@drawable/ic_back" />
+
+                        <TextView
+                            android:id="@+id/current_page"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="@font/poppins_regular"
+                            android:textSize="@dimen/label" />
+
+                        <ImageButton
+                            android:id="@+id/next_button"
+                            style="@style/ButtonStyle"
+                            android:layout_width="@dimen/height_button"
+                            android:layout_height="@dimen/height_button"
+                            android:layout_alignParentEnd="true"
+                            android:src="@drawable/ic_next" />
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/result_screen_imagenes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/title_cont_imagenes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_bold"
+                        android:textColor="@color/title"
+                        android:textSize="@dimen/subtitle"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:layout_marginBottom="@dimen/spacing_medium"
+                        android:layout_marginTop="@dimen/spacing_medium"/>
+
+                    <TextView
+                        android:id="@+id/tvObservacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:padding="8dp"
+                        android:background="#EFEFEF"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:inputType="textMultiLine"
+                        android:singleLine="false"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/lista_imagenes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/input_margin_bottom"
+                        tools:listitem="@layout/item_photo"
+                        android:orientation="vertical"
+                        app:spanCount="3"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"/>
+
+                    <Button
+                        android:id="@+id/btnCerrarImagenes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cerrar"
+                        android:layout_marginTop="5dp"
+                        android:layout_gravity="center_horizontal"/>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_regular"
+            android:textAlignment="center"
+            android:textColor="@color/title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

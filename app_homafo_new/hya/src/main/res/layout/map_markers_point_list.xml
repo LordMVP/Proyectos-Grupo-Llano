@@ -1,0 +1,74 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/default_padding"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_bold"
+        android:gravity="center"
+        android:text="@string/marker_point_list_map"
+        android:textAlignment="center"
+        android:textColor="@color/title"
+        android:textSize="@dimen/title"
+        android:textStyle="bold"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:layout_marginBottom="@dimen/spacing_medium" />
+
+    <TextView
+        android:id="@+id/message_markers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_regular"
+        android:textAlignment="center"
+        android:textColor="@color/title"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_of_markers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/cardview_shadow_end_color"
+        tools:listitem="@layout/simple_list_item_marker" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHideAllMarkers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:minWidth="200dp"
+        android:paddingHorizontal="24dp"
+        android:layout_gravity="center_horizontal"
+        android:text="MOSTRAR/OCULTAR"
+        android:textSize="@dimen/input_text_size"
+        app:backgroundTint="@android:color/darker_gray"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_hide"
+        app:iconSize="@dimen/icon_size" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDeleteAllMarkers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:minWidth="200dp"
+        android:paddingHorizontal="24dp"
+        android:layout_gravity="center_horizontal"
+        android:text="ELIMINAR"
+        android:textSize="@dimen/input_text_size"
+        app:backgroundTint="@android:color/holo_red_light"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_delete_red"
+        app:iconSize="@dimen/icon_size" />
+
+</LinearLayout>

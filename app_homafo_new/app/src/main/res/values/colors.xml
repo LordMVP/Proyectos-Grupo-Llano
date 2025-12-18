@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="input">#EBEFF2</color>
+    <color name="caption">#6F6F6F</color>
+    <color name="title">#252731</color>
+    <color name="background">#EDEDED</color>
+    <color name="purple_500">#0477BF</color>
+    <color name="purple_700">#0477BF</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="teal_200">#81BF04</color>
+    <color name="teal_700">#10BF04</color>
+    <color name="black">#FF000000</color>
+</resources>

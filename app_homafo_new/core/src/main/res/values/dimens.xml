@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <!-- Card -->
+    <dimen name="card_title">18sp</dimen>
+    <dimen name="card_subtitle">14sp</dimen>
+    <dimen name="card_date">12sp</dimen>
+    <dimen name="card_padding">15dp</dimen>
+    <dimen name="card_space">18dp</dimen>
+
+
+    <dimen name="margin">20dp</dimen>
+    <dimen name="input_margin_bottom">15dp</dimen>
+    <dimen name="button_margin_bottom">8dp</dimen>
+    <dimen name="input_button_size">65dp</dimen>
+    <dimen name="input_size">60dp</dimen>
+    <dimen name="input_corner_radius">8dp</dimen>
+    <dimen name="margin_check">14dp</dimen>
+
+    <dimen name="size_text_item">12sp</dimen>
+    <dimen name="title">25sp</dimen>
+    <dimen name="subtitle">25sp</dimen>
+    <dimen name="visit_title">23sp</dimen>
+    <dimen name="label">18sp</dimen>
+
+
+    <!-- Espaciados -->
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_extra_large">48dp</dimen>
+    <dimen name="spacing_super_large">96dp</dimen>
+
+    <dimen name="table_label">8sp</dimen>
+    <dimen name="table_row">8sp</dimen>
+
+    <dimen name="title_item_map">16sp</dimen>
+    <dimen name="button_add_map">29sp</dimen>
+    <dimen name="margin_start_novelty">280dp</dimen>
+    <dimen name="margin_start">25dp</dimen>
+
+    <dimen name="margin_start_checkbox">90dp</dimen>
+    <dimen name="width_edittext_novelty">220dp</dimen>
+    <dimen name="height_button_two">50dp</dimen>
+    <dimen name="width_edittext">150dp</dimen>
+    <dimen name="input_margin_bottom_three">5dp</dimen>
+    <dimen name="subtitle_start_margin">12dp</dimen>
+    <dimen name="margin_start_button">97dp</dimen>
+
+    <dimen name="height_button">55dp</dimen>
+    <dimen name="padding_edittext">10dp</dimen>
+    <dimen name="margin_button_map">245dp</dimen>
+
+
+    <dimen name="_5sp">5sp</dimen>
+    <dimen name="_30sp">30sp</dimen>
+    <dimen name="margin_cancel_visit">40dp</dimen>
+    <dimen name="height_cancel_note">100dp</dimen>
+
+    <dimen name="signature_corner">8dp</dimen>
+    <dimen name="signature_height">120dp</dimen>
+    <dimen name="signature_margin_clear" >5dp</dimen>
+
+    <dimen name="default_padding">16dp</dimen>
+
+    <dimen name="corner_radius">12dp</dimen>
+    <dimen name="input_text_size">14sp</dimen>
+
+    <dimen name="icon_size">24dp</dimen>
+
+</resources>

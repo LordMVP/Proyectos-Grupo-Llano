@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Triángulo con contorno -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFC107"
+        android:strokeWidth="1.5"
+        android:strokeLineJoin="miter"
+        android:pathData="M1,21h22L12,2L1,21z" />
+
+    <!-- Exclamación (mismo color que el contorno) -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M11,9h2v6h-2z" />
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M11,17h2v2h-2z" />
+</vector>

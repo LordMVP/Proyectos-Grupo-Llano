@@ -1,0 +1,40 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="@dimen/default_padding">
+
+    <!-- Título -->
+    <TextView
+        android:id="@+id/tVNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:fontFamily="@font/poppins_bold"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="Capas del Mapa Disponibles"
+        android:textAlignment="center"
+        android:textColor="@color/title"
+        android:textSize="@dimen/title"
+        android:textStyle="bold" />
+
+    <!-- ScrollView por si hay muchos checkboxes -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/capas_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/spacing_medium"
+            android:paddingBottom="@dimen/spacing_medium">
+            <!-- Aquí se agregarán dinámicamente los CheckBoxes -->
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

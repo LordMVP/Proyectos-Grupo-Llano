@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.map.detail.MapDetailFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ScrollView
+            android:id="@+id/scrollView3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:gravity="center"
+                    android:text="@string/title_informacion_arcgis"
+                    android:textAlignment="center"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/contract_name"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/contract_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Subscriber Name -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/subscriber_name"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/subscriber_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Establishment -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/establishment"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/establishment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Bio Code -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/bio_code"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Catastral -->
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/facturacion"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/facturacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/servicio_emsa"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/servicio_emsa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/alternative_code_emsa"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/alternative_code_emsa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/alternative_med_emsa"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/alternative_med_emsa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/servicio_gas"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/servicio_gas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/alternative_code_gas"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/alternative_code_gas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/alternative_med_gas"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/alternative_med_gas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/catastral"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/catastral"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Activity Type -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/catastral_nacional"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/catastral_nacional"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/activity_type"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/activity_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Neighborhood -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/neighborhood"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/neighborhood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Address -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/address"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Stratum -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/stratum"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/stratum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- propertyUse -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/property_use"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/property_use"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Creation Date -->
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/tipo_liquidacion"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/tipo_liquidacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/creation_date"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/creation_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Latitude -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/latitude"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/latitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <!-- Longitude -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/longitude"
+                    android:textColor="@color/caption"
+                    android:textSize="@dimen/card_subtitle" />
+
+                <TextView
+                    android:id="@+id/longitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/card_space"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textColor="@color/title"
+                    android:textSize="@dimen/card_title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/edit_button"
+                    style="@style/ButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:text="@string/edit" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/close_button"
+                    style="@style/CloseButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/input_button_size"
+                    android:layout_marginBottom="@dimen/input_margin_bottom"
+                    android:text="@string/close" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
